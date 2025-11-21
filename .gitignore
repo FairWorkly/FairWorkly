@@ -1,7 +1,46 @@
-# macOS system files
-.DS_Store
+# IDE and Editor
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# Windows system files
+# Visual Studio (Backend)
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# Build Output (Backend)
+[Bb]in/
+[Oo]bj/
+
+# Database and Logs
+*.db
+*.lock
+*.log
+
+# .NET Compiled Files
+*.dll
+*.exe
+*.pdb
+
+# Node.js and React (Frontend)
+node_modules/
+build/
+dist/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# System Files
+.DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
