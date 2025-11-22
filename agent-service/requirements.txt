@@ -1,0 +1,10 @@
+# Web server
+fastapi>=0.115
+uvicorn>=0.30
+
+# Core LLM stack
+langchain-core>=0.3.0
+langchain-openai>=0.3.0
+
+# .env support
+python-dotenv>=1.0.0
