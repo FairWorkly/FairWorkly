@@ -1,9 +1,7 @@
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel
 from agent import generate_reply
-
-load_dotenv()
+from fastapi.responses import RedirectResponse
 
 app = FastAPI(
     title="FairWorkly Agent v0",
@@ -11,6 +9,9 @@ app = FastAPI(
     version="0.0.1",
 )
 
+@app.get("/", include_in_schema=False)
+async def root():
+    return RedirectResponse(url="/docs")
 
 class ChatRequest(BaseModel):
     message: str
@@ -18,6 +19,13 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
+
+@app.get("/health")
+async def health():
+    """
+    Simple health check endpoint.
+    """
+    return {"status": "ok"}
 
 
 @app.post("/chat", response_model=ChatResponse)

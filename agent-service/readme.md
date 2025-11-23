@@ -25,9 +25,21 @@ Create a .env file in agent-service/ with your Open API key
 uvicorn main:app --reload --port 8000
 ```
 
-## Testing
+## Run Tests
 
-### 2. Open Swagger UI
+To run the automated tests:
+
+```bash
+cd agent-service
+pytest
+```
+
+Pytest will automatically discover tests inside the `tests/` directory. Make sure your virtual environment is activated before running the tests.
+
+
+## Manual Testing
+
+### 1. Open Swagger UI
 
 Visit:
 
@@ -37,7 +49,7 @@ http://localhost:8000/docs
 
 Swagger UI will automatically load and display the `/chat` endpoint.
 
-### 3. Test `/chat`
+### 2. Test `/chat`
 
 Click on:
 
@@ -53,3 +65,4 @@ Click on:
 
 - Click **Execute**  
 You should see an AI-generated response under **Response body**.
+

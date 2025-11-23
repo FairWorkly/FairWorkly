@@ -8,3 +8,6 @@ langchain-openai>=0.3.0
 
 # .env support
 python-dotenv>=1.0.0
+
+# Testing tools
+pytest>=7.0
