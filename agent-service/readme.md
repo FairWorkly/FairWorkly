@@ -13,11 +13,18 @@ Minimal LangChain-based AI agent service to support future Compliance workflows.
 ```bash
 cd agent-service
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate  
+# Windows: .venv\Scripts\activate
 
 pip install -r requirements.txt 
 
-Create a .env file in agent-service/ with your Open API key
+```
+Create a `.env` file inside `agent-service/` with the following content:
+```
+OPENAI_API_KEY=your_api_key_here
+OPENAI_MODEL=gpt-4o-mini
+MODEL_TEMPERATURE=0
+```
 
 ## Run
 
