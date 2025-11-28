@@ -1,6 +1,7 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
+﻿using FairWorkly.Application.Common.Behaviors;
 using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace FairWorkly.Application;
 
@@ -14,8 +15,9 @@ public static class DependencyInjection
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 
-            // TODO: 后续 Task 3 的 ValidationBehavior 会在这里注册
-            // cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            // Registration Validation Pipeline
+            // Run ValidationBehavior before executing any Handler
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
 
         // Register FluentValidation
