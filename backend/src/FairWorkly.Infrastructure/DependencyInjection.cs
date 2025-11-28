@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using FairWorkly.Domain.Employees.Interfaces;
+using FairWorkly.Infrastructure.Repositories.Employees;
 
 namespace FairWorkly.Infrastructure;
 
@@ -15,8 +17,8 @@ public static class DependencyInjection
         services.AddDbContext<FairWorklyDbContext>(options =>
             options.UseNpgsql(connectionString));
 
-        // TODO: 注册 Repositories (Task 2 会用到)
-        // services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        // Register Repositories
+        services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
         // TODO: AI Client (Task 4 会用到)
         // services.AddHttpClient<IAiClient, PythonAiClient>();
