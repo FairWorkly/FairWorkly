@@ -20,6 +20,9 @@ public static class DependencyInjection
         services.AddDbContext<FairWorklyDbContext>(options =>
             options.UseNpgsql(connectionString));
 
+        // Register UnitOfWork
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         // Register Repositories
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
