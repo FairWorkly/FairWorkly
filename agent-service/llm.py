@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
 import os
+from pathlib import Path
+from functools import lru_cache
 
 load_dotenv()
 
@@ -11,12 +13,18 @@ llm = ChatOpenAI(
     temperature=float(os.getenv("MODEL_TEMPERATURE", "0")),
 )
 
-SYSTEM_PROMPT = open("system_prompt.txt").read().strip()
+
+@lru_cache(maxsize=None)
+def load_prompt(prompt_path: Path, fallback: str) -> str:
+    try:
+        return Path(prompt_path).read_text().strip()
+    except FileNotFoundError:
+        return fallback
 
 
-def generate_reply(message: str) -> str:
+def generate_reply(system_prompt: str, message: str) -> str:
     messages = [
-        SystemMessage(content=SYSTEM_PROMPT),
+        SystemMessage(content=system_prompt),
         HumanMessage(content=message),
     ]
     try:

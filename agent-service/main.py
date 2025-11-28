@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from schema import ChatRequest, ChatResponse
-from agent import generate_reply
+
+from agents.compliance.router import router as compliance_router
 from fastapi.responses import RedirectResponse
 
 app = FastAPI(
@@ -16,20 +16,10 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """
-    Simple health check endpoint.
-    """
+    """Simple health check endpoint."""
     return {"status": "ok"}
 
-
-@app.post("/chat", response_model=ChatResponse)
-async def chat(req: ChatRequest) -> ChatResponse:
-    """
-    Single chat endpoint for Agent v0.
-    Takes a user message and returns the AI response.
-    """
-    reply = generate_reply(req.message)
-    return ChatResponse(reply=reply)
+app.include_router(compliance_router)
 
 
 if __name__ == "__main__":

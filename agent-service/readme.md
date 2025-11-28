@@ -1,12 +1,33 @@
 # FairWorkly Agent v0
 
-Minimal LangChain-based AI agent service to support future Compliance workflows.
+## Directory structure
 
-## Features
-
-- Single LLM-based chat agent (no RAG, no tools, no multi-agent)
-- HTTP endpoint: `POST /chat` → returns AI response
-- Ready for future enhancements (RAG, tools, workflows)
+```
+agent-service/
+├── main.py                         # FastAPI entrypoint, health/docs, router registration
+├── llm.py                          # Shared LLM helper (OpenAI client + prompt loader)
+├── agents/                         # Each persona-specific agent
+│   ├── compliance/                 # Active agent: Award Q&A, roster checks
+│   │   ├── system_prompt.txt       # Compliance persona instructions
+│   │   ├── router.py               # Mounts Compliance feature routes
+│   │   └── features/              
+│   │       └── ask_ai_question/    # Q&A Copilot
+│   │           ├── handler.py      # Orchestrates the feature logic
+│   │           └── schemas.py      # Request/response DTOs
+│   ├── documents/                  # (To add) Document & Contract
+│   │   ├── system_prompt.txt       
+│   │   └── features/               
+│   ├── payroll/                    # (To add) Payroll & STP Check
+│   │   ├── system_prompt.txt
+│   │   └── features/              
+│   └── employee_help/              # (To add) Employee self-service agent
+│       ├── system_prompt.txt
+│       └── features/               
+└── tests/
+    ├── test_health.py              # Global health endpoint smoke test
+    └── compliance/
+        └── test_qa.py              # Compliance Q&A endpoint tests
+```
 
 ## Setup
 
@@ -29,7 +50,7 @@ MODEL_TEMPERATURE=0
 ## Run
 
 ```bash
-uvicorn main:app --reload --port 8000
+uvicorn main:app --reload --port 8000 --app-dir agent-service
 ```
 
 ## Run Tests
@@ -54,22 +75,15 @@ Visit:
 http://localhost:8000/docs
 ```
 
-Swagger UI will automatically load and display the `/chat` endpoint.
 
-### 2. Test `/chat`
+### 2. Test Compliance Q&A
 
-Click on:
-
-- **POST /chat**
-- Click **Try it out**
-- Enter JSON payload:
-
-```json
-{
-  "message": "Hello, what can you do?"
-}
-```
-
-- Click **Execute**  
-You should see an AI-generated response under **Response body**.
-
+1. In Swagger, expand **POST /agents/compliance/qa**.
+2. Click **Try it out**.
+3. Use the payload:
+   ```json
+   {
+     "question": "I want a casual to work 10 extra hours, what should I check?"
+   }
+   ```
+4. Execute and review the structured response (summary, obligations, risk level, next steps, links, disclaimer).
