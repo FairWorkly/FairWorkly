@@ -25,6 +25,9 @@
 *.exe
 *.pdb
 
+# Local .NET SDK config
+global.json
+
 # Node.js and React (Frontend)
 node_modules/
 build/
