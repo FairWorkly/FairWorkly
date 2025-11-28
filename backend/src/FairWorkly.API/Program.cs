@@ -1,5 +1,5 @@
-using FairWorkly.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using FairWorkly.Application;
+using FairWorkly.Infrastructure;
 
 namespace FairWorkly.API
 {
@@ -9,18 +9,27 @@ namespace FairWorkly.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add API explorer (Required for Swagger)
-            builder.Services.AddEndpointsApiExplorer();
-
-            // Add Swagger generator
-            builder.Services.AddSwaggerGen();
-
-            // Register DbContext
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContext<FairWorklyDbContext>(options => options.UseNpgsql(connectionString));
+            // Register Application and Infrastructure services (DependencyInjection.cs)
+            builder.Services.AddApplicationServices();
+            builder.Services.AddInfrastructureServices(builder.Configuration);
 
             // Add controllers
             builder.Services.AddControllers();
+
+            // Add Swagger generator
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            // Add CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
 
             /* -------------------------------------- */
             /* app */
@@ -33,9 +42,15 @@ namespace FairWorkly.API
                 app.UseSwaggerUI();
             }
 
+            // Must before UseAuthorization
+            app.UseCors("AllowAll");
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
+            // TODO: 注册全局异常处理 (Task 3 会用到)
+            // app.UseMiddleware<GlobalExceptionMiddleware>(); 
 
             app.MapControllers();
 
