@@ -1,6 +1,6 @@
+using FairWorkly.API.ExceptionHandlers;
 using FairWorkly.Application;
 using FairWorkly.Infrastructure;
-using FairWorkly.API.ExceptionHandlers;
 
 namespace FairWorkly.API
 {
@@ -57,9 +57,6 @@ namespace FairWorkly.API
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
-            // TODO: 注册全局异常处理 (Task 3 会用到)
-            // app.UseMiddleware<GlobalExceptionMiddleware>(); 
 
             app.MapControllers();
 
