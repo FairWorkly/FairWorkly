@@ -91,3 +91,22 @@ http://localhost:8000/docs
    }
    ```
 4. Execute and review the structured response (summary, obligations, risk level, next steps, links, disclaimer).
+
+## Data flow overview (Compliance Agent)
+
+```mermaid
+flowchart TD
+    Adapter["AI Service Adapter (.NET)"]
+    Agent["Compliance Agent (FastAPI + LangChain)"]
+    Feature["Feature slice (QA / roster check)"]
+    Retrieval["RAG Retriever"]
+    VectorDB["Vector DB (Award/NES embeddings) — Chroma"]
+    Prompt["Prompt Builder"]
+    LLM["LLM Provider (OpenAI/Gemini)"]
+
+    Adapter -->|"Payload (question + context)"| Agent --> Feature
+    Feature -->|Fetch context| Retrieval --> VectorDB
+    Retrieval --> Feature
+    Feature -->|Compose sections| Prompt -->|Call LLM| LLM
+    LLM --> Agent -->|"Structured reply (summary, risk, steps)"| Adapter
+```
