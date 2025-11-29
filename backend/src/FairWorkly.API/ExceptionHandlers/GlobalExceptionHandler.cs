@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using FairWorkly.Domain.Exceptions;
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,46 +19,87 @@ public class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        // Handle FluentValidation Exceptions as 400
-        if (exception is ValidationException validationException)
+        // Map exception type to HTTP status code and details
+        var (statusCode, title, detail, extensions) = exception switch
         {
-            // Error response format defined by RFC 7807 international standard
-            var problemDetails = new ProblemDetails
-            {
-                Status = StatusCodes.Status400BadRequest,
-                Title = "Validation Failed",
-                Detail = "One or more validation errors occurred.",
-                Instance = httpContext.Request.Path
-            };
+            // Validation Failure (400)
+            ValidationException valEx => (
+                StatusCodes.Status400BadRequest,
+                "Validation Failed",
+                "One or more validation errors occurred.",
+                new Dictionary<string, object?>
+                {
+                    { "errors", valEx.Errors
+                        .GroupBy(e => e.PropertyName)
+                        .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray())
+                    }
+                }
+            ),
 
-            // Group errors: field name -> list of error messages
-            var errors = validationException.Errors
-                .GroupBy(e => e.PropertyName)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(e => e.ErrorMessage).ToArray()
-                );
+            // Not Found (404)
+            NotFoundException => (
+                StatusCodes.Status404NotFound,
+                "Resource Not Found",
+                exception.Message,
+                null
+            ),
 
-            problemDetails.Extensions.Add("errors", errors);
+            // Forbidden (403)
+            ForbiddenAccessException => (
+                StatusCodes.Status403Forbidden,
+                "Forbidden",
+                exception.Message,
+                null
+            ),
 
-            httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+            // Domain Rule Violation (422)
+            DomainException => (
+                StatusCodes.Status422UnprocessableEntity,
+                "Business Rule Violation",
+                exception.Message,
+                null
+            ),
 
-            return true; // Mark Exception as Handled
-        }
-
-        // Other unknown exceptions return 500
-        _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
-
-        var serverErrorProblem = new ProblemDetails
-        {
-            Status = StatusCodes.Status500InternalServerError,
-            Title = "An error occurred while processing your request.",
-            Detail = exception.Message // Hide Message in Production Environment
+            // Default / Internal Server Error (500)
+            _ => (
+                StatusCodes.Status500InternalServerError,
+                "Internal Server Error",
+                "An error occurred while processing your request.",
+                null
+            )
         };
 
-        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        await httpContext.Response.WriteAsJsonAsync(serverErrorProblem, cancellationToken);
+        // Log based on severity (Error for 5xx, Warning for 4xx)
+        if (statusCode >= 500)
+        {
+            _logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
+        }
+        else
+        {
+            _logger.LogWarning("Application exception ({StatusCode}): {Message}", statusCode, exception.Message);
+        }
+
+        // Build RFC 7807 ProblemDetails response
+        var problemDetails = new ProblemDetails
+        {
+            Status = statusCode,
+            Title = title,
+            Detail = detail,
+            Instance = httpContext.Request.Path
+        };
+
+        // Add extension fields if available
+        if (extensions != null)
+        {
+            foreach (var ext in extensions)
+            {
+                problemDetails.Extensions.Add(ext.Key, ext.Value);
+            }
+        }
+
+        // Write response
+        httpContext.Response.StatusCode = statusCode;
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
         return true;
     }
