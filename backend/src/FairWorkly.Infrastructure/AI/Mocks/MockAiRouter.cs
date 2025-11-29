@@ -11,6 +11,9 @@ public static class MockAiRouter
             // Compliance Agent
             "/chat" => ComplianceMock.Chat(request),
 
+            // Employee Agent
+            "/employee/welcome" => EmployeeMock.Welcome(request),
+
             _ => throw new NotImplementedException($"Mock route '{route}' is not configured.")
         };
     }

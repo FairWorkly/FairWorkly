@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FairWorkly.Infrastructure.AI.Mocks.Agents
+﻿namespace FairWorkly.Infrastructure.AI.Mocks.Agents;
+public static class EmployeeMock
 {
-    internal class EmployeeMock
+    public static object Welcome(object request)
     {
+        return new { reply = "[MOCK AI] Hello! This is Employee Agent!" };
     }
 }

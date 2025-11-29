@@ -1,5 +1,6 @@
 ﻿using FairWorkly.Application.Common.Behaviors;
 using FairWorkly.Application.Compliance.Orchestrators;
+using FairWorkly.Application.Employees.Services;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -26,7 +27,11 @@ public static class DependencyInjection
         // Automatically scan and register all Validators under the current assembly
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        
+
+        // Register Services
+        services.AddScoped<IEmployeeService, EmployeeService>();
+
+
         // Register AI Orchestrators
         services.AddScoped<ComplianceAiOrchestrator>();
         // TODO: 未来添加其他 Orchestrator 时在这里注册：
