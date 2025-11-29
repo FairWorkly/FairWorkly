@@ -1,38 +1,5 @@
 # FairWorkly Agent v0
 
-## Directory structure
-
-```
-agent-service/
-├── main.py                         # FastAPI entrypoint, health/docs, router registration
-├── llm.py                          # Shared LLM helper (OpenAI client)
-├── agents/                         # Each persona-specific agent
-│   ├── prompt_builder_base.py      # Shared PromptBuilder base helper
-│   ├── compliance/                 # Active agent: Award Q&A, roster checks
-│   │   ├── router.py               # Mounts Compliance feature routes
-│   │   ├── prompt_builder.py       # Compliance-specific prompt rules
-│   │   └── features/
-│   │       └── ask_ai_question/    # Q&A Copilot
-│   │           ├── handler.py      # Orchestrates the feature logic
-│   │           └── schemas.py      # Request/response DTOs
-│   ├── documents/                  # (To add) Document & Contract
-│   │   ├── router.py
-│   │   ├── prompt_builder.py
-│   │   └── features/
-│   ├── payroll/                    # (To add) Payroll & STP Check
-│   │   ├── router.py
-│   │   ├── prompt_builder.py
-│   │   └── features/
-│   └── employee_help/              # (To add) Employee self-service agent
-│       ├── router.py
-│       ├── prompt_builder.py
-│       └── features/
-└── tests/
-    ├── test_health.py              # Global health endpoint smoke test
-    └── compliance/
-        └── test_qa.py              # Compliance Q&A endpoint tests
-```
-
 ## Setup
 
 ```bash
@@ -91,6 +58,39 @@ http://localhost:8000/docs
    }
    ```
 4. Execute and review the structured response (summary, obligations, risk level, next steps, links, disclaimer).
+
+## Directory structure
+
+```
+agent-service/
+├── main.py                         # FastAPI entrypoint, health/docs, router registration
+├── llm.py                          # Shared LLM helper (OpenAI client)
+├── agents/                         # Each persona-specific agent
+│   ├── prompt_builder_base.py      # Shared PromptBuilder base helper
+│   ├── compliance/                 # Active agent: Award Q&A, roster checks
+│   │   ├── router.py               # Mounts Compliance feature routes
+│   │   ├── prompt_builder.py       # Compliance-specific prompt rules
+│   │   └── features/
+│   │       └── ask_ai_question/    # Q&A Copilot
+│   │           ├── handler.py      # Orchestrates the feature logic
+│   │           └── schemas.py      # Request/response DTOs
+│   ├── documents/                  # (To add) Document & Contract
+│   │   ├── router.py
+│   │   ├── prompt_builder.py
+│   │   └── features/
+│   ├── payroll/                    # (To add) Payroll & STP Check
+│   │   ├── router.py
+│   │   ├── prompt_builder.py
+│   │   └── features/
+│   └── employee_help/              # (To add) Employee self-service agent
+│       ├── router.py
+│       ├── prompt_builder.py
+│       └── features/
+└── tests/
+    ├── test_health.py              # Global health endpoint smoke test
+    └── compliance/
+        └── test_qa.py              # Compliance Q&A endpoint tests
+```
 
 ## Data flow overview (Compliance Agent)
 
