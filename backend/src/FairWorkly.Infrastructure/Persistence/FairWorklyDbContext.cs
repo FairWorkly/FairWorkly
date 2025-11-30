@@ -1,9 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace FairWorkly.Infrastructure.Persistence
 {
@@ -12,6 +8,16 @@ namespace FairWorkly.Infrastructure.Persistence
         public FairWorklyDbContext(DbContextOptions<FairWorklyDbContext> options)
             : base(options)
         {
+        }
+
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Automatically load all configurations under the current assembly
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
     }
 }

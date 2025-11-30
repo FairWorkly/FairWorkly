@@ -1,5 +1,6 @@
-using FairWorkly.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using FairWorkly.API.ExceptionHandlers;
+using FairWorkly.Application;
+using FairWorkly.Infrastructure;
 
 namespace FairWorkly.API
 {
@@ -9,22 +10,39 @@ namespace FairWorkly.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add API explorer (Required for Swagger)
-            builder.Services.AddEndpointsApiExplorer();
-
-            // Add Swagger generator
-            builder.Services.AddSwaggerGen();
-
-            // Register DbContext
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContext<FairWorklyDbContext>(options => options.UseNpgsql(connectionString));
+            // Register Application and Infrastructure services (DependencyInjection.cs)
+            builder.Services.AddApplicationServices();
+            builder.Services.AddInfrastructureServices(builder.Configuration);
 
             // Add controllers
             builder.Services.AddControllers();
 
+            // Add Swagger generator
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            // Register Global Exception Handler
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
+
+            // Add CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
             /* -------------------------------------- */
             /* app */
             var app = builder.Build();
+
+            // Enable exception handling middleware
+            // Must be placed at the front of the pipeline
+            app.UseExceptionHandler();
 
             // Enable Swagger UI in Development
             if (app.Environment.IsDevelopment())
@@ -32,6 +50,9 @@ namespace FairWorkly.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            // Must before UseAuthorization
+            app.UseCors("AllowAll");
 
             app.UseHttpsRedirection();
 
