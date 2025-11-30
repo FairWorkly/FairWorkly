@@ -2,16 +2,18 @@
 
 ## Setup
 
+Prerequisites (one-time):
+
+1. Install Python 3.10+
+2. Install the `uv` CLI (`pip install uv`).
+
+Run the following commands inside the `agent-service/` directory:
+
 ```bash
-cd agent-service
-python -m venv .venv
-source .venv/bin/activate  
-# Windows: .venv\Scripts\activate
-
-pip install -r requirements.txt 
-
+uv sync
 ```
-Create a `.env` file inside `agent-service/` with the following content:
+
+Create a `.env` file (or copy `.env.example`) with the following content:
 ```
 OPENAI_API_KEY=your_api_key_here
 OPENAI_MODEL=gpt-4o-mini
@@ -21,7 +23,7 @@ MODEL_TEMPERATURE=0
 ## Run
 
 ```bash
-uvicorn main:app --reload --port 8000 --app-dir agent-service
+uv run uvicorn main:app --reload --port 8000 --app-dir agent-service
 ```
 
 ## Run Tests
@@ -29,8 +31,7 @@ uvicorn main:app --reload --port 8000 --app-dir agent-service
 To run the automated tests:
 
 ```bash
-cd agent-service
-pytest
+uv run pytest
 ```
 
 Pytest will automatically discover tests inside the `tests/` directory. Make sure your virtual environment is activated before running the tests.
@@ -75,17 +76,8 @@ agent-service/
 │   │           ├── handler.py      # Feature logic
 │   │           └── schemas.py      # Request/response DTOs
 │   ├── documents/                  # (To add) Document & Contract
-│   │   ├── router.py
-│   │   ├── prompt_builder.py
-│   │   └── features/
 │   ├── payroll/                    # (To add) Payroll & STP Check
-│   │   ├── router.py
-│   │   ├── prompt_builder.py
-│   │   └── features/
 │   └── employee_help/              # (To add) Employee self-service agent
-│       ├── router.py
-│       ├── prompt_builder.py
-│       └── features/
 └── tests/
     ├── test_health.py              # Health endpoint smoke test
     └── agents/
