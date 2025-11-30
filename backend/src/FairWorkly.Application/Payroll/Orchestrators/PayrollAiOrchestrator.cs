@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FairWorkly.Application.Common.Interfaces;
 
-namespace FairWorkly.Application.Payroll.Orchestrators
+namespace FairWorkly.Application.Payroll.Orchestrators;
+
+public class PayrollAiOrchestrator
 {
-    internal class PayrollAiOrchestrator
+    private readonly IAiClient _aiClient;
+
+    public PayrollAiOrchestrator(IAiClient aiClient)
     {
+        _aiClient = aiClient;
     }
+
 }

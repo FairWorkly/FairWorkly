@@ -1,5 +1,4 @@
 ﻿using FairWorkly.Application.Employees.Services;
-using FairWorkly.Domain.Employees.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FairWorkly.API.Controllers.Employees
@@ -15,12 +14,6 @@ namespace FairWorkly.API.Controllers.Employees
             _employeeService = employeeService;
         }
 
-        [HttpPost]
-        [ProducesResponseType(typeof(CreateEmployeeResponseDto), StatusCodes.Status201Created)]
-        public async Task<ActionResult<CreateEmployeeResponseDto>> Create([FromBody] CreateEmployeeRequestDto request)
-        {
-            var result = await _employeeService.CreateEmployeeAsync(request);
-            return StatusCode(StatusCodes.Status201Created, result);
-        }
+
     }
 }

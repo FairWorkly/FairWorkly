@@ -25,6 +25,9 @@
 *.exe
 *.pdb
 
+# Ignore local file uploads during development
+**/wwwroot/uploads/
+
 # Local .NET SDK config
 global.json
 

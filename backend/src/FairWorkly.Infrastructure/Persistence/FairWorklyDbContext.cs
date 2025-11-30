@@ -1,11 +1,5 @@
-﻿using FairWorkly.Domain.Employees.Entities;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FairWorkly.Infrastructure.Persistence
 {
@@ -16,7 +10,7 @@ namespace FairWorkly.Infrastructure.Persistence
         {
         }
 
-        public DbSet<Employee> Employees { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

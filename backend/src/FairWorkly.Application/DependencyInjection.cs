@@ -1,6 +1,10 @@
 ﻿using FairWorkly.Application.Common.Behaviors;
 using FairWorkly.Application.Compliance.Orchestrators;
+using FairWorkly.Application.Documents.Orchestrators;
+using FairWorkly.Application.Documents.Services;
+using FairWorkly.Application.Employees.Orchestrators;
 using FairWorkly.Application.Employees.Services;
+using FairWorkly.Application.Payroll.Orchestrators;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -30,14 +34,14 @@ public static class DependencyInjection
 
         // Register Services
         services.AddScoped<IEmployeeService, EmployeeService>();
+        services.AddScoped<IDocumentService, DocumentService>();
 
 
         // Register AI Orchestrators
         services.AddScoped<ComplianceAiOrchestrator>();
-        // TODO: 未来添加其他 Orchestrator 时在这里注册：
-        // services.AddScoped<DocumentAiOrchestrator>();
-        // services.AddScoped<PayrollAiOrchestrator>();
-        // services.AddScoped<EmployeeAiOrchestrator>();
+        services.AddScoped<PayrollAiOrchestrator>();
+        services.AddScoped<DocumentAiOrchestrator>();
+        services.AddScoped<EmployeeAiOrchestrator>();
 
         return services;
     }

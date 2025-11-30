@@ -1,15 +1,15 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FairWorkly.API.Controllers.Compliance;
+namespace FairWorkly.API.Controllers.Auth;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ComplianceController : ControllerBase
+public class AuthController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public ComplianceController(IMediator mediator)
+    public AuthController(IMediator mediator)
     {
         _mediator = mediator;
     }
