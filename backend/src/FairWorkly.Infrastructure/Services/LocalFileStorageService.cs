@@ -1,42 +1,59 @@
 ﻿using FairWorkly.Application.Common.Interfaces;
+using Microsoft.Extensions.Hosting;
 
 namespace FairWorkly.Infrastructure.Services;
 
 public class LocalFileStorageService : IFileStorageService
 {
-    // Files are stored in the wwwroot/uploads folder of the API project
-    private readonly string _basePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+    private readonly string _basePath;
+
+    // Use ContentRootPath for reliability
+    public LocalFileStorageService(IHostEnvironment env)
+    {
+        _basePath = Path.Combine(env.ContentRootPath, "wwwroot", "uploads");
+    }
 
     public async Task<string> UploadAsync(Stream fileStream, string fileName, CancellationToken ct = default)
     {
-        // Ensure the storage directory exists
         if (!Directory.Exists(_basePath))
         {
             Directory.CreateDirectory(_basePath);
         }
 
-        // Generate Unique Filename (Prevent Duplicate Name Overwrite)
-        var uniqueFileName = $"{Guid.NewGuid()}_{fileName}";
+        // Security: Prevent Path Traversal
+        var safeFileName = Path.GetFileName(fileName);
+
+        var uniqueFileName = $"{Guid.NewGuid()}_{safeFileName}";
         var fullPath = Path.Combine(_basePath, uniqueFileName);
 
-        // Write to hard disk
-        using var fs = new FileStream(fullPath, FileMode.Create);
+        // useAsync: true for non-blocking I/O
+        await using var fs = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true);
+
+        // Rewind stream if needed
+        if (fileStream.CanSeek)
+        {
+            fileStream.Position = 0;
+        }
+
         await fileStream.CopyToAsync(fs, ct);
 
-        // Return filename (to be stored in database later)
         return uniqueFileName;
     }
 
     public Task<Stream?> GetFileStreamAsync(string filePath, CancellationToken ct = default)
     {
-        var fullPath = Path.Combine(_basePath, filePath);
+        // Security: Prevent Path Traversal
+        var safeFileName = Path.GetFileName(filePath);
+        var fullPath = Path.Combine(_basePath, safeFileName);
 
         if (!File.Exists(fullPath))
         {
             return Task.FromResult<Stream?>(null);
         }
 
-        // Open file stream return
-        return Task.FromResult<Stream?>(File.OpenRead(fullPath));
+        // Async read with shared access
+        var fs = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
+
+        return Task.FromResult<Stream?>(fs);
     }
 }

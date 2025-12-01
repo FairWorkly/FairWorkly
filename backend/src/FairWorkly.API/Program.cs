@@ -1,6 +1,7 @@
 using FairWorkly.API.ExceptionHandlers;
 using FairWorkly.Application;
 using FairWorkly.Infrastructure;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace FairWorkly.API
 {
@@ -21,8 +22,8 @@ namespace FairWorkly.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            // Register Global Exception Handler
-            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            // Explicitly register Global Exception Handler
+            builder.Services.AddSingleton<IExceptionHandler, GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
 
             // Add CORS
@@ -42,7 +43,20 @@ namespace FairWorkly.API
 
             // Enable exception handling middleware
             // Must be placed at the front of the pipeline
-            app.UseExceptionHandler();
+            app.UseExceptionHandler(errorApp =>
+            {
+                errorApp.Run(async context =>
+                {
+                    var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+                    var exception = exceptionHandlerFeature?.Error;
+
+                    if (exception != null)
+                    {
+                        var handler = context.RequestServices.GetRequiredService<IExceptionHandler>();
+                        await handler.TryHandleAsync(context, exception, CancellationToken.None);
+                    }
+                });
+            });
 
             // Enable Swagger UI in Development
             if (app.Environment.IsDevelopment())

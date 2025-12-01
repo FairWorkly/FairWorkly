@@ -13,6 +13,4 @@ public class ComplianceController : ControllerBase
     {
         _mediator = mediator;
     }
-
-
 }
