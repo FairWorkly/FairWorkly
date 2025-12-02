@@ -10,6 +10,7 @@ class ComplianceReference(BaseModel):
     note: str | None = None
 
 class AskAiQuestionRequest(BaseModel):
+    question_id: str | None = None
     question: str
     org_id: str | None = None
     user_id: str | None = None
@@ -19,6 +20,7 @@ class AskAiQuestionRequest(BaseModel):
     precomputed_findings: dict | None = None
 
 class AskAiQuestionResponse(BaseModel):
+    question_id: str | None = None
     plain_explanation: str
     key_points: List[str]
     risk_level: RiskLevel
