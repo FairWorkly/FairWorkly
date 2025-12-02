@@ -8,10 +8,10 @@ import RosterResults from '../../modules/compliance/pages/RosterResults.tsx'
 const ComplianceRoutes = () => {
     return (
         <Routes>
-            <Route path="/" element={<ComplianceHome />} />
-            <Route path="/qa" element={<ComplianceQA />} />
-            <Route path="/roster-check" element={<RosterCheck />} />
-            <Route path="/roster-results" element={<RosterResults />} />
+            <Route index element={<ComplianceHome />} />
+            <Route path="qa" element={<ComplianceQA />} />
+            <Route path="roster-check" element={<RosterCheck />} />
+            <Route path="roster-results" element={<RosterResults />} />
         </Routes>
     )
 }

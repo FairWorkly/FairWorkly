@@ -6,7 +6,7 @@ const AppRoutes = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/compliance" element={<ComplianceRoutes />} />
+                <Route path="/compliance/*" element={<ComplianceRoutes />} />
                 <Route path="*" element={<h1>404 not found</h1>} />
             </Routes>
         </Router>
