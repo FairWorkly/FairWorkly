@@ -99,9 +99,11 @@ flowchart TD
     Prompt["Prompt Builder"]
     LLM["LLM Provider (OpenAI/Gemini)"]
 
-    Adapter -->|"Payload (question + context)"| Agent --> Feature
+    Adapter -->|"Payload"| Agent --> Feature
     Feature -->|Fetch context| Retrieval --> VectorDB
     Retrieval --> Feature
-    Feature -->|Compose sections| Prompt -->|Call LLM| LLM
-    LLM --> Agent -->|"Structured reply (summary, risk, steps)"| Adapter
+    Feature --> Prompt -->|Call LLM| LLM
+    LLM --> Agent -->|"Structured reply"| Adapter
 ```
+## Rag overview
+![](https://miro.medium.com/v2/resize:fit:1100/format:webp/1*_Rjw0DOvOO6tfAotfKsG_g.png)
