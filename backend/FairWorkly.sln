@@ -13,8 +13,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6F755AD3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
+		.csharpierignore = .csharpierignore
+		.csharpierrc.json = .csharpierrc.json
 		.editorconfig = .editorconfig
 		..\.gitignore = ..\.gitignore
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairWorkly.Application", "src\FairWorkly.Application\FairWorkly.Application.csproj", "{AC8C2333-B847-4CCF-B15D-DDA666D04327}"
@@ -22,6 +25,17 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairWorkly.Infrastructure", "src\FairWorkly.Infrastructure\FairWorkly.Infrastructure.csproj", "{00879C65-2968-471E-B776-874776520AA3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairWorkly.API", "src\FairWorkly.API\FairWorkly.API.csproj", "{28F04E99-40E0-477A-87E7-CDE286F3DDB1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".vscode", ".vscode", "{9240CD84-CA0F-4D1F-93C0-B72BB27F45B8}"
+	ProjectSection(SolutionItems) = preProject
+		.vscode\extensions.json = .vscode\extensions.json
+		.vscode\settings.json = .vscode\settings.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".config", ".config", "{F8BA6AE5-7ABD-4853-B611-44177D55E882}"
+	ProjectSection(SolutionItems) = preProject
+		.config\dotnet-tools.json = .config\dotnet-tools.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

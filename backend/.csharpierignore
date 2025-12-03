@@ -1,0 +1,23 @@
+# Standard ignores
+.git/
+.vs/
+.vscode/
+.idea/
+
+# Build artifacts
+**/bin/
+**/obj/
+
+# Generated code
+**/Migrations/
+**/*.g.cs
+**/*.designer.cs
+**/*.generated.cs
+**/Generated/
+
+# Runtime data
+# Ignore local uploads directory
+**/wwwroot/uploads/
+
+# Misc
+**/node_modules/
