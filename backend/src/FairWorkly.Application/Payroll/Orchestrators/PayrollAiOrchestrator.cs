@@ -10,5 +10,4 @@ public class PayrollAiOrchestrator
     {
         _aiClient = aiClient;
     }
-
 }

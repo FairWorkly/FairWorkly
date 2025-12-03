@@ -13,6 +13,4 @@ public class AuthController : ControllerBase
     {
         _mediator = mediator;
     }
-
-
 }

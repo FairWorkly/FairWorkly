@@ -13,6 +13,4 @@ public class DocumentsController : ControllerBase
     {
         _documentService = documentService;
     }
-
-
 }

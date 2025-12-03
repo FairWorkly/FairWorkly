@@ -13,7 +13,5 @@ namespace FairWorkly.API.Controllers.Employees
         {
             _employeeService = employeeService;
         }
-
-
     }
 }

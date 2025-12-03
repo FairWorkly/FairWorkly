@@ -6,7 +6,7 @@ public static class MockAiRouter
     {
         return route switch
         {
-            _ => throw new NotImplementedException($"Mock route '{route}' is not configured.")
+            _ => throw new NotImplementedException($"Mock route '{route}' is not configured."),
         };
     }
 }

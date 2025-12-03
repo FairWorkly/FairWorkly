@@ -13,7 +13,11 @@ public class LocalFileStorageService : IFileStorageService
         _basePath = Path.Combine(env.ContentRootPath, "wwwroot", "uploads");
     }
 
-    public async Task<string> UploadAsync(Stream fileStream, string fileName, CancellationToken ct = default)
+    public async Task<string> UploadAsync(
+        Stream fileStream,
+        string fileName,
+        CancellationToken ct = default
+    )
     {
         if (!Directory.Exists(_basePath))
         {
@@ -27,7 +31,14 @@ public class LocalFileStorageService : IFileStorageService
         var fullPath = Path.Combine(_basePath, uniqueFileName);
 
         // useAsync: true for non-blocking I/O
-        await using var fs = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true);
+        await using var fs = new FileStream(
+            fullPath,
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None,
+            4096,
+            useAsync: true
+        );
 
         // Rewind stream if needed
         if (fileStream.CanSeek)
@@ -52,7 +63,14 @@ public class LocalFileStorageService : IFileStorageService
         }
 
         // Async read with shared access
-        var fs = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
+        var fs = new FileStream(
+            fullPath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read,
+            4096,
+            useAsync: true
+        );
 
         return Task.FromResult<Stream?>(fs);
     }

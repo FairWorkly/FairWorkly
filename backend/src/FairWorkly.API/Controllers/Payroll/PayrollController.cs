@@ -13,6 +13,4 @@ public class PayrollController : ControllerBase
     {
         _mediator = mediator;
     }
-
-    
 }

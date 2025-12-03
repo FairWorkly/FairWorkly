@@ -1,6 +1,3 @@
 ﻿namespace FairWorkly.Application.Employees.Services;
 
-public interface IEmployeeService
-{
-
-}
+public interface IEmployeeService { }

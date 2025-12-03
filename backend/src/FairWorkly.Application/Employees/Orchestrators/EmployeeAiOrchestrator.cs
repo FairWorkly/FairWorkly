@@ -10,5 +10,4 @@ public class EmployeeAiOrchestrator
     {
         _aiClient = aiClient;
     }
-
 }

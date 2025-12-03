@@ -6,7 +6,7 @@ namespace FairWorkly.Domain.Common;
 /// </summary>
 public interface IDomainEvent
 {
-  DateTime OccurredOn { get; }
+    DateTime OccurredOn { get; }
 }
 
 /// <summary>
@@ -14,5 +14,5 @@ public interface IDomainEvent
 /// </summary>
 public abstract class DomainEvent : IDomainEvent
 {
-  public DateTime OccurredOn { get; } = DateTime.UtcNow;
+    public DateTime OccurredOn { get; } = DateTime.UtcNow;
 }

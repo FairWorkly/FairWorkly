@@ -1,6 +1,7 @@
 ﻿using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Documents.Orchestrators;
-// TODO: using FairWorkly.Domain.Documents.Interfaces; 
+
+// TODO: using FairWorkly.Domain.Documents.Interfaces;
 
 namespace FairWorkly.Application.Documents.Services;
 
@@ -15,13 +16,12 @@ public class DocumentService : IDocumentService
         // IDocumentRepository repository,
         IAiClient aiClient,
         DocumentAiOrchestrator orchestrator,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork
+    )
     {
         // _repository = repository;
         _aiClient = aiClient;
         _orchestrator = orchestrator;
         _unitOfWork = unitOfWork;
     }
-
-
 }

@@ -1,6 +1,4 @@
 ﻿namespace FairWorkly.Infrastructure.AI.Mocks.Agents
 {
-    public static class PayrollMock
-    {
-    }
+    public static class PayrollMock { }
 }

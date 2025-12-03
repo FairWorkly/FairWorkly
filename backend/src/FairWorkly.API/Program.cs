@@ -29,12 +29,13 @@ namespace FairWorkly.API
             // Add CORS
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", policy =>
-                {
-                    policy.AllowAnyOrigin()
-                          .AllowAnyMethod()
-                          .AllowAnyHeader();
-                });
+                options.AddPolicy(
+                    "AllowAll",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    }
+                );
             });
 
             /* -------------------------------------- */
@@ -52,7 +53,8 @@ namespace FairWorkly.API
 
                     if (exception != null)
                     {
-                        var handler = context.RequestServices.GetRequiredService<IExceptionHandler>();
+                        var handler =
+                            context.RequestServices.GetRequiredService<IExceptionHandler>();
                         await handler.TryHandleAsync(context, exception, CancellationToken.None);
                     }
                 });
@@ -78,4 +80,3 @@ namespace FairWorkly.API
         }
     }
 }
-

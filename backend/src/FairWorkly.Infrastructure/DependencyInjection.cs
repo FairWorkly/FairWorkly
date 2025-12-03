@@ -11,7 +11,10 @@ namespace FairWorkly.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructureServices(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         // true: use real AI service; false: use mock AI service
         var useMockAi = configuration.GetValue<bool>("AiSettings:UseMockAi");
@@ -25,15 +28,12 @@ public static class DependencyInjection
             services.AddHttpClient<IAiClient, PythonAiClient>();
         }
 
-
         // Register DbContext (PostgreSQL)
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-        services.AddDbContext<FairWorklyDbContext>(options =>
-            options.UseNpgsql(connectionString));
+        services.AddDbContext<FairWorklyDbContext>(options => options.UseNpgsql(connectionString));
 
         // Register Repositories
-
 
         // Register UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();

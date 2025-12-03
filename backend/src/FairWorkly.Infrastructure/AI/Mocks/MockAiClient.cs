@@ -1,5 +1,5 @@
-﻿using FairWorkly.Application.Common.Interfaces;
-using System.Text.Json;
+﻿using System.Text.Json;
+using FairWorkly.Application.Common.Interfaces;
 
 namespace FairWorkly.Infrastructure.AI.Mocks;
 
@@ -7,10 +7,14 @@ public class MockAiClient : IAiClient
 {
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
     };
 
-    public async Task<TResponse> PostAsync<TRequest, TResponse>(string route, TRequest request, CancellationToken cancellationToken = default)
+    public async Task<TResponse> PostAsync<TRequest, TResponse>(
+        string route,
+        TRequest request,
+        CancellationToken cancellationToken = default
+    )
     {
         // Simulate Network Latency
         await Task.Delay(1000, cancellationToken);
@@ -18,8 +22,8 @@ public class MockAiClient : IAiClient
         var resultData = MockAiRouter.Dispatch(route, request!);
 
         /*
-         * The backend mock data is written as an anonymous object, but in real scenarios 
-         * the AI returns JSON, so here we need to first serialize the anonymous object 
+         * The backend mock data is written as an anonymous object, but in real scenarios
+         * the AI returns JSON, so here we need to first serialize the anonymous object
          * into JSON, then deserialize the JSON into the DTO.
          */
         var json = JsonSerializer.Serialize(resultData);

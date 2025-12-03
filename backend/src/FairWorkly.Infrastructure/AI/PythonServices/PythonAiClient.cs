@@ -1,6 +1,6 @@
-﻿using FairWorkly.Application.Common.Interfaces;
+﻿using System.Net.Http.Json;
+using FairWorkly.Application.Common.Interfaces;
 using Microsoft.Extensions.Configuration;
-using System.Net.Http.Json;
 
 namespace FairWorkly.Infrastructure.AI.PythonServices;
 
@@ -17,7 +17,11 @@ public class PythonAiClient : IAiClient
         _httpClient.BaseAddress = new Uri(baseUrl);
     }
 
-    public async Task<TResponse> PostAsync<TRequest, TResponse>(string route, TRequest request, CancellationToken cancellationToken = default)
+    public async Task<TResponse> PostAsync<TRequest, TResponse>(
+        string route,
+        TRequest request,
+        CancellationToken cancellationToken = default
+    )
     {
         // Convert the request object to a JSON string and send it
         var response = await _httpClient.PostAsJsonAsync(route, request, cancellationToken);
@@ -27,7 +31,9 @@ public class PythonAiClient : IAiClient
 
         // Read JSON from the response body and try to force it into the TResponse template
         // If the fields returned by Python don't match TResponse, there may be errors here or missing properties
-        var result = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken);
+        var result = await response.Content.ReadFromJsonAsync<TResponse>(
+            cancellationToken: cancellationToken
+        );
 
         if (result == null)
         {

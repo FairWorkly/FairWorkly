@@ -1,5 +1,6 @@
 ﻿using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Employees.Orchestrators;
+
 // TODO: using FairWorkly.Domain.Employees.Interfaces;
 
 namespace FairWorkly.Application.Employees.Services;
@@ -15,7 +16,8 @@ public class EmployeeService : IEmployeeService
         // IEmployeeRepository repository,
         IUnitOfWork unitOfWork,
         IAiClient aiClient,
-        EmployeeAiOrchestrator orchestrator)
+        EmployeeAiOrchestrator orchestrator
+    )
     {
         // _repository = repository;
         _unitOfWork = unitOfWork;

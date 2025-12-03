@@ -17,7 +17,8 @@ public class GlobalExceptionHandler : IExceptionHandler
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         // Map exception type to HTTP status code and details
         var (statusCode, title, detail, extensions) = exception switch
@@ -29,10 +30,12 @@ public class GlobalExceptionHandler : IExceptionHandler
                 "One or more validation errors occurred.",
                 new Dictionary<string, object?>
                 {
-                    { "errors", valEx.Errors
-                        .GroupBy(e => e.PropertyName)
-                        .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray())
-                    }
+                    {
+                        "errors",
+                        valEx
+                            .Errors.GroupBy(e => e.PropertyName)
+                            .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray())
+                    },
                 }
             ),
 
@@ -66,17 +69,25 @@ public class GlobalExceptionHandler : IExceptionHandler
                 "Internal Server Error",
                 "An error occurred while processing your request.",
                 null
-            )
+            ),
         };
 
         // Log based on severity (Error for 5xx, Warning for 4xx)
         if (statusCode >= 500)
         {
-            _logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
+            _logger.LogError(
+                exception,
+                "Unhandled exception occurred: {Message}",
+                exception.Message
+            );
         }
         else
         {
-            _logger.LogWarning("Application exception ({StatusCode}): {Message}", statusCode, exception.Message);
+            _logger.LogWarning(
+                "Application exception ({StatusCode}): {Message}",
+                statusCode,
+                exception.Message
+            );
         }
 
         // Build RFC 7807 ProblemDetails response
@@ -85,7 +96,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             Status = statusCode,
             Title = title,
             Detail = detail,
-            Instance = httpContext.Request.Path
+            Instance = httpContext.Request.Path,
         };
 
         // Add extension fields if available
