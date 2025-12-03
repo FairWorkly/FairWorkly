@@ -130,7 +130,14 @@ VS2022 users need to manually configure settings to avoid conflicts with native 
 
 #### Visual Studio Code Settings
 
-The project includes `.vscode/settings.json`. Simply install the recommended plugins after opening the project, and files will be automatically formatted on save.
+The project comes with a pre-configured `.vscode/settings.json` that enforces CSharpier as the default formatter.
+
+To ensure it works correctly, please **install the following extensions**:
+
+1.  **C# Dev Kit** (id: `ms-dotnettools.csdevkit`) - *Required for running and debugging .NET projects.*
+2.  **CSharpier - Code Formatter** (id: `csharpier.csharpier-vscode`) - *Required for automatic code formatting.*
+
+Once installed, simply **Save (Ctrl+S)** any `.cs` file, and it will be formatted automatically. No further configuration is needed.
 
 #### Manual Execution Command
 
