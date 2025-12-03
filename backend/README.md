@@ -42,31 +42,79 @@ Before you begin, please ensure you have installed:
 
 ## ⚡ Getting Started
 
-### 1. Initialize Toolchain
+### 1. Set Working Directory
 
-This project uses local tools to manage dependencies (such as EF Core and CSharpier). Run the following command in the `backend` directory:
+Ensure your terminal is inside the `backend` folder:
 
+```bash
+cd backend
 ```
+
+### 2. Initialize Toolchain
+
+```bash
 dotnet tool restore
 ```
 
-### 2. Configure Git Blame (Mandatory ⚠️)
+### 3. Configure Git Blame
 
-This project enforces code formatting. To prevent formatting commits from obscuring the true authors of the business code, **you must run the following command once in the project root directory**:
-
-```
+```bash
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
 
-### 3. Database Configuration
+### 4. Configure IDE & Formatting
 
-You need to configure the connection string to point to your local PostgreSQL instance.
+Follow the instructions below for your chosen IDE.
 
-Method A: Using User Secrets (Recommended, prevents password leakage)
+#### Visual Studio 2022 Settings
 
-In VS2022, right-click the FairWorkly.API project -> Select Manage User Secrets, and enter the following:
+1. **Install Extension**: Search for and install `CSharpier` in Extensions.
+2. **Configure Save Actions**:
+   - `Tools` -> `Options` -> `CSharpier`.
+   - Tick **Reformat with CSharpier on Save**.
+   - Ensure **Solution** is `True`, and **Global** is `False`.
+3. **Disable Native Interference**:
+   - `Analyze` -> `Code Cleanup` -> `Configure Code Cleanup`.
+   - Check Profile 1, **remove** `Format Document`.
+4. **Remap Shortcuts (Optional)**:
+   - `Tools` -> `Options` -> `Environment` -> `Keyboard`.
+   - Search for `Edit.FormatDocument` -> **Remove**.
+   - Search for `ReformatWithCSharpier` -> Assign preferred key -> **Assign**.
 
-```
+#### JetBrains Rider Settings
+
+1.  **Install Plugin**:
+    - Go to **Settings** (`Ctrl+Alt+S`) -> **Plugins**.
+    - Search for and install **CSharpier**.
+2.  **Configure Plugin**:
+    - Go to **Tools** -> **CSharpier**.
+    - Check **Run on Save**.
+    - Leave "Override CSharpier Executable" **unchecked**.
+3.  **Disable Native Formatting (Crucial)**:
+    - Go to **Tools** -> **Actions on Save**.
+    - Ensure **Reformat code** is **unchecked**.
+4.  **Configure Shortcut (Optional)**:
+    - Go to **Settings** -> **Keymap**.
+    - Search for **"Reformat with CSharpier"**.
+    - Right-click it -> **Add Keyboard Shortcut**.
+    - Assign your preferred combination.
+
+#### Visual Studio Code Settings
+
+**Install extensions**:
+
+1.  **C# Dev Kit** (id: `ms-dotnettools.csdevkit`)
+2.  **CSharpier - Code Formatter** (id: `csharpier.csharpier-vscode`)
+
+Once installed, simply **Save (Ctrl+S)** any `.cs` file, and it will be formatted automatically. No further configuration is needed.
+
+### 5. Database Configuration
+
+**Method A: Using User Secrets**
+
+In VS2022, right-click `FairWorkly.API` project -> **Manage User Secrets**:
+
+```json
 {
   "ConnectionStrings": {
     "DefaultConnection": "Host=localhost;Port=5432;Database=FairWorklyDb;Username=postgres;Password=<YourPassword>"
@@ -74,105 +122,65 @@ In VS2022, right-click the FairWorkly.API project -> Select Manage User Secrets,
 }
 ```
 
-Method B: Modify Configuration File
+**Method B: Modify Configuration File**
 
-Directly modify the DefaultConnection field in src/FairWorkly.API/appsettings.Development.json.
+Edit `src/FairWorkly.API/appsettings.json` -> `DefaultConnection`.
 
-After configuration is complete, apply the database migrations:
+**Apply Migrations**:
 
-```
+```bash
 dotnet ef database update --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
 ```
 
-### 4. AI Service Configuration (Mock vs Real)
+### 6. Start the Project
+
+```bash
+dotnet run --project src/FairWorkly.API --launch-profile https
+```
+
+Access Swagger: `https://localhost:7075/swagger`
+
+## 🔧 Development Patterns & Tools
+
+### 1. Dependency Injection Standards
+
+This project follows Clean Architecture, and dependency injection registration logic is split by layer. Whenever you add a new Service or Repository, **you must register the service in the corresponding layer**:
+
+- **Application Layer Services**:
+  - **Location**: `src/FairWorkly.Application/DependencyInjection.cs`
+- **Infrastructure Layer Services**:
+  - **Location**: `src/FairWorkly.Infrastructure/DependencyInjection.cs`
+
+> **⚠️ Note**: `Program.cs` in the API layer is only responsible for calling these two extension methods. **It is strictly forbidden to register business services directly in `Program.cs`**.
+
+### 2. AI Service Configuration (Mock vs Real)
 
 The backend depends on a Python AI Service (`agent-service`). During the development phase, **Mock Mode** is enabled by default (does not depend on the real Python service) for easier debugging.
 
-Configuration location: `appsettings.Development.json`
+Configuration location: `appsettings.json`
 
-```
+```json
 "AiSettings": {
   "BaseUrl": "http://localhost:8000",
   "UseMockAi": true  // true = Use local mock data; false = Call Python interface
 }
 ```
 
-### 5. Start the Project
-
-```
-dotnet run --project src/FairWorkly.API
-```
-
-Access Swagger Documentation: `https://localhost:7075/swagger`
-
-## 📏 Coding Standards
-
-### 1. Code Formatting
-
-This project enforces **CSharpier** for formatting.
-
-#### Visual Studio 2022 Settings (Mandatory)
-
-VS2022 users need to manually configure settings to avoid conflicts with native formatting:
-
-1. **Install Extension**: Search for and install `CSharpier` in Extensions.
-2. **Configure Save Actions**:
-   - `Tools` -> `Options` -> `CSharpier`.
-   - Tick **Reformat with CSharpier on Save**.
-   - Ensure **Solution** is `True`, and **Global** is `False` (to prevent affecting other projects).
-3. **Disable Native Interference**:
-   - `Analyze` -> `Code Cleanup` -> `Configure Code Cleanup`.
-   - Check Profile 1, **make sure to remove** `Format Document`.
-4. **Remap Shortcuts**:
-   - `Tools` -> `Options` -> `Environment` -> `Keyboard`.
-   - Search for `Edit.FormatDocument` -> **Remove** (remove the original `Ctrl+K, Ctrl+D`).
-   - Search for `ReformatWithCSharpier` -> In "Press shortcut keys", press `Ctrl+K, Ctrl+D` -> Click **Assign**.
-
-#### Visual Studio Code Settings
-
-The project comes with a pre-configured `.vscode/settings.json` that enforces CSharpier as the default formatter.
-
-To ensure it works correctly, please **install the following extensions**:
-
-1.  **C# Dev Kit** (id: `ms-dotnettools.csdevkit`) - *Required for running and debugging .NET projects.*
-2.  **CSharpier - Code Formatter** (id: `csharpier.csharpier-vscode`) - *Required for automatic code formatting.*
-
-Once installed, simply **Save (Ctrl+S)** any `.cs` file, and it will be formatted automatically. No further configuration is needed.
-
-#### Manual Execution Command
-
-> **⚠️ Note: This is a bulk operation!** Before running this command, please **ensure you Commit your current changes**. This command will format all `.cs` files and may generate a large number of changes. Please carefully check `git status` to ensure no unintended files (such as other people's code or Migration files) are accidentally modified before committing.
-
-```
-dotnet csharpier format .
-```
-
-### 2. Time Handling Standards (Time Provider)
+### 3. Time Handling Standards (Time Provider)
 
 To ensure the testability of business logic (such as "determining if it is within rostered hours"), **it is strictly forbidden to use `DateTime.Now` or `DateTimeOffset.Now` directly in the code**.
 
 - **Correct Approach**: Inject `IDateTimeProvider` via the constructor.
 - **Usage**: `_dateTimeProvider.Now`.
 
-### 3. File Storage Strategy
+### 4. File Storage Strategy
 
 This project uses the Adapter Pattern to handle file storage, with the core interface being `IFileStorageService`.
 
 - **Development Environment**:
   - Injects `LocalFileStorageService` by default.
   - Physical Path: `src/FairWorkly.API/wwwroot/uploads/`.
-  - **Note**: This directory is ignored in `.gitignore` and `.csharpierignore`.
-
-### 4. Dependency Injection Standards
-
-This project follows Clean Architecture, and dependency injection registration logic is split by layer. Whenever you add a new Service or Repository, **you must register the service in the corresponding layer**:
-
-- **Application Layer Services** (e.g., `IEmployeeService`, `MediatR` Handlers):
-  - **Location**: `src/FairWorkly.Application/DependencyInjection.cs`
-- **Infrastructure Layer Services** (e.g., `IUserRepository`, `IDateTimeProvider`):
-  - **Location**: `src/FairWorkly.Infrastructure/DependencyInjection.cs`
-
-> **⚠️ Note**: `Program.cs` in the API layer is only responsible for calling these two extension methods. **It is strictly forbidden to register business services directly in `Program.cs`**.
+  - **Note**: This directory is ignored in `.gitignore`.
 
 ## 📂 Cheatsheet
 
