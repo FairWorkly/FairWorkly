@@ -1,37 +1,18 @@
-import React from 'react'
+import {
+    Box,
+    Button,
+    TextField,
+} from '@mui/material'
 
 const ComplianceQA = () => {
     return (
-        <div>
-            <div>
-                <h1>What can I help with?</h1>
-                <h3>Description</h3>
-                <TextField
-                    id="standard-multiline-flexible"
-                    label="Multiline"
-                    multiline
-                    maxRows={4}
-                    variant="standard"
-                />
-                <TextField
-                    id="standard-textarea"
-                    label="Multiline Placeholder"
-                    placeholder="Placeholder"
-                    multiline
-                    variant="standard"
-                />
-                <TextField
-                    id="standard-multiline-static"
-                    label="Multiline"
-                    multiline
-                    rows={4}
-                    defaultValue="Default Value"
-                    variant="standard"
-                />
-            </div>
-        </div>
+        <Box>
+            <h1>Hello</h1>
+            <h3>Description</h3>
+            <TextField></TextField>
+            <button>Send</button>
+        </Box>
     )
 }
 
 export default ComplianceQA
-
