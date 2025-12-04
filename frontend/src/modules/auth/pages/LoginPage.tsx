@@ -2,14 +2,14 @@ import React from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-export const ComplianceQA: React.FC = () => {
+export const LoginPage: React.FC = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Compliance Q&A (AI Copilot)
+        Login (WIP)
       </Typography>
       <Typography variant="body1">
-        This page will host the AI Q&A interface for compliance questions.
+        This will be the login page for FairWorkly.
       </Typography>
     </Box>
   );

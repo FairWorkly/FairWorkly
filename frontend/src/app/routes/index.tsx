@@ -1,19 +1,23 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import ComplianceRoutes from './compliance.routes.tsx'
-import MainLayout from '../../shared/components/layout/MainLayout.tsx'
+import { useRoutes, type RouteObject } from 'react-router-dom'
 
-const AppRoutes = () => {
-    return (
-        <Router>
-            <MainLayout>
-                <Routes>
-                    <Route path="/compliance/*" element={<ComplianceRoutes />} />
-                    <Route path="*" element={<h1>404 not found</h1>} />
-                </Routes>
-            </MainLayout>
-        </Router>
-    )
+import { homeRoutes } from './home.routes'
+import { authRoutes } from './auth.routes'
+import { complianceRoutes } from './compliance.routes'
+import { documentsRoutes } from './documents.routes'
+import { payrollRoutes } from './payroll.routes'
+import { employeeRoutes } from './employee.routes'
+
+const routes: RouteObject[] = [
+  ...homeRoutes,
+  ...authRoutes,
+  ...complianceRoutes,
+  ...documentsRoutes,
+  ...payrollRoutes,
+  ...employeeRoutes,
+]
+
+export const AppRoutes: React.FC = () => {
+  const element = useRoutes(routes)
+  return element
 }
-
-export default AppRoutes

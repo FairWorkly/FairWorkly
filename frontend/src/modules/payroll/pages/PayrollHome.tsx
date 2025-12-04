@@ -2,14 +2,14 @@ import React from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-export const ComplianceQA: React.FC = () => {
+export const PayrollHome: React.FC = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Compliance Q&A (AI Copilot)
+        Payroll & STP Checks
       </Typography>
       <Typography variant="body1">
-        This page will host the AI Q&A interface for compliance questions.
+        This module will provide second-line checks on pay runs, STP, and SG (MVP placeholder).
       </Typography>
     </Box>
   );

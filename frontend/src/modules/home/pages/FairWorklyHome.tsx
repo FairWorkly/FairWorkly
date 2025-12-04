@@ -2,14 +2,15 @@ import React from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-export const ComplianceQA: React.FC = () => {
+export const FairWorklyHome: React.FC = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Compliance Q&A (AI Copilot)
+        FairWorkly – Workplace Compliance Copilot
       </Typography>
       <Typography variant="body1">
-        This page will host the AI Q&A interface for compliance questions.
+        Welcome! This is the product home page. From here you can navigate to
+        Compliance, Payroll, Documents and Employee tools.
       </Typography>
     </Box>
   );
