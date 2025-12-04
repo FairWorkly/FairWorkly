@@ -1,6 +1,11 @@
-import React from 'react'
+
+import { useComplianceQuestion } from '../hooks/useComplianceQuestion';
 
 const ComplianceQA = () => {
+
+    const { mutate, isLoading, isError, data, error, genericErrorMessage } =
+        useComplianceQuestion();
+
     return (
         <div>
             <p>ComplianceQA</p>
