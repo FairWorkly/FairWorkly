@@ -1,4 +1,6 @@
+import asyncio
 import json
+import logging
 
 from fastapi import HTTPException, status
 from pydantic import ValidationError
@@ -9,6 +11,9 @@ from agents.compliance.features.ask_ai_question.schemas import (
     AskAiQuestionRequest,
     AskAiQuestionResponse,
 )
+
+logger = logging.getLogger(__name__)
+
 
 ASK_AI_RESPONSE_FORMAT = {
     "name": "AskAiQuestionResponse",
@@ -22,7 +27,7 @@ def _llm_snippet(text: str, limit: int = 400) -> str:
     return f"{text[:limit]}... (truncated)"
 
 
-def run(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
+def _handle_request(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
     try:
         reply = generate_reply(
             COMPLIANCE_PROMPT,
@@ -62,3 +67,14 @@ def run(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
                 "llm_output": _llm_snippet(reply),
             },
         ) from exc
+
+
+async def handle_ask_ai_question(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
+    """Async interface for the compliance Q&A handler."""
+    logger.debug(
+        "Handling compliance QA request question_id=%s audience=%s award_code=%s",
+        req.question_id,
+        req.audience,
+        req.award_code or "-",
+    )
+    return await asyncio.to_thread(_handle_request, req)
