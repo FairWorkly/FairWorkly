@@ -10,7 +10,7 @@ const ComplianceQA = () => {
             <h1>Hello</h1>
             <h3>Description</h3>
             <TextField></TextField>
-            <button>Send</button>
+            <Button>Send</Button>
         </Box>
     )
 }
