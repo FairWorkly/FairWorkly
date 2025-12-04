@@ -1,25 +1,21 @@
-import { useMutation  } from '@tanstack/react-query';
-import { postComplianceQuestion } from '../../../services/complianceApi';
-import type { AskComplianceQuestionResponse, ComplianceQuestionPayload } from '../types/compliance.types';
+import { useMutation } from '@tanstack/react-query';
+import { postComplianceQuestion, type ApiResponse } from '../../../services/complianceApi';
+import type { AskComplianceQuestionResponse, AskComplianceRequest } from '../types/compliance.types';
 
 
 
-export function useComplianceQuestion(){
+export function useComplianceQuestion() {
     const mutation = useMutation<
-    AskComplianceQuestionResponse,
-    Error,
-    ComplianceQuestionPayload
+        ApiResponse<AskComplianceQuestionResponse>,
+        Error,
+        AskComplianceRequest
     >({
-        mutationFn: (payload) => postComplianceQuestion(payload)
+        mutationFn: async (payload) => await postComplianceQuestion(payload)
     })
 
-    const genericErrorMessage = mutation.isError
-    ? "Something went wrong while asking the compliance question"
-    : null;
 
     return {
-        ...mutation, 
-        genericErrorMessage,
+        ...mutation,
     }
 }
 

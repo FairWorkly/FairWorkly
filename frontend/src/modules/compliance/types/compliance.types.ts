@@ -1,9 +1,7 @@
-export type ComplianceQuestionPayload = {
+export type AskComplianceRequest = {
     question: string;
     awardCode?: string;
     audience: "manager" | "employee";
   };
 
-  export type AskComplianceQuestionResponse = {
-
-  };
+  export type AskComplianceQuestionResponse = Record<string,unknown>;
