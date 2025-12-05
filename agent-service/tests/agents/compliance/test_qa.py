@@ -1,6 +1,7 @@
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 sys.path.append(str(Path(__file__).resolve().parents[3]))
@@ -37,6 +38,9 @@ def test_compliance_qa_endpoint():
     with patch(
         "agents.compliance.features.ask_ai_question.handler.generate_reply",
         return_value=json.dumps(MOCK_RESPONSE),
+    ), patch(
+        "agents.compliance.features.ask_ai_question.handler._get_query_handler",
+        return_value=SimpleNamespace(retrieve_documents=lambda _: []),
     ):
         r = client.post(
             "/agents/compliance/qa",

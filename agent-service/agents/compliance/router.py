@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/agents/compliance", tags=["Compliance"])
 
-
 @router.post("/qa", response_model=AskAiQuestionResponse)
 async def ask_compliance(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
     logger.info(
