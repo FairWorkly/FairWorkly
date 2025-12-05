@@ -3,6 +3,7 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
+import yaml
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
@@ -13,13 +14,23 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = "gpt-4o-mini"
 DEFAULT_TEMPERATURE = 0.0
+CONFIG_PATH = Path(os.getenv("CONFIG_PATH", "config.yaml"))
+
+
+def _resolve_model_settings() -> tuple[str, float]:
+    """config reader: expect config.yaml and model block to exist."""
+    config = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))
+    model_block = config.get("model", {})
+
+    name = model_block.get("name", DEFAULT_MODEL)
+    temperature = float(model_block.get("temperature", DEFAULT_TEMPERATURE))
+    return name, temperature
 
 
 @lru_cache(maxsize=1)
 def _get_llm() -> ChatOpenAI:
-    """Lazy-initialize the ChatOpenAI client (cached for reuse)."""
-    model = os.getenv("OPENAI_MODEL", DEFAULT_MODEL)
-    temperature = float(os.getenv("MODEL_TEMPERATURE", DEFAULT_TEMPERATURE))
+    """Lazy-initialize the LLM client (cached for reuse)."""
+    model, temperature = _resolve_model_settings()
     return ChatOpenAI(model=model, temperature=temperature)
 
 

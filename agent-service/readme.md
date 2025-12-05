@@ -14,11 +14,9 @@ cd agent-service/
 uv sync
 ```
 
-Create a `.env` file (or copy `.env.example`) with the following content:
+Create a `.env` file:
 ```
 OPENAI_API_KEY=your_api_key_here
-OPENAI_MODEL=gpt-4o-mini
-MODEL_TEMPERATURE=0
 ```
 
 ## Run
@@ -61,7 +59,7 @@ http://localhost:8000/docs
      "question": "I want a casual to work 10 extra hours, what should I check?"
    }
    ```
-4. Execute and review the structured response (plain explanation, key points, risk level, next steps, legal references, disclaimer).
+4. Execute and review the structured response.
 
 ## Directory structure
 
