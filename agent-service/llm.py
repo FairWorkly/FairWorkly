@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
+from errors import LLMResponseError
+
 load_dotenv()
 
 DEFAULT_MODEL = "gpt-4o-mini"
@@ -15,7 +17,6 @@ CONFIG_PATH = Path(os.getenv("CONFIG_PATH", "config.yaml"))
 
 
 def _resolve_model_settings() -> tuple[str, float]:
-    """config reader: expect config.yaml and model block to exist."""
     config = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))
     model_block = config.get("model", {})
 
@@ -26,23 +27,17 @@ def _resolve_model_settings() -> tuple[str, float]:
 
 @lru_cache(maxsize=1)
 def _get_llm() -> ChatOpenAI:
-    """Lazy-initialize the LLM client (cached for reuse)."""
     model, temperature = _resolve_model_settings()
     return ChatOpenAI(model=model, temperature=temperature)
 
 
 @lru_cache(maxsize=None)
 def load_prompt(prompt_path: Path | str, fallback: str) -> str:
-    """Read a prompt file once and fall back to a default when missing."""
     path = Path(prompt_path)
     try:
         return path.read_text(encoding="utf-8").strip()
     except FileNotFoundError:
         return fallback
-
-
-class LLMInvocationError(Exception):
-    """Raised when the LLM backend fails."""
 
 
 def generate_reply(
@@ -61,4 +56,4 @@ def generate_reply(
         response = _get_llm().invoke(messages, **kwargs)
         return response.content
     except Exception as exc:
-        raise LLMInvocationError("LLM invocation failed") from exc
+        raise LLMResponseError("LLM invocation failed") from exc

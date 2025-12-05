@@ -14,10 +14,7 @@ cd agent-service/
 uv sync
 ```
 
-Create a `.env` file:
-```
-OPENAI_API_KEY=your_api_key_here
-```
+Create a `.env` file: `OPENAI_API_KEY=your_api_key_here`.
 
 ## Run
 
@@ -66,6 +63,7 @@ http://localhost:8000/docs
 ```
 agent-service/
 ├── .env.example                    # Template for environment variables
+├── errors.py                       # Shared exception types
 ├── main.py                         # FastAPI entrypoint
 ├── llm.py                          # Shared LLM helper
 ├── agents/                         # Specific agent

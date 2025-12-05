@@ -3,7 +3,8 @@ import asyncio
 from fastapi import HTTPException, status
 from pydantic import ValidationError
 
-from llm import LLMInvocationError, generate_reply
+from errors import LLMResponseError
+from llm import generate_reply
 from agents.compliance.prompt_builder import COMPLIANCE_PROMPT
 from agents.compliance.features.ask_ai_question.schemas import (
     AskAiQuestionRequest,
@@ -33,7 +34,7 @@ def _handle_request(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
             req.question,
             response_format=ASK_AI_RESPONSE_FORMAT,
         )
-    except LLMInvocationError as exc:
+    except LLMResponseError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="LLM request failed.",
@@ -58,5 +59,4 @@ def _handle_request(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
 
 
 async def handle_ask_ai_question(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
-    """Async interface for the compliance Q&A handler."""
     return await asyncio.to_thread(_handle_request, req)

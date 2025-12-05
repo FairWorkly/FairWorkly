@@ -31,7 +31,7 @@ def test_request_rejects_invalid_audience() -> None:
         AskAiQuestionRequest(
             question_id="q-1",
             question="What are our overtime obligations?",
-            audience="supervisor",  # type: ignore[arg-type]
+            audience="supervisor",
         )
 
 
@@ -41,7 +41,7 @@ def test_response_rejects_invalid_risk_level() -> None:
             question_id="q-1",
             plain_explanation="Explanation",
             key_points=["Point"],
-            risk_level="blue",  # type: ignore[arg-type]
+            risk_level="blue",
             what_to_do_next=["Action"],
             legal_references=[_base_reference()],
             disclaimer="Disclaimer",
