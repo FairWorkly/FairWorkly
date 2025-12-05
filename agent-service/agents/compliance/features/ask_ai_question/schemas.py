@@ -3,13 +3,11 @@ from typing import List, Literal
 
 RiskLevel = Literal["green", "yellow", "red"]
 
-
 class ComplianceReference(BaseModel):
     source: Literal["NES", "Award", "FairWork", "Other"]
     title: str
     url: HttpUrl | None = None
     note: str | None = None
-
 
 class AskAiQuestionRequest(BaseModel):
     question_id: str
@@ -20,7 +18,6 @@ class AskAiQuestionRequest(BaseModel):
     audience: Literal["manager", "employee"] = "manager"
 
     precomputed_findings: dict | None = None
-
 
 class AskAiQuestionResponse(BaseModel):
     question_id: str
