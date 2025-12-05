@@ -4,22 +4,33 @@ from functools import lru_cache
 from pathlib import Path
 
 from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_openai import ChatOpenAI
+
 load_dotenv()
 
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import SystemMessage, HumanMessage
+logger = logging.getLogger(__name__)
 
-llm = ChatOpenAI(
-    model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-    temperature=float(os.getenv("MODEL_TEMPERATURE", "0")),
-)
+DEFAULT_MODEL = "gpt-4o-mini"
+DEFAULT_TEMPERATURE = 0.0
+
+
+@lru_cache(maxsize=1)
+def _get_llm() -> ChatOpenAI:
+    """Lazy-initialize the ChatOpenAI client (cached for reuse)."""
+    model = os.getenv("OPENAI_MODEL", DEFAULT_MODEL)
+    temperature = float(os.getenv("MODEL_TEMPERATURE", DEFAULT_TEMPERATURE))
+    return ChatOpenAI(model=model, temperature=temperature)
 
 
 @lru_cache(maxsize=None)
-def load_prompt(prompt_path: Path, fallback: str) -> str:
+def load_prompt(prompt_path: Path | str, fallback: str) -> str:
+    """Read a prompt file once and fall back to a default when missing."""
+    path = Path(prompt_path)
     try:
-        return Path(prompt_path).read_text().strip()
+        return path.read_text(encoding="utf-8").strip()
     except FileNotFoundError:
+        logger.warning("Prompt file %s not found; using fallback content", path)
         return fallback
 
 
@@ -27,26 +38,20 @@ class LLMInvocationError(Exception):
     """Raised when the LLM backend fails."""
 
 
-logger = logging.getLogger(__name__)
-
-
 def generate_reply(
     system_prompt: str,
     message: str,
-    response_schema: dict | None = None,
+    response_format: dict | None = None,
 ) -> str:
     messages = [
         SystemMessage(content=system_prompt),
         HumanMessage(content=message),
     ]
     kwargs = {}
-    if response_schema:
-        kwargs["response_format"] = {
-            "type": "json_schema",
-            "json_schema": response_schema,
-        }
+    if response_format:
+        kwargs["response_format"] = response_format
     try:
-        response = llm.invoke(messages, **kwargs)
+        response = _get_llm().invoke(messages, **kwargs)
         return response.content
     except Exception as exc:
         logger.exception("LLM invocation failed")

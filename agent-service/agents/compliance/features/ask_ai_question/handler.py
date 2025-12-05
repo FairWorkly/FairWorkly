@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 
 from fastapi import HTTPException, status
@@ -16,9 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 ASK_AI_RESPONSE_FORMAT = {
-    "name": "AskAiQuestionResponse",
-    "schema": AskAiQuestionResponse.model_json_schema(),
+    "type": "json_schema",
+    "json_schema": {
+        "name": "AskAiQuestionResponse",
+        "schema": AskAiQuestionResponse.model_json_schema(),
+    },
 }
+
 
 def _llm_snippet(text: str, limit: int = 400) -> str:
     text = text.strip()
@@ -32,7 +35,7 @@ def _handle_request(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
         reply = generate_reply(
             COMPLIANCE_PROMPT,
             req.question,
-            response_schema=ASK_AI_RESPONSE_FORMAT,
+            response_format=ASK_AI_RESPONSE_FORMAT,
         )
     except LLMInvocationError as exc:
         raise HTTPException(
@@ -46,23 +49,12 @@ def _handle_request(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
         )
 
     try:
-        payload = json.loads(reply)
-    except json.JSONDecodeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail={
-                "message": "LLM returned invalid JSON.",
-                "llm_output": _llm_snippet(reply),
-            },
-        ) from exc
-
-    try:
-        return AskAiQuestionResponse(**payload)
+        return AskAiQuestionResponse.model_validate_json(reply)
     except ValidationError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail={
-                "message": "LLM response did not match the expected schema.",
+                "message": "LLM returned invalid JSON or an unexpected schema.",
                 "errors": exc.errors(),
                 "llm_output": _llm_snippet(reply),
             },
