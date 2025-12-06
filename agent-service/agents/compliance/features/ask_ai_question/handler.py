@@ -1,35 +1,33 @@
-import json
+import asyncio
 
 from fastapi import HTTPException, status
 from pydantic import ValidationError
 
-from llm import LLMInvocationError, generate_reply
+from errors import LLMResponseError
+from llm import generate_reply
 from agents.compliance.prompt_builder import COMPLIANCE_PROMPT
 from agents.compliance.features.ask_ai_question.schemas import (
     AskAiQuestionRequest,
     AskAiQuestionResponse,
 )
 
-ASK_AI_RESPONSE_FORMAT = {
-    "name": "AskAiQuestionResponse",
-    "schema": AskAiQuestionResponse.model_json_schema(),
+RESP_FORMAT = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "AskAiQuestionResponse",
+        "schema": AskAiQuestionResponse.model_json_schema(),
+    },
 }
 
-def _llm_snippet(text: str, limit: int = 400) -> str:
-    text = text.strip()
-    if len(text) <= limit:
-        return text
-    return f"{text[:limit]}... (truncated)"
 
-
-def run(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
+def _handle_request(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
     try:
         reply = generate_reply(
             COMPLIANCE_PROMPT,
             req.question,
-            response_schema=ASK_AI_RESPONSE_FORMAT,
+            response_format=RESP_FORMAT,
         )
-    except LLMInvocationError as exc:
+    except LLMResponseError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="LLM request failed.",
@@ -41,24 +39,17 @@ def run(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
         )
 
     try:
-        payload = json.loads(reply)
-    except json.JSONDecodeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail={
-                "message": "LLM returned invalid JSON.",
-                "llm_output": _llm_snippet(reply),
-            },
-        ) from exc
-
-    try:
-        return AskAiQuestionResponse(**payload)
+        return AskAiQuestionResponse.model_validate_json(reply)
     except ValidationError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail={
-                "message": "LLM response did not match the expected schema.",
+                "message": "LLM returned invalid JSON or an unexpected schema.",
                 "errors": exc.errors(),
-                "llm_output": _llm_snippet(reply),
+                "llm_output": reply,
             },
         ) from exc
+
+
+async def handle_ask_ai_question(req: AskAiQuestionRequest) -> AskAiQuestionResponse:
+    return await asyncio.to_thread(_handle_request, req)
