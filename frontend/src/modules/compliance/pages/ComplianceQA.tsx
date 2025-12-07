@@ -32,7 +32,7 @@ export const ComplianceQA: React.FC = () => {
         This page will host the AI Q&A interface for compliance questions.
       </Typography>
       <TextField
-        id="filled-multiline-flexible-icon"
+        id="compliance-qa-textfield"
         placeholder="Ask anything"
         variant="standard"
         required
@@ -45,7 +45,12 @@ export const ComplianceQA: React.FC = () => {
         helperText={showQuestionError ? "Please enter a question to continue." : undefined}
         slotProps={{ htmlInput: { minLength: 1 } }}
       />
-      <Button onClick={handleAsk}>Ask</Button>
+      <Button
+        variant="contained"
+        onClick={handleAsk}
+      >
+        Ask
+      </Button>
     </Box>
   );
 };
