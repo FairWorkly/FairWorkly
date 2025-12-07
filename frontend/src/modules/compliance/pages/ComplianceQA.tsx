@@ -1,7 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Typography, TextField, Button } from "@mui/material";
 
 export const ComplianceQA: React.FC = () => {
+  const [question, setQuestion] = useState("");
+  const [showQuestionError, setShowQuestionError] = useState(false);
+
+  const handleAsk = () => {
+    if (!question.trim()) {
+      setShowQuestionError(true);
+      return;
+    }
+
+    setShowQuestionError(false);
+  };
+
+  const handleChangeQuestion = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    if (showQuestionError) {
+      setShowQuestionError(false);
+    }
+    setQuestion(event.target.value);
+  };
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
@@ -18,11 +39,13 @@ export const ComplianceQA: React.FC = () => {
         multiline
         fullWidth
         maxRows={8}
+        value={question}
+        onChange={handleChangeQuestion}
+        error={showQuestionError}
+        helperText={showQuestionError ? "Please enter a question to continue." : undefined}
         slotProps={{ htmlInput: { minLength: 1 } }}
-        error
-        helperText="Please check."
       />
-      <Button>Ask</Button>
+      <Button onClick={handleAsk}>Ask</Button>
     </Box>
   );
 };
