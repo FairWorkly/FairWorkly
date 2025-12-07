@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  IconButton,
-  InputAdornment,
-} from "@mui/material";
-import { Add } from "@mui/icons-material";
+import { Box, Typography, TextField, Button } from "@mui/material";
 
 export const ComplianceQA: React.FC = () => {
   return (
@@ -27,7 +18,7 @@ export const ComplianceQA: React.FC = () => {
         multiline
         fullWidth
         maxRows={8}
-        inputProps={{ minLength: 3 }}
+        slotProps={{ htmlInput: { minLength: 1 } }}
       />
       <Button>Ask</Button>
     </Box>
