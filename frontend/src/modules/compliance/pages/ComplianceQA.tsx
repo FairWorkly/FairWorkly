@@ -23,21 +23,11 @@ export const ComplianceQA: React.FC = () => {
         id="filled-multiline-flexible-icon"
         placeholder="Ask anything"
         variant="standard"
-        multiline
         required
+        multiline
         fullWidth
         maxRows={8}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <IconButton>
-                  <Add />
-                </IconButton>
-              </InputAdornment>
-            ),
-          },
-        }}
+        inputProps={{ minLength: 3 }}
       />
       <Button>Ask</Button>
     </Box>
