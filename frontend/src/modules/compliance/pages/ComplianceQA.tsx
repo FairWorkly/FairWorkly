@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Box, Typography, TextField, Button } from "@mui/material";
 
+const MIN_QUESTION_LENGTH = 3;
+
 export const ComplianceQA: React.FC = () => {
   const [question, setQuestion] = useState("");
   const [showQuestionError, setShowQuestionError] = useState(false);
 
   const handleAsk = () => {
-    if (!question.trim()) {
+    if (question.trim().length < MIN_QUESTION_LENGTH) {
       setShowQuestionError(true);
       return;
     }
@@ -16,10 +18,13 @@ export const ComplianceQA: React.FC = () => {
   const handleChangeQuestion = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    if (showQuestionError) {
+    const nextValue = event.target.value;
+    const isValid = nextValue.trim().length >= MIN_QUESTION_LENGTH;
+
+    if (showQuestionError && isValid) {
       setShowQuestionError(false);
     }
-    setQuestion(event.target.value);
+    setQuestion(nextValue);
   };
 
   return (
@@ -41,10 +46,18 @@ export const ComplianceQA: React.FC = () => {
         value={question}
         onChange={handleChangeQuestion}
         error={showQuestionError}
-        helperText={showQuestionError ? "Please enter a question to continue." : undefined}
-        slotProps={{ htmlInput: { minLength: 1 } }}
+        helperText={
+          showQuestionError
+            ? `Please enter at least ${MIN_QUESTION_LENGTH} characters to continue.`
+            : undefined
+        }
+        slotProps={{ htmlInput: { minLength: MIN_QUESTION_LENGTH } }}
       />
-      <Button variant="contained" onClick={handleAsk} disabled={!question.trim()}>
+      <Button
+        variant="contained"
+        onClick={handleAsk}
+        disabled={question.trim().length < MIN_QUESTION_LENGTH}
+      >
         Ask
       </Button>
     </Box>
