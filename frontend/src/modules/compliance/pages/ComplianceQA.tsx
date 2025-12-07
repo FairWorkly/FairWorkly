@@ -10,7 +10,6 @@ export const ComplianceQA: React.FC = () => {
       setShowQuestionError(true);
       return;
     }
-
     setShowQuestionError(false);
   };
 
@@ -45,10 +44,7 @@ export const ComplianceQA: React.FC = () => {
         helperText={showQuestionError ? "Please enter a question to continue." : undefined}
         slotProps={{ htmlInput: { minLength: 1 } }}
       />
-      <Button
-        variant="contained"
-        onClick={handleAsk}
-      >
+      <Button variant="contained" onClick={handleAsk} disabled={!question.trim()}>
         Ask
       </Button>
     </Box>
