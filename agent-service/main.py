@@ -16,7 +16,6 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """Simple health check endpoint."""
     return {"status": "ok"}
 
 app.include_router(compliance_router)
