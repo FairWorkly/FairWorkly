@@ -19,6 +19,8 @@ export const ComplianceQA: React.FC = () => {
         fullWidth
         maxRows={8}
         slotProps={{ htmlInput: { minLength: 1 } }}
+        error
+        helperText="Please check."
       />
       <Button>Ask</Button>
     </Box>
