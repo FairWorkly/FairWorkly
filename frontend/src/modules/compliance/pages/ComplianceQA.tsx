@@ -1,18 +1,23 @@
 import React, { useState } from "react";
 import { Box, Typography, TextField, Button } from "@mui/material";
+import type { ComplianceQAFormValues } from "../types/compliance.types";
 
 const MIN_QUESTION_LENGTH = 3;
+
 
 export const ComplianceQA: React.FC = () => {
   const [question, setQuestion] = useState("");
   const [showQuestionError, setShowQuestionError] = useState(false);
 
   const handleAsk = () => {
-    if (question.trim().length < MIN_QUESTION_LENGTH) {
+    const trimmedQuestion = question.trim();
+    if (trimmedQuestion.length < MIN_QUESTION_LENGTH) {
       setShowQuestionError(true);
       return;
     }
+
     setShowQuestionError(false);
+    handleSubmit({ question: trimmedQuestion });
   };
 
   const handleChangeQuestion = (
@@ -25,6 +30,11 @@ export const ComplianceQA: React.FC = () => {
       setShowQuestionError(false);
     }
     setQuestion(nextValue);
+  };
+
+  const handleSubmit = (values: ComplianceQAFormValues) => {
+    // please modify this once you know what to do
+    console.log("Compliance QA submission", values);
   };
 
   return (
