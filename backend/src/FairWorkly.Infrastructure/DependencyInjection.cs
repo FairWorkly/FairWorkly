@@ -2,6 +2,7 @@ using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Infrastructure.AI.Mocks;
 using FairWorkly.Infrastructure.AI.PythonServices;
+using FairWorkly.Infrastructure.Identity;
 using FairWorkly.Infrastructure.Persistence;
 using FairWorkly.Infrastructure.Persistence.Repositories.Auth;
 using FairWorkly.Infrastructure.Services;
@@ -36,6 +37,10 @@ public static class DependencyInjection
         services.AddDbContext<FairWorklyDbContext>(options =>
             options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention()
         );
+
+        // Register Auth Services
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<ITokenService, TokenService>();
 
         // Register Repositories
         services.AddScoped<IUserRepository, UserRepository>();
