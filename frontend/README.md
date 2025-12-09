@@ -27,8 +27,23 @@ Node 18+ is recommended. Dependencies are local (no global installs required).
 - `src/services/` — API client modules; align with backend/OpenAPI once available.
 - `src/store/` — Redux Toolkit slices/store setup (empty scaffold).
 - `src/constants/`, `src/types/`, `src/utils/` — shared definitions and helpers.
+- `src/modules/` — feature modules (e.g., `compliance`); prefer colocated constants/types/hooks/ui inside each module.
 - `public/` — static assets copied verbatim to the build.
 - `dist/` — production output after `npm run build` (checked in for reference; regenerate before release).
+
+## Compliance module specifics (`src/modules/compliance`)
+
+- **pages/**: Screen-level components. Own data-fetching hooks and form controllers. Pass state/handlers down via props or context; avoid duplicating form instances in children.
+- **hooks/**: Reusable logic (e.g., `useComplianceQAForm`). Hooks return controllers/handlers; keep them UI-agnostic.
+- **features/**: Presentational building blocks composed inside pages. They should accept the needed slice of state/handlers via props; do not call form hooks directly.
+- **ui/**: Display-only pieces (titles, descriptions) with no business logic.
+- **constants/types/**: Centralize option lists (award/audience), strings, and shared types. Keep option shapes typed (`as const`) to avoid drift.
+
+Guidance:
+
+- Use a single `useComplianceQAForm` instance per page and thread it through features via props.
+- Collapse ultra-thin features back into the page if they aren’t reused to reduce indirection.
+- Keep files <1000 lines, avoid `any`, and stick to interfaces for shapes.
 
 ## Styling and UI
 

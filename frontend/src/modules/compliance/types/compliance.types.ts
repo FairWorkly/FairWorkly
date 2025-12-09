@@ -7,3 +7,8 @@ export interface ComplianceQAFormValues {
   awardCode?: AwardCode;
   audience: AudienceOption;
 }
+
+export type ComplianceQAFieldProps = {
+  question: string;
+  showQuestionError: boolean;
+};
