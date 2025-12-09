@@ -28,13 +28,18 @@ namespace FairWorkly.API
             builder.Services.AddProblemDetails();
 
             // Add CORS
+            var frontendUrl = "http://localhost:5173";
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(
-                    "AllowAll",
+                    "AllowFrontend",
                     policy =>
                     {
-                        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                        policy
+                            .WithOrigins(frontendUrl)
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials();
                     }
                 );
             });
@@ -83,7 +88,7 @@ namespace FairWorkly.API
                 await DbSeeder.SeedAsync(app);
             }
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }
