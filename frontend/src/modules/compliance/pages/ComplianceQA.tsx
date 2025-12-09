@@ -7,7 +7,7 @@ import {
 } from "../features";
 import { useComplianceQAForm } from "../hooks";
 import { ComplianceQADescription, ComplianceQATitle } from "../ui";
-import { Box, FormControl } from "@mui/material";
+import { Box, FormControl, Stack } from "@mui/material";
 
 export const ComplianceQA: React.FC = () => {
   const {
@@ -22,30 +22,34 @@ export const ComplianceQA: React.FC = () => {
   } = useComplianceQAForm();
 
   return (
-    <Box>
-      <ComplianceQATitle />
-      <ComplianceQADescription />
-      <FormControl>
-        <ComplianceQATextField
-          question={question}
-          showQuestionError={showQuestionError}
-          handleChangeQuestion={handleChangeQuestion}
-        />
-        <FormControl>
-          <ComplianceAwardOption
-            awardCode={awardCode}
-            handleAwardCode={handleAwardCode}
+    <Box maxWidth={720} width="100%">
+      <Stack spacing={3}>
+        <ComplianceQATitle />
+        <ComplianceQADescription />
+        <Stack spacing={2}>
+          <ComplianceQATextField
+            question={question}
+            showQuestionError={showQuestionError}
+            handleChangeQuestion={handleChangeQuestion}
           />
-          <ComplianceAudienceGroup
-            audience={audience}
-            handleAudienceOption={handleAudienceOption}
+          <Stack spacing={1.5}>
+            <FormControl fullWidth>
+              <ComplianceAwardOption
+                awardCode={awardCode}
+                handleAwardCode={handleAwardCode}
+              />
+            </FormControl>
+            <ComplianceAudienceGroup
+              audience={audience}
+              handleAudienceOption={handleAudienceOption}
+            />
+          </Stack>
+          <ComplianceSubmissionButton
+            question={question}
+            handleAsk={handleAsk}
           />
-        </FormControl>
-        <ComplianceSubmissionButton
-          question={question}
-          handleAsk={handleAsk}
-        />
-      </FormControl>
+        </Stack>
+      </Stack>
     </Box>
   );
 };

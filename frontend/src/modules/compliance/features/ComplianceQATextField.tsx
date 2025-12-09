@@ -18,6 +18,7 @@ const ComplianceQATextField = ({
       placeholder="Ask anything"
       variant="standard"
       required
+      fullWidth
       multiline
       maxRows={8}
       value={question}
