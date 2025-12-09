@@ -90,3 +90,5 @@ export const useComplianceQAForm = (params?: UseComplianceQAFormParams) => {
     handleAudienceOption,
   };
 };
+
+export type ComplianceQAFormController = ReturnType<typeof useComplianceQAForm>;

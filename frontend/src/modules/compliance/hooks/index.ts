@@ -1,2 +1,2 @@
-export { useComplianceQAForm } from "./useComplianceQAForm";
+export { useComplianceQAForm, type ComplianceQAFormController } from "./useComplianceQAForm";
 export { useComplianceQuestion } from "./useComplianceQuestion";

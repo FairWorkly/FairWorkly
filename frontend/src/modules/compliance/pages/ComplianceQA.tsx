@@ -2,31 +2,50 @@ import React from "react";
 import {
   ComplianceQATextField,
   ComplianceAwardOption,
-  ComplilanceSubmitionButton,
-  CompliabceAudienceGroup,
+  ComplianceSubmissionButton,
+  ComplianceAudienceGroup,
 } from "../features";
-import {
-  ComplianceQADescription,
-  ComplianceQATitle
-} from "../ui";
-import {
-  Box,
-  FormControl,
-} from "@mui/material";
+import { useComplianceQAForm } from "../hooks";
+import { ComplianceQADescription, ComplianceQATitle } from "../ui";
+import { Box, FormControl } from "@mui/material";
 
 export const ComplianceQA: React.FC = () => {
+  const {
+    question,
+    showQuestionError,
+    awardCode,
+    audience,
+    handleAsk,
+    handleChangeQuestion,
+    handleAwardCode,
+    handleAudienceOption,
+  } = useComplianceQAForm();
+
   return (
     <Box>
       <ComplianceQATitle />
       <ComplianceQADescription />
       <FormControl>
-        <ComplianceQATextField />
+        <ComplianceQATextField
+          question={question}
+          showQuestionError={showQuestionError}
+          handleChangeQuestion={handleChangeQuestion}
+        />
         <FormControl>
-          <ComplianceAwardOption />
-          <CompliabceAudienceGroup />
+          <ComplianceAwardOption
+            awardCode={awardCode}
+            handleAwardCode={handleAwardCode}
+          />
+          <ComplianceAudienceGroup
+            audience={audience}
+            handleAudienceOption={handleAudienceOption}
+          />
         </FormControl>
-        <ComplilanceSubmitionButton />
+        <ComplianceSubmissionButton
+          question={question}
+          handleAsk={handleAsk}
+        />
       </FormControl>
-    </Box >
+    </Box>
   );
 };
