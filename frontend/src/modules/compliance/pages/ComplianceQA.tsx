@@ -15,12 +15,10 @@ import {
   type SelectChangeEvent,
 } from "@mui/material";
 
-type AwardCode = keyof typeof Constants.AWARD_OPTIONS;
-
 export const ComplianceQA: React.FC = () => {
   const [question, setQuestion] = useState<string>("");
   const [showQuestionError, setShowQuestionError] = useState<boolean>(false);
-  const [awardCode, setAwardCode] = useState<AwardCode>("");
+  const [awardCode, setAwardCode] = useState<Types.AwardCode>("");
   const [audience, setAudience] = useState<Types.AudienceOption>(
     Constants.AUDIENCE_OPTIONS[0],
   );
@@ -59,7 +57,7 @@ export const ComplianceQA: React.FC = () => {
   };
 
   const handleAwardCode = (event: SelectChangeEvent) => {
-    setAwardCode(event.target.value as AwardCode);
+    setAwardCode(event.target.value as Types.AwardCode);
   };
 
   const handleAudienceOption = (

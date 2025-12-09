@@ -1,5 +1,7 @@
-export type AudienceOption = "manager" | "employee";
+import * as Constants from "../constants/ComplianceConstants";
 
+export type AudienceOption = "manager" | "employee";
+export type AwardCode = keyof typeof Constants.AWARD_OPTIONS;
 export interface ComplianceQAFormValues {
   question: string;
   awardCode?: string;
