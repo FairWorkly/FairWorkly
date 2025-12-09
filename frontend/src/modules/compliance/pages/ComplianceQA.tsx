@@ -56,7 +56,7 @@ export const ComplianceQA: React.FC = () => {
     }
   };
 
-  const handleSubmit = (values: Types.ComplianceQAFormValues) => {
+  const handleSubmit = (values: Types.ComplianceQAFormSumitionValues) => {
     // please modify this once you know what to do
     console.log("Compliance QA submission", values);
   };

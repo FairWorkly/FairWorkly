@@ -1,3 +1,5 @@
-export interface ComplianceQAFormValues {
+export interface ComplianceQAFormSumitionValues {
     question: string;
+    awardCode: string;
+    audience: string;
 }
