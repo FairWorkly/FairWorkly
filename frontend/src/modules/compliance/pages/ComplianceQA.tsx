@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import * as Constants from "./ComplianceConstants.tsx";
+import * as Constants from "../constants/ComplianceConstants.ts";
 import * as Types from "../types/compliance.types.ts";
 import {
   Button,
@@ -15,7 +15,7 @@ import {
 export const ComplianceQA: React.FC = () => {
   const [question, setQuestion] = useState("");
   const [showQuestionError, setShowQuestionError] = useState(false);
-  const [awardCode, setAwardcode] = useState("");
+  const [awardCode, setAwardcode] = useState(Constants.AWARD_OPTIONS[0]);
 
   const handleAsk = () => {
     const trimmedQuestion = question.trim();
