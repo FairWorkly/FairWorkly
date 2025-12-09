@@ -1,17 +1,25 @@
 import React, { useState } from "react";
-import { Box, Typography, TextField, Button } from "@mui/material";
-import type { ComplianceQAFormValues } from "../types/compliance.types";
-
-const MIN_QUESTION_LENGTH = 3;
-
+import * as Constants from "./ComplianceConstants.tsx";
+import * as Types from "../types/compliance.types.ts";
+import {
+  Button,
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+  TextField,
+} from "@mui/material";
 
 export const ComplianceQA: React.FC = () => {
   const [question, setQuestion] = useState("");
   const [showQuestionError, setShowQuestionError] = useState(false);
+  const [awardCode, setAwardcode] = useState("");
 
   const handleAsk = () => {
     const trimmedQuestion = question.trim();
-    if (trimmedQuestion.length < MIN_QUESTION_LENGTH) {
+    if (trimmedQuestion.length < Constants.MIN_QUESTION_LENGTH) {
       setShowQuestionError(true);
       return;
     }
@@ -24,7 +32,7 @@ export const ComplianceQA: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const nextValue = event.target.value;
-    const isValid = nextValue.trim().length >= MIN_QUESTION_LENGTH;
+    const isValid = nextValue.trim().length >= Constants.MIN_QUESTION_LENGTH;
 
     if (showQuestionError && isValid) {
       setShowQuestionError(false);
@@ -32,18 +40,22 @@ export const ComplianceQA: React.FC = () => {
     setQuestion(nextValue);
   };
 
-  const handleSubmit = (values: ComplianceQAFormValues) => {
+  const handleAwardCode = (event: Types.SelectChangeEvent) => {
+    setAwardcode(event.target.value as string);
+  }
+
+  const handleSubmit = (values: Types.ComplianceQAFormValues) => {
     // please modify this once you know what to do
     console.log("Compliance QA submission", values);
   };
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Compliance Q&A (AI Copilot)
-      </Typography>
+      <Typography variant="h4" gutterBottom >
+        {Constants.COMPLIANCE_QA_PAGE_TITLE}
+      </Typography >
       <Typography variant="body1">
-        This page will host the AI Q&A interface for compliance questions.
+        {Constants.COMPLIANCE_QA_PAGE_DESCRIPTION}
       </Typography>
       <TextField
         id="compliance-qa-textfield"
@@ -58,18 +70,33 @@ export const ComplianceQA: React.FC = () => {
         error={showQuestionError}
         helperText={
           showQuestionError
-            ? `Please enter at least ${MIN_QUESTION_LENGTH} characters to continue.`
+            ? `Please enter at least ${Constants.MIN_QUESTION_LENGTH} characters to continue.`
             : undefined
         }
-        slotProps={{ htmlInput: { minLength: MIN_QUESTION_LENGTH } }}
+        slotProps={{ htmlInput: { minLength: Constants.MIN_QUESTION_LENGTH } }}
       />
+
+      <FormControl fullWidth>
+        <InputLabel id="compliance-qa-award-select-label">Award</InputLabel>
+        <Select
+          labelId="compliance-qa-award-select-label"
+          id="demo-simple-select"
+          value={awardCode}
+          onChange={handleAwardCode}
+        >
+          {Constants.AWARD_OPTIONS.map((awardCode) => (
+            <MenuItem key={awardCode} value={awardCode}>{awardCode}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
       <Button
         variant="contained"
         onClick={handleAsk}
-        disabled={question.trim().length < MIN_QUESTION_LENGTH}
+        disabled={question.trim().length < Constants.MIN_QUESTION_LENGTH}
       >
         Ask
       </Button>
-    </Box>
+    </Box >
   );
 };
