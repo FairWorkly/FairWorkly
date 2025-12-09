@@ -15,10 +15,10 @@ import {
 } from "@mui/material";
 
 export const ComplianceQA: React.FC = () => {
-  const [question, setQuestion] = useState("");
-  const [showQuestionError, setShowQuestionError] = useState(false);
-  const [awardCode, setAwardcode] = useState(Constants.AWARD_OPTIONS[0]);
-  const [audience, setAudience] = useState(Constants.AUDIENCE_OPTIONS[0]);
+  const [question, setQuestion] = useState<string>("");
+  const [showQuestionError, setShowQuestionError] = useState<boolean>(false);
+  const [awardCode, setAwardcode] = useState<string>(Constants.AWARD_OPTIONS[0]);
+  const [audience, setAudience] = useState<string>(Constants.AUDIENCE_OPTIONS[0]);
 
   const handleAsk = () => {
     const trimmedQuestion = question.trim();
@@ -44,11 +44,11 @@ export const ComplianceQA: React.FC = () => {
   };
 
   const handleAwardCode = (event: Types.SelectChangeEvent) => {
-    setAwardcode(event.target.value as undefined);
+    setAwardcode(event.target.value as string);
   }
 
-  const handleAudienceOption = (event: React.MouseEvent<HTMLElement>,) => {
-    setAudience(event.target.value as undefined);
+  const handleAudienceOption = (event: React.MouseEvent<HTMLElement>) => {
+    setAudience(event.target.value as string);
   }
 
   const handleSubmit = (values: Types.ComplianceQAFormValues) => {
