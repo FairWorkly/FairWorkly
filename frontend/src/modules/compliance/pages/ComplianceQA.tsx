@@ -5,19 +5,19 @@ import {
   Button,
   Box,
   FormControl,
-  InputLabel,
   MenuItem,
   Select,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
   TextField,
+  type SelectChangeEvent,
 } from "@mui/material";
 
 export const ComplianceQA: React.FC = () => {
   const [question, setQuestion] = useState<string>("");
   const [showQuestionError, setShowQuestionError] = useState<boolean>(false);
-  const [awardCode, setAwardcode] = useState<string>(Constants.AWARD_OPTIONS[0]);
+  const [awardCode, setAwardCode] = useState<string>(Constants.AWARD_OPTIONS[0]);
   const [audience, setAudience] = useState<string>(Constants.AUDIENCE_OPTIONS[0]);
 
   const handleAsk = () => {
@@ -43,13 +43,18 @@ export const ComplianceQA: React.FC = () => {
     setQuestion(nextValue);
   };
 
-  const handleAwardCode = (event: Types.SelectChangeEvent) => {
-    setAwardcode(event.target.value as string);
-  }
+  const handleAwardCode = (event: SelectChangeEvent) => {
+    setAwardCode(event.target.value as string);
+  };
 
-  const handleAudienceOption = (event: React.MouseEvent<HTMLElement>) => {
-    setAudience(event.target.value as string);
-  }
+  const handleAudienceOption = (
+    _event: React.MouseEvent<HTMLElement>,
+    nextAudience: string | null,
+  ) => {
+    if (nextAudience !== null) {
+      setAudience(nextAudience);
+    }
+  };
 
   const handleSubmit = (values: Types.ComplianceQAFormValues) => {
     // please modify this once you know what to do
@@ -64,35 +69,35 @@ export const ComplianceQA: React.FC = () => {
       <Typography variant="body1">
         {Constants.QA_PAGE_DESCRIPTION}
       </Typography>
-      <TextField
-        id="compliance-qa-textfield"
-        placeholder="Ask anything"
-        variant="standard"
-        required
-        multiline
-        fullWidth
-        maxRows={8}
-        value={question}
-        onChange={handleChangeQuestion}
-        error={showQuestionError}
-        helperText={
-          showQuestionError
-            ? `Please enter at least ${Constants.MIN_QUESTION_LENGTH} characters to continue.`
-            : undefined
-        }
-        slotProps={{ htmlInput: { minLength: Constants.MIN_QUESTION_LENGTH } }}
-      />
+      <FormControl>
+        <TextField
+          id="compliance-qa-textfield"
+          placeholder="Ask anything"
+          variant="standard"
+          required
+          multiline
+          maxRows={8}
+          value={question}
+          onChange={handleChangeQuestion}
+          error={showQuestionError}
+          helperText={
+            showQuestionError
+              ? `Please enter at least ${Constants.MIN_QUESTION_LENGTH} characters to continue.`
+              : undefined
+          }
+          slotProps={{ htmlInput: { minLength: Constants.MIN_QUESTION_LENGTH } }}
+        />
 
-      <FormControl fullWidth>
-        <InputLabel id="compliance-qa-award-select-label">Award</InputLabel>
         <Select
           labelId="compliance-qa-award-select-label"
           id="demo-simple-select"
           value={awardCode}
           onChange={handleAwardCode}
         >
-          {Constants.AWARD_OPTIONS.map((awardCode) => (
-            <MenuItem key={awardCode} value={awardCode}>{awardCode}</MenuItem>
+          {Constants.AWARD_OPTIONS.map((award) => (
+            <MenuItem key={award} value={award}>
+              {award}
+            </MenuItem>
           ))}
         </Select>
         <ToggleButtonGroup
@@ -102,19 +107,21 @@ export const ComplianceQA: React.FC = () => {
           onChange={handleAudienceOption}
           aria-label="Platform"
         >
-          <ToggleButton value="web">Web</ToggleButton>
-          <ToggleButton value="android">Android</ToggleButton>
-          <ToggleButton value="ios">iOS</ToggleButton>
+          {Constants.AUDIENCE_OPTIONS.map((option) => (
+            <ToggleButton key={option} value={option}>
+              {option}
+            </ToggleButton>
+          ))}
         </ToggleButtonGroup>
-      </FormControl>
 
-      <Button
-        variant="contained"
-        onClick={handleAsk}
-        disabled={question.trim().length < Constants.MIN_QUESTION_LENGTH}
-      >
-        Ask
-      </Button>
+        <Button
+          variant="contained"
+          onClick={handleAsk}
+          disabled={question.trim().length < Constants.MIN_QUESTION_LENGTH}
+        >
+          Ask
+        </Button>
+      </FormControl>
     </Box >
   );
 };
