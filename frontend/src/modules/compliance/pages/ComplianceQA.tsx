@@ -21,8 +21,10 @@ export const ComplianceQA: React.FC = () => {
       <ComplianceQADescription />
       <FormControl>
         <ComplianceQATextField />
-        <ComplianceAwardOption />
-        <CompliabceAudienceGroup />
+        <FormControl>
+          <ComplianceAwardOption />
+          <CompliabceAudienceGroup />
+        </FormControl>
         <ComplilanceSubmitionButton />
       </FormControl>
     </Box >
