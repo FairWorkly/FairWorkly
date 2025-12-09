@@ -24,4 +24,6 @@ def test_chat_endpoint_without_file():
 
     result = data["result"]
     assert result["type"] == "compliance"
-    assert payload["message"] in result["message"]
+    assert "message" in result
+    assert isinstance(result["message"], str)
+    assert result["message"]

@@ -23,6 +23,8 @@ cp .env.example .env
 # edit .env so OPENAI_API_KEY has a real value
 ```
 
+Configuration such as LLM mode, FAISS paths, and prompt defaults lives in `config.yaml`. Adjust the YAML (e.g., `model_params.deployment_mode_llm`) to switch between OpenAI, HuggingFace, or local models.
+
 ## Run
 
 Start the FastAPI server with Uvicorn via Poetry:
@@ -34,8 +36,6 @@ poetry run uvicorn master_agent.main:app --reload --port 8000
 The root route (`/`) redirects to Swagger, so opening `http://localhost:8000/` immediately shows the API docs.
 
 ## Run Tests
-
-No automated tests ship yet. If you add any under `tests/`, run them with:
 
 ```bash
 poetry run pytest
@@ -63,20 +63,21 @@ http://localhost:8000/docs
 ```
 agent-service/
 ├── .env.example                # Template for API keys
-├── pyproject.toml              # Poetry configuration
-├── master_agent/               # FastAPI entry point + shared registry
-│   ├── main.py                 # Uvicorn target (master_agent.main:app)
-│   ├── intent_router.py        # Naive router to choose feature
-│   ├── feature_registry.py     # Registers and resolves features
-│   └── demo_feature.py         # Sample feature implementations
+├── config.yaml                 # Central config (LLM modes, FAISS paths, prompts)
+├── master_agent/
+│   ├── main.py                 # FastAPI entry point
+│   ├── intent_router.py
+│   ├── feature_registry.py
+│   └── config.py               # Helper to load config.yaml
 ├── agents/
-│   ├── compliance/             # Compliance feature slice
-│   │   └── compliance_feature.py
-│   └── shared/                 # Utilities shared across features
-│       ├── file_handler.py     # File parsing scaffolding
-│       ├── prompt_builder_base.py
-│       ├── rag_retriever.py    # Future RAG integration hooks
-│       └── llm/                # Provider abstractions (Azure/OpenAI stubs)
+│   ├── compliance/compliance_feature.py
+│   └── shared/
+│       ├── file_handler.py
+│       ├── rag_retriever.py
+│       └── llm/
+│           ├── factory.py
+│           └── langchain_provider.py
+├── tests/test_master_agent.py
 └── README.md
 ```
 
