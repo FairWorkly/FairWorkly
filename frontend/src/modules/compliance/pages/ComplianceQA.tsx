@@ -15,10 +15,12 @@ import {
   type SelectChangeEvent,
 } from "@mui/material";
 
+type AwardCode = keyof typeof Constants.AWARD_OPTIONS;
+
 export const ComplianceQA: React.FC = () => {
   const [question, setQuestion] = useState<string>("");
   const [showQuestionError, setShowQuestionError] = useState<boolean>(false);
-  const [awardCode, setAwardCode] = useState<string>(Constants.AWARD_OPTIONS[""]);
+  const [awardCode, setAwardCode] = useState<AwardCode>("");
   const [audience, setAudience] = useState<Types.AudienceOption>(
     Constants.AUDIENCE_OPTIONS[0],
   );
@@ -57,7 +59,7 @@ export const ComplianceQA: React.FC = () => {
   };
 
   const handleAwardCode = (event: SelectChangeEvent) => {
-    setAwardCode(event.target.value as string);
+    setAwardCode(event.target.value as AwardCode);
   };
 
   const handleAudienceOption = (
@@ -110,9 +112,9 @@ export const ComplianceQA: React.FC = () => {
             onChange={handleAwardCode}
             label="Award"
           >
-            {Constants.AWARD_OPTIONS.map((award) => (
-              <MenuItem key={award} value={award}>
-                {award}
+            {Object.entries(Constants.AWARD_OPTIONS).map(([code, label]) => (
+              <MenuItem key={code} value={code}>
+                {label}
               </MenuItem>
             ))}
           </Select>
