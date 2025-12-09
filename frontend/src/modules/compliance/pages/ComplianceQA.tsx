@@ -5,6 +5,7 @@ import {
   Button,
   Box,
   FormControl,
+  InputLabel,
   MenuItem,
   Select,
   ToggleButton,
@@ -17,8 +18,10 @@ import {
 export const ComplianceQA: React.FC = () => {
   const [question, setQuestion] = useState<string>("");
   const [showQuestionError, setShowQuestionError] = useState<boolean>(false);
-  const [awardCode, setAwardCode] = useState<string>(Constants.AWARD_OPTIONS[0]);
-  const [audience, setAudience] = useState<string>(Constants.AUDIENCE_OPTIONS[0]);
+  const [awardCode, setAwardCode] = useState<string>(Constants.AWARD_OPTIONS[""]);
+  const [audience, setAudience] = useState<Types.AudienceOption>(
+    Constants.AUDIENCE_OPTIONS[0],
+  );
 
   const handleAsk = () => {
     const trimmedQuestion = question.trim();
@@ -28,7 +31,17 @@ export const ComplianceQA: React.FC = () => {
     }
 
     setShowQuestionError(false);
-    handleSubmit({ question: trimmedQuestion });
+
+    const submission: Types.ComplianceQAFormValues = {
+      question: trimmedQuestion,
+      audience,
+    };
+
+    if (awardCode) {
+      submission.awardCode = awardCode;
+    }
+
+    handleSubmit(submission);
   };
 
   const handleChangeQuestion = (
@@ -49,14 +62,14 @@ export const ComplianceQA: React.FC = () => {
 
   const handleAudienceOption = (
     _event: React.MouseEvent<HTMLElement>,
-    nextAudience: string | null,
+    nextAudience: Types.AudienceOption | null,
   ) => {
     if (nextAudience !== null) {
       setAudience(nextAudience);
     }
   };
 
-  const handleSubmit = (values: Types.ComplianceQAFormSumitionValues) => {
+  const handleSubmit = (values: Types.ComplianceQAFormValues) => {
     // please modify this once you know what to do
     console.log("Compliance QA submission", values);
   };
@@ -88,18 +101,22 @@ export const ComplianceQA: React.FC = () => {
           slotProps={{ htmlInput: { minLength: Constants.MIN_QUESTION_LENGTH } }}
         />
 
-        <Select
-          labelId="compliance-qa-award-select-label"
-          id="demo-simple-select"
-          value={awardCode}
-          onChange={handleAwardCode}
-        >
-          {Constants.AWARD_OPTIONS.map((award) => (
-            <MenuItem key={award} value={award}>
-              {award}
-            </MenuItem>
-          ))}
-        </Select>
+        <FormControl>
+          <InputLabel id="compliance-qa-award-select-label">Award</InputLabel>
+          <Select
+            labelId="compliance-qa-award-select-label"
+            id="compliance-qa-award-select"
+            value={awardCode}
+            onChange={handleAwardCode}
+            label="Award"
+          >
+            {Constants.AWARD_OPTIONS.map((award) => (
+              <MenuItem key={award} value={award}>
+                {award}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <ToggleButtonGroup
           color="primary"
           value={audience}
