@@ -41,7 +41,7 @@ export const ComplianceQA: React.FC = () => {
   };
 
   const handleAwardCode = (event: Types.SelectChangeEvent) => {
-    setAwardcode(event.target.value as string);
+    setAwardcode(event.target.value);
   }
 
   const handleSubmit = (values: Types.ComplianceQAFormValues) => {
@@ -52,10 +52,10 @@ export const ComplianceQA: React.FC = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom >
-        {Constants.COMPLIANCE_QA_PAGE_TITLE}
+        {Constants.QA_PAGE_TITLE}
       </Typography >
       <Typography variant="body1">
-        {Constants.COMPLIANCE_QA_PAGE_DESCRIPTION}
+        {Constants.QA_PAGE_DESCRIPTION}
       </Typography>
       <TextField
         id="compliance-qa-textfield"
