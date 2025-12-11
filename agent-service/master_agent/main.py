@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Form, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from fastapi.responses import RedirectResponse
+from typing import Optional, Union
 from .intent_router import IntentRouter
 from .feature_registry import FeatureRegistry
 
@@ -32,21 +33,19 @@ registry.register("payroll_verify", DemoPayrollFeature())
 
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def root():
-    return {
-        "message": "Master Agent is running",
-        "version": "1.0.0",
-        "registered_features": registry.list_features()
-        }
+    # Redirect root requests straight to Swagger UI for convenience
+    return RedirectResponse(url="/docs")
 
 @app.post("/api/agent/chat")
 async def chat(
     message: str = Form(...),
-    file: Optional[UploadFile] = File(None)
+    file: Union[UploadFile, str, None] = File(None)
 ):
     # Step 1: use route to determine feature
-    file_name = file.filename if file else None
+    upload = file if isinstance(file, UploadFile) else None
+    file_name = upload.filename if upload else None
     feature_type = router.route(message, file_name)
 
     # Step 2: get feature
@@ -56,7 +55,7 @@ async def chat(
     result = await feature.process({
         'message': message,
         'file_name': file_name,
-        'file': file # Also pass the file object
+        'file': upload  # Also pass the file object if provided
     })
     
     return {
