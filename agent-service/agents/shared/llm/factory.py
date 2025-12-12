@@ -1,17 +1,11 @@
-"""
-LLM Provider Factory
-
-TODO: Create the right LLM provider based on config.
-
-This decides whether to use Claude or Azure OpenAI.
-Reads from environment variables.
-"""
+"""LLM Provider factory that reads defaults from config/environment."""
 
 import os
-from typing import Optional
+from typing import Optional, List, Dict, Any
+
+from master_agent.config import load_config
 from .provider_base import LLMProviderBase
-from .anthropic_provider import AnthropicProvider
-from .azure_openai_provider import AzureOpenAIProvider
+from .langchain_provider import LangChainOpenAIProvider
 
 
 class LLMProviderFactory:
@@ -23,47 +17,20 @@ class LLMProviderFactory:
     def create(provider_type: Optional[str] = None) -> LLMProviderBase:
         """
         Create LLM provider based on config
-        
-        Args:
-            provider_type: "anthropic" or "azure_openai"
-                          If None, reads from LLM_PROVIDER env var
-        
-        Returns:
-            The appropriate provider instance
-        
-        Example:
-            # In .env file:
-            # LLM_PROVIDER=anthropic
-            
-            provider = LLMProviderFactory.create()
-            response = await provider.generate([...])
         """
-        # Get provider type from env if not specified
-        provider_type = provider_type or os.getenv("LLM_PROVIDER", "anthropic")
+        config = load_config()
+        default_provider = config.get("model_params", {}).get("deployment_mode_llm", "openai")
+        provider_type = provider_type or os.getenv("LLM_PROVIDER", default_provider)
         
-        if provider_type == "anthropic":
-            # TODO: Get model from env
-            model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5")
-            return AnthropicProvider(model=model)
+        if provider_type == "openai":
+            model = os.getenv("OPENAI_MODEL")
+            return LangChainOpenAIProvider(model=model)
         
-        elif provider_type == "azure_openai":
-            # TODO: Get deployment name from env
-            deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME", "gpt-4")
-            return AzureOpenAIProvider(deployment_name=deployment)
-        
-        else:
-            raise ValueError(f"Unknown provider type: {provider_type}")
+        raise ValueError(f"Unknown provider type: {provider_type}")
 
 
-# Simple wrapper for easy use
 class LLMProvider:
-    """
-    Simple wrapper - automatically picks the right provider
-    
-    Usage:
-        llm = LLMProvider()
-        response = await llm.generate("What is Fair Work?")
-    """
+    """Simple wrapper that delegates to the factory."""
     
     def __init__(self):
         self.provider = LLMProviderFactory.create()
@@ -74,7 +41,4 @@ class LLMProvider:
         temperature: float = 0.7,
         max_tokens: int = 4096
     ) -> Dict[str, Any]:
-        """
-        Generate response using the configured provider
-        """
         return await self.provider.generate(messages, temperature, max_tokens)
