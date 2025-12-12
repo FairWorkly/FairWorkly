@@ -117,10 +117,10 @@ const CardsGrid = styled(Box)(({ theme }) => ({
     gridTemplateColumns: "1fr",
     gap: "24px",
     [theme.breakpoints.up("sm")]: {
-        gridTemplateColumns: "repeat(2, 1fr)",
+        gridTemplateColumns: "repeat(2, minmax(180px,1fr))",
     },
     [theme.breakpoints.up("md")]: {
-        gridTemplateColumns: "repeat(4, 1fr)",
+        gridTemplateColumns: "repeat(4, minmax(180px,1fr))",
         gap: "20px",
     },
 }));
