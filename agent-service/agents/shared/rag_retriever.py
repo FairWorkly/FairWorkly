@@ -14,11 +14,9 @@ Workflow:
 5. LLM generates answer based on actual documents
 
 This is the HIGH-LEVEL interface.
-Uses ChromaClient under the hood.
 """
 
 from typing import List, Dict, Any
-from .chroma_client import ChromaClient
 
 
 class RetrievalResult:

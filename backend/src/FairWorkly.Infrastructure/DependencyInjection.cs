@@ -1,4 +1,4 @@
-﻿using FairWorkly.Application.Common.Interfaces;
+using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Infrastructure.AI.Mocks;
 using FairWorkly.Infrastructure.AI.PythonServices;
 using FairWorkly.Infrastructure.Persistence;
@@ -30,8 +30,10 @@ public static class DependencyInjection
 
         // Register DbContext (PostgreSQL)
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-
-        services.AddDbContext<FairWorklyDbContext>(options => options.UseNpgsql(connectionString));
+        // UseSnakeCaseNamingConvention for PostgreSQL
+        services.AddDbContext<FairWorklyDbContext>(options =>
+            options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention()
+        );
 
         // Register Repositories
 
