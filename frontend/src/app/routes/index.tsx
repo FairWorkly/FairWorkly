@@ -1,23 +1,28 @@
-import React from 'react'
-import { useRoutes, type RouteObject } from 'react-router-dom'
+import { Navigate, useRoutes, type RouteObject } from 'react-router-dom'
+import { MainLayout } from '@/shared/components/layout/MainLayout'
 
-import { homeRoutes } from './home.routes'
-import { authRoutes } from './auth.routes'
-import { complianceRoutes } from './compliance.routes'
-import { documentsRoutes } from './documents.routes'
-import { payrollRoutes } from './payroll.routes'
-import { employeeRoutes } from './employee.routes'
+// Import route configs
+import { publicRoutes } from './public.routes'
+import { fairbotRoutes } from './fairbot.routes'
+import { toolRoutes } from './tools.routes'
 
 const routes: RouteObject[] = [
-  ...homeRoutes,
-  ...authRoutes,
-  ...complianceRoutes,
-  ...documentsRoutes,
-  ...payrollRoutes,
-  ...employeeRoutes,
+  ...publicRoutes, // Don't need to login，No MainLayout
+
+  {
+    element: <MainLayout />, // Layout Route, Protected Routes,need to login
+    children: [
+      ...fairbotRoutes, // /fairbot
+      ...toolRoutes, // /payroll, /compliance, /documents, /employees
+    ],
+  },
+
+  {
+    path: '*',
+    element: <Navigate to="/" replace />, // 404 Fallback
+  },
 ]
 
 export const AppRoutes: React.FC = () => {
-  const element = useRoutes(routes)
-  return element
+  return useRoutes(routes)
 }
