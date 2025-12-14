@@ -60,14 +60,39 @@ public enum IssueSeverity
 }
 
 /// <summary>
-/// Document types for contract and letter generation
+/// Document types for Document Agent
+/// MVP supports 3 essential templates
 /// </summary>
 public enum DocumentType
 {
-    EmploymentContract = 1,              // Priority 1
-    FairWorkInformationStatement = 2,    // Priority 2
-    PositionDescription = 3,             // Priority 3
+    /// <summary>
+    /// Employment Contract
+    /// Priority:  Highest
+    /// Usage: Every new hire
+    /// Customization: Award-specific clauses, employment type variations
+    /// </summary>
+    EmploymentContract = 1,
 
+    /// <summary>
+    /// Fair Work Information Statement (FWIS)
+    /// Priority:  High (legally required)
+    /// Usage: Every new hire (mandatory by Fair Work Act Section 125)
+    /// Customization: Employee details, applicable Award
+    /// </summary>
+    FairWorkInformationStatement = 2,
+
+    /// <summary>
+    /// Position Description
+    /// Priority:  Medium
+    /// Usage: Recruitment and role clarity
+    /// Customization: Award-based responsibilities, classification level
+    /// </summary>
+    PositionDescription = 3
+
+    // Post-MVP:
+    // TerminationLetter = 4,
+    // OfferLetter = 5,
+    // ReferenceCheck = 6,
 }
 
 /// <summary>
@@ -75,11 +100,29 @@ public enum DocumentType
 /// </summary>
 public enum ValidationStatus
 {
+    /// <summary>
+    /// Validation queued but not started
+    /// </summary>
     Pending = 1,
-    Processing = 2,
+
+    /// <summary>
+    /// AI is currently validating
+    /// </summary>
+    InProgress = 2,
+
+    /// <summary>
+    /// Validation completed successfully
+    /// Check IssuesFound to see if any problems were detected
+    /// </summary>
     Completed = 3,
-    Failed = 4,
+
+    /// <summary>
+    /// Validation failed due to error
+    /// Example: Invalid data format, missing required fields
+    /// </summary>
+    Failed = 4
 }
+
 /// <summary>
 /// Australian Modern Awards (MVP covers top 3)
 /// </summary>
