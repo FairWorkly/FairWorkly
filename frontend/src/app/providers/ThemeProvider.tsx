@@ -14,7 +14,23 @@ const theme = createTheme({
     secondary: {
       main: '#9c27b0',
     },
+    // 添加的
+    success: {
+      main: "#10B981",
+    },
+    warning: {
+      main: "#F59E0B",
+    },
+    info:{
+      main: "#3B82F6",
+    },
+    text: {
+      primary: "#111827",
+      secondary: "#6B7280",
+    },
+    divider: "#E5E7EB",
   },
+  spacing: 8,
 })
 
 interface ThemeProviderProps {

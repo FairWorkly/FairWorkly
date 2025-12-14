@@ -71,6 +71,11 @@ const ContentWrapper = styled(Box)({
     margin: "0 auto",
 });
 
+const LabelWrapper = styled(Box)({
+    display: "flex",
+    justifyContent: "center",
+});
+
 const SectionLabel = styled(Box)({
     display: "inline-flex",
     alignItems: "center",
@@ -85,6 +90,7 @@ const SectionLabel = styled(Box)({
     letterSpacing: "0.5px",
     marginBottom: "24px",
 });
+
 
 const MainHeading = styled("h2")({
     fontSize: "36px",
@@ -183,11 +189,6 @@ const ValueText = styled(Typography, {
     lineHeight: 1,
     marginBottom: "12px",
 }));
-
-const LabelWrapper = styled(Box)({
-    display: "flex",
-    justifyContent: "center",
-});
 
 const LabelText = styled(Typography)<TypographyProps>({
     fontSize: "16px",
