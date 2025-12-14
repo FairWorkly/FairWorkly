@@ -19,9 +19,19 @@ cp .env.example .env
 ```
 
 
+## Build the FAISS index (required for RAG)
+
+Before starting the API, ingest the PDF knowledge base (AWARD.pdf lives in `agents/shared/assets/`):
+
+```bash
+poetry run python scripts/ingest_assets_to_faiss.py
+```
+
+This generates the vector store under the path defined by `paths.document_faiss_path` (default: `document_faiss/customer_1/`). Re-run the script whenever you update the source PDFs.
+
 ## Run
 
-Start the FastAPI server with Uvicorn via Poetry:
+Start the FastAPI server with Uvicorn via Poetry (after the FAISS index exists):
 
 ```bash
 poetry run uvicorn master_agent.main:app --reload --port 8000
@@ -63,6 +73,8 @@ agent-service/
 │   ├── intent_router.py
 │   ├── feature_registry.py
 │   └── config.py               # Helper to load config.yaml
+├── scripts/
+│   └── ingest_assets_to_faiss.py   # Offline ingestion of assets/AWARD.pdf into FAISS
 ├── agents/
 │   ├── compliance/compliance_feature.py
 │   └── shared/
@@ -70,7 +82,12 @@ agent-service/
 │       ├── rag_retriever.py
 │       └── llm/
 │           ├── factory.py
+│           ├── local_provider.py
 │           └── langchain_provider.py
+│       ├── vector_db/
+│       │   └── faiss_store.py
+│       └── assets/
+│           └── AWARD.pdf
 ├── tests/test_master_agent.py
 └── README.md
 ```

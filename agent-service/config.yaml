@@ -4,7 +4,7 @@ faiss:
 
 model_params:
   deployment_mode_embedding: local  # local, online
-  deployment_mode_llm: openai  # local, online
+  deployment_mode_llm: local  # local, online
   hf_model_repo_id: microsoft/Phi-3-mini-4k-instruct
   local_embedding_model: sentence-transformers/all-MiniLM-L6-v2
   local_max_tokens: 1000
