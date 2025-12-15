@@ -63,3 +63,5 @@ __pycache__/
 
 # Environment variables
 .env
+## FAISS indexes
+document_faiss/

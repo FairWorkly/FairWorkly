@@ -29,6 +29,10 @@ poetry run python scripts/ingest_assets_to_faiss.py
 
 This generates the vector store under the path defined by `paths.document_faiss_path` (default: `document_faiss/customer_1/`). Re-run the script whenever you update the source PDFs.
 
+### Security warning
+
+Loading the FAISS store uses `allow_dangerous_deserialization=True`. Only load `.faiss/.pkl` bundles from trusted sources; malicious files can execute arbitrary code during deserialization.
+
 ## Run
 
 Start the FastAPI server with Uvicorn via Poetry (after the FAISS index exists):
