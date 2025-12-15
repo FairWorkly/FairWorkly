@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import { CheckCircleOutline, Description as DescriptionIcon, Receipt, Shield, SupportAgent } from '@mui/icons-material';
+import { AccountBalanceWallet, AccountBalanceWalletOutlined, Article, ArticleOutlined, CheckCircleOutline, Description as DescriptionIcon, Receipt, Shield, ShieldOutlined, SupportAgent } from '@mui/icons-material';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
@@ -29,7 +29,7 @@ const FEATURE_CARDS: FeatureCardData[] = [
     id: "compliance-agent",
     agentType: "COMPLIANCE AGENT",
     themeColor: "primary",
-    icon: Shield,
+    icon: ShieldOutlined,
     title: "Roster Compliance Checking",
     description: "Upload your roster and get instant compliance analysis against Modern Award requirements.",
     features: [
@@ -43,7 +43,7 @@ const FEATURE_CARDS: FeatureCardData[] = [
     id: "payroll-agent",
     agentType: "PAYROLL AGENT",
     themeColor: "warning",
-    icon: Receipt,
+    icon: AccountBalanceWalletOutlined,
     title: "Pay Validation & Audit",
     description: "Validate your payroll against award rates before you process, not after.",
     features: [
@@ -57,7 +57,7 @@ const FEATURE_CARDS: FeatureCardData[] = [
     id: "document-agent",
     agentType: "DOCUMENT AGENT",
     themeColor: "info",
-    icon: DescriptionIcon,
+    icon: ArticleOutlined,
     title: "Compliant Documents",
     description: "Generate legally compliant HR documents in seconds with AI assistance.",
     features: [
