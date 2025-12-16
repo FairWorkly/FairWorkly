@@ -1,8 +1,8 @@
-
-import styled from '@emotion/styled';
+import { styled } from "@mui/material/styles";
 import { CheckCircleOutline } from '@mui/icons-material';
 import Box from '@mui/material/Box';
-import React from 'react'
+import { SectionContainer, ContentWrapper } from './SectionComponents';
+import { tokens, customTheme } from "@/app/providers/ThemeProvider";
 
 
 interface AwardItem {
@@ -29,28 +29,15 @@ const AWARDS: AwardItem[] = [
   }
 ];
 
-const SectionContainer = styled("section")(({ theme }) => ({
-  backgroundColor: "#F9FAFB",
-  padding: "80px 24px",
-  [theme.breakpoints.up("md")]: {
-    padding: "100px 48px",
-  }
-}));
-
-const ContentWrapper = styled(Box)({
-  maxWidth: "1280px",
-  margin: "0 auto",
-
-});
 
 const ContentGrid = styled(Box)(({ theme }) => ({
   display: "grid",
   gridTemplateColumns: "1fr",
-  gap: theme.spacing(6),
+  gap: "48px",
   alignItems: "center",
   [theme.breakpoints.up("md")]: {
     gridTemplateColumns: "1fr 1fr",
-    gap: theme.spacing(8),
+    gap: "64px",
   },
 }));
 
@@ -68,72 +55,72 @@ const StyledImage = styled("img")({
   objectFit: "cover",
 });
 
-const TextColumn = styled(Box)(({ theme }) => ({
+const TextColumn = styled(Box)({
   display: "flex",
   flexDirection: "column",
-  gap: theme.spacing(3),
-}));
+  gap: "24px",
+});
 
-const Heading = styled("h2")(({ theme }) => ({
+const Heading = styled("h2")({
   fontSize: "24px",
   fontWeight: 700,
-  color: theme.palette.text.primary,
+  color: tokens.colors.gray900,
   lineHeight: 1.2,
   margin: 0,
-  [theme.breakpoints.up("md")]: {
+  [customTheme.breakpoints.up("md")]: {
     fontSize: "32px",
   },
-}));
+});
 
-const Paragraph = styled("p")(({ theme }) => ({
+const Paragraph = styled("p")({
   fontSize: "14px",
   lineHeight: 1.6,
-  color: theme.palette.text.secondary,
+  color: tokens.colors.gray500,
   margin: 0,
 
-  [theme.breakpoints.up("md")]: {
+  [customTheme.breakpoints.up("md")]: {
     fontSize: "18px",
   }
-}))
+});
 
-const AwardList = styled("ul")(({ theme }) => ({
+const AwardList = styled("ul")({
   listStyle: "none",
   padding: 0,
   margin: 0,
   display: "flex",
   flexDirection: "column",
-  gap: theme.spacing(2),
-}));
+  gap: "16px",
+});
 
-const AwardItem = styled("li")(({ theme }) => ({
+const AwardItem = styled("li")({
   display: "flex",
   alignItems: "flex-start",
-  gap: theme.spacing(1.5)
-}));
+  gap: "12px"
+});
 
 const AwardContent = styled("div")({
   display: "flex",
-  gap: "2px,"
+  flexWrap: "wrap"
 });
 
-const AwardTitle = styled("span")(({ theme }) => ({
+const AwardTitle = styled("span")({
   fontSize: "16px",
   fontWeight: 700,
-  color: theme.palette.text.primary,
-}));
+  color: tokens.colors.gray900,
+});
 
-const AwardDescription = styled("span")(({ theme }) => ({
+const AwardDescription = styled("span")({
   fontSize: "16px",
   fontWeight: 400,
   marginLeft: "5px",
-  color: theme.palette.text.secondary,
-}))
+  color: tokens.colors.gray500,
+});
 
-const CheckIcon = styled(CheckCircleOutline)(({ theme }) => ({
+const CheckIcon = styled(CheckCircleOutline)({
   fontSize: '1.25rem',
-  color: theme.palette.success.main,
+  color: customTheme.palette.success.main,
   flexShrink: 0,
-}));
+});
 
 
 export const ShowcaseSection = () => {
@@ -142,7 +129,10 @@ export const ShowcaseSection = () => {
       <ContentWrapper>
         <ContentGrid>
           <ImageColumn>
-            <StyledImage src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80" />
+            <StyledImage
+              src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80"
+              alt="Australian small business owner"
+            />
           </ImageColumn>
           <TextColumn>
             <Heading>Built for Australian Small Business Owners</Heading>

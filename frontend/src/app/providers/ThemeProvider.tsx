@@ -5,33 +5,72 @@ import {
 } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
-const theme = createTheme({
+
+const colors = {
+  primary: "#6366F1",
+  primaryLight: "#E0E7FF",
+  success: "#10B981",
+  warning: "#F59E0B",
+  error: "#EF4444",
+  info: "#3B82F6",
+
+  gray50: "#F9FAFB",
+  gray100: "#F3F4F6",
+  gray200: "#E5E7EB",
+  gray500: "#6B7280",
+  gray700: "#374151",
+  gray900: "#111827",
+
+  white: "#FFFFFF",
+};
+
+const spacing = {
+  sectionPaddingMobile: "80px 24px",
+  sectionPaddingDesktop: "100px 48px",
+  cardPadding: "32px 24px",
+  cardPaddingMobile: "24px 20px",
+}
+
+
+export const customTheme = createTheme({
   palette: {
-    mode: 'light',
     primary: {
-      main: '#1976d2',
+      main: colors.primary,
+      light: colors.primaryLight,
     },
-    secondary: {
-      main: '#9c27b0',
-    },
-    // 添加的
     success: {
-      main: "#10B981",
+      main: colors.success,
     },
     warning: {
-      main: "#F59E0B",
+      main: colors.warning,
     },
     info: {
-      main: "#3B82F6",
+      main: colors.info,
     },
     text: {
-      primary: "#111827",
-      secondary: "#6B7280",
+      primary: colors.gray900,
+      secondary: colors.gray500,
     },
-    divider: "#E5E7EB",
+    divider: colors.gray200,
   },
-  spacing: 8,
-})
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+    },
+  },
+});
+
+export const tokens = {
+  colors,
+  spacing,
+  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  cardShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+  cardHoverShadow: "0 12px 24px rgba(0, 0, 0, 0.1)",
+};
 
 interface ThemeProviderProps {
   children: React.ReactNode
@@ -39,7 +78,7 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   return (
-    <MuiThemeProvider theme={theme}>
+    <MuiThemeProvider theme={customTheme}>
       <CssBaseline />
       {children}
     </MuiThemeProvider>
