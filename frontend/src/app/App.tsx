@@ -1,7 +1,7 @@
 import React from 'react'
-// import { AppRoutes } from './routes'
-import { FairWorklyHome } from '@/modules/home/pages/FairWorklyHome'
+import { AppRoutes } from './routes'
+
 
 export const App: React.FC = () => {
-  return <FairWorklyHome />
+  return <AppRoutes />
 }

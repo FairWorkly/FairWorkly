@@ -25,7 +25,7 @@ const colors = {
 };
 
 
-export const customTheme = createTheme({
+const theme = createTheme({
   palette: {
     primary: {
       main: colors.primary,
@@ -84,7 +84,7 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   return (
-    <MuiThemeProvider theme={customTheme}>
+    <MuiThemeProvider theme={theme}>
       <CssBaseline />
       {children}
     </MuiThemeProvider>
