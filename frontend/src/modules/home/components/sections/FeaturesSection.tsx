@@ -23,7 +23,7 @@ interface FeatureCardData {
   title: string;
   description: string;
   features: string[];
-}
+};
 
 const FEATURE_CARDS: FeatureCardData[] = [
   {
@@ -83,7 +83,7 @@ const FEATURE_CARDS: FeatureCardData[] = [
     ],
   },
 
-]
+];
 
 
 const CardsGrid = styled(Box)<BoxProps>(({ theme }) => ({
@@ -107,14 +107,14 @@ const FeatureCard = styled(Paper)<PaperProps>(({ theme }) => ({
     transform: "translateY(-4px)",
     borderColor: theme.palette.primary.main,
   }
-}))
+}));
 
 const CardHeader = styled(Box)<BoxProps>(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(2),
   marginBottom: theme.spacing(3),
-}))
+}));
 
 const IconWrapper = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'themeColor',
@@ -132,9 +132,9 @@ const IconWrapper = styled(Box, {
   "& svg": {
     fontSize: "2rem",
   },
-}))
+}));
 
-const HeaderContent = styled(Box)<BoxProps>(({theme})=>({
+const HeaderContent = styled(Box)<BoxProps>(({ theme }) => ({
   flex: 1,
   display: "flex",
   flexDirection: "column",
@@ -158,7 +158,7 @@ const AgentTypeLabel = styled(Chip, {
 }));
 
 const CardTitle = styled('h3')(({ theme }) => ({
-  fontSize: '1.25rem',
+  fontSize: "1.25rem",
   fontWeight: 700,
   color: theme.palette.text.primary,
   margin: 0,
@@ -223,9 +223,9 @@ const Card: React.FC<CardProps> = ({ data }) => {
       <Description>{description}</Description>
 
       <FeaturesGrid>
-        {features.map((feature, index) => (
-          <FeatureItem key={index}>
-            <CheckIcon aria-hidden="true"/>
+        {features.map((feature) => (
+          <FeatureItem key={`${agentType}-${feature}`}>
+            <CheckIcon aria-hidden="true" />
             <span>{feature}</span>
           </FeatureItem>
         ))}
@@ -251,4 +251,4 @@ export const FeaturesSection = () => {
       </ContentWrapper>
     </SectionContainer>
   )
-}
+};

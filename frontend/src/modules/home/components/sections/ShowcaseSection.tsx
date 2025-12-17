@@ -19,7 +19,7 @@ const AWARDS: AwardItem[] = [
   },
   {
     id: "hospitality",
-    title: "Hospotality Award",
+    title: "Hospitality Award",
     description: "— Overtime, split shifts covered",
   },
   {
@@ -41,12 +41,12 @@ const ContentGrid = styled(Box)<BoxProps>(({ theme }) => ({
   },
 }));
 
-const ImageColumn = styled(Box)<BoxProps>(({ theme }) => ({
+const ImageColumn = styled(Box)<BoxProps>({
   position: "relative",
-  borderRadius: theme.spacing(2),
+  borderRadius: tokens.borderRadius.large,
   overflow: "hidden",
   boxShadow: tokens.imageShadow,
-}));
+});
 
 const StyledImage = styled("img")({
   width: "100%",
@@ -62,24 +62,24 @@ const TextColumn = styled(Box)<BoxProps>(({ theme }) => ({
 }));
 
 const Heading = styled("h2")(({ theme }) => ({
-  fontSize: "24px",
+  fontSize: "1.5rem",
   fontWeight: 700,
   color: tokens.colors.gray900,
   lineHeight: 1.2,
   margin: 0,
   [theme.breakpoints.up("md")]: {
-    fontSize: "32px",
+    fontSize: "2rem",
   },
 }));
 
 const Paragraph = styled("p")(({ theme }) => ({
-  fontSize: "14px",
+  fontSize: "0.875rem",
   lineHeight: 1.6,
   color: tokens.colors.gray500,
   margin: 0,
 
   [theme.breakpoints.up("md")]: {
-    fontSize: "18px",
+    fontSize: "1.125rem",
   }
 }));
 
@@ -104,13 +104,13 @@ const AwardContent = styled(Box)<BoxProps>({
 });
 
 const AwardTitle = styled("span")({
-  fontSize: "16px",
+  fontSize: "1rem",
   fontWeight: 700,
   color: tokens.colors.gray900,
 });
 
 const AwardDescription = styled("span")(({ theme }) => ({
-  fontSize: "16px",
+  fontSize: "1rem",
   fontWeight: 400,
   marginLeft: theme.spacing(0.625),
   color: tokens.colors.gray500,

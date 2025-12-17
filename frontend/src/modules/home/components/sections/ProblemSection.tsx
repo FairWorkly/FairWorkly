@@ -20,7 +20,7 @@ interface ProblemCardData {
     description: string;
     iconBgColor: string;
     valueColor: string;
-}
+};
 
 const PROBLEM_CARDS: ProblemCardData[] = [
     {
@@ -78,7 +78,7 @@ const CardsGrid = styled(Box)<BoxProps>(({ theme }) => ({
 
 const ProblemCard = styled(Box)<BoxProps>(({ theme }) => ({
     backgroundColor: tokens.colors.white,
-    borderRadius: "16px",
+    borderRadius: tokens.borderRadius.large,
     border: `1px solid ${tokens.colors.gray100}`,
     padding: theme.spacing(4, 3),
     textAlign: "center",
@@ -105,7 +105,7 @@ const IconContainer = styled(Box, {
 })<BoxProps & { bgColor: string }>(({ bgColor, theme }) => ({
     width: theme.spacing(8),
     height: theme.spacing(8),
-    borderRadius: "50%",
+    borderRadius: tokens.borderRadius.circle,
     backgroundColor: bgColor,
     display: "flex",
     alignItems: "center",
@@ -117,7 +117,7 @@ const StyledIcon = styled(Box, {
     shouldForwardProp: (prop) => prop !== "iconColor",
 })<BoxProps & { iconColor: string }>(({ iconColor }) => ({
     color: iconColor,
-    fontSize: "32px",
+    fontSize: "2rem",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -127,7 +127,7 @@ const StyledIcon = styled(Box, {
 const ValueText = styled(Typography, {
     shouldForwardProp: (prop) => prop !== "valueColor",
 })<TypographyProps & { valueColor: string }>(({ valueColor, theme }) => ({
-    fontSize: "40px",
+    fontSize: "2.5rem",
     fontWeight: 700,
     color: valueColor,
     lineHeight: 1,
@@ -135,7 +135,7 @@ const ValueText = styled(Typography, {
 }));
 
 const LabelText = styled(Typography)<TypographyProps>(({theme})=>({
-    fontSize: "16px",
+    fontSize: "1rem",
     fontWeight: 600,
     color: tokens.colors.gray900,
     marginBottom: theme.spacing(1),
@@ -144,7 +144,7 @@ const LabelText = styled(Typography)<TypographyProps>(({theme})=>({
 }));
 
 const DescriptionText = styled(Typography)<TypographyProps>({
-    fontSize: "14px",
+    fontSize: "0.875rem",
     color: tokens.colors.gray500,
     lineHeight: 1.5,
 
@@ -168,7 +168,7 @@ const Card: React.FC<CardProps> = ({ data }) => {
             <DescriptionText>{data.description}</DescriptionText>
         </ProblemCard>
     )
-}
+};
 
 export const ProblemSection: React.FC = () => {
     return (
@@ -187,4 +187,4 @@ export const ProblemSection: React.FC = () => {
             </ContentWrapper>
         </SectionContainer>
     )
-}
+};

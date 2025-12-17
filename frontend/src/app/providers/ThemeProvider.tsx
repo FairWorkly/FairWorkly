@@ -65,6 +65,13 @@ export const tokens = {
     cardPadding: "32px 24px",
     cardPaddingMobile: "24px 20px",
   },
+  borderRadius: {
+    small: "8px",
+    medium: "12px",
+    large: "16px",
+    pill: "20px",
+    circle: "50%",
+  },
   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   cardShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
   cardHoverShadow: "0 12px 24px rgba(0, 0, 0, 0.1)",
