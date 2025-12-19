@@ -10,6 +10,9 @@ public interface IUserRepository
     // Retrieves a user record by their email address.
     Task<User?> GetByEmailAsync(string email, CancellationToken ct = default);
 
+    // Retrieve a user by the stored refresh token hash
+    Task<User?> GetByRefreshTokenHashAsync(string refreshTokenHash, CancellationToken ct = default);
+
     // Checks if the email is already taken by another user.
     Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct = default);
 

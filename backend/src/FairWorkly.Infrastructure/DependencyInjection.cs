@@ -41,6 +41,8 @@ public static class DependencyInjection
         // Register Auth Services
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenService, TokenService>();
+        // Secret hasher for tokens (refresh/reset/api keys)
+        services.AddScoped<ISecretHasher, SecretHasher>();
 
         // Register Repositories
         services.AddScoped<IUserRepository, UserRepository>();

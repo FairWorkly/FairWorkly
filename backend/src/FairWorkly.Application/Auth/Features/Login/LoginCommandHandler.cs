@@ -1,4 +1,6 @@
 using FairWorkly.Application.Common.Interfaces;
+using System.Security.Cryptography;
+using System.Text;
 using FairWorkly.Domain.Auth.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +11,7 @@ public class LoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     ITokenService tokenService,
+    ISecretHasher secretHasher,
     IUnitOfWork unitOfWork,
     IConfiguration configuration
 ) : IRequestHandler<LoginCommand, LoginResponse?>
@@ -34,8 +37,9 @@ public class LoginCommandHandler(
         var accessToken = tokenService.GenerateAccessToken(user);
         var refreshToken = tokenService.GenerateRefreshToken();
 
-        // Persist the Refresh Token to the database
-        user.RefreshToken = refreshToken;
+        // Persist the Refresh Token to the database (store HASH, not plain)
+        var tokenHash = secretHasher.Hash(refreshToken);
+        user.RefreshToken = tokenHash;
 
         var refreshTokenDays = configuration.GetValue<int>("JwtSettings:RefreshTokenExpiryDays", 7);
         var expiresAt = DateTime.UtcNow.AddDays(refreshTokenDays);

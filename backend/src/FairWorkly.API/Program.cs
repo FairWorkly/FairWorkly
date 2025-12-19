@@ -2,6 +2,7 @@ using FairWorkly.API.ExceptionHandlers;
 using FairWorkly.Application;
 using FairWorkly.Infrastructure;
 using FairWorkly.Infrastructure.Persistence;
+using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace FairWorkly.API
@@ -21,7 +22,14 @@ namespace FairWorkly.API
 
             // Add Swagger generator
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                // enable example filters from Swashbuckle.AspNetCore.Filters
+                c.ExampleFilters();
+            });
+
+            // Register example providers from this assembly (LoginCommandExample)
+            builder.Services.AddSwaggerExamplesFromAssemblyOf<FairWorkly.API.SwaggerExamples.LoginCommandExample>();
 
             // Explicitly register Global Exception Handler
             builder.Services.AddSingleton<IExceptionHandler, GlobalExceptionHandler>();
