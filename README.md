@@ -1,48 +1,46 @@
-# FairWorkly — AI-Powered HR & Compliance Copilot for Australian SMEs 🇦🇺
+# FairWorkly
 
-FairWorkly is an AI-driven HR compliance platform built to help Australian small and medium businesses stay compliant with Fair Work, NES, and Modern Awards — without becoming legal experts.
+FairWorkly is a B2B SaaS platform that helps Australian SMEs make compliant, auditable, and explainable HR decisions.
 
-This MVP includes four core AI Agents designed to automate and streamline HR compliance, document creation, payroll checks, and employee self-service.
+👉 **New here? Start with:**  
+📘 [Project Overview – How FairWorkly Works](docs/00-project-overview.md)
 
----
+## What We Are Building
 
-## 🚀 Key Features (4 AI Agents)
+FairWorkly focuses on **agent-driven HR compliance**, with the following core agents in the MVP:
 
-### 1. **Compliance Agent**
+- **Compliance Agent**  
+  Checks whether rosters and working arrangements comply with relevant Award rules.
 
-AI-driven Q&A + rule interpretation for:
+- **Payroll Agent**  
+  Validates whether _already-calculated_ pay outcomes comply with Award rules.
 
-- NES minimum standards
-- Modern Awards
-- Overtime / penalty rates
-- Rosters, shift rules, weekend/public holiday handling
-- Risk assessment: low / medium / high
-- CSV roster upload → rule violation detection + cost estimate
+  > FairWorkly does **not** calculate payroll. Payroll calculation is handled by external systems.
 
-### 2. **Document & Contract Agent**
+- **FairBot**  
+  Provides guided interaction and explanations across agents, helping users understand compliance outcomes.
 
-- Generate customised documents (Offer Letter, Contract, Warning Letter…)
-- Multi-step form → AI generates legal-friendly drafts
-- Automatic NES/Award compliance checks (soft constraints)
-- Upload existing templates → highlight risk gaps
+## Getting Started
 
-### 3. **Payroll & STP Check Agent**
+This section is intentionally minimal. Detailed architecture and workflows are documented separately.
 
-Second line of defence (not a payroll system).
+### Frontend
 
-- Upload pay run CSV (Xero / KeyPay export)
-- Detect suspected underpayments
-- Compare base rate vs Award minimum (industry subset)
-- STP Phase 2 validation
-- SG (Super Guarantee) check (12%)
+cd frontend
+pnpm install
+pnpm dev
 
-### 4. **Employee Self-Service Agent**
+### Backend
 
-- View personal documents (contract, policies, letters)
-- Ask questions (“How much annual leave do I have?”)
-- View next shift, employment details, status
-- Award / overtime Q&A powered by Compliance Agent
+cd backend
+dotnet restore
+dotnet run
 
----
+## 📚 Documentation
 
-## 🏗 System Architecture (MVP)
+Start here to understand how FairWorkly works and how to contribute safely.
+
+1. 📘 [Project Overview – How FairWorkly Works](docs/00-project-overview.md)
+2. 🧠 [Frontend Architecture Cheat Sheet](docs/01-frontend-architecture.md)
+3. 🏗️ [Backend Architecture & Rules](docs/02-backend-architecture.md)
+4. 🔄 [Development Workflow & PR Rules](docs/03-dev-workflow-and-pr.md)
