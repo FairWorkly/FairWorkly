@@ -1,12 +1,6 @@
-
-import React from "react";
-import { AppRoutes } from "./routes";
-import { MainLayout } from "../shared/components/layout/MainLayout";
+import React from 'react'
+import { AppRoutes } from './routes'
 
 export const App: React.FC = () => {
-  return (
-    <MainLayout>
-      <AppRoutes />
-    </MainLayout>
-  );
-};
+  return <AppRoutes />
+}

@@ -1,3 +1,5 @@
+using FairWorkly.Domain.Auth.Entities;
+
 namespace FairWorkly.Domain.Common;
 
 /// <summary>
@@ -5,6 +7,9 @@ namespace FairWorkly.Domain.Common;
 /// </summary>
 public abstract class AuditableEntity : BaseEntity
 {
-    public string CreatedBy { get; set; } = string.Empty;
-    public string? UpdatedBy { get; set; }
+    public Guid CreatedByUserId { get; set; }
+    public virtual User? CreatedByUser { get; set; }
+    public Guid? UpdatedByUserId { get; set; }
+    public virtual User? UpdatedByUser { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }

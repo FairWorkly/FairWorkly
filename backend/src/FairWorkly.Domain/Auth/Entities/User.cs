@@ -1,5 +1,6 @@
 using FairWorkly.Domain.Auth.Enums;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Employees.Entities;
 
 namespace FairWorkly.Domain.Auth.Entities;
 
@@ -7,7 +8,7 @@ namespace FairWorkly.Domain.Auth.Entities;
 /// User entity for authentication and authorization
 /// Represents people who can access the FairWorkly system
 /// </summary>
-public class User : AuditableEntity
+public class User : BaseEntity
 {
     // Basic Information
     public string Email { get; set; } = string.Empty;
@@ -30,6 +31,17 @@ public class User : AuditableEntity
     // JWT refresh token
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiresAt { get; set; }
+
+    // Password Reset 
+    public string? PasswordResetToken { get; set; }
+    public DateTime? PasswordResetTokenExpiry { get; set; }
+
+    //for Google login
+    public string? GoogleId { get; set; }
+
+    // Employee Link (for Employee role)
+    public Guid? EmployeeId { get; set; }
+    public virtual Employee? Employee { get; set; }
 
     // Computed property
     public string FullName => $"{FirstName} {LastName}";
