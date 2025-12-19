@@ -1,6 +1,9 @@
-import React from 'react'
-import { AppRoutes } from './routes'
+import { useRoutes } from 'react-router-dom'
+import { publicRoutes } from '@/app/routes/public.routes'
+import { toolRoutes } from '@/app/routes/tools.routes'
 
-export const App: React.FC = () => {
-  return <AppRoutes />
+export function App() {
+  const routes = useRoutes([...publicRoutes, ...toolRoutes])
+
+  return routes
 }

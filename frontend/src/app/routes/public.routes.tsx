@@ -1,7 +1,7 @@
 import { type RouteObject } from 'react-router-dom'
-import { HomePage } from '@/pages/HomePage'
-import { LoginPage } from '@/pages/LoginPage'
-import { RegisterPage } from '@/pages/RegisterPage'
+import { HomePage } from '@/modules/home/pages/HomePage'
+import { LoginPage } from '@/modules/auth/pages/LoginPage'
+import { RegisterPage } from '@/modules/auth/pages/RegisterPage'
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -13,7 +13,7 @@ export const publicRoutes: RouteObject[] = [
     element: <LoginPage />,
   },
   {
-    path: '/register', // support all the register scenario
+    path: '/register',
     element: <RegisterPage />,
   },
 ]
