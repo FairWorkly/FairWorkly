@@ -22,6 +22,10 @@ export const FAIRBOT_LABELS = {
   LOADING_MESSAGE: 'FairBot is thinking...',
   ERROR_GENERIC: 'Something went wrong. Please try again.',
   ATTACHMENT_LABEL: 'Attachment',
+  QUICK_ACTIONS_HEADER: 'Quick Actions',
+  GENERATE_CONTRACT: 'Generate Employment Contract',
+  CHECK_PAYROLL_COMPLIANCE: 'Check Payroll Compliance',
+  CHECK_ROSTER_COMPLIANCE: 'Check Roster Compliance',
 } as const
 
 export const FAIRBOT_ARIA = {
@@ -35,6 +39,7 @@ export const FAIRBOT_ARIA = {
 
 export const FAIRBOT_TEXT = {
   EMPTY: '',
+  FULL_SPAN: '1 / -1',
 } as const
 
 export const FAIRBOT_ENV = {
@@ -59,6 +64,7 @@ export const FAIRBOT_MESSAGES = {
 export const FAIRBOT_NUMBERS = {
   ZERO: 0,
   ONE: 1,
+  TWO: 2,
 } as const
 
 export const FAIRBOT_KEYWORDS = {
@@ -76,6 +82,8 @@ export const FAIRBOT_LAYOUT = {
   CONTENT_GAP: 24,
   CHAT_SCROLL_HEIGHT: 540,
   MOBILE_BREAKPOINT: 900,
+  QUICK_ACTIONS_GAP: 12,
+  QUICK_ACTIONS_COLUMNS: 2,
 } as const
 
 export const FAIRBOT_UPLOAD = {
@@ -88,6 +96,24 @@ export const FAIRBOT_UPLOAD = {
   BORDER_STYLE: 'dashed',
   TRANSITION_EASING: 'ease',
   TRANSITION_PROPERTIES: 'border-color, background-color',
+} as const
+
+export const FAIRBOT_QUICK_ACTIONS_UI = {
+  CARD_PADDING: 12,
+  CARD_RADIUS: 12,
+  CARD_BORDER_WIDTH: 1,
+  CARD_MIN_HEIGHT: 88,
+  ICON_SIZE: 20,
+  CONTENT_GAP: 4,
+  TRANSITION_MS: 150,
+  HOVER_TRANSLATE_Y_PX: -1,
+  COLOR_MAP: {
+    blue: { background: 'info', border: 'info' },
+    green: { background: 'success', border: 'success' },
+    purple: { background: 'secondary', border: 'secondary' },
+    orange: { background: 'warning', border: 'warning' },
+  },
+  FULL_SPAN_COLUMNS: 2,
 } as const
 
 export const FAIRBOT_TIMING = {
@@ -130,6 +156,29 @@ export const FAIRBOT_ROUTES = {
   DOCUMENT: '/documents',
 } as const
 
+export const FAIRBOT_QUICK_ACTIONS_TEXT = {
+  CHECK_PAYROLL: {
+    TITLE: FAIRBOT_LABELS.CHECK_PAYROLL_COMPLIANCE,
+    DESCRIPTION: 'Upload payslip CSV to verify Fair Work compliance',
+    INITIAL_MESSAGE: 'I want to check payroll compliance',
+  },
+  CHECK_ROSTER: {
+    TITLE: FAIRBOT_LABELS.CHECK_ROSTER_COMPLIANCE,
+    DESCRIPTION: 'Upload roster to check for penalty rate issues',
+    INITIAL_MESSAGE: 'I want to check roster compliance',
+  },
+  ASK_QUESTION: {
+    TITLE: FAIRBOT_LABELS.ASK_QUESTION,
+    DESCRIPTION: 'Get answers about awards, overtime, leave',
+    INITIAL_MESSAGE: 'I have a Fair Work question',
+  },
+  GENERATE_CONTRACT: {
+    TITLE: FAIRBOT_LABELS.GENERATE_CONTRACT,
+    DESCRIPTION: 'Create a Fair Work compliant contract',
+    INITIAL_MESSAGE: 'I want to generate an employment contract',
+  },
+} as const
+
 export const FAIRBOT_IDS = {
   FILE_INPUT: 'fairbot-file-input',
 } as const
@@ -170,6 +219,17 @@ export const FAIRBOT_QUICK_ACTIONS = {
     GREEN: 'green',
     PURPLE: 'purple',
     ORANGE: 'orange',
+  },
+  ICONS: {
+    PAYROLL: 'payroll',
+    ROSTER: 'roster',
+    QUESTION: 'question',
+    DOCUMENT: 'document',
+  },
+  PERMISSIONS: {
+    CHECK_PAYROLL: 'CheckPayrollCompliance',
+    CHECK_ROSTER: 'CheckRosterCompliance',
+    MANAGE_DOCUMENTS: 'ManageDocuments',
   },
   IDS: {
     CHECK_PAYROLL: 'check-payroll',
