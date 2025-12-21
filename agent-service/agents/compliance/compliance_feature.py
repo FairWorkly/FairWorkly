@@ -1,5 +1,6 @@
 from typing import Dict, Any
 import logging
+import threading
 
 from master_agent.feature_registry import FeatureBase
 from master_agent.config import load_config, CONFIG_PATH
@@ -7,6 +8,35 @@ from agents.shared.llm.factory import LLMProvider
 from agents.shared.llm.embeddings_factory import create_embeddings
 from agents.shared.vector_db import load_faiss
 from agents.shared.rag_retriever import RAGRetriever, RetrievalResult
+
+
+_RESOURCE_LOCK = threading.Lock()
+_EMBEDDINGS = None
+_VECTORSTORE = None
+_RETRIEVER = None
+
+
+def _ensure_retriever(config, logger):
+    """Ensure embeddings/vector store/retriever exist exactly once per process."""
+    global _EMBEDDINGS, _VECTORSTORE, _RETRIEVER
+
+    if _RETRIEVER is not None:
+        return _RETRIEVER
+
+    with _RESOURCE_LOCK:
+        if _RETRIEVER is not None:
+            return _RETRIEVER
+
+        if _EMBEDDINGS is None:
+            _EMBEDDINGS = create_embeddings(config, logger=logger)
+
+        if _VECTORSTORE is None:
+            store_relative = config["paths"]["document_faiss_path"]
+            store_absolute = (CONFIG_PATH.parent / store_relative).resolve()
+            _VECTORSTORE = load_faiss(str(store_absolute), _EMBEDDINGS, logger=logger)
+
+        _RETRIEVER = RAGRetriever(_VECTORSTORE, logger=logger)
+        return _RETRIEVER
 
 
 class ComplianceFeature(FeatureBase):
@@ -29,11 +59,8 @@ class ComplianceFeature(FeatureBase):
             self.llm = None
 
         try:
-            embeddings = create_embeddings(self.config, logger=self.logger)
-            store_relative = self.config["paths"]["document_faiss_path"]
-            store_absolute = (CONFIG_PATH.parent / store_relative).resolve()
-            self.vectorstore = load_faiss(str(store_absolute), embeddings, logger=self.logger)
-            self.retriever = RAGRetriever(self.vectorstore, logger=self.logger)
+            self.retriever = _ensure_retriever(self.config, self.logger)
+            self.vectorstore = _VECTORSTORE
         except FileNotFoundError as exc:
             self.logger.warning("Vector store unavailable: %s", exc)
         except Exception as exc:
@@ -65,6 +92,15 @@ class ComplianceFeature(FeatureBase):
         docs_text = "Retriever unavailable - please run the ingestion script."
         metadata_sources: list[Dict[str, Any]] = []
         top_k = self.config.get("faiss", {}).get("similarity_search_k_docs", 3)
+
+        if not self.retriever:
+            try:
+                self.retriever = _ensure_retriever(self.config, self.logger)
+                self.vectorstore = _VECTORSTORE
+            except FileNotFoundError as exc:
+                self.logger.warning("Vector store unavailable: %s", exc)
+            except Exception as exc:
+                self.logger.error("Failed to initialize retriever: %s", exc, exc_info=True)
 
         if self.retriever:
             try:
