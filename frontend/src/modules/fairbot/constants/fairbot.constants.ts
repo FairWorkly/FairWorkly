@@ -33,9 +33,31 @@ export const FAIRBOT_ARIA = {
   QUICK_ACTIONS: 'FairBot quick actions',
 } as const
 
+export const FAIRBOT_ENV = {
+  TYPEOF_UNDEFINED: 'undefined',
+} as const
+
 export const FAIRBOT_SESSION_KEYS = {
   CONVERSATION: 'fairbot_conversation',
   RESULTS: 'fairbot_results',
+} as const
+
+export const FAIRBOT_ROLES = {
+  USER: 'user',
+  ASSISTANT: 'assistant',
+} as const
+
+export const FAIRBOT_MESSAGES = {
+  ASSISTANT_DEFAULT: 'Thanks! I can help with that.',
+  ASSISTANT_FILE_RECEIVED: 'Thanks for the file. I will review it now.',
+} as const
+
+export const FAIRBOT_KEYWORDS = {
+  PAYROLL: 'payroll',
+  ROSTER: 'roster',
+  EMPLOYEE: 'employee',
+  DOCUMENT: 'document',
+  CONTRACT: 'contract',
 } as const
 
 export const FAIRBOT_LAYOUT = {
@@ -63,6 +85,39 @@ export const FAIRBOT_RESULTS = {
     ROSTER: 'roster',
     EMPLOYEE: 'employee',
     DOCUMENT: 'document',
+  },
+} as const
+
+export const FAIRBOT_ROUTES = {
+  PAYROLL: '/payroll/upload',
+  ROSTER: '/compliance/upload',
+  EMPLOYEE: '/my-profile',
+  DOCUMENT: '/documents',
+} as const
+
+export const FAIRBOT_MOCK_DATA = {
+  PAYROLL: {
+    issuesFound: 2,
+    totalRecords: 24,
+    topIssues: [
+      { id: 'underpayment', description: 'Potential underpayment detected' },
+      { id: 'missing-allowance', description: 'Allowance missing for shift' },
+    ],
+  },
+  ROSTER: {
+    issuesFound: 1,
+    shiftCount: 12,
+    topIssues: [
+      { id: 'insufficient-breaks', description: 'Insufficient breaks detected' },
+    ],
+  },
+  EMPLOYEE: {
+    employeesReviewed: 6,
+    issuesFound: 0,
+  },
+  DOCUMENT: {
+    documentsGenerated: 1,
+    lastGeneratedAt: '2024-01-12T10:30:00.000Z',
   },
 } as const
 
