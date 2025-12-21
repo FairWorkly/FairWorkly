@@ -26,6 +26,24 @@ export const FAIRBOT_LABELS = {
   GENERATE_CONTRACT: 'Generate Employment Contract',
   CHECK_PAYROLL_COMPLIANCE: 'Check Payroll Compliance',
   CHECK_ROSTER_COMPLIANCE: 'Check Roster Compliance',
+  RESULTS_PANEL_TITLE: 'Results Summary',
+  RESULTS_PANEL_SUBTITLE: 'Summary based on your latest request.',
+  PAYROLL_SUMMARY_TITLE: 'Payroll Check Complete',
+  ROSTER_SUMMARY_TITLE: 'Roster Check Complete',
+  EMPLOYEE_SUMMARY_TITLE: 'Employee Review Complete',
+  DOCUMENT_SUMMARY_TITLE: 'Document Generation Complete',
+  TOTAL_RECORDS_LABEL: 'Total Records',
+  SHIFT_COUNT_LABEL: 'Shifts Reviewed',
+  EMPLOYEES_REVIEWED_LABEL: 'Employees Reviewed',
+  DOCUMENTS_GENERATED_LABEL: 'Documents Generated',
+  ISSUES_FOUND_LABEL: 'Issues Found',
+  TOP_ISSUES_LABEL: 'Top Issues',
+  NO_PAYROLL_ISSUES: 'No payroll issues detected.',
+  NO_ROSTER_ISSUES: 'No roster issues detected.',
+  EMPLOYEE_ISSUES_SUMMARY: 'Employee review summary',
+  DOCUMENTS_SUMMARY: 'Document generation summary',
+  VIEW_RESULTS_TITLE: 'View results',
+  RESULTS_PANEL_HINT: 'Open detailed reports to review findings.',
 } as const
 
 export const FAIRBOT_ARIA = {
@@ -65,6 +83,9 @@ export const FAIRBOT_NUMBERS = {
   ZERO: 0,
   ONE: 1,
   TWO: 2,
+  THREE: 3,
+  FOUR: 4,
+  FIVE: 5,
 } as const
 
 export const FAIRBOT_KEYWORDS = {
@@ -84,6 +105,8 @@ export const FAIRBOT_LAYOUT = {
   MOBILE_BREAKPOINT: 900,
   QUICK_ACTIONS_GAP: 12,
   QUICK_ACTIONS_COLUMNS: 2,
+  RESULTS_PANEL_PADDING: 24,
+  RESULTS_PANEL_GAP: 16,
 } as const
 
 export const FAIRBOT_UPLOAD = {
@@ -114,6 +137,22 @@ export const FAIRBOT_QUICK_ACTIONS_UI = {
     orange: { background: 'warning', border: 'warning' },
   },
   FULL_SPAN_COLUMNS: 2,
+} as const
+
+export const FAIRBOT_RESULTS_UI = {
+  HEADER_ICON_SIZE: 56,
+  CARD_RADIUS: 16,
+  CARD_PADDING: 16,
+  EMPTY_ICON_RADIUS: 48,
+  EMPTY_ICON_SIZE: 32,
+  STAT_GAP: 12,
+  LIST_GAP: 8,
+  EMPTY_ICON_BG: 'action.hover',
+  STATS_GRID_COLUMNS: 2,
+  STACK_GAP: 16,
+  MIN_HEIGHT: 320,
+  CARD_BORDER_WIDTH: 1,
+  HEADER_GAP: 4,
 } as const
 
 export const FAIRBOT_TIMING = {
