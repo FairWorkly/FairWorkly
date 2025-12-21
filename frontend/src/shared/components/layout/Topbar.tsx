@@ -6,6 +6,12 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { Link as RouterLink } from "react-router-dom";
+import {
+  APP_LABELS,
+  NAV_ARIA,
+  NAV_LAYOUT,
+  TOPBAR_NAV_ITEMS,
+} from "@/shared/constants/navigation.constants";
 
 interface TopbarProps {
   drawerWidth: number;
@@ -26,7 +32,11 @@ const HeaderBar = styled(AppBar, {
 const TopNav = styled.nav`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: ${NAV_LAYOUT.TOP_GAP_PX}px;
+`;
+
+const Title = styled(Typography)`
+  flex-grow: ${NAV_LAYOUT.TITLE_FLEX};
 `;
 
 export const Topbar: React.FC<TopbarProps> = ({ drawerWidth }) => {
@@ -39,34 +49,23 @@ export const Topbar: React.FC<TopbarProps> = ({ drawerWidth }) => {
       drawerWidth={drawerWidth}
     >
       <Toolbar component="div">
-        <Typography
-          component="h1"
-          variant="h6"
-          sx={{ flexGrow: 1 }}
-        >
-          FairWorkly
-        </Typography>
+        <Title component="h1" variant="h6">
+          {APP_LABELS.BRAND}
+        </Title>
 
-        <TopNav aria-label="Top navigation">
-          <Button
-            color="inherit"
-            component={RouterLink}
-            to="/compliance/qa"
-          >
-            Compliance Q&A
-          </Button>
-          <Button color="inherit" component={RouterLink} to="/payroll">
-            Payroll
-          </Button>
-          <Button color="inherit" component={RouterLink} to="/documents">
-            Documents
-          </Button>
-          <Button color="inherit" component={RouterLink} to="/employee/help">
-            Employee Help
-          </Button>
+        <TopNav aria-label={NAV_ARIA.TOP}>
+          {TOPBAR_NAV_ITEMS.map((item) => (
+            <Button
+              key={item.to}
+              color="inherit"
+              component={RouterLink}
+              to={item.to}
+            >
+              {item.label}
+            </Button>
+          ))}
         </TopNav>
       </Toolbar>
     </HeaderBar>
   );
 };
-
