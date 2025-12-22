@@ -8,7 +8,7 @@ namespace FairWorkly.Domain.Auth.Entities;
 /// User entity for authentication and authorization
 /// Represents people who can access the FairWorkly system
 /// </summary>
-public class User : BaseEntity
+public class User : AuditableEntity
 {
     // Basic Information
     public string Email { get; set; } = string.Empty;

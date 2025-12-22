@@ -12,7 +12,7 @@ namespace FairWorkly.Domain.Auth.Entities;
 /// Multi-tenancy:Each Organization is a separate tenant with isolated data.
 /// All other entities (Employee, Payslip, etc.) belong to an Organization.
 /// </summary>
-public class Organization : BaseEntity
+public class Organization : AuditableEntity
 {
     [MaxLength(500)]
     public string? LogoUrl { get; set; }
