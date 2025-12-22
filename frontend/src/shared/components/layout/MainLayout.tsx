@@ -8,7 +8,7 @@ interface MainLayoutProps {
 }
 
 /**
- * 整个应用的外层容器（语义上就是一个布局 div）
+ * 登陆后的壳，无特效背景
  */
 const AppShell = styled.div`
   display: flex;
