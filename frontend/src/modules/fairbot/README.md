@@ -77,10 +77,13 @@ src/modules/fairbot/
 - `useFileUpload`
   - Drag/drop + file picker validation.
   - Accepts `.csv` and `.xlsx`, max 5MB.
+  - Returns `{ inputRef, controls }` where `controls` is ref-free render state and handlers.
 - `useResultsPanel`
   - Reads/writes current results to `sessionStorage`.
 - `usePermissions`
   - Placeholder hook; currently allows all actions.
+
+Note: `FileUploadZone` receives `inputRef` separately to avoid ref-like props in render.
 
 ## Quick Actions
 
