@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
 
 namespace FairWorkly.Domain.Auth.Entities;
@@ -7,7 +8,7 @@ namespace FairWorkly.Domain.Auth.Entities;
 /// Many-to-many relationship between Organization and Awards
 /// Represents the "Active Awards" section in Settings
 /// </summary>
-public class OrganizationAward
+public class OrganizationAward : BaseEntity
 {
   /// <summary>
   /// Organization ID
