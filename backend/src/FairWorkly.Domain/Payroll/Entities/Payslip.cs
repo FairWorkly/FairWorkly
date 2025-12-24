@@ -63,6 +63,22 @@ public class Payslip : AuditableEntity
     [MaxLength(50)]
     public string EmployeeNumber { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Snapshot of employee name at time of upload
+    /// Used for: Audit trail and historical display (preserves name even if Employee record changes)
+    /// </summary>
+    [Required]
+    [MaxLength(200)]
+    public string EmployeeName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Snapshot of employee number / staff ID from CSV
+    /// Used for: Quick lookup and mapping to Employee entity without joining tables
+    /// </summary>
+    [Required]
+    [MaxLength(50)]
+    public string EmployeeNumber { get; set; } = string.Empty;
+
     // Snapshot: Employee status at time of this pay period
     /// <summary>
     /// Employment type at time of this pay period
