@@ -47,6 +47,22 @@ public class Payslip : AuditableEntity
     [Required]
     public DateTime PayDate { get; set; }
 
+    /// <summary>
+    /// Snapshot of employee name at time of upload
+    /// Used for: Audit trail and historical display (preserves name even if Employee record changes)
+    /// </summary>
+    [Required]
+    [MaxLength(200)]
+    public string EmployeeName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Snapshot of employee number / staff ID from CSV
+    /// Used for: Quick lookup and mapping to Employee entity without joining tables
+    /// </summary>
+    [Required]
+    [MaxLength(50)]
+    public string EmployeeNumber { get; set; } = string.Empty;
+
     // Snapshot: Employee status at time of this pay period
     /// <summary>
     /// Employment type at time of this pay period
@@ -94,8 +110,9 @@ public class Payslip : AuditableEntity
     public decimal? OvertimeHours { get; set; }
 
     /// <summary>
-    /// Ordinary pay (base rate only, no loading)
-    /// Calculation: OrdinaryHours × HourlyRate
+    /// Ordinary pay amount
+    /// Permanent: Base Rate × OrdinaryHours (Excludes penalties)
+    /// Casual: Loaded Rate × OrdinaryHours (Includes 25% loading)
     /// </summary>
     public decimal OrdinaryPay { get; set; }
 
@@ -125,14 +142,14 @@ public class Payslip : AuditableEntity
     public decimal? Allowances { get; set; }
 
     /// <summary>
-    /// Casual loading pay (25% extra for casual employees)
-    /// Null for Full-time/Part-time employees
+    /// Separated casual loading amount (25%)
+    /// Note: Optional/Calculated. Often null if loading is implicitly included in OrdinaryPay.
     /// </summary>
     public decimal? CasualLoadingPay { get; set; }
 
     /// <summary>
     /// Total gross pay before deductions
-    /// </summary
+    /// </summary>
     public decimal GrossPay { get; set; }
 
     //  Deductions
