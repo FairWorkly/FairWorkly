@@ -8,7 +8,7 @@ namespace FairWorkly.Domain.Auth.Entities;
 /// User entity for authentication and authorization
 /// Represents people who can access the FairWorkly system
 /// </summary>
-public class User : BaseEntity
+public class User : AuditableEntity
 {
     // Basic Information
     public string Email { get; set; } = string.Empty;
@@ -32,7 +32,7 @@ public class User : BaseEntity
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiresAt { get; set; }
 
-    // Password Reset 
+    // Password Reset
     public string? PasswordResetToken { get; set; }
     public DateTime? PasswordResetTokenExpiry { get; set; }
 
