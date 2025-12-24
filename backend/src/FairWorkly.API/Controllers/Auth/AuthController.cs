@@ -118,4 +118,5 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
 
         Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
     }
+
 }
