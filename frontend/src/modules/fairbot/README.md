@@ -41,6 +41,8 @@ src/modules/fairbot/
     WelcomeMessage.tsx
 ```
 
+For shared UI, hooks, and constants referenced here, see `src/shared/README.md`.
+
 ## Entry Point and Routing
 
 - Route: `src/app/routes/fairbot.routes.tsx` maps `/fairbot` to the page.
@@ -48,6 +50,8 @@ src/modules/fairbot/
 
 ## UI Composition (FairBotChat)
 
+- Sidebar column
+  - `Sidebar` from `src/shared/components/layout` (navigation)
 - Chat column
   - `WelcomeMessage` (intro + bullet list)
   - `QuickActions` (prebuilt actions + optional file upload)
@@ -56,6 +60,9 @@ src/modules/fairbot/
   - `MessageInput` (text input + send)
 - Results column
   - `ResultsPanel` (summary or empty state)
+
+Note: `FairBotChat` renders `Sidebar` directly to achieve a three-column layout.
+If `MainLayout` is wired in later, avoid double sidebars.
 
 ## Core Data Flow
 

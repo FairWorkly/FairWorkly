@@ -33,7 +33,7 @@ npm run build-storybook  # static Storybook build
 - `src/app/providers/` - Redux and MUI theme providers.
 - `src/modules/*` - feature modules with `pages/`, `features/`, `hooks/`, `types/`, `ui/`.
 - `src/shared/components/` - reusable UI (`ui/`, `feedback/`, `layout/`, `guards/`, `storybook/`).
-- `src/shared/constants/`, `src/shared/types/`, `src/shared/utils/`, `src/shared/hooks/` - shared contracts and helpers.
+- `src/shared/constants/`, `src/shared/types/`, `src/shared/utils/`, `src/shared/hooks/` - shared contracts and helpers (see `src/shared/README.md`).
 - `src/services/` - axios client and API modules.
 - `src/store/`, `src/slices/` - Redux store and slices (auth/ui/notifications scaffolds).
 - `src/assets/`, `public/` - static assets.
@@ -43,6 +43,7 @@ npm run build-storybook  # static Storybook build
 
 - Route configs live in `src/app/routes/*.routes.tsx`.
 - Navigation labels and routes are centralized in `src/shared/constants/navigation.constants.ts` and consumed by `Topbar`/`Sidebar`.
+- `FairBotChat` currently renders the shared `Sidebar` directly for a three-column layout; reconcile with `MainLayout` if you later wrap routes.
 - Import alias: `@/` maps to `src/` (see `vite.config.ts` and `tsconfig.app.json`).
 
 ## State, data, and API
