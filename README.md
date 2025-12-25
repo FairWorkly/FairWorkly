@@ -27,8 +27,8 @@ This section is intentionally minimal. Detailed architecture and workflows are d
 ### Frontend
 
 cd frontend
-pnpm install
-pnpm dev
+npm install
+npm run dev
 
 ### Backend
 

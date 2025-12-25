@@ -10,6 +10,14 @@ import Toolbar from "@mui/material/Toolbar";
 import Divider from "@mui/material/Divider";
 import { Link as RouterLink } from "react-router-dom";
 
+// this sidebar now map over shared nav arrays
+// to remove duplicated JSX
+// and make ordering/labels a single-source-of-truth update. 
+import {
+  NAV_ARIA,
+  SIDEBAR_NAV_ITEMS,
+} from "@/shared/constants/navigation.constants";
+
 interface SidebarProps {
   width: number;
 }
@@ -33,7 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width }) => {
     <NavigationDrawer
       variant="permanent"
       component="nav"
-      aria-label="Primary navigation"
+      aria-label={NAV_ARIA.PRIMARY}
       width={width}
     >
       {/* 顶部留出和 AppBar 对齐的空间 */}
@@ -42,37 +50,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ width }) => {
 
       {/* 语义：列表 = <ul> / <li> */}
       <List component="ul">
-        <ListItem disablePadding component="li">
-          <ListItemButton component={RouterLink} to="/">
-            <ListItemText primary="Home" />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding component="li">
-          <ListItemButton component={RouterLink} to="/compliance">
-            <ListItemText primary="Compliance" />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding component="li">
-          <ListItemButton component={RouterLink} to="/payroll">
-            <ListItemText primary="Payroll" />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding component="li">
-          <ListItemButton component={RouterLink} to="/documents">
-            <ListItemText primary="Documents" />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding component="li">
-          <ListItemButton component={RouterLink} to="/employee">
-            <ListItemText primary="Employees" />
-          </ListItemButton>
-        </ListItem>
+        {SIDEBAR_NAV_ITEMS.map((item) => (
+          <ListItem disablePadding component="li" key={item.to}>
+            <ListItemButton component={RouterLink} to={item.to}>
+              <ListItemText primary={item.label} />
+            </ListItemButton>
+          </ListItem>
+        ))}
       </List>
     </NavigationDrawer>
   );
 };
-
