@@ -19,6 +19,9 @@
 [Bb]in/
 [Oo]bj/
 
+# Serilog log files
+logs/
+
 # Database and Logs
 *.db
 *.lock
