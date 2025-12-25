@@ -27,6 +27,7 @@ const EmptyIcon = styled('div')(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
+// Empty-state panel shown before any summary is available.
 export const ResultsEmpty = () => {
   return (
     <EmptyStateContainer>

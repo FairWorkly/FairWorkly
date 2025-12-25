@@ -139,6 +139,7 @@ export const QuickActions = ({
   actions = quickActions,
 }: QuickActionsProps) => {
   const { hasPermission } = usePermissions()
+  // Hide actions when the current user lacks the required permission.
   const visibleActions = actions.filter((action) =>
     hasPermissionForAction(hasPermission, action),
   )
@@ -151,6 +152,7 @@ export const QuickActions = ({
   const actionCountIsOdd =
     visibleActions.length % FAIRBOT_NUMBERS.TWO !== FAIRBOT_NUMBERS.ZERO
 
+  // Send the prefilled message and request a file if the action needs one.
   const handleActionClick = async (action: FairBotQuickAction) => {
     await onSendMessage(action.initialMessage)
     if (action.requiresFile) {

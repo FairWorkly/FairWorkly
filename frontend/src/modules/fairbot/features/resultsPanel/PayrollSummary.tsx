@@ -38,6 +38,7 @@ const StatCard = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.action.hover,
 }))
 
+// Payroll summary card with stats, issues list, and link to detailed results.
 export const PayrollSummary = ({ data, detailsUrl }: PayrollSummaryProps) => {
   const navigate = useNavigate()
   const hasIssues = data.issuesFound > FAIRBOT_NUMBERS.ZERO

@@ -40,6 +40,7 @@ const InputButton = styled(IconButton)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
 }))
 
+// Text entry plus attach/send actions for the chat footer.
 export const MessageInput = ({
   onSendMessage,
   upload,
@@ -49,6 +50,7 @@ export const MessageInput = ({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    // Ignore empty submissions; file uploads are handled via the attach button.
     if (!value.trim()) {
       return
     }

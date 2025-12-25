@@ -32,6 +32,7 @@ const MessageStack = styled('div')({
   gap: `${FAIRBOT_LAYOUT.MESSAGE_LIST_GAP}px`,
 })
 
+// Renders message bubbles and the typing indicator for active responses.
 export const MessageList = ({ messages, isTyping }: MessageListProps) => {
   const hasMessages = messages.length > FAIRBOT_NUMBERS.ZERO
 

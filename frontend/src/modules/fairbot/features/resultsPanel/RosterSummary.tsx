@@ -38,6 +38,7 @@ const StatCard = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.action.hover,
 }))
 
+// Roster summary card with stats, issues list, and link to detailed results.
 export const RosterSummary = ({ data, detailsUrl }: RosterSummaryProps) => {
   const navigate = useNavigate()
   const hasIssues = data.issuesFound > FAIRBOT_NUMBERS.ZERO

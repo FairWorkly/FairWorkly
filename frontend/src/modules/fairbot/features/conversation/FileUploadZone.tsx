@@ -72,6 +72,7 @@ const ErrorText = styled('p')(({ theme }) => ({
   color: theme.palette.error.main,
 }))
 
+// Drag-and-drop file zone that wires to the shared upload controls.
 export const FileUploadZone = ({
   upload,
   inputRef,
