@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FairWorkly | Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-glow: rgba(99, 102, 241, 0.12);
+            --secondary: #ec4899;
+            --accent-green: #10b981;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-nav: #1e1b4b;
+            --bg-brand: #eef2ff;
+            --border: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --error: #ef4444;
+            --gradient-1: linear-gradient(135deg, #6366f1, #ec4899);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+            --shadow-xl: 0 20px 40px -10px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .material-icons-outlined { font-size: inherit; vertical-align: middle; }
+
+        .bg-effects {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .bg-effects::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: 
+                radial-gradient(ellipse 60% 40% at 10% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 30% at 90% 80%, rgba(236, 72, 153, 0.06) 0%, transparent 50%);
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        .auth-container { display: flex; width: 100%; min-height: 100vh; }
+
+        /* Left Branding Panel */
+        .auth-branding {
+            flex: 1;
+            background: var(--bg-nav);
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-branding::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -50%;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .branding-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 1;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .logo-icon .material-icons-outlined { font-size: 1.75rem; }
+
+        .logo-text {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a5b4fc, #f9a8d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .branding-content { position: relative; z-index: 1; }
+
+        .branding-title {
+            font-size: 2.25rem;
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .branding-title .highlight {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .branding-subtitle {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+            max-width: 360px;
+        }
+
+        .branding-features { list-style: none; margin-top: 1.5rem; }
+
+        .branding-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 0;
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .branding-features li .icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a5b4fc;
+        }
+
+        .branding-features li .icon .material-icons-outlined { font-size: 1.125rem; }
+
+        .branding-footer {
+            position: relative;
+            z-index: 1;
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Right Form Panel */
+        .auth-form-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            background: var(--bg-light);
+        }
+
+        .auth-form-container { width: 100%; max-width: 420px; }
+
+        .auth-header { text-align: center; margin-bottom: 2rem; }
+
+        .auth-title { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-primary); }
+
+        .auth-subtitle { font-size: 0.9375rem; color: var(--text-secondary); }
+
+        .auth-subtitle a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-subtitle a:hover { text-decoration: underline; }
+
+        .auth-tabs {
+            display: flex;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 2rem;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-tab.active { background: var(--gradient-1); color: white; }
+        .auth-tab:not(.active):hover { color: var(--text-primary); background: var(--bg-light); }
+
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
+
+        .form-group { margin-bottom: 1.25rem; }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder { color: var(--text-muted); }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .form-checkbox input { width: 18px; height: 18px; accent-color: var(--primary); }
+        .form-checkbox span { font-size: 0.875rem; color: var(--text-secondary); }
+
+        .form-link {
+            font-size: 0.875rem;
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-weight: 500;
+        }
+
+        .form-link:hover { text-decoration: underline; }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn .material-icons-outlined { font-size: 1.25rem; }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-social {
+            background: var(--bg-white);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-social:hover { border-color: var(--primary); background: var(--primary-glow); }
+        .btn-social svg { width: 20px; height: 20px; }
+
+        .divider { display: flex; align-items: center; margin: 1.5rem 0; }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider span { padding: 0 1rem; font-size: 0.8125rem; color: var(--text-muted); }
+
+        .form-terms {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .form-terms a { color: var(--primary); text-decoration: none; }
+        .form-terms a:hover { text-decoration: underline; }
+
+        .password-strength { margin-top: 0.5rem; }
+
+        .strength-bar {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 0.375rem;
+        }
+
+        .strength-fill { height: 100%; width: 0%; transition: all 0.3s ease; }
+        .strength-fill.weak { width: 33%; background: var(--error); }
+        .strength-fill.medium { width: 66%; background: #f59e0b; }
+        .strength-fill.strong { width: 100%; background: var(--accent-green); }
+
+        .strength-text { font-size: 0.75rem; color: var(--text-muted); }
+
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem; right: 1rem;
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: var(--bg-light);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover { background: var(--border); color: var(--text-primary); }
+
+        .modal-icon {
+            width: 64px; height: 64px;
+            border-radius: 16px;
+            background: var(--primary-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--primary);
+        }
+
+        .modal-icon .material-icons-outlined { font-size: 2rem; }
+
+        .success-icon {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--accent-green);
+        }
+
+        .success-icon .material-icons-outlined { font-size: 2rem; }
+
+        .modal-title { font-size: 1.5rem; font-weight: 800; text-align: center; margin-bottom: 0.5rem; }
+        .modal-subtitle { font-size: 0.9375rem; color: var(--text-secondary); text-align: center; margin-bottom: 1.5rem; line-height: 1.5; }
+
+        .back-to-login { text-align: center; margin-top: 1.5rem; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .auth-branding { display: none; }
+            .auth-form-panel { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects"></div>
+    <div class="grid-bg"></div>
+
+    <div class="auth-container">
+        <!-- Left Branding Panel -->
+        <div class="auth-branding">
+            <div class="branding-logo" onclick="window.location.href='FairWorkly-HomePage-FINAL.html'" style="cursor:pointer;">
+                <div class="logo-icon"><span class="material-icons-outlined">bolt</span></div>
+                <span class="logo-text">FairWorkly</span>
+            </div>
+
+            <div class="branding-content">
+                <h1 class="branding-title">
+                    AI Compliance<br>
+                    Made <span class="highlight">Simple</span>
+                </h1>
+                <p class="branding-subtitle">
+                    Join hundreds of Australian SMEs using FairWorkly to stay compliant with Modern Awards.
+                </p>
+
+                <ul class="branding-features">
+                    <li>
+                        <div class="icon"><span class="material-icons-outlined">schedule</span></div>
+                        <span>2-minute validation</span>
+                    </li>
+                    <li>
+                        <div class="icon"><span class="material-icons-outlined">verified</span></div>
+                        <span>3 core Modern Awards</span>
+                    </li>
+                    <li>
+                        <div class="icon"><span class="material-icons-outlined">smart_toy</span></div>
+                        <span>3 AI compliance agents</span>
+                    </li>
+                    <li>
+                        <div class="icon"><span class="material-icons-outlined">support_agent</span></div>
+                        <span>Melbourne-based support</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="branding-footer">
+                © 2025 FairWorkly · Made in Melbourne, Australia
+            </div>
+        </div>
+
+        <!-- Right Form Panel -->
+        <div class="auth-form-panel">
+            <div class="auth-form-container">
+                <div class="auth-header">
+                    <h2 class="auth-title">Welcome back</h2>
+                    <p class="auth-subtitle">Sign in to manage your compliance</p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+                    <button class="auth-tab" onclick="switchTab('signup')">Create Account</button>
+                </div>
+
+                <!-- Login Form -->
+                <form class="auth-form active" id="loginForm">
+                    <button type="button" class="btn btn-social" onclick="handleGoogleLogin()">
+                        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        Continue with Google
+                    </button>
+
+                    <div class="divider"><span>or continue with email</span></div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" id="loginEmail" placeholder="you@company.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="form-checkbox">
+                            <input type="checkbox" id="rememberMe">
+                            <span>Remember me</span>
+                        </label>
+                        <button type="button" class="form-link" onclick="openForgotPassword()">Forgot password?</button>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" onclick="handleLogin(event)">
+                        Sign In
+                        <span class="material-icons-outlined">arrow_forward</span>
+                    </button>
+                </form>
+
+                <!-- Signup Form -->
+                <form class="auth-form" id="signupForm">
+                    <button type="button" class="btn btn-social" onclick="handleGoogleLogin()">
+                        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        Continue with Google
+                    </button>
+
+                    <div class="divider"><span>or sign up with email</span></div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-input" placeholder="John" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-input" placeholder="Smith" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Company Name</label>
+                        <input type="text" class="form-input" placeholder="Your Company Pty Ltd" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Work Email</label>
+                        <input type="email" class="form-input" placeholder="you@company.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="signupPassword" placeholder="Create a password" required oninput="checkPasswordStrength(this.value)">
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <span class="strength-text" id="strengthText">Use 8+ characters with letters, numbers & symbols</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Number of Employees</label>
+                        <select class="form-input" required>
+                            <option value="">Select range</option>
+                            <option value="1-50">1-50 employees</option>
+                            <option value="51-150">51-150 employees</option>
+                            <option value="150+">150+ employees</option>
+                        </select>
+                        <small class="form-hint" style="display: block; margin-top: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">This helps us recommend the right plan for you</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" onclick="handleSignup(event)">
+                        Create Account
+                        <span class="material-icons-outlined">arrow_forward</span>
+                    </button>
+
+                    <p class="form-terms">
+                        By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal')">
+                <span class="material-icons-outlined">close</span>
+            </button>
+            
+            <div id="forgotStep1">
+                <div class="modal-icon">
+                    <span class="material-icons-outlined">lock_reset</span>
+                </div>
+                <h3 class="modal-title">Forgot Password?</h3>
+                <p class="modal-subtitle">Enter your email and we'll send you a reset link.</p>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" id="resetEmail" placeholder="you@company.com">
+                </div>
+                
+                <button class="btn btn-primary" onclick="sendResetEmail()">
+                    Send Reset Link
+                    <span class="material-icons-outlined">send</span>
+                </button>
+                
+                <div class="back-to-login">
+                    <button class="form-link" onclick="closeModal('forgotPasswordModal')">← Back to login</button>
+                </div>
+            </div>
+            
+            <div id="forgotStep2" style="display: none;">
+                <div class="success-icon">
+                    <span class="material-icons-outlined">check</span>
+                </div>
+                <h3 class="modal-title">Check Your Email</h3>
+                <p class="modal-subtitle">We've sent a password reset link to <strong id="sentToEmail"></strong></p>
+                
+                <button class="btn btn-primary" onclick="closeModal('forgotPasswordModal')">Back to Login</button>
+                
+                <p class="form-terms" style="margin-top: 1rem;">
+                    Didn't receive the email? <button class="form-link" onclick="resendEmail()">Resend</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check URL for signup parameter
+        if (window.location.search.includes('signup=true')) switchTab('signup');
+
+        // Load saved email
+        window.addEventListener('load', function() {
+            const savedEmail = localStorage.getItem('rememberedEmail');
+            if (savedEmail) {
+                document.getElementById('loginEmail').value = savedEmail;
+                document.getElementById('rememberMe').checked = true;
+            }
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+                document.getElementById('signupForm').classList.add('active');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const remember = document.getElementById('rememberMe').checked;
+            
+            if (remember) {
+                localStorage.setItem('rememberedEmail', email);
+            } else {
+                localStorage.removeItem('rememberedEmail');
+            }
+            
+            // Redirect to dashboard
+            window.location.href = '../fairworkly-app/app-dashboard.html';
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const role = document.querySelector('input[name="role"]:checked').value;
+            
+            if (role === 'employee') {
+                window.location.href = '../fairworkly-app/app-self-service.html';
+            } else {
+                window.location.href = '../fairworkly-app/app-dashboard.html';
+            }
+        }
+
+        function handleGoogleLogin() {
+            // Simulate Google login
+            window.location.href = '../fairworkly-app/app-dashboard.html';
+        }
+
+        function checkPasswordStrength(password) {
+            const fill = document.getElementById('strengthFill');
+            const text = document.getElementById('strengthText');
+            
+            fill.className = 'strength-fill';
+            
+            if (password.length === 0) {
+                text.textContent = 'Use 8+ characters with letters, numbers & symbols';
+                return;
+            }
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
+            if (/[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password)) strength++;
+            
+            if (strength === 1) {
+                fill.classList.add('weak');
+                text.textContent = 'Weak - add more variety';
+            } else if (strength === 2) {
+                fill.classList.add('medium');
+                text.textContent = 'Medium - almost there';
+            } else if (strength === 3) {
+                fill.classList.add('strong');
+                text.textContent = 'Strong password!';
+            }
+        }
+
+        // Modal functions
+        function openForgotPassword() {
+            document.getElementById('forgotPasswordModal').classList.add('active');
+            document.getElementById('forgotStep1').style.display = 'block';
+            document.getElementById('forgotStep2').style.display = 'none';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function sendResetEmail() {
+            const email = document.getElementById('resetEmail').value;
+            if (email) {
+                document.getElementById('sentToEmail').textContent = email;
+                document.getElementById('forgotStep1').style.display = 'none';
+                document.getElementById('forgotStep2').style.display = 'block';
+            }
+        }
+
+        function resendEmail() {
+            alert('Reset email resent!');
+        }
+
+        // Close modal on outside click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) closeModal(this.id);
+            });
+        });
+    </script>
+</body>
+</html>
