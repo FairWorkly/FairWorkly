@@ -4,7 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Quick Start
 
-**Before starting any work, read `.raw_materials/AI_README_FIRST.md`** - it defines your permissions, constraints, and workflow.
+**Before starting any work, read the appropriate entry document:**
+
+- If `.doc/` directory exists → read `.doc/AI_GUIDE.md` (project navigation and current task status)
+- If `.doc/` directory does NOT exist → read `.raw_materials/AI_README_FIRST.md` (initial setup instructions)
 
 ## Common Commands
 
