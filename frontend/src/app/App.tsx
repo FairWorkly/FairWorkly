@@ -1,9 +1,6 @@
-import { useRoutes } from 'react-router-dom'
-import { publicRoutes } from '@/app/routes/public.routes'
-import { toolRoutes } from '@/app/routes/tools.routes'
+import { RouterProvider } from 'react-router-dom'
+import { router } from './routes'
 
 export function App() {
-  const routes = useRoutes([...publicRoutes, ...toolRoutes])
-
-  return routes
+  return <RouterProvider router={router} />
 }
