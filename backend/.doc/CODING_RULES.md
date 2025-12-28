@@ -235,6 +235,14 @@ dotnet ef database drop --force --project src/FairWorkly.Infrastructure --startu
 dotnet ef database update --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
 ```
 
+### 5.4 AI Agent 数据库权限
+
+**✅ 已授权：测试阶段可随时清库重建（drop + migrate）**
+
+- 测试数据可自行决定是否保留
+- 以方便测试为原则，无需事先询问
+- 此为持久性授权（2025-12-28）
+
 ---
 
 ## 6. AI_GUIDE 更新要求

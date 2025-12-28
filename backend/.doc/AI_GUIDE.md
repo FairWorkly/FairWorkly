@@ -78,9 +78,52 @@ backend/
 
 | Issue | 名称 | 状态 | 详情 |
 |-------|------|------|------|
-| ISSUE_01 | CSV 解析 + 员工同步 | 待开发 | [.doc/issues/ISSUE_01_CsvParser_EmployeeSync.md](./issues/ISSUE_01_CsvParser_EmployeeSync.md) |
+| ISSUE_01 | CSV 解析 + 员工同步 | ✅ 联调测试通过 (16/16 tests) | [.doc/issues/ISSUE_01_CsvParser_EmployeeSync.md](./issues/ISSUE_01_CsvParser_EmployeeSync.md) |
 | ISSUE_02 | 合规规则引擎 | 待开发 | [.doc/issues/ISSUE_02_ComplianceEngine.md](./issues/ISSUE_02_ComplianceEngine.md) |
 | ISSUE_03 | Handler 集成 + API | 待开发 | [.doc/issues/ISSUE_03_Handler_API.md](./issues/ISSUE_03_Handler_API.md) |
+
+### ISSUE_01 已完成的交付物
+
+```
+src/FairWorkly.Application/Payroll/
+├── Interfaces/
+│   ├── ICsvParserService.cs
+│   └── IEmployeeSyncService.cs
+├── Services/
+│   ├── CsvParserService.cs
+│   ├── EmployeeSyncService.cs
+│   └── Models/
+│       └── PayrollCsvRow.cs
+
+src/FairWorkly.Infrastructure/Persistence/
+├── Repositories/Employees/
+│   └── EmployeeRepository.cs
+├── Configurations/
+│   ├── Auth/
+│   │   ├── OrganizationConfiguration.cs
+│   │   ├── UserConfiguration.cs
+│   │   └── OrganizationAwardConfiguration.cs
+│   ├── Employees/
+│   │   └── EmployeeConfiguration.cs
+│   ├── Compliance/
+│   │   ├── RosterConfiguration.cs
+│   │   ├── RosterValidationConfiguration.cs
+│   │   ├── ShiftConfiguration.cs
+│   │   └── RosterIssueConfiguration.cs
+│   ├── Documents/
+│   │   └── DocumentConfiguration.cs
+│   └── Awards/
+│       ├── AwardConfiguration.cs
+│       └── AwardLevelConfiguration.cs
+└── AI_GUIDE.md (EF Core 配置知识点)
+
+tests/FairWorkly.UnitTests/
+├── Unit/
+│   ├── CsvParserServiceTests.cs (7 tests ✅)
+│   └── EmployeeSyncServiceTests.cs (6 tests ✅)
+└── Integration/
+    └── EmployeeSyncIntegrationTests.cs (3 tests ✅)
+```
 
 ---
 
@@ -92,6 +135,7 @@ backend/
 | [SPEC_Payroll.md](./SPEC_Payroll.md) | Payroll 模块技术规格 |
 | [TEST_PLAN.md](./TEST_PLAN.md) | 测试方案 |
 | [DEVLOG.md](./DEVLOG.md) | 开发日志 |
+| [INTEGRATION_TEST_LOG.md](./INTEGRATION_TEST_LOG.md) | 联调测试日志 |
 
 ---
 
@@ -135,6 +179,21 @@ backend/
 
 ---
 
+## 数据库连接
+
+| 配置项 | 值 |
+|--------|-----|
+| Host | localhost |
+| Port | 5433 |
+| Database | FairWorklyDb |
+| Username | postgres |
+| Password | fairworkly123 |
+| Docker 容器 | fairworkly-db |
+
+**注意**: Docker 端口映射为 `5433:5432`（宿主机:容器内部）
+
+---
+
 ## 常用命令
 
 ```bash
@@ -144,7 +203,13 @@ dotnet run --project src/FairWorkly.API
 # 运行测试
 dotnet test
 
-# 清库重建
+# 清库重建（AI Agent 已授权，可随时执行）
 dotnet ef database drop --force --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
 dotnet ef database update --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
+
+# 检查数据库连接
+docker exec fairworkly-db psql -U postgres -d FairWorklyDb -c "SELECT version();"
+
+# 查看数据库表
+docker exec fairworkly-db psql -U postgres -d FairWorklyDb -c "\dt"
 ```
