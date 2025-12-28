@@ -100,12 +100,12 @@ backend/
 ### 1. 了解业务规则
 
 先读这两个文件（只读，不能改）：
-- `.raw_materials/BUSINESS_RULES/Payroll_Engine_Logic.md.md` - 费率表、计算逻辑
-- `.raw_materials/BUSINESS_RULES/API_Contract.md.md` - API 契约
+- [Payroll_Engine_Logic.md](../.raw_materials/BUSINESS_RULES/Payroll_Engine_Logic.md) - 费率表、计算逻辑
+- [API_Contract.md](../.raw_materials/BUSINESS_RULES/API_Contract.md) - API 契约
 
 ### 2. 了解技术约束
 
-- `.raw_materials/TECH_CONSTRAINTS/CODING_STANDARDS.md` - 编码规范
+- [CODING_STANDARDS.md](../.raw_materials/TECH_CONSTRAINTS/CODING_STANDARDS.md) - 编码规范
 
 ### 3. 查看当前任务
 

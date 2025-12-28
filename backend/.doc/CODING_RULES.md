@@ -245,3 +245,19 @@ dotnet ef database update --project src/FairWorkly.Infrastructure --startup-proj
 - [ ] 新建的目录是否需要 AI_GUIDE？
 - [ ] 已有的 AI_GUIDE 内容是否需要更新？
 - [ ] 复杂逻辑是否需要单独的说明？
+
+---
+
+## 7. AI Agent 行为规范
+
+### 7.1 获取当前日期
+
+Claude Code 通过系统上下文中的 `Today's date` 字段获取当前日期，**不是**通过内部训练数据推断。
+
+在 DEVLOG.md 或其他需要记录日期的地方，使用系统提供的日期，格式为 `YYYY-MM-DD`。
+
+### 7.2 时间相关注意事项
+
+- 系统上下文中的日期是可信的
+- 如果需要记录时间戳，应询问人类或使用系统提供的日期
+- 不要凭"感觉"或"记忆"推断日期
