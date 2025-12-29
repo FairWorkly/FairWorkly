@@ -1,4 +1,5 @@
-import { type RouteObject, Navigate } from 'react-router-dom'
+import { Navigate, type RouteObject } from 'react-router-dom'
+import { MainLayout } from '@/shared/components/layout/MainLayout'
 import { ProtectedRoute } from '@/shared/components/guards/ProtectedRoute'
 
 // Payroll pages
@@ -13,103 +14,55 @@ import { RosterResults } from '@/modules/compliance/pages/RosterResults'
 import { DocumentTemplates } from '@/modules/documents/pages/DocumentTemplates'
 import { GenerateDocument } from '@/modules/documents/pages/GenerateDocument'
 import { DocumentLibrary } from '@/modules/documents/pages/DocumentLibrary'
-
-// Employee pages
-import { MyProfile } from '@/modules/employee/pages/MyProfile'
+import { RoleBasedRoute } from '@/shared/components/guards/RoleBasedRoute'
 
 export const toolRoutes: RouteObject[] = [
-  // ==================== Payroll Agent ====================
   {
-    path: '/payroll',
+    // First Layer：handle loading, Auth, Deep Linking
+    element: <ProtectedRoute />,
     children: [
       {
-        index: true,
-        element: <Navigate to="upload" replace />,
-      },
-      {
-        path: 'upload',
-        element: (
-          <ProtectedRoute requiredModule="payroll">
-            <PayrollUpload />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'results/:id',
-        element: (
-          <ProtectedRoute requiredModule="payroll">
-            <PayrollResults />
-          </ProtectedRoute>
-        ),
+        // Second Layer: MainLayout ( Sidebar, Topbar, backgroud)
+        element: <MainLayout />,
+        children: [
+          {
+            path: '/payroll',
+            children: [
+              { path: 'upload', element: <PayrollUpload /> },
+              { path: 'results', element: <PayrollResults /> },
+              // this Navigate only for UX, when users access to /payroll then direct to upload page
+              { index: true, element: <Navigate to="upload" replace /> },
+            ],
+          },
+
+          {
+            path: '/compliance',
+            children: [
+              { path: 'roster-upload', element: <RosterUpload /> },
+              { path: 'roster-results', element: <RosterResults /> },
+            ],
+          },
+
+          {
+            path: '/documents',
+            children: [
+              { path: 'templates', element: <DocumentTemplates /> },
+              { path: 'generate', element: <GenerateDocument /> },
+              { path: 'library', element: <DocumentLibrary /> },
+            ],
+          },
+
+          {
+            element: <RoleBasedRoute allowedRoles={['admin']} />,
+            children: [
+              {
+                path: '/settings/system',
+                element: <div>Admin Only System Settings</div>,
+              },
+            ],
+          },
+        ],
       },
     ],
-  },
-
-  // ==================== Compliance Agent ====================
-  {
-    path: '/compliance',
-    children: [
-      {
-        index: true,
-        element: <Navigate to="upload" replace />,
-      },
-      {
-        path: 'upload',
-        element: (
-          <ProtectedRoute requiredModule="compliance">
-            <RosterUpload />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'results/:id',
-        element: (
-          <ProtectedRoute requiredModule="compliance">
-            <RosterResults />
-          </ProtectedRoute>
-        ),
-      },
-    ],
-  },
-
-  // ==================== Documents Agent ====================
-  {
-    path: '/documents',
-    children: [
-      {
-        index: true,
-        element: (
-          <ProtectedRoute requiredModule="documents">
-            <DocumentTemplates />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'generate/:templateId',
-        element: (
-          <ProtectedRoute requiredModule="documents">
-            <GenerateDocument />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'library',
-        element: (
-          <ProtectedRoute requiredModule="documents">
-            <DocumentLibrary />
-          </ProtectedRoute>
-        ),
-      },
-    ],
-  },
-
-  // ==================== Employee Management ====================
-  {
-    path: 'my-profile',
-    element: (
-      <ProtectedRoute>
-        <MyProfile />
-      </ProtectedRoute>
-    ),
   },
 ]

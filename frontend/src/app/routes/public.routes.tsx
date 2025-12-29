@@ -1,19 +1,25 @@
 import { type RouteObject } from 'react-router-dom'
+import { PublicLayout } from '@/shared/components/layout/PublicLayout'
 import { HomePage } from '@/modules/home/pages/HomePage'
 import { LoginPage } from '@/modules/auth/pages/LoginPage'
-import { RegisterPage } from '@/modules/auth/pages/RegisterPage'
+import { TemplatesPage } from '@/modules/home/pages/TemplatesPage'
 
 export const publicRoutes: RouteObject[] = [
   {
-    path: '/',
-    element: <HomePage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/register',
-    element: <RegisterPage />,
+    element: <PublicLayout />,
+    children: [
+      {
+        path: '/',
+        element: <HomePage />,
+      },
+      {
+        path: '/login',
+        element: <LoginPage />,
+      },
+      {
+        path: '/templates',
+        element: <TemplatesPage />,
+      },
+    ],
   },
 ]
