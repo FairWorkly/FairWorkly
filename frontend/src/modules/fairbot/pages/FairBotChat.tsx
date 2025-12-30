@@ -41,9 +41,11 @@ const SidebarColumn = styled('aside')({
 
 // Left column that holds the conversational UI stack.
 const ChatColumn = styled('section')({
-  display: 'flex',
-  flexDirection: 'column',
+  display: FAIRBOT_LAYOUT.DISPLAY_FLEX,
+  flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
   gap: `${FAIRBOT_LAYOUT.CONTENT_GAP}px`,
+  alignSelf: FAIRBOT_LAYOUT.ALIGN_STRETCH,
+  height: FAIRBOT_LAYOUT.COLUMN_FULL_HEIGHT,
 })
 
 // Page header for title/subtitle within the chat column.
@@ -82,6 +84,10 @@ const ResultsPanelWrapper = styled('div')({
   width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
 })
 
+const MessageComposer = styled(Stack)({
+  marginTop: FAIRBOT_LAYOUT.AUTO,
+})
+
 export const FairBotChat = () => {
   const conversation = useConversation()
   // Treat file uploads as messages to keep the chat flow consistent.
@@ -115,7 +121,7 @@ export const FairBotChat = () => {
             isTyping={conversation.isTyping}
           />
         </ScrollArea>
-        <Stack spacing={FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}>
+        <MessageComposer spacing={FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}>
           <Divider />
           <FileUploadZone
             upload={upload}
@@ -124,7 +130,7 @@ export const FairBotChat = () => {
           >
             <MessageInput upload={upload} onSendMessage={conversation.sendMessage} />
           </FileUploadZone>
-        </Stack>
+        </MessageComposer>
       </ChatColumn>
       {/* Results column: mirrors the latest summary for faster navigation. */}
       <ResultsColumn>

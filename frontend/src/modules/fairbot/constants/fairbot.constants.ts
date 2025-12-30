@@ -237,6 +237,8 @@ export const FAIRBOT_LAYOUT = {
   ALIGN_CENTER: 'center',
   // Center justification value for flex layouts.
   JUSTIFY_CENTER: 'center',
+  // Auto value for flex spacing.
+  AUTO: 'auto',
   // Full-width value for grid children.
   COLUMN_FULL_WIDTH: '100%',
   // Full-height value for stretching columns/panels.
