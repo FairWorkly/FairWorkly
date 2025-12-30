@@ -239,6 +239,8 @@ export const FAIRBOT_LAYOUT = {
   JUSTIFY_CENTER: 'center',
   // Auto value for flex spacing.
   AUTO: 'auto',
+  // Border-box sizing for panel width calculations.
+  BOX_SIZING_BORDER_BOX: 'border-box',
   // Full-width value for grid children.
   COLUMN_FULL_WIDTH: '100%',
   // Full-height value for stretching columns/panels.

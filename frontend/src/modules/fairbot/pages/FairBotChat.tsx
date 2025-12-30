@@ -60,6 +60,8 @@ const ScrollArea = styled('div')({
   display: 'flex',
   flexDirection: 'column',
   gap: `${FAIRBOT_LAYOUT.MESSAGE_LIST_GAP}px`,
+  flex: FAIRBOT_NUMBERS.ONE,
+  minHeight: FAIRBOT_NUMBERS.ZERO,
   maxHeight: `${FAIRBOT_LAYOUT.CHAT_SCROLL_HEIGHT}px`,
   overflowY: 'auto',
   paddingRight: `${FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}px`,

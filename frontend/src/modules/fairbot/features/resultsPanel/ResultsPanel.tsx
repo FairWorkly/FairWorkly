@@ -1,8 +1,6 @@
 import { styled } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
 import {
   FAIRBOT_ARIA,
-  FAIRBOT_LABELS,
   FAIRBOT_LAYOUT,
   FAIRBOT_RESULTS_UI,
 } from '../../constants/fairbot.constants'
@@ -17,18 +15,13 @@ const PanelContainer = styled('section')(({ theme }) => ({
   gap: `${FAIRBOT_LAYOUT.RESULTS_PANEL_GAP}px`,
   padding: `${FAIRBOT_LAYOUT.RESULTS_PANEL_PADDING}px`,
   backgroundColor: theme.palette.background.paper,
+  boxSizing: FAIRBOT_LAYOUT.BOX_SIZING_BORDER_BOX,
   borderRadius: `${FAIRBOT_RESULTS_UI.CARD_RADIUS}px`,
   border: FAIRBOT_RESULTS_UI.PANEL_BORDER,
   width: `${FAIRBOT_LAYOUT.RESULTS_PANEL_WIDTH}px`,
   maxWidth: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
   minHeight: `${FAIRBOT_RESULTS_UI.MIN_HEIGHT}px`,
 }))
-
-const PanelHeader = styled('div')({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: `${FAIRBOT_RESULTS_UI.HEADER_GAP}px`,
-})
 
 export const ResultsPanel = () => {
   const { currentResult } = useResultsPanel()
