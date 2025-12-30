@@ -19,14 +19,14 @@ import {
 } from "@/shared/constants/navigation.constants";
 
 interface SidebarProps {
-  width: number;
+  width: number | string;
 }
 
 // Drawer 本身作为 <nav>，语义是主导航区域
 const NavigationDrawer = styled(Drawer, {
   shouldForwardProp: (prop) => prop !== "width",
 })<{
-  width: number;
+  width: number | string;
 }>(({ width }) => ({
   width,
   flexShrink: 0,

@@ -22,7 +22,7 @@ import { Sidebar } from '@/shared/components/layout/Sidebar'
 // FairBot chat page wires conversation and upload flows into a three-column layout.
 const PageContainer = styled('div')({
   display: 'grid',
-  gridTemplateColumns: `${FAIRBOT_LAYOUT.SIDEBAR_WIDTH}px minmax(0, 1fr) ${FAIRBOT_LAYOUT.RESULTS_PANEL_WIDTH}px`,
+  gridTemplateColumns: FAIRBOT_LAYOUT.GRID_TEMPLATE_COLUMNS,
   gap: `${FAIRBOT_LAYOUT.CONTENT_GAP}px`,
   alignItems: 'start',
   minHeight: FAIRBOT_LAYOUT.PAGE_MIN_HEIGHT,
@@ -33,6 +33,7 @@ const PageContainer = styled('div')({
 
 // Left column that hosts the shared sidebar navigation.
 const SidebarColumn = styled('aside')({
+  width: FAIRBOT_LAYOUT.SIDEBAR_COLUMN_WIDTH,
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
     order: FAIRBOT_NUMBERS.ZERO,
   },
@@ -43,6 +44,7 @@ const ChatColumn = styled('section')({
   display: 'flex',
   flexDirection: 'column',
   gap: `${FAIRBOT_LAYOUT.CONTENT_GAP}px`,
+  width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
 })
 
 // Page header for title/subtitle within the chat column.
@@ -64,6 +66,7 @@ const ScrollArea = styled('div')({
 
 // Right column that hosts the summary panel (stacks below on mobile).
 const ResultsColumn = styled('aside')({
+  width: FAIRBOT_LAYOUT.RESULTS_COLUMN_WIDTH,
   alignSelf: FAIRBOT_LAYOUT.ALIGN_STRETCH,
   height: FAIRBOT_LAYOUT.COLUMN_FULL_HEIGHT,
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
@@ -83,9 +86,9 @@ export const FairBotChat = () => {
   return (
     <PageContainer>
       <SidebarColumn>
-        <Sidebar width={FAIRBOT_LAYOUT.SIDEBAR_WIDTH} />
+        <Sidebar width={FAIRBOT_LAYOUT.SIDEBAR_COLUMN_WIDTH} />
       </SidebarColumn>
-      {/* Chat column: greeting, quick actions, message list, upload zone, input. */}
+      {/* Chat column: greeting, quick actions, message list, input. */}
       <ChatColumn aria-label={FAIRBOT_ARIA.CHAT_AREA}>
         <ChatHeader>
           <Typography variant="h5">{FAIRBOT_LABELS.TITLE}</Typography>

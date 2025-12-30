@@ -180,6 +180,18 @@ export const FAIRBOT_KEYWORDS = {
   CONTRACT: 'contract',
 } as const
 
+const FAIRBOT_GRID_COLUMNS = {
+  // Sidebar column width for the FairBot layout.
+  SIDEBAR: '20%',
+  // Chat column width definition for the grid.
+  CHAT: 'minmax(0, 1fr)',
+  // Results column width for the FairBot layout.
+  RESULTS: '25%',
+} as const
+
+const FAIRBOT_GRID_TEMPLATE_COLUMNS =
+  `${FAIRBOT_GRID_COLUMNS.SIDEBAR} ${FAIRBOT_GRID_COLUMNS.CHAT} ${FAIRBOT_GRID_COLUMNS.RESULTS}` as const
+
 export const FAIRBOT_LAYOUT = {
   // Max width of the chat column content.
   CHAT_MAX_WIDTH: 760,
@@ -209,8 +221,16 @@ export const FAIRBOT_LAYOUT = {
   MESSAGE_SECTION_GAP: 1.5,
   // Padding inside the message list container.
   MESSAGE_LIST_PADDING: 8,
+  // Sidebar column width for the FairBot grid layout.
+  SIDEBAR_COLUMN_WIDTH: FAIRBOT_GRID_COLUMNS.SIDEBAR,
+  // Results column width for the FairBot grid layout.
+  RESULTS_COLUMN_WIDTH: FAIRBOT_GRID_COLUMNS.RESULTS,
+  // Grid template columns for the FairBot page container.
+  GRID_TEMPLATE_COLUMNS: FAIRBOT_GRID_TEMPLATE_COLUMNS,
   // Minimum height for the page-level grid container.
   PAGE_MIN_HEIGHT: '100vh',
+  // Full-width value for grid children.
+  COLUMN_FULL_WIDTH: '100%',
   // Full-height value for stretching columns/panels.
   COLUMN_FULL_HEIGHT: '100%',
   // Grid alignment value for stretching items.
