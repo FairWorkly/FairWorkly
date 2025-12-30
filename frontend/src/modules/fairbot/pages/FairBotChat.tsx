@@ -12,7 +12,7 @@ import {
 import { useConversation } from '../features/conversation/useConversation'
 import { useFileUpload } from '../hooks/useFileUpload'
 import { WelcomeMessage } from '../ui/WelcomeMessage'
-import { QuickActions } from '../features/quickActions/QuickActions'
+// import { QuickActions } from '../features/quickActions/QuickActions'
 import { MessageList } from '../features/conversation/MessageList'
 import { FileUploadZone } from '../features/conversation/FileUploadZone'
 import { MessageInput } from '../features/conversation/MessageInput'
@@ -95,10 +95,10 @@ export const FairBotChat = () => {
           </Typography>
         </ChatHeader>
         <WelcomeMessage />
-        <QuickActions
+        {/* <QuickActions
           upload={upload}
           onSendMessage={conversation.sendMessage}
-        />
+        /> */}
         <ScrollArea>
           <MessageList
             messages={conversation.messages}
