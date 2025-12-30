@@ -88,6 +88,13 @@ const MessageComposer = styled(Stack)({
   marginTop: FAIRBOT_LAYOUT.AUTO,
 })
 
+const MessageInputWrapper = styled('div')({
+  width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
+  '& > *': {
+    width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
+  },
+})
+
 export const FairBotChat = () => {
   const conversation = useConversation()
   // Treat file uploads as messages to keep the chat flow consistent.
@@ -128,7 +135,9 @@ export const FairBotChat = () => {
             inputRef={inputRef}
             helperText={FAIRBOT_LABELS.UPLOAD_TIP}
           >
-            <MessageInput upload={upload} onSendMessage={conversation.sendMessage} />
+            <MessageInputWrapper>
+              <MessageInput upload={upload} onSendMessage={conversation.sendMessage} />
+            </MessageInputWrapper>
           </FileUploadZone>
         </MessageComposer>
       </ChatColumn>
