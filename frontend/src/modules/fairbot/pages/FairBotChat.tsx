@@ -119,6 +119,7 @@ export const FairBotChat = () => {
             {FAIRBOT_LABELS.SUBTITLE}
           </Typography>
         </ChatHeader>
+        <Divider />
         <WelcomeMessage />
         {/* <QuickActions
           upload={upload}
