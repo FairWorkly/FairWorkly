@@ -229,6 +229,14 @@ export const FAIRBOT_LAYOUT = {
   GRID_TEMPLATE_COLUMNS: FAIRBOT_GRID_TEMPLATE_COLUMNS,
   // Minimum height for the page-level grid container.
   PAGE_MIN_HEIGHT: '100vh',
+  // Flex display value for layout containers.
+  DISPLAY_FLEX: 'flex',
+  // Column direction for flex layouts.
+  FLEX_DIRECTION_COLUMN: 'column',
+  // Center alignment value for flex layouts.
+  ALIGN_CENTER: 'center',
+  // Center justification value for flex layouts.
+  JUSTIFY_CENTER: 'center',
   // Full-width value for grid children.
   COLUMN_FULL_WIDTH: '100%',
   // Full-height value for stretching columns/panels.
@@ -315,6 +323,8 @@ export const FAIRBOT_RESULTS_UI = {
   HEADER_ICON_SIZE: 56,
   // Border radius for results cards.
   CARD_RADIUS: 16,
+  // Border override for results panel.
+  PANEL_BORDER: 'none',
   // Padding inside results cards.
   CARD_PADDING: 16,
   // Radius for empty state icon container.

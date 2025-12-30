@@ -12,14 +12,15 @@ import { QuickSummary } from './QuickSummary'
 
 // Results panel reads the latest summary from session storage and renders the right state.
 const PanelContainer = styled('section')(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
+  display: FAIRBOT_LAYOUT.DISPLAY_FLEX,
+  flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
   gap: `${FAIRBOT_LAYOUT.RESULTS_PANEL_GAP}px`,
   padding: `${FAIRBOT_LAYOUT.RESULTS_PANEL_PADDING}px`,
   backgroundColor: theme.palette.background.paper,
   borderRadius: `${FAIRBOT_RESULTS_UI.CARD_RADIUS}px`,
-  border: `${FAIRBOT_RESULTS_UI.CARD_BORDER_WIDTH}px solid ${theme.palette.divider}`,
-  height: FAIRBOT_LAYOUT.COLUMN_FULL_HEIGHT,
+  border: FAIRBOT_RESULTS_UI.PANEL_BORDER,
+  width: `${FAIRBOT_LAYOUT.RESULTS_PANEL_WIDTH}px`,
+  maxWidth: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
   minHeight: `${FAIRBOT_RESULTS_UI.MIN_HEIGHT}px`,
 }))
 
@@ -34,12 +35,6 @@ export const ResultsPanel = () => {
 
   return (
     <PanelContainer aria-label={FAIRBOT_ARIA.RESULTS_PANEL}>
-      <PanelHeader>
-        <Typography variant="subtitle1">{FAIRBOT_LABELS.RESULTS_PANEL_TITLE}</Typography>
-        <Typography variant="body2" color="text.secondary">
-          {FAIRBOT_LABELS.RESULTS_PANEL_SUBTITLE}
-        </Typography>
-      </PanelHeader>
       {currentResult ? <QuickSummary result={currentResult} /> : <ResultsEmpty />}
     </PanelContainer>
   )

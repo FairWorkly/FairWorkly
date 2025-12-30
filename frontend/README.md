@@ -44,6 +44,7 @@ npm run build-storybook  # static Storybook build
 - Route configs live in `src/app/routes/*.routes.tsx`.
 - Navigation labels and routes are centralized in `src/shared/constants/navigation.constants.ts` and consumed by `Topbar`/`Sidebar`.
 - `FairBotChat` currently renders the shared `Sidebar` directly for a three-column layout; reconcile with `MainLayout` if you later wrap routes.
+- FairBot layout widths are set in `src/modules/fairbot/constants/fairbot.constants.ts` (`GRID_TEMPLATE_COLUMNS`, `SIDEBAR_COLUMN_WIDTH`, `RESULTS_COLUMN_WIDTH`).
 - Import alias: `@/` maps to `src/` (see `vite.config.ts` and `tsconfig.app.json`).
 
 ## State, data, and API

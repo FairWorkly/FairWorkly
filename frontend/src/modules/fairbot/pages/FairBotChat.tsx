@@ -64,12 +64,22 @@ const ScrollArea = styled('div')({
 })
 
 // Right column that hosts the summary panel (stacks below on mobile).
-const ResultsColumn = styled('aside')({
+const ResultsColumn = styled('aside')(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
   alignSelf: FAIRBOT_LAYOUT.ALIGN_STRETCH,
   height: FAIRBOT_LAYOUT.COLUMN_FULL_HEIGHT,
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
     order: FAIRBOT_NUMBERS.TWO,
   },
+}))
+
+const ResultsPanelWrapper = styled('div')({
+  display: FAIRBOT_LAYOUT.DISPLAY_FLEX,
+  flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
+  alignItems: FAIRBOT_LAYOUT.ALIGN_CENTER,
+  justifyContent: FAIRBOT_LAYOUT.JUSTIFY_CENTER,
+  height: FAIRBOT_LAYOUT.COLUMN_FULL_HEIGHT,
+  width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
 })
 
 export const FairBotChat = () => {
@@ -118,7 +128,9 @@ export const FairBotChat = () => {
       </ChatColumn>
       {/* Results column: mirrors the latest summary for faster navigation. */}
       <ResultsColumn>
-        <ResultsPanel />
+        <ResultsPanelWrapper>
+          <ResultsPanel />
+        </ResultsPanelWrapper>
       </ResultsColumn>
     </PageContainer >
   )
