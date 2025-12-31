@@ -44,14 +44,15 @@ const ChatColumn = styled('section')({
   flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
   alignSelf: FAIRBOT_LAYOUT.ALIGN_STRETCH,
   height: FAIRBOT_LAYOUT.PAGE_MIN_HEIGHT,
+  minHeight: FAIRBOT_NUMBERS.ZERO,
 })
 
 // Page header for title/subtitle within the chat column.
 const ChatHeader = styled('header')({
   display: 'flex',
   flexDirection: 'column',
-  height: `${FAIRBOT_LAYOUT.CHAT_HEADER_HEIGHT}px`,
-  padding: `${FAIRBOT_LAYOUT.CHAT_HEADER_PADDIMG}px`,
+  height: `${FAIRBOT_LAYOUT.CHAT_HEADER_HEIGHT}`,
+  margin: `${FAIRBOT_LAYOUT.CHAT_HEADER_MARGIN}`,
   gap: `${FAIRBOT_LAYOUT.MESSAGE_STACK_GAP}px`,
 })
 
@@ -62,10 +63,8 @@ const ScrollArea = styled('div')({
   gap: `${FAIRBOT_LAYOUT.MESSAGE_LIST_GAP}px`,
   flex: FAIRBOT_NUMBERS.ONE,
   minHeight: FAIRBOT_NUMBERS.ZERO,
-  // marginTop: `${FAIRBOT_LAYOUT.SCROLL_AREA_TOP_GAP}px`,
-  // marginBottom: `${FAIRBOT_LAYOUT.SCROLL_AREA_BOTTOM_GAP}px`,
   overflowY: 'auto',
-  paddingRight: `${FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}px`,
+  margin: `${FAIRBOT_LAYOUT.CHAT_SCROLL_AREA_MARGIN}`,
 })
 
 // Right column that hosts the summary panel (stacks below on mobile).
@@ -88,7 +87,7 @@ const ResultsPanelWrapper = styled('div')({
 })
 
 const MessageComposer = styled(Stack)({
-  marginTop: FAIRBOT_LAYOUT.AUTO,
+  margin: `${FAIRBOT_LAYOUT.CHAT_MESSAGE_AREA_MARGIN}`,
 })
 
 const MessageInputWrapper = styled('div')({

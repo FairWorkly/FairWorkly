@@ -191,14 +191,16 @@ const FAIRBOT_GRID_TEMPLATE_COLUMNS =
   `${FAIRBOT_GRID_COLUMNS.SIDEBAR} ${FAIRBOT_GRID_COLUMNS.CHAT} ${FAIRBOT_GRID_COLUMNS.RESULTS}` as const
 
 export const FAIRBOT_LAYOUT = {
-  CHAT_HEADER_PADDIMG: 25,
-  CHAT_HEADER_HEIGHT: 125,
+  // margin of things in chat column.
+  CHAT_HEADER_MARGIN: `25px`,
+  // margin of things in chat column.
+  CHAT_SCROLL_AREA_MARGIN: `25px`,
+  // margin of things in chat column.
+  CHAT_MESSAGE_AREA_MARGIN: `25px`,
+  // height of chat header.
+  CHAT_HEADER_HEIGHT: `100px`,
   // Max width of the chat column content.
   CHAT_MAX_WIDTH: 760,
-  // Gap between chat and chat header
-  SCROLL_AREA_TOP_GAP: 30,
-  // Gap between chat and message input area
-  SCROLL_AREA_BOTTOM_GAP: 30,
   // Fixed width for the results panel.
   RESULTS_PANEL_WIDTH: 360,
   // Reserved width for sidebar layouts.
@@ -254,8 +256,6 @@ export const FAIRBOT_UPLOAD = {
   BORDER_RADIUS: 16,
   // Border override for upload drop zone.
   BORDER_NONE: 'none',
-  // Padding inside the upload zone.
-  PADDING: 12,
   // Gap between upload zone elements.
   GAP: 8,
   // Horizontal offset for helper text alignment.
