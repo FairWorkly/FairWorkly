@@ -12,7 +12,7 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.Property(e => e.FirstName).HasMaxLength(100).IsRequired();
         builder.Property(e => e.LastName).HasMaxLength(100).IsRequired();
         builder.Property(e => e.Email).HasMaxLength(255).IsRequired();
-        builder.Property(e => e.EmployeeNumber).HasMaxLength(50); // 工号
+        builder.Property(e => e.EmployeeNumber).HasMaxLength(50);
 
         // Important: create indexes to speed up CSV lookups
         // Composite index: EmployeeNumber must be unique within the same Organization

@@ -29,6 +29,10 @@ public class EmployeeSyncService : IEmployeeSyncService
         Guid organizationId,
         CancellationToken cancellationToken = default)
     {
+        // Early return for null or empty input
+        if (rows == null || rows.Count == 0)
+            return new Dictionary<string, Guid>();
+
         var employeeMapping = new Dictionary<string, Guid>();
 
         // Get unique employee numbers from CSV
@@ -43,7 +47,10 @@ public class EmployeeSyncService : IEmployeeSyncService
             employeeNumbers,
             cancellationToken);
 
-        var existingEmployeesDict = existingEmployees.ToDictionary(e => e.EmployeeNumber!);
+        // Filter out any employees with null EmployeeNumber (defensive against dirty data)
+        var existingEmployeesDict = existingEmployees
+            .Where(e => e.EmployeeNumber != null)
+            .ToDictionary(e => e.EmployeeNumber!);
 
         // Group rows by EmployeeId to get the latest data for each employee
         var employeeGroups = rows
