@@ -26,8 +26,6 @@ export const FAIRBOT_LABELS = {
   UPLOAD_TIP: 'Tip: Upload roster or payroll files (.xlsx, .csv) for instant analysis',
   // Label for roster quick action.
   CHECK_ROSTER: 'Check Roster',
-  // Label for payroll quick action.
-  VERIFY_PAYROLL: 'Verify Payroll',
   // Label for ask question quick action.
   ASK_QUESTION: 'Ask a Question',
   // Call-to-action label for detailed report links.
@@ -96,7 +94,7 @@ export const FAIRBOT_LABELS = {
   MESSAGE_INPUT_LABEL: 'Message',
   // Heading for message list section.
   MESSAGE_LIST_HEADING: 'Conversation',
-  // Prompt text inside upload zone.
+  // Message text used when a file upload is sent.
   FILE_UPLOAD_PROMPT: 'Drop a file here or click to upload',
   // Hint when user cannot submit.
   SUBMIT_DISABLED_HINT: 'Please enter a message or attach a file.',
