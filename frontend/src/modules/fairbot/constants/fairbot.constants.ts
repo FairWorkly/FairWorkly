@@ -191,16 +191,18 @@ const FAIRBOT_GRID_TEMPLATE_COLUMNS =
   `${FAIRBOT_GRID_COLUMNS.SIDEBAR} ${FAIRBOT_GRID_COLUMNS.CHAT} ${FAIRBOT_GRID_COLUMNS.RESULTS}` as const
 
 export const FAIRBOT_LAYOUT = {
+  CHAT_HEADER_PADDIMG: 25,
+  CHAT_HEADER_HEIGHT: 125,
   // Max width of the chat column content.
   CHAT_MAX_WIDTH: 760,
+  // Gap between chat and chat header
   SCROLL_AREA_TOP_GAP: 30,
+  // Gap between chat and message input area
   SCROLL_AREA_BOTTOM_GAP: 30,
   // Fixed width for the results panel.
   RESULTS_PANEL_WIDTH: 360,
   // Reserved width for sidebar layouts.
   SIDEBAR_WIDTH: 220,
-  // Base gap used between layout sections.
-  CONTENT_GAP: 24,
   // Breakpoint for mobile layout adjustments.
   MOBILE_BREAKPOINT: 900,
   // Gap between quick action cards.

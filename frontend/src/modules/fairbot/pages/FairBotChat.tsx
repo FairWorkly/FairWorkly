@@ -23,7 +23,6 @@ import { Sidebar } from '@/shared/components/layout/Sidebar'
 const PageContainer = styled('div')({
   display: 'grid',
   gridTemplateColumns: FAIRBOT_LAYOUT.GRID_TEMPLATE_COLUMNS,
-  gap: `${FAIRBOT_LAYOUT.CONTENT_GAP}px`,
   alignItems: 'start',
   minHeight: FAIRBOT_LAYOUT.PAGE_MIN_HEIGHT,
   width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
@@ -51,6 +50,8 @@ const ChatColumn = styled('section')({
 const ChatHeader = styled('header')({
   display: 'flex',
   flexDirection: 'column',
+  height: `${FAIRBOT_LAYOUT.CHAT_HEADER_HEIGHT}px`,
+  padding: `${FAIRBOT_LAYOUT.CHAT_HEADER_PADDIMG}px`,
   gap: `${FAIRBOT_LAYOUT.MESSAGE_STACK_GAP}px`,
 })
 
@@ -61,8 +62,8 @@ const ScrollArea = styled('div')({
   gap: `${FAIRBOT_LAYOUT.MESSAGE_LIST_GAP}px`,
   flex: FAIRBOT_NUMBERS.ONE,
   minHeight: FAIRBOT_NUMBERS.ZERO,
-  marginTop: `${FAIRBOT_LAYOUT.SCROLL_AREA_TOP_GAP}px`,
-  marginBottom: `${FAIRBOT_LAYOUT.SCROLL_AREA_BOTTOM_GAP}px`,
+  // marginTop: `${FAIRBOT_LAYOUT.SCROLL_AREA_TOP_GAP}px`,
+  // marginBottom: `${FAIRBOT_LAYOUT.SCROLL_AREA_BOTTOM_GAP}px`,
   overflowY: 'auto',
   paddingRight: `${FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}px`,
 })
@@ -118,8 +119,8 @@ export const FairBotChat = () => {
           <Typography variant="body2" color="text.secondary">
             {FAIRBOT_LABELS.SUBTITLE}
           </Typography>
-          <Divider />
         </ChatHeader>
+        <Divider />
         <ScrollArea>
           <WelcomeMessage />
           <QuickActions
@@ -131,8 +132,8 @@ export const FairBotChat = () => {
             isTyping={conversation.isTyping}
           />
         </ScrollArea>
+        <Divider />
         <MessageComposer spacing={FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}>
-          <Divider />
           <FileUploadZone
             upload={upload}
             inputRef={inputRef}
