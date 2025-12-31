@@ -12,7 +12,7 @@ import {
 import { useConversation } from '../features/conversation/useConversation'
 import { useFileUpload } from '../hooks/useFileUpload'
 import { WelcomeMessage } from '../ui/WelcomeMessage'
-// import { QuickActions } from '../features/quickActions/QuickActions'
+import { QuickActions } from '../features/quickActions/QuickActions'
 import { MessageList } from '../features/conversation/MessageList'
 import { FileUploadZone } from '../features/conversation/FileUploadZone'
 import { MessageInput } from '../features/conversation/MessageInput'
@@ -43,7 +43,6 @@ const SidebarColumn = styled('aside')({
 const ChatColumn = styled('section')({
   display: FAIRBOT_LAYOUT.DISPLAY_FLEX,
   flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
-  gap: `${FAIRBOT_LAYOUT.CONTENT_GAP}px`,
   alignSelf: FAIRBOT_LAYOUT.ALIGN_STRETCH,
   height: FAIRBOT_LAYOUT.COLUMN_FULL_HEIGHT,
 })
@@ -62,7 +61,6 @@ const ScrollArea = styled('div')({
   gap: `${FAIRBOT_LAYOUT.MESSAGE_LIST_GAP}px`,
   flex: FAIRBOT_NUMBERS.ONE,
   minHeight: FAIRBOT_NUMBERS.ZERO,
-  maxHeight: `${FAIRBOT_LAYOUT.CHAT_SCROLL_HEIGHT}px`,
   overflowY: 'auto',
   paddingRight: `${FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}px`,
 })
@@ -118,14 +116,14 @@ export const FairBotChat = () => {
           <Typography variant="body2" color="text.secondary">
             {FAIRBOT_LABELS.SUBTITLE}
           </Typography>
+          <Divider />
         </ChatHeader>
-        <Divider />
-        <WelcomeMessage />
-        {/* <QuickActions
-          upload={upload}
-          onSendMessage={conversation.sendMessage}
-        /> */}
         <ScrollArea>
+          <WelcomeMessage />
+          <QuickActions
+            upload={upload}
+            onSendMessage={conversation.sendMessage}
+          />
           <MessageList
             messages={conversation.messages}
             isTyping={conversation.isTyping}
