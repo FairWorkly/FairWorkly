@@ -2,12 +2,29 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ Constitutional Documents (Read First!)
+
+**`.raw_materials/` is the project's "constitution" - AI can only READ, never WRITE.**
+
+| Path | Permission | Description |
+|------|------------|-------------|
+| `.raw_materials/BUSINESS_RULES/` | 🔴 Read-Only | Rate tables, API contracts. ANY modification is a violation. |
+| `.raw_materials/TECH_CONSTRAINTS/` | 🟡 Read-Only (can raise objections) | Technical constraints. Can question but cannot modify. |
+| `.raw_materials/REFERENCE/` | 🟢 Read-Only Reference | Reference materials. Can redesign in `.doc/`. |
+| `**/README.md` | 🔴 Read-Only | Human documentation. AI cannot modify/delete/create. |
+
+**If you find issues in constitutional documents:**
+1. DO NOT modify them
+2. Report to human using the objection format
+3. Wait for human confirmation
+
 ## Quick Start
 
 **Before starting any work, read the appropriate entry document:**
 
-- If `.doc/` directory exists → read `.doc/AI_GUIDE.md` (project navigation and current task status)
-- If `.doc/` directory does NOT exist → read `.raw_materials/AI_README_FIRST.md` (initial setup instructions)
+1. **ALWAYS first**: Read `.raw_materials/AI_README_FIRST.md` (constitutional document, understand your boundaries)
+2. If `.doc/` directory exists → read `.doc/AI_GUIDE.md` (project navigation and current task status)
+3. If `.doc/` directory does NOT exist → follow instructions in `.raw_materials/AI_README_FIRST.md` to create `.doc/`
 
 ## Common Commands
 
@@ -52,11 +69,29 @@ src/
 
 ## Files You Cannot Modify
 
+### Code Files (Red Line)
+
 | Path | Reason |
 |------|--------|
 | `FairWorkly.Domain/*/Entities/*.cs` | Entities are finalized |
 | `FairWorkly.Infrastructure/Persistence/FairWorklyDbContext.cs` | Audit logic configured |
-| `.raw_materials/BUSINESS_RULES/*` | Legal-level constraints |
+
+### Documentation Files (Constitutional)
+
+| Path | Reason |
+|------|--------|
+| `.raw_materials/*` | Constitutional documents - AI has READ-ONLY access |
+| `.raw_materials/BUSINESS_RULES/*` | Legal-level constraints - absolute red line |
+| `**/README.md` | Human documentation - written by humans for humans |
+
+**Objection Format** (when you find issues in read-only docs):
+```markdown
+> **[Objection]**
+> - Document says: XXX
+> - Actual situation: YYY
+> - My judgment: ZZZ
+> - Suggestion: Wait for human confirmation
+```
 
 ## Code Standards
 
@@ -70,13 +105,33 @@ src/
 
 ## Documentation System
 
-This project uses a layered documentation approach:
+This project uses a **hierarchical documentation approach** with strict permission levels:
 
-- **`.doc/`**: Development documentation (specs, issues, dev log)
-- **`AI_GUIDE.md` files**: Navigation guides in code directories
-- **`.raw_materials/`**: Original requirements (read-only reference)
+### Constitutional Layer (READ-ONLY for AI)
 
-When starting a new session, read `.doc/AI_GUIDE.md` for current project state and task status.
+| Path | Description |
+|------|-------------|
+| `.raw_materials/AI_README_FIRST.md` | Entry point - read this FIRST in every session |
+| `.raw_materials/BUSINESS_RULES/` | Rate tables, API contracts (legal-level constraints) |
+| `.raw_materials/TECH_CONSTRAINTS/` | Coding standards, architecture rules |
+| `.raw_materials/REFERENCE/` | Reference materials (can be redesigned in `.doc/`) |
+| `**/README.md` | Human documentation (never modify) |
+
+### Working Layer (READ-WRITE for AI)
+
+| Path | Description |
+|------|-------------|
+| `.doc/AI_GUIDE.md` | Project navigation - read at session start |
+| `.doc/CODING_RULES.md` | AI's interpretation of coding rules |
+| `.doc/SPEC_*.md` | Technical specifications |
+| `.doc/DEVLOG.md` | Development log (decisions, discussions) |
+| `.doc/issues/` | Current development tasks |
+| `**/AI_GUIDE.md` (in code dirs) | Navigation guides for code directories |
+
+**Session Start Workflow:**
+1. Read `.raw_materials/AI_README_FIRST.md` (understand boundaries)
+2. Read `.doc/AI_GUIDE.md` (current project state)
+3. Check `.doc/issues/` for current task
 
 ## Workflow
 

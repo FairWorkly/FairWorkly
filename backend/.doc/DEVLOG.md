@@ -6,6 +6,62 @@
 
 ---
 
+## 2026-01-01 文档工程全面更新
+
+### 变更内容
+
+**文档权限体系建立**：
+
+人类要求全面更新文档，强调 `.raw_materials/` 的宪法级地位：
+
+| 文档类型 | 权限 | 说明 |
+|----------|------|------|
+| `.raw_materials/BUSINESS_RULES/` | 🔴 绝对只读 | 费率表、API 契约 |
+| `.raw_materials/TECH_CONSTRAINTS/` | 🟡 只读可异议 | 技术约束 |
+| `.raw_materials/REFERENCE/` | 🟢 只读参考 | 参考资料 |
+| `**/README.md` | 🔴 只读 | 人类文档 |
+| `.doc/*` | ✅ 可读写 | AI 工作文档 |
+| `**/AI_GUIDE.md` | ✅ 可读写 | AI 导航文档 |
+
+**更新的文件清单**：
+
+1. `CLAUDE.md` - 添加 Constitutional Documents 章节
+2. `.doc/AI_GUIDE.md` - 全面重写，反映当前项目状态
+3. `.doc/CODING_RULES.md` - 添加文档权限层级说明
+4. `.doc/issues/ISSUE_01_*.md` - 标记为已完成
+5. `.doc/issues/ISSUE_02_*.md` - 标记为当前任务
+6. `.doc/issues/ISSUE_03_*.md` - 更新前置依赖状态
+7. `src/FairWorkly.Application/AI_GUIDE.md` - 添加宪法提醒
+8. `src/FairWorkly.Application/Payroll/AI_GUIDE.md` - 添加宪法提醒
+9. `src/FairWorkly.Infrastructure/AI_GUIDE.md` - 添加宪法提醒
+10. `src/FairWorkly.Infrastructure/Persistence/AI_GUIDE.md` - 添加宪法提醒
+
+### 项目状态确认
+
+经代码库探索确认：
+
+| 组件 | 状态 | 完成度 |
+|------|------|--------|
+| ISSUE_01 (CSV + Sync) | ✅ 完成 | 100% |
+| ISSUE_02 (ComplianceEngine) | ⏳ 未开始 | 0% |
+| ISSUE_03 (Handler + API) | ⏳ 未开始 | 0% |
+| **总体** | - | **33%** |
+
+### 已实现的代码
+
+- `CsvParserService.cs` - CSV 解析
+- `EmployeeSyncService.cs` - 员工同步
+- `EmployeeRepository.cs` - 员工仓储
+- 16 个测试用例全部通过
+
+### 待实现的代码
+
+- ComplianceEngine (4 个规则类 + RateTableProvider)
+- Payroll Repositories (Payslip, Validation, Issue)
+- ValidatePayroll Handler + API
+
+---
+
 ## 2025-12-28 项目初始化
 
 ### 已确认的技术决策

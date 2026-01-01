@@ -2,6 +2,9 @@
 
 > **EF Core 配置和数据库访问相关的开发指南**
 
+> ⚠️ **宪法文档提醒**：`FairWorklyDbContext.cs` 是红线文件，不能修改。
+> 详见 [.doc/CODING_RULES.md](../../../.doc/CODING_RULES.md)。
+
 ---
 
 ## 核心机制
@@ -164,3 +167,19 @@ StartDate = _dateTimeProvider.UtcNow.UtcDateTime
 - [CODING_RULES.md](../../../.doc/CODING_RULES.md) - 编码规范
 - [AI_GUIDE.md](../../../.doc/AI_GUIDE.md) - 项目主导航
 - [INTEGRATION_TEST_LOG.md](../../../.doc/INTEGRATION_TEST_LOG.md) - 联调测试日志
+
+---
+
+## 文档矩阵链接
+
+### 上级导航
+- [← 返回 Infrastructure 层](../AI_GUIDE.md)
+- [← 返回仓库级 AI_GUIDE](../../../AI_GUIDE.md)
+
+### 同级导航
+- [Application 层](../../FairWorkly.Application/AI_GUIDE.md)
+- [Payroll 模块](../../FairWorkly.Application/Payroll/AI_GUIDE.md)
+
+---
+
+*最后更新: 2026-01-01*
