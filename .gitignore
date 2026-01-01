@@ -21,6 +21,7 @@
 
 # Backend AI Files
 .raw_materials/
+.claude/
 
 # Serilog log files
 logs/
