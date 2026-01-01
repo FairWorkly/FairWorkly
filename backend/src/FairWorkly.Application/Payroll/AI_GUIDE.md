@@ -32,13 +32,13 @@ Payroll/
 │   ├── EmployeeSyncService.cs        ✅ 已实现 (ISSUE_01)
 │   ├── Models/
 │   │   └── PayrollCsvRow.cs          ✅ 已实现
-│   └── ComplianceEngine/             ⏳ 待实现 (ISSUE_02)
-│       ├── IComplianceRule.cs
-│       ├── BaseRateRule.cs
-│       ├── PenaltyRateRule.cs
-│       ├── CasualLoadingRule.cs
-│       ├── SuperannuationRule.cs
-│       └── RateTableProvider.cs
+│   └── ComplianceEngine/             ✅ 已实现 (ISSUE_02)
+│       ├── IComplianceRule.cs        ✅ 规则接口
+│       ├── RateTableProvider.cs      ✅ 静态费率表
+│       ├── BaseRateRule.cs           ✅ 基础费率检查
+│       ├── PenaltyRateRule.cs        ✅ 罚金费率检查
+│       ├── CasualLoadingRule.cs      ✅ Casual Loading 检查
+│       └── SuperannuationRule.cs     ✅ 养老金检查
 ├── Features/
 │   └── ValidatePayroll/              ⏳ 待实现 (ISSUE_03)
 │       ├── ValidatePayrollCommand.cs
@@ -57,8 +57,8 @@ Payroll/
 | Issue | 名称 | 状态 | 详情 |
 |-------|------|------|------|
 | ISSUE_01 | CSV 解析 + 员工同步 | ✅ 完成 | [详情](/../.doc/issues/ISSUE_01_CsvParser_EmployeeSync.md) |
-| ISSUE_02 | 合规规则引擎 | ⏳ **当前任务** | [详情](/../.doc/issues/ISSUE_02_ComplianceEngine.md) |
-| ISSUE_03 | Handler 集成 + API | ⏳ 待开发 | [详情](/../.doc/issues/ISSUE_03_Handler_API.md) |
+| ISSUE_02 | 合规规则引擎 | ✅ 完成 | [详情](/../.doc/issues/ISSUE_02_ComplianceEngine.md) |
+| ISSUE_03 | Handler 集成 + API | ⏳ **当前任务** | [详情](/../.doc/issues/ISSUE_03_Handler_API.md) |
 
 ---
 
@@ -74,7 +74,7 @@ EmployeeSyncService.SyncEmployeesAsync() ✅ 已实现
 创建 Payslip 记录                        ⏳ ISSUE_03
     ↓
 ┌─────────────────────────────────────┐
-│         ComplianceEngine            │  ⏳ ISSUE_02
+│         ComplianceEngine            │  ✅ 已实现
 │  BaseRateRule → PenaltyRateRule    │
 │  CasualLoadingRule → SuperRule     │
 └─────────────────────────────────────┘
@@ -125,9 +125,11 @@ Task<Dictionary<string, Guid>> SyncEmployeesAsync(
 
 ---
 
-## ISSUE_02 待实现详情
+## ComplianceEngine 已实现详情
 
 ### RateTableProvider (静态费率表)
+
+**文件**: `Services/ComplianceEngine/RateTableProvider.cs`
 
 ```csharp
 public static class RateTableProvider
@@ -147,21 +149,27 @@ public static class RateTableProvider
     };
 
     // 罚金倍率
-    public static class Multipliers { ... }
+    public static class PermanentMultipliers { Saturday=1.25m, Sunday=1.50m, PublicHoliday=2.25m }
+    public static class CasualMultipliers { Saturday=1.50m, Sunday=1.75m, PublicHoliday=2.50m }
+
+    // 容差
+    public const decimal RateTolerance = 0.01m;  // 时薪容差
+    public const decimal PayTolerance = 0.05m;   // 金额容差
 
     // 养老金率
     public const decimal SuperannuationRate = 0.12m;
 }
 ```
 
-### 4 个合规规则
+### 4 个合规规则 (已实现)
 
-| 规则 | 检查目标 | Severity |
-|------|----------|----------|
-| BaseRateRule | 时薪 >= Permanent Rate | CRITICAL / WARNING |
-| PenaltyRateRule | 周末/公休罚金正确 | ERROR |
-| CasualLoadingRule | Casual 获得 25% Loading | CRITICAL / WARNING |
-| SuperannuationRule | 养老金 >= 12% | ERROR / WARNING |
+| 规则 | 检查目标 | Severity | 测试数 |
+|------|----------|----------|--------|
+| BaseRateRule | 时薪 >= Permanent Rate | CRITICAL / WARNING | 13 |
+| PenaltyRateRule | 周末/公休罚金正确 | ERROR | 13 |
+| CasualLoadingRule | Casual 获得 25% Loading | CRITICAL / WARNING | 17 |
+| SuperannuationRule | 养老金 >= 12% | ERROR / WARNING | 22 |
+| **总计** | - | - | **65** |
 
 ---
 
@@ -194,8 +202,8 @@ public static class RateTableProvider
 
 ### Issue 文档
 - [ISSUE_01 (已完成)](../../../.doc/issues/ISSUE_01_CsvParser_EmployeeSync.md)
-- [ISSUE_02 (当前)](../../../.doc/issues/ISSUE_02_ComplianceEngine.md) ← **当前任务**
-- [ISSUE_03 (待开发)](../../../.doc/issues/ISSUE_03_Handler_API.md)
+- [ISSUE_02 (已完成)](../../../.doc/issues/ISSUE_02_ComplianceEngine.md)
+- [ISSUE_03 (当前)](../../../.doc/issues/ISSUE_03_Handler_API.md) ← **当前任务**
 
 ### 规格文档
 - [SPEC_Payroll.md](../../../.doc/SPEC_Payroll.md) - 技术规格
@@ -207,4 +215,4 @@ public static class RateTableProvider
 
 ---
 
-*最后更新: 2026-01-01*
+*最后更新: 2026-01-01 (ISSUE_02 完成)*

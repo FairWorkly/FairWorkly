@@ -83,15 +83,15 @@ CSV上传 → 解析数据 → 员工Upsert → 4规则检查 → 输出违规�
 | 组件 | Issue | 状态 | 完成度 |
 |------|-------|------|--------|
 | CSV 解析 + 员工同步 | ISSUE_01 | ✅ 完成 | 100% |
-| 合规规则引擎 (4规则) | ISSUE_02 | ⏳ 待开发 | 0% |
+| 合规规则引擎 (4规则) | ISSUE_02 | ✅ 完成 | 100% |
 | Handler + API 集成 | ISSUE_03 | ⏳ 待开发 | 0% |
-| **总体进度** | - | - | **33%** |
+| **总体进度** | - | - | **67%** |
 
 ### 当前任务
 
-**→ ISSUE_02: 合规规则引擎**
+**→ ISSUE_03: Handler 集成 + API**
 
-详见: [.doc/issues/ISSUE_02_ComplianceEngine.md](./issues/ISSUE_02_ComplianceEngine.md)
+详见: [.doc/issues/ISSUE_03_Handler_API.md](./issues/ISSUE_03_Handler_API.md)
 
 ---
 
@@ -133,9 +133,9 @@ backend/
 
 ---
 
-## 已完成的交付物 (ISSUE_01)
+## 已完成的交付物 (ISSUE_01 + ISSUE_02)
 
-### 代码文件
+### ISSUE_01 代码文件
 
 ```
 src/FairWorkly.Application/Payroll/
@@ -158,16 +158,34 @@ src/FairWorkly.Infrastructure/Persistence/Repositories/
     └── EmployeeRepository.cs        ✅
 ```
 
+### ISSUE_02 代码文件
+
+```
+src/FairWorkly.Application/Payroll/Services/ComplianceEngine/
+├── IComplianceRule.cs               ✅ 规则接口
+├── RateTableProvider.cs             ✅ 静态费率表
+├── BaseRateRule.cs                  ✅ 基础费率检查
+├── PenaltyRateRule.cs               ✅ 罚金费率检查
+├── CasualLoadingRule.cs             ✅ Casual Loading 检查
+└── SuperannuationRule.cs            ✅ 养老金检查
+```
+
 ### 测试文件
 
 ```
 tests/FairWorkly.UnitTests/
 ├── Unit/
-│   ├── CsvParserServiceTests.cs     ✅ 7 tests
-│   └── EmployeeSyncServiceTests.cs  ✅ 6 tests
+│   ├── CsvParserServiceTests.cs        ✅ 7 tests
+│   ├── EmployeeSyncServiceTests.cs     ✅ 6 tests
+│   ├── BaseRateRuleTests.cs            ✅ 13 tests
+│   ├── PenaltyRateRuleTests.cs         ✅ 13 tests
+│   ├── CasualLoadingRuleTests.cs       ✅ 17 tests
+│   └── SuperannuationRuleTests.cs      ✅ 22 tests
 └── Integration/
     └── EmployeeSyncIntegrationTests.cs ✅ 3 tests
 ```
+
+**测试总计**: 81 tests passing
 
 ### DI 注册状态
 
@@ -176,32 +194,17 @@ tests/FairWorkly.UnitTests/
 | ICsvParserService → CsvParserService | ✅ 已注册 |
 | IEmployeeSyncService → EmployeeSyncService | ✅ 已注册 |
 | IEmployeeRepository → EmployeeRepository | ✅ 已注册 |
+| IComplianceRule → BaseRateRule | ✅ 已注册 |
+| IComplianceRule → PenaltyRateRule | ✅ 已注册 |
+| IComplianceRule → CasualLoadingRule | ✅ 已注册 |
+| IComplianceRule → SuperannuationRule | ✅ 已注册 |
 | IPayslipRepository | ❌ 未实现 |
 | IPayrollValidationRepository | ❌ 未实现 |
 | IPayrollIssueRepository | ❌ 未实现 |
-| ComplianceEngine Rules | ❌ 未实现 |
 
 ---
 
-## 待实现的交付物 (ISSUE_02 + ISSUE_03)
-
-### ISSUE_02: ComplianceEngine
-
-```
-src/FairWorkly.Application/Payroll/Services/ComplianceEngine/
-├── IComplianceRule.cs               ← 规则接口
-├── BaseRateRule.cs                  ← 基础费率检查
-├── PenaltyRateRule.cs               ← 罚金费率检查
-├── CasualLoadingRule.cs             ← Casual Loading 检查
-├── SuperannuationRule.cs            ← 养老金检查
-└── RateTableProvider.cs             ← 静态费率表
-
-tests/FairWorkly.UnitTests/Unit/
-├── BaseRateRuleTests.cs
-├── PenaltyRateRuleTests.cs
-├── CasualLoadingRuleTests.cs
-└── SuperannuationRuleTests.cs
-```
+## 待实现的交付物 (ISSUE_03)
 
 ### ISSUE_03: Handler + API
 
@@ -241,8 +244,8 @@ tests/FairWorkly.UnitTests/Integration/
 | Issue | 文档 | 状态 |
 |-------|------|------|
 | ISSUE_01 | [CSV 解析 + 员工同步](./issues/ISSUE_01_CsvParser_EmployeeSync.md) | ✅ 完成 |
-| ISSUE_02 | [合规规则引擎](./issues/ISSUE_02_ComplianceEngine.md) | ⏳ 当前任务 |
-| ISSUE_03 | [Handler 集成 + API](./issues/ISSUE_03_Handler_API.md) | ⏳ 待开发 |
+| ISSUE_02 | [合规规则引擎](./issues/ISSUE_02_ComplianceEngine.md) | ✅ 完成 |
+| ISSUE_03 | [Handler 集成 + API](./issues/ISSUE_03_Handler_API.md) | ⏳ 当前任务 |
 
 ---
 
@@ -260,8 +263,8 @@ tests/FairWorkly.UnitTests/Integration/
 
 ### 3. 查看当前任务
 
-- 当前任务: ISSUE_02 (合规规则引擎)
-- 打开 [.doc/issues/ISSUE_02_ComplianceEngine.md](./issues/ISSUE_02_ComplianceEngine.md)
+- 当前任务: ISSUE_03 (Handler 集成 + API)
+- 打开 [.doc/issues/ISSUE_03_Handler_API.md](./issues/ISSUE_03_Handler_API.md)
 
 ### 4. 开发流程
 
@@ -371,4 +374,4 @@ docker exec fairworkly-db psql -U postgres -d FairWorklyDb -c "\dt"
 
 ---
 
-*最后更新: 2026-01-01*
+*最后更新: 2026-01-01 (ISSUE_02 完成)*

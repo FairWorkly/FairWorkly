@@ -6,6 +6,100 @@
 
 ---
 
+## 2026-01-01 ISSUE_02 ComplianceEngine - Completed
+
+### 变更内容
+
+**新建文件**:
+
+```
+src/FairWorkly.Application/Payroll/Services/ComplianceEngine/
+├── IComplianceRule.cs               ← 规则接口
+├── RateTableProvider.cs             ← 静态费率表 (Retail Award MA000004)
+├── BaseRateRule.cs                  ← 基础费率检查
+├── PenaltyRateRule.cs               ← 周末/公休罚金费率检查
+├── CasualLoadingRule.cs             ← Casual 25% Loading 检查
+└── SuperannuationRule.cs            ← 12% 养老金检查
+
+tests/FairWorkly.UnitTests/Unit/
+├── BaseRateRuleTests.cs             ← 13 tests
+├── PenaltyRateRuleTests.cs          ← 13 tests
+├── CasualLoadingRuleTests.cs        ← 17 tests
+└── SuperannuationRuleTests.cs       ← 22 tests
+```
+
+**修改文件**:
+- `src/FairWorkly.Application/DependencyInjection.cs` - 注册 4 个 IComplianceRule 实现
+
+### Commit 历史
+
+```
+5daec15 chore(compliance): register ComplianceEngine services in DI
+dd0b475 feat(compliance): implement SuperannuationRule with unit tests
+f11ae9f feat(compliance): implement CasualLoadingRule with unit tests
+3de7a09 feat(compliance): implement PenaltyRateRule with unit tests
+bcb7ede feat(compliance): implement BaseRateRule with unit tests
+5fb0456 feat(compliance): add IComplianceRule interface and RateTableProvider
+```
+
+### 技术决策
+
+| 决策项 | 结果 | 原因 |
+|--------|------|------|
+| 罚金计算基数 | 所有员工类型使用 Permanent Rate | Award 规定：即使 Casual 员工，也用基础费率乘以对应倍率 |
+| 规则返回值 | 仅返回违规，不返回 PASS | PayrollIssue 语义是"问题"，通过不是问题 |
+| 容差处理 | 费率 $0.01，金额 $0.05 | 防止浮点精度问题导致误报 |
+| Severity 设计 | CRITICAL=实际欠薪, WARNING=配置错误, ERROR=罚金欠薪 | 区分不同严重程度，便于优先级排序 |
+
+### 规则实现要点
+
+**BaseRateRule**:
+- 检查 OrdinaryPay / OrdinaryHours 是否 >= Permanent Rate
+- 如果实际支付正确但系统配置费率错误，输出 WARNING
+
+**PenaltyRateRule**:
+- 分别检查 Saturday / Sunday / PublicHoliday
+- 使用 Permanent Rate 作为基数，乘以对应倍率
+- Permanent: 1.25x / 1.50x / 2.25x
+- Casual: 1.50x / 1.75x / 2.50x
+
+**CasualLoadingRule**:
+- 仅适用于 EmploymentType.Casual
+- 检查是否支付 Casual Rate (Permanent Rate × 1.25)
+- 同样区分 CRITICAL (实际欠薪) 和 WARNING (配置错误)
+
+**SuperannuationRule**:
+- 检查 Superannuation >= GrossPay × 12%
+- 如果 GrossPay = 0 但有工时，输出 WARNING (数据异常)
+- 无工时无工资则跳过 (无薪周期)
+
+### 测试覆盖
+
+| 规则 | 测试数 | 覆盖场景 |
+|------|--------|----------|
+| BaseRateRule | 13 | 合规、违规、容差边界、配置错误 |
+| PenaltyRateRule | 13 | Sat/Sun/PH、Casual vs Permanent、多违规组合 |
+| CasualLoadingRule | 17 | 非Casual跳过、合规、违规、各等级、配置错误 |
+| SuperannuationRule | 22 | 合规、违规、容差、零工资、所有员工类型 |
+| **总计** | **65** | - |
+
+**全项目测试**: 81 tests passing
+
+### 遵守的编码规范
+
+- ✅ 金额字段使用 `decimal`
+- ✅ 容差常量集中在 `RateTableProvider`
+- ✅ 服务注册在 `DependencyInjection.cs`
+- ✅ 代码注释和命名使用 English
+- ✅ 不修改 Domain 层 Entity
+- ✅ Commit message 使用 English + Conventional Commits
+
+### 下一步
+
+ISSUE_02 已完成，准备进入 ISSUE_03: Handler 集成 + API
+
+---
+
 ## 2026-01-01 ISSUE_02 Review 与测试覆盖补充
 
 ### 变更内容

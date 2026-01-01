@@ -1,6 +1,6 @@
 # ISSUE_02: 合规规则引擎
 
-> ⚠️ **当前任务**：此 Issue 是下一个开发目标
+> ✅ **已完成**：此 Issue 已于 2026-01-01 完成
 
 ## 目标
 
@@ -12,9 +12,9 @@
 
 ## 状态
 
-- [ ] 开发中 ← **当前位置**
-- [ ] 测试通过
-- [ ] Review 完成
+- [x] 开发中
+- [x] 测试通过 (81 tests, 65 new for ComplianceEngine)
+- [x] Review 完成 ← **已完成**
 
 **前置依赖**: ISSUE_01 ✅ 已完成
 
@@ -306,14 +306,14 @@ public const decimal PayTolerance = 0.05m;
 
 ## 验收标准
 
-- [ ] BaseRateRule 能正确识别时薪低于最低标准的违规
-- [ ] PenaltyRateRule 能正确计算三种场景（Sat/Sun/PH）的罚金差额
-- [ ] CasualLoadingRule 仅对 Casual 员工生效
-- [ ] SuperannuationRule 能正确计算 12% 养老金差额
-- [ ] 所有规则的 Severity 判定正确
-- [ ] 返回的 PayrollIssue 包含完整的 Evidence 数据
-- [ ] 服务已在 DependencyInjection.cs 中注册
-- [ ] 单元测试通过 (TC-BASE, TC-PENALTY, TC-CASUAL, TC-SUPER)
+- [x] BaseRateRule 能正确识别时薪低于最低标准的违规
+- [x] PenaltyRateRule 能正确计算三种场景（Sat/Sun/PH）的罚金差额
+- [x] CasualLoadingRule 仅对 Casual 员工生效
+- [x] SuperannuationRule 能正确计算 12% 养老金差额
+- [x] 所有规则的 Severity 判定正确
+- [x] 返回的 PayrollIssue 包含完整的 Evidence 数据
+- [x] 服务已在 DependencyInjection.cs 中注册
+- [x] 单元测试通过 (TC-BASE, TC-PENALTY, TC-CASUAL, TC-SUPER)
 
 ---
 

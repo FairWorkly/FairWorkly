@@ -22,10 +22,10 @@ FairWorkly.UnitTests/
 ├── Unit/                            ← 单元测试
 │   ├── CsvParserServiceTests.cs     ✅ 7 tests (ISSUE_01)
 │   ├── EmployeeSyncServiceTests.cs  ✅ 6 tests (ISSUE_01)
-│   ├── BaseRateRuleTests.cs         ⏳ 待 ISSUE_02
-│   ├── PenaltyRateRuleTests.cs      ⏳ 待 ISSUE_02
-│   ├── CasualLoadingRuleTests.cs    ⏳ 待 ISSUE_02
-│   └── SuperannuationRuleTests.cs   ⏳ 待 ISSUE_02
+│   ├── BaseRateRuleTests.cs         ✅ 13 tests (ISSUE_02)
+│   ├── PenaltyRateRuleTests.cs      ✅ 13 tests (ISSUE_02)
+│   ├── CasualLoadingRuleTests.cs    ✅ 17 tests (ISSUE_02)
+│   └── SuperannuationRuleTests.cs   ✅ 22 tests (ISSUE_02)
 ├── Integration/                     ← 集成测试
 │   ├── EmployeeSyncIntegrationTests.cs ✅ 3 tests (ISSUE_01)
 │   └── PayrollValidationTests.cs    ⏳ 待 ISSUE_03
@@ -46,12 +46,12 @@ FairWorkly.UnitTests/
 | ISSUE_01 | CsvParserServiceTests | 7 | ✅ Pass |
 | ISSUE_01 | EmployeeSyncServiceTests | 6 | ✅ Pass |
 | ISSUE_01 | EmployeeSyncIntegrationTests | 3 | ✅ Pass |
-| ISSUE_02 | BaseRateRuleTests | - | ⏳ 待实现 |
-| ISSUE_02 | PenaltyRateRuleTests | - | ⏳ 待实现 |
-| ISSUE_02 | CasualLoadingRuleTests | - | ⏳ 待实现 |
-| ISSUE_02 | SuperannuationRuleTests | - | ⏳ 待实现 |
+| ISSUE_02 | BaseRateRuleTests | 13 | ✅ Pass |
+| ISSUE_02 | PenaltyRateRuleTests | 13 | ✅ Pass |
+| ISSUE_02 | CasualLoadingRuleTests | 17 | ✅ Pass |
+| ISSUE_02 | SuperannuationRuleTests | 22 | ✅ Pass |
 | ISSUE_03 | PayrollValidationTests | - | ⏳ 待实现 |
-| **总计** | - | **16** | **16/16 Pass** |
+| **总计** | - | **81** | **81/81 Pass** |
 
 ---
 
@@ -150,9 +150,9 @@ dotnet ef database update --project src/FairWorkly.Infrastructure --startup-proj
 
 ### Issue 文档
 - [ISSUE_01 (已完成)](../../.doc/issues/ISSUE_01_CsvParser_EmployeeSync.md) - 16 tests
-- [ISSUE_02 (当前)](../../.doc/issues/ISSUE_02_ComplianceEngine.md) - 待实现
-- [ISSUE_03 (待开发)](../../.doc/issues/ISSUE_03_Handler_API.md) - 待实现
+- [ISSUE_02 (已完成)](../../.doc/issues/ISSUE_02_ComplianceEngine.md) - 65 tests
+- [ISSUE_03 (当前)](../../.doc/issues/ISSUE_03_Handler_API.md) ← **下一个任务**
 
 ---
 
-*最后更新: 2026-01-01*
+*最后更新: 2026-01-01 (ISSUE_02 完成, 81 tests total)*
