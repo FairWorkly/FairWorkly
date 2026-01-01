@@ -312,3 +312,29 @@ Claude Code 通过系统上下文中的 `Today's date` 字段获取当前日期�
 - 系统上下文中的日期是可信的
 - 如果需要记录时间戳，应询问人类或使用系统提供的日期
 - 不要凭"感觉"或"记忆"推断日期
+
+---
+
+## 8. AI Commit 规则
+
+AI Agent 的 commit 权限由各 Issue 文档单独授权。
+
+**通用规则**：
+
+| 规则 | 要求 |
+|------|------|
+| **语言** | Commit message 必须使用 **English** |
+| **格式** | Conventional Commits (`feat:`, `test:`, `fix:`, `chore:`, `docs:`) |
+| **粒度** | 按逻辑单元提交（一个功能点 = 代码 + 测试） |
+| **测试** | 提交前必须运行 `dotnet test` 确保通过 |
+| **Push** | ❌ 禁止 push 到远程，仅 commit 到本地 |
+| **签名** | ❌ 禁止添加 AI 生成标识（如 "Generated with Claude Code"、Co-Authored-By 等） |
+
+**权限来源**：
+
+具体的 commit 权限范围（可提交哪些文件）由各 Issue 文档定义，例如：
+- `ISSUE_02_ComplianceEngine.md` 中的 "AI Commit 权限" 章节
+
+**无授权 = 无权限**：
+
+如果当前 Issue 文档中没有 "AI Commit 权限" 章节，则 AI Agent 不可自动提交代码。

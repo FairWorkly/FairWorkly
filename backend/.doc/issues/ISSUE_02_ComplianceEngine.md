@@ -53,6 +53,50 @@ tests/FairWorkly.UnitTests/Unit/
 
 ---
 
+## AI Commit 权限
+
+> **本章节授权 AI Agent 在 ISSUE_02 开发过程中自动提交代码。**
+
+### 权限范围
+
+AI Agent 仅可对以下文件进行 commit：
+
+| 目录/文件 | 说明 |
+|-----------|------|
+| `src/FairWorkly.Application/Payroll/Services/ComplianceEngine/*` | 规则引擎实现 |
+| `src/FairWorkly.Application/DependencyInjection.cs` | DI 注册 |
+| `tests/FairWorkly.UnitTests/Unit/*RuleTests.cs` | 规则单元测试 |
+| `tests/FairWorkly.UnitTests/TestData/Csv/*` | 测试数据 |
+
+### Commit 规则
+
+| 规则 | 要求 |
+|------|------|
+| **语言** | Commit message 必须使用 **English** |
+| **格式** | Conventional Commits (`feat:`, `test:`, `fix:`, `chore:`) |
+| **粒度** | 按逻辑单元提交（一个功能点 = 代码 + 测试） |
+| **测试** | 提交前必须运行 `dotnet test` 确保通过 |
+| **Push** | ❌ 禁止 push，仅 commit 到本地 |
+| **确认** | 按规则自动提交，无需每次确认 |
+| **签名** | ❌ 禁止添加 AI 生成标识（如 "Generated with Claude Code"、Co-Authored-By 等） |
+
+### Commit 顺序建议
+
+```
+1. feat(compliance): add IComplianceRule interface and RateTableProvider
+2. feat(compliance): implement BaseRateRule with unit tests
+3. feat(compliance): implement PenaltyRateRule with unit tests
+4. feat(compliance): implement CasualLoadingRule with unit tests
+5. feat(compliance): implement SuperannuationRule with unit tests
+6. chore(compliance): register ComplianceEngine services in DI
+```
+
+### 权限终止
+
+当 ISSUE_02 所有验收标准完成后，此 commit 权限自动失效。
+
+---
+
 ## Pre-Validation (前置数据校验)
 
 > **位置**: 在 Orchestrator 层实现，不是 ComplianceEngine 的一部分。
