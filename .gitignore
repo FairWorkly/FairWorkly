@@ -19,6 +19,13 @@
 [Bb]in/
 [Oo]bj/
 
+# Backend AI Files
+.raw_materials/
+.claude/
+
+# Serilog log files
+logs/
+
 # Database and Logs
 *.db
 *.lock

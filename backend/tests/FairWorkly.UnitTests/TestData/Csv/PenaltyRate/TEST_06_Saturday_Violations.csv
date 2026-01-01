@@ -1,0 +1,4 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+SAT001,FT Sat Underpaid,2025-12-15,2025-12-21,Retail,Level 2,FullTime,27.16,30.00,814.80,8.00,217.28,0.00,0.00,0.00,0.00,1032.08,123.85
+SAT002,PT Sat Underpaid,2025-12-15,2025-12-21,Retail,Level 3,PartTime,27.58,20.00,551.60,6.00,165.48,0.00,0.00,0.00,0.00,717.08,86.05
+SAT003,Casual Sat Underpaid,2025-12-15,2025-12-21,Retail,Level 1,Casual,33.19,15.00,497.85,5.00,132.75,0.00,0.00,0.00,0.00,630.60,75.67

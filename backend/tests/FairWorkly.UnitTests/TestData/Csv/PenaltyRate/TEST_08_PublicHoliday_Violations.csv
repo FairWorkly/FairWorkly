@@ -1,0 +1,4 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+PH001,FT Christmas Underpaid,2025-12-22,2025-12-28,Retail,Level 1,FullTime,26.55,32.00,849.60,0.00,0.00,0.00,0.00,8.00,424.80,1274.40,152.93
+PH002,PT Christmas Underpaid,2025-12-22,2025-12-28,Retail,Level 2,PartTime,27.16,20.00,543.20,0.00,0.00,0.00,0.00,6.00,325.92,869.12,104.29
+PH003,Casual Christmas Underpaid,2025-12-22,2025-12-28,Retail,Level 3,Casual,34.48,15.00,517.20,0.00,0.00,0.00,0.00,4.00,220.64,737.84,88.54

@@ -1,7 +1,6 @@
 ﻿using FairWorkly.Application.Common.Interfaces;
+using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Employees.Orchestrators;
-
-// TODO: using FairWorkly.Domain.Employees.Interfaces;
 
 namespace FairWorkly.Application.Employees.Services;
 

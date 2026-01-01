@@ -1,0 +1,5 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+CAS001,Casual L1 Pass,2025-12-15,2025-12-21,Retail,Level 1,Casual,33.19,20.00,663.80,0.00,0.00,0.00,0.00,0.00,0.00,663.80,79.66
+CAS002,Casual L2 Pass,2025-12-15,2025-12-21,Retail,Level 2,Casual,33.95,25.00,848.75,0.00,0.00,0.00,0.00,0.00,0.00,848.75,101.85
+CAS003,FullTime Skip,2025-12-15,2025-12-21,Retail,Level 3,FullTime,27.58,38.00,1048.04,0.00,0.00,0.00,0.00,0.00,0.00,1048.04,125.76
+CAS004,PartTime Skip,2025-12-15,2025-12-21,Retail,Level 4,PartTime,28.12,20.00,562.40,0.00,0.00,0.00,0.00,0.00,0.00,562.40,67.49

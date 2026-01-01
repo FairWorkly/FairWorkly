@@ -1,0 +1,13 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+MIX001,Pass FullTime L1,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07
+MIX002,Pass PartTime L2,2025-12-15,2025-12-21,Retail,Level 2,PartTime,27.16,25.00,679.00,0.00,0.00,0.00,0.00,0.00,0.00,679.00,81.48
+MIX003,Pass Casual L3,2025-12-15,2025-12-21,Retail,Level 3,Casual,34.48,20.00,689.60,0.00,0.00,0.00,0.00,0.00,0.00,689.60,82.75
+MIX004,Pass FullTime L4 Sat,2025-12-15,2025-12-21,Retail,Level 4,FullTime,28.12,32.00,899.84,6.00,210.90,0.00,0.00,0.00,0.00,1110.74,133.29
+MIX005,Pass PartTime L5,2025-12-15,2025-12-21,Retail,Level 5,PartTime,29.27,20.00,585.40,0.00,0.00,0.00,0.00,0.00,0.00,585.40,70.25
+MIX006,Pass Casual L6,2025-12-15,2025-12-21,Retail,Level 6,Casual,37.13,15.00,556.95,0.00,0.00,0.00,0.00,0.00,0.00,556.95,66.83
+MIX007,FAIL BaseRate L1,2025-12-15,2025-12-21,Retail,Level 1,FullTime,24.00,40.00,960.00,0.00,0.00,0.00,0.00,0.00,0.00,960.00,115.20
+MIX008,FAIL BaseRate L2,2025-12-15,2025-12-21,Retail,Level 2,PartTime,25.00,30.00,750.00,0.00,0.00,0.00,0.00,0.00,0.00,750.00,90.00
+MIX009,FAIL Saturday Penalty,2025-12-15,2025-12-21,Retail,Level 3,FullTime,27.58,30.00,827.40,8.00,200.00,0.00,0.00,0.00,0.00,1027.40,123.29
+MIX010,FAIL Casual Loading,2025-12-15,2025-12-21,Retail,Level 4,Casual,28.12,25.00,703.00,0.00,0.00,0.00,0.00,0.00,0.00,703.00,84.36
+MIX011,FAIL Super 1,2025-12-15,2025-12-21,Retail,Level 5,FullTime,29.27,38.00,1112.26,0.00,0.00,0.00,0.00,0.00,0.00,1112.26,100.00
+MIX012,FAIL Super 2,2025-12-15,2025-12-21,Retail,Level 6,PartTime,29.70,20.00,594.00,0.00,0.00,0.00,0.00,0.00,0.00,594.00,50.00

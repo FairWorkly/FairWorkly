@@ -1,0 +1,5 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+VIOL001,Underpaid L1,2025-12-15,2025-12-21,Retail,Level 1,FullTime,25.00,40.00,1000.00,0.00,0.00,0.00,0.00,0.00,0.00,1000.00,120.00
+VIOL002,Underpaid L2,2025-12-15,2025-12-21,Retail,Level 2,PartTime,26.00,30.00,780.00,0.00,0.00,0.00,0.00,0.00,0.00,780.00,93.60
+VIOL003,Underpaid L3 Casual,2025-12-15,2025-12-21,Retail,Level 3,Casual,25.00,20.00,500.00,0.00,0.00,0.00,0.00,0.00,0.00,500.00,60.00
+VIOL004,Severely Underpaid,2025-12-15,2025-12-21,Retail,Level 5,FullTime,20.00,38.00,760.00,0.00,0.00,0.00,0.00,0.00,0.00,760.00,91.20
