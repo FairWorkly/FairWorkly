@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FairWorkly | AI-Powered HR Compliance for Australian SMEs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.12);
+            --secondary: #ec4899;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-nav: #1e1b4b;
+            --border: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --gradient-1: linear-gradient(135deg, #6366f1, #ec4899);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+            --shadow-xl: 0 20px 40px -10px rgba(0,0,0,0.15);
+        }
+
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-primary); line-height: 1.6; overflow-x: hidden; }
+        .material-icons-outlined { font-size: inherit; vertical-align: middle; }
+
+        .bg-effects { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .bg-effects::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(236, 72, 153, 0.06) 0%, transparent 50%); }
+        .grid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px); background-size: 60px 60px; z-index: -1; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+
+        /* NAVBAR */
+        .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0.875rem 0; background: var(--bg-nav); transition: all 0.3s ease; }
+        .navbar.scrolled { padding: 0.625rem 0; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .navbar .container { display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+        .logo-icon { width: 40px; height: 40px; background: var(--gradient-1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; }
+        .logo-icon .material-icons-outlined { font-size: 1.5rem; }
+        .logo-text { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #a5b4fc, #f9a8d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-links { display: flex; align-items: center; gap: 2.5rem; }
+        .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.9375rem; font-weight: 600; transition: color 0.2s ease; }
+        .nav-links a:hover { color: #a5b4fc; }
+        .nav-actions { display: flex; align-items: center; gap: 1rem; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 10px; font-size: 0.9375rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.3s ease; border: none; }
+        .btn-ghost { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.2); color: white; }
+        .btn-primary { background: var(--gradient-1); color: white; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5); }
+        .btn-secondary { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.2); }
+        .btn-secondary:hover { background: rgba(99, 102, 241, 0.18); border-color: var(--primary); }
+        .btn-outline { background: var(--bg-white); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+        .btn-lg { padding: 1rem 2rem; font-size: 1rem; }
+        .btn .material-icons-outlined { font-size: 1.25rem; }
+
+        /* HERO */
+        .hero { padding: 9rem 0 5rem; position: relative; }
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+        .hero-content { position: relative; z-index: 2; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--bg-white); border: 1px solid var(--border); border-radius: 9999px; font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); }
+        .hero-badge .dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.2); } }
+        .hero-title { font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; }
+        .hero-title .highlight { background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-subtitle { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.7; }
+        .hero-actions { display: flex; gap: 1rem; margin-bottom: 2.5rem; }
+        .hero-image { position: relative; z-index: 1; }
+        .hero-image img { width: 100%; border-radius: 20px; box-shadow: var(--shadow-xl); }
+        .hero-image-badge { position: absolute; bottom: -20px; left: -20px; background: var(--bg-white); border-radius: 16px; padding: 1rem 1.25rem; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 0.75rem; }
+        .badge-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; color: var(--accent-green); }
+        .badge-text { font-weight: 700; }
+        .badge-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* TRUST BAR */
+        .trust-bar { padding: 3rem 0; background: var(--bg-white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .trust-content { display: flex; align-items: center; justify-content: center; gap: 4rem; flex-wrap: wrap; }
+        .trust-item { display: flex; align-items: center; gap: 0.75rem; color: var(--text-muted); font-size: 0.9375rem; }
+        .trust-item .material-icons-outlined { font-size: 1.5rem; color: var(--accent-green); }
+
+        /* SECTIONS */
+        .section { padding: 6rem 0; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-label { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 1rem; background: var(--primary-glow); color: var(--primary); border-radius: 9999px; font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+        .section-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
+        .section-subtitle { font-size: 1.125rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+        /* PROBLEM */
+        .problem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+        .problem-card { background: var(--bg-white); border-radius: 20px; padding: 2rem; border: 1px solid var(--border); transition: all 0.3s ease; text-align: center; }
+        .problem-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-xl); }
+        .problem-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+        .problem-card.red .problem-icon { background: rgba(239, 68, 68, 0.1); color: var(--accent-red); }
+        .problem-card.orange .problem-icon { background: rgba(249, 115, 22, 0.1); color: var(--accent-orange); }
+        .problem-card.purple .problem-icon { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .problem-card.cyan .problem-icon { background: rgba(6, 182, 212, 0.1); color: var(--accent-cyan); }
+        .problem-icon .material-icons-outlined { font-size: 1.75rem; }
+        .problem-value { font-size: 2.25rem; font-weight: 900; margin-bottom: 0.5rem; }
+        .problem-card.red .problem-value { color: var(--accent-red); }
+        .problem-card.orange .problem-value { color: var(--accent-orange); }
+        .problem-card.purple .problem-value { color: var(--primary); }
+        .problem-card.cyan .problem-value { color: var(--accent-cyan); }
+        .problem-label { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .problem-desc { font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.6; }
+
+        /* FEATURES */
+        .features-section { background: var(--bg-white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .feature-card { 
+            background: var(--bg-light); 
+            border-radius: 20px; 
+            padding: 2.5rem 2rem; 
+            border: 1px solid var(--border); 
+            transition: all 0.3s ease; 
+            display: flex;
+            flex-direction: column;
+            min-height: 450px;
+        }
+        .feature-card:hover { border-color: var(--primary); box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+        .feature-header { 
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1rem; 
+            margin-bottom: 1.25rem; 
+        }
+        .feature-icon { 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-shrink: 0; 
+        }
+        .feature-icon .material-icons-outlined { font-size: 1.875rem; }
+        .feature-card.purple .feature-icon { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .feature-card.orange .feature-icon { background: rgba(249, 115, 22, 0.1); color: var(--accent-orange); }
+        .feature-card.cyan .feature-icon { background: rgba(6, 182, 212, 0.1); color: var(--accent-cyan); }
+        .feature-card.green .feature-icon { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
+        .feature-title { 
+            font-size: 1.25rem; 
+            font-weight: 700; 
+            line-height: 1.3;
+            white-space: nowrap;
+        }
+        .feature-desc { 
+            color: var(--text-secondary); 
+            margin-bottom: 1.5rem; 
+            line-height: 1.65; 
+            text-align: center;
+            flex-grow: 1;
+            font-size: 0.9375rem;
+        }
+        .feature-list { 
+            list-style: none; 
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem; 
+        }
+        .feature-list li { 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 0.625rem; 
+            font-size: 0.875rem; 
+            color: var(--text-secondary); 
+            line-height: 1.5;
+        }
+        .feature-list li .material-icons-outlined { 
+            font-size: 1.125rem; 
+            color: var(--accent-green); 
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        /* SHOWCASE */
+        .showcase-section { background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-white) 100%); }
+        .showcase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+        
+        /* Visual Illustration */
+        .showcase-visual { 
+            background: var(--bg-white); 
+            border-radius: 24px; 
+            padding: 2rem; 
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+        }
+        .visual-header { 
+            font-size: 0.875rem; 
+            font-weight: 600; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            margin-bottom: 1.5rem; 
+            text-align: center;
+        }
+        .locations-grid { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem; }
+        .location-card { 
+            background: var(--bg-light); 
+            border-radius: 16px; 
+            padding: 1.25rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .location-card:hover { transform: translateX(4px); }
+        .location-card.compliant { border-color: rgba(16, 185, 129, 0.2); }
+        .location-card.warning { border-color: rgba(249, 115, 22, 0.2); }
+        .location-icon { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 12px; 
+            background: var(--primary-glow); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-shrink: 0;
+        }
+        .location-icon .material-icons-outlined { font-size: 1.5rem; color: var(--primary); }
+        .location-info { flex-grow: 1; }
+        .location-name { font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.25rem; }
+        .location-details { font-size: 0.8125rem; color: var(--text-muted); }
+        .status-badge { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.375rem; 
+            padding: 0.375rem 0.75rem; 
+            border-radius: 8px; 
+            font-size: 0.8125rem; 
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .status-badge .material-icons-outlined { font-size: 1rem; }
+        .status-badge.green { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
+        .status-badge.orange { background: rgba(249, 115, 22, 0.1); color: var(--accent-orange); }
+        .visual-note { 
+            text-align: center; 
+            font-size: 0.8125rem; 
+            color: var(--text-muted); 
+            font-style: italic;
+        }
+        
+        /* Showcase Content */
+        .showcase-content h3 { font-size: 1.875rem; font-weight: 800; margin-bottom: 1rem; line-height: 1.2; }
+        .showcase-content p { color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.7; }
+        .showcase-list { list-style: none; margin-bottom: 1.5rem; }
+        .showcase-list li { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 0; }
+        .showcase-list li .material-icons-outlined { color: var(--accent-green); margin-top: 2px; flex-shrink: 0; }
+        .showcase-list li strong { color: var(--text-primary); }
+        .showcase-awards { 
+            padding: 1rem; 
+            background: var(--primary-glow); 
+            border-radius: 12px; 
+            border-left: 3px solid var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 0.9375rem;
+        }
+        .showcase-awards strong { color: var(--primary); }
+
+
+        /* PRICING */
+        .pricing-section { background: var(--bg-white); border-top: 1px solid var(--border); }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1100px; margin: 0 auto; }
+        .pricing-card { background: var(--bg-light); border-radius: 24px; padding: 2.5rem; border: 2px solid var(--border); transition: all 0.3s ease; position: relative; }
+        .pricing-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-xl); }
+        .pricing-card.featured { background: var(--bg-white); border-color: var(--primary); transform: scale(1.05); box-shadow: var(--shadow-xl); }
+        .pricing-card.featured:hover { transform: scale(1.05) translateY(-8px); }
+        .pricing-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 0.375rem 1rem; background: var(--gradient-1); color: white; font-size: 0.75rem; font-weight: 700; border-radius: 9999px; }
+        .pricing-name { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .pricing-desc { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
+        .pricing-price { margin-bottom: 1.5rem; }
+        .pricing-amount { font-size: 3rem; font-weight: 900; }
+        .pricing-period { font-size: 1rem; color: var(--text-muted); }
+        .pricing-features { list-style: none; margin-bottom: 2rem; }
+        .pricing-features li { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); font-size: 0.9375rem; color: var(--text-secondary); }
+        .pricing-features li:last-child { border-bottom: none; }
+        .pricing-features li .material-icons-outlined { font-size: 1.25rem; color: var(--accent-green); }
+        .pricing-card .btn { width: 100%; }
+        .pricing-note-section { text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+        .pricing-bottom-note { font-size: 0.9375rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .pricing-support-note { font-size: 0.875rem; color: var(--text-muted); }
+        .pricing-support-note a { color: var(--primary); text-decoration: none; }
+        .pricing-support-note a:hover { text-decoration: underline; }
+
+        /* FAQ */
+        .faq-section { background: var(--bg-light); }
+        .faq-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+        .faq-item { background: var(--bg-white); border-radius: 16px; padding: 2rem; border: 1px solid var(--border); transition: all 0.3s ease; }
+        .faq-item:hover { border-color: var(--primary); box-shadow: var(--shadow-md); }
+        .faq-question { font-size: 1.0625rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; }
+        .faq-question .material-icons-outlined { color: var(--primary); font-size: 1.5rem; flex-shrink: 0; }
+        .faq-answer { font-size: 0.9375rem; line-height: 1.7; color: var(--text-secondary); }
+        .faq-answer strong { color: var(--text-primary); font-weight: 600; }
+        .faq-answer a { color: var(--primary); text-decoration: none; font-weight: 500; }
+        .faq-answer a:hover { text-decoration: underline; }
+        .faq-note { background: rgba(99, 102, 241, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1rem; font-size: 0.875rem; border-left: 3px solid var(--primary); }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-content {
+            background: var(--bg-white);
+            margin: 10% auto;
+            padding: 0;
+            border-radius: 24px;
+            max-width: 500px;
+            box-shadow: var(--shadow-xl);
+            animation: slideIn 0.3s ease;
+            position: relative;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-close {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            font-size: 2rem;
+            font-weight: 300;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s ease;
+            line-height: 1;
+        }
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+        .modal-header {
+            text-align: center;
+            padding: 3rem 2rem 1rem;
+        }
+        .modal-header h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 1rem;
+            color: var(--text-primary);
+        }
+        .modal-body {
+            padding: 1rem 2.5rem 3rem;
+            text-align: center;
+        }
+        .modal-body p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+            font-size: 0.9375rem;
+        }
+        .contact-info {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+        }
+        .contact-info strong {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+        .modal-email {
+            display: inline-block;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .modal-email:hover {
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        .modal-note {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0 !important;
+        }
+
+        /* FOOTER */
+        .footer { background: var(--bg-nav); color: rgba(255,255,255,0.7); padding: 4rem 0 2rem; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+        .footer-brand .logo { margin-bottom: 1rem; }
+        .footer-brand p { font-size: 0.9375rem; line-height: 1.7; color: rgba(255,255,255,0.6); }
+        .footer-title { font-size: 0.875rem; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem; }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 0.75rem; }
+        .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9375rem; transition: color 0.2s ease; }
+        .footer-links a:hover { color: white; }
+        .footer-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.875rem; color: rgba(255,255,255,0.5); }
+        .footer-social { display: flex; gap: 1rem; }
+        .footer-social a { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); transition: all 0.2s ease; }
+        .footer-social a:hover { background: var(--primary); color: white; }
+        .footer-social svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .hero-grid { grid-template-columns: 1fr; text-align: center; }
+            .hero-content { order: 1; }
+            .hero-image { order: 0; max-width: 500px; margin: 0 auto 2rem; }
+            .hero-actions { justify-content: center; }
+            .hero-title { font-size: 2.75rem; }
+            .problem-grid, .features-grid { grid-template-columns: 1fr 1fr; }
+            .showcase-grid { grid-template-columns: 1fr; }
+            .pricing-grid, .faq-grid { grid-template-columns: 1fr; max-width: 400px; }
+            .pricing-card.featured { transform: none; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .hero { padding: 7rem 0 3rem; }
+            .hero-title { font-size: 2rem; }
+            .nav-links { display: none; }
+            .problem-grid, .features-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects"></div>
+    <div class="grid-bg"></div>
+
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="logo">
+                <div class="logo-icon"><span class="material-icons-outlined">bolt</span></div>
+                <span class="logo-text">FairWorkly</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#faq">FAQ</a>
+            </div>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-ghost">Log In</a>
+                <a href="login.html?signup=true" class="btn btn-primary">Start Free Trial</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge"><span class="dot"></span> Now supporting Retail, Hospitality & Clerks Awards</div>
+                    <h1 class="hero-title">Fair Work Compliance <span class="highlight">Made Simple</span></h1>
+                    <p class="hero-subtitle">Upload payslip and roster CSV from any system. Get instant Fair Work validation. Avoid $50K+ penalties with AI-powered compliance checking.</p>
+                    <div class="hero-actions">
+                        <a href="login.html?signup=true" class="btn btn-primary btn-lg">Start Free Trial <span class="material-icons-outlined">arrow_forward</span></a>
+                        <a href="#pricing" class="btn btn-secondary btn-lg">View Pricing</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80" alt="Australian small business team">
+                    <div class="hero-image-badge">
+                        <div class="badge-icon"><span class="material-icons-outlined">verified</span></div>
+                        <div><div class="badge-text">Compliant</div><div class="badge-sub">All checks passed</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="trust-bar">
+        <div class="container">
+            <div class="trust-content">
+                <div class="trust-item"><span class="material-icons-outlined">security</span> SOC 2 Compliant</div>
+                <div class="trust-item"><span class="material-icons-outlined">location_on</span> Australian Hosted</div>
+                <div class="trust-item"><span class="material-icons-outlined">gavel</span> Fair Work Aligned</div>
+                <div class="trust-item"><span class="material-icons-outlined">support_agent</span> Local Support</div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="section features-section" id="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label"><span class="material-icons-outlined">auto_awesome</span> Features</span>
+                <h2 class="section-title">Three Compliance Modules, One Platform</h2>
+                <p class="section-subtitle">Complete Fair Work validation for payroll, rosters, and documents</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card purple">
+                    <div class="feature-header">
+                        <div class="feature-icon"><span class="material-icons-outlined">event</span></div>
+                        <div class="feature-title">Roster Compliance</div>
+                    </div>
+                    <p class="feature-desc">Upload roster CSV (from Deputy, Excel, or any system) to check scheduling violations.</p>
+                    <ul class="feature-list">
+                        <li><span class="material-icons-outlined">check_circle</span> Consecutive working days (max 6)</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Rest between shifts (min 10h)</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Weekly hour limits</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Break requirements</li>
+                    </ul>
+                </div>
+                <div class="feature-card orange">
+                    <div class="feature-header">
+                        <div class="feature-icon"><span class="material-icons-outlined">payments</span></div>
+                        <div class="feature-title">Payroll Compliance</div>
+                    </div>
+                    <p class="feature-desc">Upload payslip CSV and instantly validate against Award requirements.</p>
+                    <ul class="feature-list">
+                        <li><span class="material-icons-outlined">check_circle</span> Base rates vs Award minimum</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Penalty rates (Sat/Sun/PH)</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Casual loading (25%)</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Superannuation compliance</li>
+                    </ul>
+                </div>
+                <div class="feature-card cyan">
+                    <div class="feature-header">
+                        <div class="feature-icon"><span class="material-icons-outlined">description</span></div>
+                        <div class="feature-title">Document Compliance</div>
+                    </div>
+                    <p class="feature-desc">Track mandatory employment documents and avoid missing critical deadlines.</p>
+                    <ul class="feature-list">
+                        <li><span class="material-icons-outlined">check_circle</span> Fair Work Info Statement</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Separation Certificate (14-day)</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Casual Conversion Notice</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Deadline reminders</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section showcase-section">
+        <div class="container">
+            <div class="showcase-grid">
+                <div class="showcase-visual">
+                    <div class="visual-header">Multi-Location Compliance Dashboard</div>
+                    <div class="locations-grid">
+                        <div class="location-card compliant">
+                            <div class="location-icon">
+                                <span class="material-icons-outlined">store</span>
+                            </div>
+                            <div class="location-info">
+                                <div class="location-name">Melbourne CBD</div>
+                                <div class="location-details">42 employees</div>
+                            </div>
+                            <div class="status-badge green">
+                                <span class="material-icons-outlined">check_circle</span>
+                                Compliant
+                            </div>
+                        </div>
+                        <div class="location-card compliant">
+                            <div class="location-icon">
+                                <span class="material-icons-outlined">store</span>
+                            </div>
+                            <div class="location-info">
+                                <div class="location-name">Sydney Harbour</div>
+                                <div class="location-details">38 employees</div>
+                            </div>
+                            <div class="status-badge green">
+                                <span class="material-icons-outlined">check_circle</span>
+                                Compliant
+                            </div>
+                        </div>
+                        <div class="location-card warning">
+                            <div class="location-icon">
+                                <span class="material-icons-outlined">store</span>
+                            </div>
+                            <div class="location-info">
+                                <div class="location-name">Brisbane South</div>
+                                <div class="location-details">35 employees</div>
+                            </div>
+                            <div class="status-badge orange">
+                                <span class="material-icons-outlined">warning</span>
+                                2 Issues
+                            </div>
+                        </div>
+                    </div>
+                    <div class="visual-note">View all locations from one dashboard</div>
+                </div>
+                <div class="showcase-content">
+                    <h3>Perfect for Growing Australian Chains</h3>
+                    <p>Whether you're managing 3 cafés across Melbourne, 5 retail stores in Sydney, or 8 hospitality venues nationwide — FairWorkly scales with your business.</p>
+                    <ul class="showcase-list">
+                        <li><span class="material-icons-outlined">check_circle</span><div><strong>Café Chains (3-10 stores)</strong><br>Track compliance across all locations from one dashboard</div></li>
+                        <li><span class="material-icons-outlined">check_circle</span><div><strong>Retail Chains (5-15 stores)</strong><br>Handle different penalty rates for weekends and public holidays</div></li>
+                        <li><span class="material-icons-outlined">check_circle</span><div><strong>Hospitality Groups</strong><br>Manage split shifts, casual conversion, document deadlines</div></li>
+                    </ul>
+                    <p class="showcase-awards"><strong>Supported Awards:</strong> Hospitality • Retail • Clerks</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="section pricing-section" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label"><span class="material-icons-outlined">sell</span> Pricing</span>
+                <h2 class="section-title">Simple, Transparent Pricing</h2>
+                <p class="section-subtitle">Choose the plan that fits your business size</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-name">Starter</div>
+                    <div class="pricing-desc">Perfect for single locations</div>
+                    <div class="pricing-price"><span class="pricing-amount">$149</span><span class="pricing-period">/month</span></div>
+                    <ul class="pricing-features">
+                        <li><span class="material-icons-outlined">check_circle</span> 1 location (same state)</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Up to 50 employees</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Unlimited CSV uploads</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Payroll + Roster + Document</li>
+                        <li><span class="material-icons-outlined">check_circle</span> 3 Awards (Hospitality/Retail/Clerks)</li>
+                    </ul>
+                    <a href="login.html?signup=true" class="btn btn-outline">Start Free Trial</a>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">Most Popular</div>
+                    <div class="pricing-name">Professional</div>
+                    <div class="pricing-desc">Perfect for multi-location chains</div>
+                    <div class="pricing-price"><span class="pricing-amount">$299</span><span class="pricing-period">/month</span></div>
+                    <ul class="pricing-features">
+                        <li><span class="material-icons-outlined">check_circle</span> Everything in Starter, plus:</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Up to 10 locations (same state)</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Up to 150 employees</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Multi-location dashboard</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Export reports (Excel/CSV)</li>
+                    </ul>
+                    <a href="login.html?signup=true" class="btn btn-primary">Start Free Trial</a>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-name">Enterprise</div>
+                    <div class="pricing-desc">For large organizations</div>
+                    <div class="pricing-price"><span class="pricing-amount">Custom</span></div>
+                    <ul class="pricing-features">
+                        <li><span class="material-icons-outlined">check_circle</span> Everything in Professional, plus:</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Multi-state support (VIC/NSW/QLD...)</li>
+                        <li><span class="material-icons-outlined">check_circle</span> 10+ locations, 150+ employees</li>
+                        <li><span class="material-icons-outlined">check_circle</span> API integrations (Xero/Deputy)</li>
+                        <li><span class="material-icons-outlined">check_circle</span> Custom Award development</li>
+                    </ul>
+                    <a href="#" class="btn btn-outline" onclick="showContactModal(event)">Contact Sales</a>
+                </div>
+            </div>
+            <div class="pricing-note-section">
+                <p class="pricing-bottom-note">All plans include 14-day free trial • No credit card required</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section faq-section" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label"><span class="material-icons-outlined">help_outline</span> FAQ</span>
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="section-subtitle">Everything you need to know about FairWorkly</p>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="material-icons-outlined">computer</span>
+                        <span>What systems does FairWorkly work with?</span>
+                    </div>
+                    <div class="faq-answer">
+                        <strong>FairWorkly doesn't require integration.</strong> We accept standard CSV files, which means you can use any payroll or rostering system that can export CSV — including Xero, MYOB, QuickBooks, Keypay, Deputy, Tanda, and many others.
+                        <div class="faq-note">💡 Simply export your data as CSV and upload. No API keys, no IT setup required.</div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="material-icons-outlined">event</span>
+                        <span>Do I need rostering software?</span>
+                    </div>
+                    <div class="faq-answer">
+                        No! While we work great with Deputy and Tanda exports, you can also upload roster data from Excel. We provide a <strong>free template</strong> that makes it easy to convert your existing schedules to CSV format.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="material-icons-outlined">verified</span>
+                        <span>Which Awards do you cover?</span>
+                    </div>
+                    <div class="faq-answer">
+                        We currently support the three most common Awards:
+                        <br>• <strong>Hospitality Industry Award 2020</strong>
+                        <br>• <strong>General Retail Industry Award</strong>
+                        <br>• <strong>Clerks Private Sector Award</strong>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="material-icons-outlined">schedule</span>
+                        <span>How long does validation take?</span>
+                    </div>
+                    <div class="faq-answer">
+                        Most validations complete in <strong>2-3 minutes</strong>. Upload your CSV, grab a coffee, and your compliance report will be ready. Larger files (100+ employees) may take up to 5 minutes.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="material-icons-outlined">description</span>
+                        <span>Do you generate employment contracts?</span>
+                    </div>
+                    <div class="faq-answer">
+                        No, we don't generate documents in the MVP. Our <strong>Document Agent</strong> helps you <strong>track mandatory documents</strong> like Fair Work Information Statement (FWIS), Separation Certificates, and Casual Conversion Notices — ensuring you don't miss critical deadlines.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="material-icons-outlined">build</span>
+                        <span>What if I find issues in my payroll?</span>
+                    </div>
+                    <div class="faq-answer">
+                        We provide <strong>detailed reports</strong> with expected vs actual values and step-by-step recommendations. You can then fix issues in your payroll system (Xero/MYOB/etc) and re-upload to verify.
+                        <div class="faq-note">📌 For complex issues, we recommend consulting the Fair Work Ombudsman or an employment lawyer.</div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="material-icons-outlined">gavel</span>
+                        <span>Is this a substitute for legal advice?</span>
+                    </div>
+                    <div class="faq-answer">
+                        <strong>No.</strong> FairWorkly is a compliance validation tool, not legal advice. We check your payroll and rosters against Fair Work rules and highlight potential issues. For complex situations or disputes, consult the Fair Work Ombudsman or an employment lawyer.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="material-icons-outlined">cloud_download</span>
+                        <span>Do you provide CSV templates?</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes! We provide <strong>CSV templates</strong> for both payslip and roster data to help you get started with FairWorkly.
+                        <br><br>
+                        <a href="templates.html" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--primary-glow); color: var(--primary); border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                            View All CSV Templates →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Sales Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeContactModal()">&times;</span>
+            <div class="modal-header">
+                <span class="material-icons-outlined" style="font-size: 3rem; color: var(--primary);">mail</span>
+                <h3>Contact Sales</h3>
+            </div>
+            <div class="modal-body">
+                <p>Interested in Enterprise? Let's talk!</p>
+                <div class="contact-info">
+                    <strong>Email us at:</strong>
+                    <a href="mailto:support@fairworkly.com" class="modal-email">support@fairworkly.com</a>
+                </div>
+                <p class="modal-note">We typically respond within 24 hours.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="logo"><div class="logo-icon"><span class="material-icons-outlined">bolt</span></div><span class="logo-text">FairWorkly</span></a>
+                    <p>Fair Work compliance made simple for Australian SMEs.</p>
+                    <p style="margin-top: 1rem; font-size: 0.875rem;"><strong>Support:</strong> <a href="mailto:support@fairworkly.com" style="color: var(--primary); text-decoration: none;">support@fairworkly.com</a></p>
+                </div>
+                <div>
+                    <h4 class="footer-title">Product</h4>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="mailto:support@fairworkly.com">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="templates.html">CSV Templates</a></li>
+                        <li><a href="https://www.fairwork.gov.au" target="_blank" rel="noopener">Fair Work Ombudsman</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 FairWorkly · Made in Melbourne, Australia</p>
+                <div class="footer-social">
+                    <a href="#" title="LinkedIn"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+                    <a href="#" title="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+        
+        // Modal functions
+        function showContactModal(event) {
+            event.preventDefault();
+            document.getElementById('contactModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeContactModal() {
+            document.getElementById('contactModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('contactModal');
+            if (event.target == modal) {
+                closeContactModal();
+            }
+        }
+        
+      // Close modal with Escape key
+      document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeContactModal();
+            }
+        });
+    </script>
+</body>
+</html>
