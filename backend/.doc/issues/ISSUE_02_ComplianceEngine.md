@@ -53,6 +53,40 @@ tests/FairWorkly.UnitTests/Unit/
 
 ---
 
+## Pre-Validation (前置数据校验)
+
+> **位置**: 在 Orchestrator 层实现，不是 ComplianceEngine 的一部分。
+
+### 目的
+
+在调用任何合规规则之前，确保数据完整性。这是进入 ComplianceEngine 的"门卫"。
+
+### 检查字段
+
+- Classification
+- Employment Type
+- Hourly Rate
+- Ordinary Hours
+- Ordinary Pay
+- Gross Pay
+
+### 处理逻辑
+
+```
+1. 遍历所有必填字段
+2. 如果任何字段缺失或无法解析：
+   → 输出 WARNING ("Unable to verify: Mandatory field [FieldName] is missing")
+   → 终止该员工的所有规则检查 (Skip All Rules)
+   → 继续处理下一个员工
+3. 否则 → 放行，进入 ComplianceEngine
+```
+
+### 实现位置
+
+- `PayrollAiOrchestrator.cs` - 在调用 ComplianceEngine 之前执行
+
+---
+
 ## 四个规则概述
 
 | 规则 | 检查目标 | 适用对象 | Severity |
@@ -141,6 +175,12 @@ public const decimal RateTolerance = 0.01m;
 public const decimal PayTolerance = 0.05m;
 ```
 
+### 输出规则
+
+- 规则通过时 **不输出** PayrollIssue（不输出 INFO 级别）
+- 仅在违规时输出 PayrollIssue（WARNING / ERROR / CRITICAL）
+- 统计摘要记录在 `PayrollValidation` 层（TotalChecks, PassedChecks, FailedChecks）
+
 ---
 
 ## 规则详细逻辑
@@ -160,14 +200,17 @@ public const decimal PayTolerance = 0.05m;
 
 ### PenaltyRateRule
 
+> ⚠️ **重要**：即使 EmploymentType 是 Casual，计算基数也必须使用 **Permanent Rate**（不是 Casual Rate）！倍率则根据 EmploymentType 查表。
+
 ```
 对 Saturday / Sunday / PublicHoliday 分别检查：
 1. 如果对应 Hours = 0，跳过
-2. 根据 EmploymentType 获取倍率
-3. 计算应发金额 = Permanent Rate × 倍率 × Hours
-4. 如果实际 Pay < 应发金额 - 0.05：
+2. 获取该等级的 Permanent Rate（所有员工类型都用这个作为基数）
+3. 根据 EmploymentType 获取对应倍率（Permanent 或 Casual 倍率表）
+4. 计算应发金额 = Permanent Rate × 倍率 × Hours
+5. 如果实际 Pay < 应发金额 - 0.05：
    → ERROR，记录差额
-5. 否则 → 无问题
+6. 否则 → 无问题
 ```
 
 ### CasualLoadingRule
@@ -187,11 +230,17 @@ public const decimal PayTolerance = 0.05m;
 ### SuperannuationRule
 
 ```
-1. 如果 Gross Pay = 0，跳过
-2. 计算应缴养老金 = Gross Pay × 12%
-3. 如果 Superannuation Paid < 应缴 - 0.05：
+1. 计算 AnyWorkHours = OrdinaryHours + SaturdayHours + SundayHours + PublicHolidayHours
+2. 如果 Gross Pay <= 0：
+   a. 如果 AnyWorkHours > 0：
+      → WARNING ("Missing Gross Pay Data")
+      → 结束流程
+   b. 否则（无工时也无工资）：
+      → 跳过（无薪周期）
+3. 计算应缴养老金 = Gross Pay × 12%
+4. 如果 Superannuation Paid < 应缴 - 0.05：
    → ERROR，记录差额
-4. 否则 → 无问题
+5. 否则 → 无问题
 ```
 
 ---
@@ -226,17 +275,44 @@ public const decimal PayTolerance = 0.05m;
 
 ## 对应测试
 
-| 测试用例 | CSV 文件 | 验证目标 |
-|----------|----------|----------|
-| TC-BASE-001 | TEST_04_BaseRate_AllPass.csv | 基础费率合规 |
-| TC-BASE-002 | TEST_05_BaseRate_Violations.csv | 基础费率违规 |
-| TC-PENALTY-001 | TEST_06_Saturday_Violations.csv | 周六罚金违规 |
-| TC-PENALTY-002 | TEST_07_Sunday_Violations.csv | 周日罚金违规 |
-| TC-PENALTY-003 | TEST_08_PublicHoliday_Violations.csv | 公休罚金违规 |
-| TC-CASUAL-001 | TEST_09_Casual_AllPass.csv | Casual Loading 合规 |
-| TC-CASUAL-002 | TEST_10_Casual_Violations.csv | Casual Loading 违规 |
-| TC-SUPER-001 | TEST_11_Super_AllPass.csv | 养老金合规 |
-| TC-SUPER-002 | TEST_12_Super_Violations.csv | 养老金违规 |
+### 单元测试用例
+
+| 测试用例 ID | CSV 文件 | 验证目标 | 预期 Severity |
+|-------------|----------|----------|---------------|
+| TC-BASE-001 | TEST_04_BaseRate_AllPass.csv | 基础费率合规 | 无输出 |
+| TC-BASE-002 | TEST_05_BaseRate_Violations.csv (行2-5) | 基础费率违规 | CRITICAL |
+| TC-BASE-003 | TEST_05_BaseRate_Violations.csv (行6) | 系统费率配置错误 | WARNING |
+| TC-PENALTY-001 | TEST_06_Saturday_Violations.csv | 周六罚金违规 | ERROR |
+| TC-PENALTY-002 | TEST_07_Sunday_Violations.csv | 周日罚金违规 | ERROR |
+| TC-PENALTY-003 | TEST_08_PublicHoliday_Violations.csv | 公休罚金违规 | ERROR |
+| TC-CASUAL-001 | TEST_09_Casual_AllPass.csv | Casual Loading 合规 | 无输出 |
+| TC-CASUAL-002 | TEST_10_Casual_Violations.csv (行2-3) | Casual Loading 违规 | CRITICAL |
+| TC-CASUAL-003 | TEST_10_Casual_Violations.csv (行4) | 系统费率配置错误 | WARNING |
+| TC-CASUAL-004 | TEST_10_Casual_Violations.csv (行5) | 非 Casual 员工跳过 | 无输出 |
+| TC-SUPER-001 | TEST_11_Super_AllPass.csv | 养老金合规 | 无输出 |
+| TC-SUPER-002 | TEST_12_Super_Violations.csv (行2-5) | 养老金违规 | ERROR |
+| TC-SUPER-003 | TEST_12_Super_Violations.csv (行6) | 缺少 Gross Pay 但有工时 | WARNING |
+| TC-PREVAL-001 | TEST_17_PreValidation.csv | 必填字段缺失 | WARNING + Skip |
+
+### 边界值测试 (TEST_16_EdgeCases.csv)
+
+| 测试用例 ID | Employee ID | 场景 | 预期结果 |
+|-------------|-------------|------|----------|
+| TC-EDGE-001 | EDGE001 | 恰好达到最低费率 | PASS |
+| TC-EDGE-002 | EDGE002 | 在容差边界 ($26.54 vs $26.55) | PASS (容差内) |
+| TC-EDGE-003 | EDGE003 | 零工时员工 | SKIP |
+| TC-EDGE-006 | EDGE006 | 养老金在容差内 ($0.04 差额) | PASS |
+| TC-EDGE-007 | EDGE007 | 罚金刚超容差 ($0.06 差额) | ERROR |
+| TC-EDGE-008 | EDGE008 | Level 8 Casual 最高等级 | PASS |
+
+### 集成测试
+
+| CSV 文件 | 场景 | 说明 |
+|----------|------|------|
+| TEST_13_AllCompliant.csv | 全部合规 | 无 PayrollIssue 输出 |
+| TEST_14_AllViolations.csv | 全部违规 | 多种违规组合 |
+| TEST_15_MixedScenarios.csv | 混合场景 | 部分合规部分违规 |
+| TEST_16_EdgeCases.csv | 边界值 | 容差边界测试 |
 
 ---
 

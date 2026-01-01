@@ -6,6 +6,56 @@
 
 ---
 
+## 2026-01-01 ISSUE_02 Review 与测试覆盖补充
+
+### 变更内容
+
+**ISSUE_02_ComplianceEngine.md 文档更新**：
+
+1. **新增 Pre-Validation 章节**
+   - 位置：Orchestrator 层（不在 ComplianceEngine 中）
+   - 逻辑：检查必填字段完整性，缺失则输出 WARNING 并跳过所有规则
+
+2. **修正 SuperannuationRule 逻辑**
+   - 添加 `AnyWorkHours` 检查
+   - 当 Gross Pay = 0 但有工时时，输出 WARNING
+
+3. **添加 PenaltyRateRule 重要注释**
+   - 强调即使是 Casual 员工，计算基数也必须使用 Permanent Rate
+
+4. **添加 INFO 级别输出规则**
+   - 规则通过时不输出 PayrollIssue
+   - 统计摘要记录在 PayrollValidation 层
+
+5. **更新测试用例表**
+   - 细化到行级别的测试场景
+   - 添加预期 Severity
+
+### 测试覆盖补充
+
+发现并填补了 3 个测试覆盖缺口：
+
+| 缺口 | 新增测试数据 | 预期 Severity |
+|------|-------------|---------------|
+| GAP-1 | `TEST_05_BaseRate_Violations.csv` 行6 (WARN001) | WARNING |
+| GAP-2 | `TEST_12_Super_Violations.csv` 行6 (SUPWARN001) | WARNING |
+| GAP-3 | `TEST_17_PreValidation.csv` (新文件) | WARNING + Skip |
+
+### 关键决策
+
+| 问题 | 决策 | 理由 |
+|------|------|------|
+| Pre-Validation 位置 | Orchestrator 层 | 职责分离：数据完整性 vs 业务合规 |
+| INFO 级别输出 | 不输出 | PayrollIssue 语义是"问题"，通过不是问题 |
+| AnyWorkHours 检查 | 保留 | 边界保护：有工时但无 Gross Pay 是数据异常 |
+
+### 与人类的讨论
+
+人类同意所有建议，并在 `Payroll_Engine_Logic.md` 的 Severity 定义中明确：
+> "规则通过时不输出 PayrollIssue，仅在 PayrollValidation 层记录统计摘要。"
+
+---
+
 ## 2026-01-01 文档工程全面更新
 
 ### 变更内容
