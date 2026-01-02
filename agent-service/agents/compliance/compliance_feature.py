@@ -3,7 +3,7 @@ import logging
 import threading
 
 from master_agent.feature_registry import FeatureBase
-from master_agent.config import load_config, CONFIG_PATH
+from master_agent.config import load_config, CONFIG_PATH, resolve_document_faiss_path
 from agents.shared.llm.factory import LLMProvider
 from agents.shared.llm.embeddings_factory import create_embeddings
 from agents.shared.vector_db import load_faiss
@@ -31,7 +31,7 @@ def _ensure_retriever(config, logger):
             _EMBEDDINGS = create_embeddings(config, logger=logger)
 
         if _VECTORSTORE is None:
-            store_relative = config["paths"]["document_faiss_path"]
+            store_relative = resolve_document_faiss_path(config)
             store_absolute = (CONFIG_PATH.parent / store_relative).resolve()
             _VECTORSTORE = load_faiss(str(store_absolute), _EMBEDDINGS, logger=logger)
 
