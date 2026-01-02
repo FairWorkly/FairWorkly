@@ -17,3 +17,28 @@ load_dotenv(dotenv_path=CONFIG_PATH.parent / ".env", override=False)
 def load_config() -> Dict[str, Any]:
     with CONFIG_PATH.open("r", encoding="utf-8") as fp:
         return yaml.safe_load(fp)
+
+
+def resolve_document_faiss_path(
+    config: Dict[str, Any],
+    embedding_mode: str | None = None,
+) -> str:
+    """Return the document FAISS path for the requested embedding mode."""
+    paths = config.get("paths") or {}
+    configured = paths.get("document_faiss_path")
+    if configured is None:
+        raise ValueError("paths.document_faiss_path is not configured")
+
+    mode = (embedding_mode or config.get("model_params", {}).get("deployment_mode_embedding", "local")).lower()
+
+    if isinstance(configured, str):
+        return configured
+
+    if isinstance(configured, dict):
+        if mode in configured:
+            return configured[mode]
+        if "default" in configured:
+            return configured["default"]
+        raise ValueError(f"paths.document_faiss_path missing entry for mode '{mode}'")
+
+    raise TypeError("paths.document_faiss_path must be a string or mapping")

@@ -13,7 +13,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
 from agents.shared.llm.embeddings_factory import create_embeddings
-from master_agent.config import load_config
+from master_agent.config import load_config, resolve_document_faiss_path
 
 
 LOGGER_NAME = "assets_ingestion"
@@ -77,7 +77,9 @@ def log_chunk_stats(chunks: List[Document], logger: logging.Logger) -> None:
 def save_faiss(chunks: List[Document], config: Dict, logger: logging.Logger) -> None:
     embeddings = create_embeddings(config, logger=logger)
     vectorstore = FAISS.from_documents(chunks, embeddings)
-    output_path = project_root() / config["paths"]["document_faiss_path"]
+    embedding_mode = config.get("model_params", {}).get("deployment_mode_embedding")
+    relative_path = resolve_document_faiss_path(config, embedding_mode)
+    output_path = project_root() / relative_path
     output_path.mkdir(parents=True, exist_ok=True)
     vectorstore.save_local(str(output_path))
     logger.info("Saved FAISS index to %s", output_path)
