@@ -6,6 +6,74 @@
 
 ---
 
+## 2026-01-02 架构问题修正
+
+### 问题发现
+
+发现 ISSUE_02 文档中关于 Pre-Validation 的描述与 `ARCHITECTURE.md` 存在矛盾：
+
+| 问题点 | ARCHITECTURE.md 定义 | 原错误描述 |
+|--------|---------------------|-----------|
+| Pre-Validation 位置 | Handler 的职责 | Orchestrator 层 |
+| Orchestrator 用途 | 仅封装 Python AI 调用 | 用于执行 Pre-Validation |
+| Payroll 是否需要 Orchestrator | 不需要（纯规则计算） | 暗示需要 |
+
+### 修正内容
+
+| 文件 | 修改内容 |
+|------|----------|
+| `.doc/issues/ISSUE_02_ComplianceEngine.md` | 重写 Pre-Validation 章节，明确是 Handler 职责 |
+| `.doc/issues/ISSUE_03_Handler_API.md` | 添加 Pre-Validation 实现细节和技术要点 |
+| `.doc/SPEC_Payroll.md` | 更新数据流向图，添加 Pre-Validation 步骤 |
+| `.doc/DEVLOG.md` | 修正历史记录中的 "Orchestrator 层" 为 "Handler 层" |
+| `.doc/AI_GUIDE.md` | 添加 Orchestrator 骨架用途说明和架构决策 |
+
+### 修正原则
+
+根据 `ARCHITECTURE.md` 的权威定义：
+- **Handler** = 业务流程的"总指挥"，负责数据校验、流程编排
+- **Orchestrator** = 仅用于封装 Python AI 服务调用
+- **Payroll 模块** = 纯规则计算，不涉及 AI，不需要 Orchestrator
+
+---
+
+## 2026-01-02 架构文档同步
+
+### 变更内容
+
+**新增宪法文档**：
+- `.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md` - Handler/Orchestrator 职责划分
+
+**AI_README_FIRST.md 更新**：
+- Section 2.2: 添加 ARCHITECTURE.md 到必读列表
+- Section 10: 生成流程增加 Step 3（阅读架构设计）
+
+### 同步的工作文档
+
+| 文件 | 更新内容 |
+|------|----------|
+| `.doc/AI_GUIDE.md` | 快速开始章节添加 ARCHITECTURE.md 链接 |
+| `.doc/CODING_RULES.md` | 新增 2.5 节 Handler vs Orchestrator 职责划分 |
+| `src/FairWorkly.Application/AI_GUIDE.md` | 添加架构约束提醒，更新核心组件职责表 |
+| `src/FairWorkly.Application/Payroll/AI_GUIDE.md` | 添加架构说明，明确 Payroll 不需要 Orchestrator |
+
+### 关键理解
+
+**Handler vs Orchestrator 核心区别**：
+
+| 组件 | 职责 | 包含业务逻辑？ |
+|------|------|---------------|
+| Handler | 业务流程的"总指挥" | ✅ 是 |
+| Orchestrator | 封装 Python AI 服务调用 | ❌ 否 |
+
+**Payroll 模块架构决策**：
+- 薪资合规检查是**纯规则计算**（数值比对）
+- **不需要调用 Python AI 服务**
+- ValidatePayrollHandler 直接调用 Service/Repository，不使用 Orchestrator
+- `PayrollAiOrchestrator.cs` 骨架是为未来 AI 功能预留
+
+---
+
 ## 2026-01-01 ISSUE_02 ComplianceEngine - Completed
 
 ### 变更内容
@@ -107,7 +175,7 @@ ISSUE_02 已完成，准备进入 ISSUE_03: Handler 集成 + API
 **ISSUE_02_ComplianceEngine.md 文档更新**：
 
 1. **新增 Pre-Validation 章节**
-   - 位置：Orchestrator 层（不在 ComplianceEngine 中）
+   - 位置：Handler 层（ValidatePayrollHandler，不在 ComplianceEngine 中）
    - 逻辑：检查必填字段完整性，缺失则输出 WARNING 并跳过所有规则
 
 2. **修正 SuperannuationRule 逻辑**
@@ -139,7 +207,7 @@ ISSUE_02 已完成，准备进入 ISSUE_03: Handler 集成 + API
 
 | 问题 | 决策 | 理由 |
 |------|------|------|
-| Pre-Validation 位置 | Orchestrator 层 | 职责分离：数据完整性 vs 业务合规 |
+| Pre-Validation 位置 | Handler 层 | 根据 ARCHITECTURE.md：Handler 负责数据校验和业务流程编排 |
 | INFO 级别输出 | 不输出 | PayrollIssue 语义是"问题"，通过不是问题 |
 | AnyWorkHours 检查 | 保留 | 边界保护：有工时但无 Gross Pay 是数据异常 |
 

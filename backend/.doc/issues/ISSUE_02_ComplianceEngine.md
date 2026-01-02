@@ -99,35 +99,11 @@ AI Agent 仅可对以下文件进行 commit：
 
 ## Pre-Validation (前置数据校验)
 
-> **位置**: 在 Orchestrator 层实现，不是 ComplianceEngine 的一部分。
+> ⚠️ **架构说明**：根据 [ARCHITECTURE.md](../../.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md)，Pre-Validation 是 **Handler 的职责**，不是 ComplianceEngine 的一部分。
+>
+> Pre-Validation 的具体实现在 **ISSUE_03 (ValidatePayrollHandler)** 中，详见 [ISSUE_03_Handler_API.md](./ISSUE_03_Handler_API.md)。
 
-### 目的
-
-在调用任何合规规则之前，确保数据完整性。这是进入 ComplianceEngine 的"门卫"。
-
-### 检查字段
-
-- Classification
-- Employment Type
-- Hourly Rate
-- Ordinary Hours
-- Ordinary Pay
-- Gross Pay
-
-### 处理逻辑
-
-```
-1. 遍历所有必填字段
-2. 如果任何字段缺失或无法解析：
-   → 输出 WARNING ("Unable to verify: Mandatory field [FieldName] is missing")
-   → 终止该员工的所有规则检查 (Skip All Rules)
-   → 继续处理下一个员工
-3. 否则 → 放行，进入 ComplianceEngine
-```
-
-### 实现位置
-
-- `PayrollAiOrchestrator.cs` - 在调用 ComplianceEngine 之前执行
+ComplianceEngine 仅负责接收**已通过前置校验**的 Payslip 实体，执行 4 个合规规则检查。
 
 ---
 

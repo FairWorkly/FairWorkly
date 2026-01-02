@@ -150,8 +150,6 @@ src/FairWorkly.Application/Payroll/
 │   ├── EmployeeSyncService.cs       ✅
 │   └── Models/
 │       └── PayrollCsvRow.cs         ✅
-└── Orchestrators/
-    └── PayrollAiOrchestrator.cs     (骨架)
 
 src/FairWorkly.Infrastructure/Persistence/Repositories/
 └── Employees/
@@ -259,6 +257,8 @@ tests/FairWorkly.UnitTests/Integration/
 
 ### 2. 了解技术约束
 
+两个文档都必须读：
+- [ARCHITECTURE.md](../.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md) - 架构设计（Handler/Orchestrator 职责划分）
 - [CODING_STANDARDS.md](../.raw_materials/TECH_CONSTRAINTS/CODING_STANDARDS.md) - 编码规范
 
 ### 3. 查看当前任务
@@ -291,6 +291,7 @@ tests/FairWorkly.UnitTests/Integration/
 | 员工姓名拆分 | 空格分隔 | 第一部分 FirstName，其余 LastName |
 | 新员工 Email | 占位符 | `{EmployeeNumber}@placeholder.local` |
 | 数值容差 | $0.01 / $0.05 | 时薪 0.01，金额 0.05 |
+| Payroll 架构 | 不使用 Orchestrator | 纯规则计算，Handler 直接调用 Service |
 
 ---
 
@@ -374,4 +375,4 @@ docker exec fairworkly-db psql -U postgres -d FairWorklyDb -c "\dt"
 
 ---
 
-*最后更新: 2026-01-01 (ISSUE_02 完成)*
+*最后更新: 2026-01-02 (架构问题修正)*

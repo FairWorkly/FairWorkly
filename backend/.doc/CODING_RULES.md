@@ -111,6 +111,38 @@ FairWorkly.Application/Payroll/Interfaces/IPayslipRepository.cs
 FairWorkly.Infrastructure/Persistence/Repositories/Payroll/PayslipRepository.cs
 ```
 
+### 2.5 Handler vs Orchestrator 职责划分
+
+> ⚠️ **架构级约束**：详见 [ARCHITECTURE.md](../.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md)
+
+**Handler（业务流程的"总指挥"）**：
+- 数据校验（Pre-Validation）
+- 业务逻辑判断（if-else 分支决策）
+- 调用各种 Service 和 Repository
+- 调用 Orchestrator（如果需要 AI）
+- 组装最终返回结果
+
+**Orchestrator（AI 技能的封装）**：
+- 组装发送给 AI 的 Payload
+- 调用 Python HTTP 接口
+- 解析 AI 返回的响应
+- **不包含业务逻辑，不做流程判断**
+
+**什么时候需要 Orchestrator？**
+
+| 场景 | 需要 AI 调用？ | 需要 Orchestrator？ |
+|------|---------------|---------------------|
+| 智能问答（RAG） | ✅ | ✅ |
+| 排班风险分析（AI 推理） | ✅ | ✅ |
+| 薪资合规检查（纯规则计算） | ❌ | ❌ |
+| 员工 CRUD | ❌ | ❌ |
+
+**禁止事项**：
+- ❌ 在 Orchestrator 中写业务逻辑
+- ❌ 在 Orchestrator 中做数据校验
+- ❌ 为不需要 AI 的模块创建 Orchestrator
+- ❌ 在 Controller 中编排业务流程
+
 ---
 
 ## 3. 代码规范

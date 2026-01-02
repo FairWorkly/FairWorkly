@@ -8,7 +8,6 @@ using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Employees.Orchestrators;
 using FairWorkly.Application.Employees.Services;
 using FairWorkly.Application.Payroll.Interfaces;
-using FairWorkly.Application.Payroll.Orchestrators;
 using FairWorkly.Application.Payroll.Services;
 using FairWorkly.Application.Payroll.Services.ComplianceEngine;
 using FluentValidation;
@@ -51,7 +50,6 @@ public static class DependencyInjection
 
         // Register AI Orchestrators
         services.AddScoped<ComplianceAiOrchestrator>();
-        services.AddScoped<PayrollAiOrchestrator>();
         services.AddScoped<DocumentAiOrchestrator>();
         services.AddScoped<EmployeeAiOrchestrator>();
 

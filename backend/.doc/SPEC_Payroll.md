@@ -79,6 +79,9 @@ CSV上传 → 解析数据 → 员工Upsert → 4规则检查 → 输出违规�
 
 ### 4.1 前置校验 (Pre-Validation)
 
+> ⚠️ **架构说明**：Pre-Validation 在 **ValidatePayrollHandler** 中实现，不是 ComplianceEngine 的一部分。
+> 详见 [ARCHITECTURE.md](../.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md)。
+
 在执行任何规则之前，检查必填字段是否完整。
 
 **逻辑**：
@@ -259,6 +262,13 @@ Content-Type: multipart/form-data
 ┌──────────────────────────┐
 │  Create Payslip Records  │
 └──────┬───────────────────┘
+       │
+       ▼
+┌──────────────────────────────────┐
+│  ⭐ Pre-Validation (Handler)    │
+│  检查必填字段完整性              │
+│  缺失 → WARNING + 跳过规则检查   │
+└──────┬───────────────────────────┘
        │
        ▼
 ┌──────────────────────────────────┐

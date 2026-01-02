@@ -15,6 +15,25 @@ Payroll 模块负责：
 3. 执行 4 个合规规则检查
 4. 输出违规报告
 
+### 架构说明
+
+> ⚠️ **重要**：薪资合规检查是**纯规则计算**，**不需要调用 Python AI 服务**。
+>
+> 根据 [ARCHITECTURE.md](../../../.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md)：
+> - ComplianceEngine 的 4 个规则是确定性的数值比对，不涉及 AI 推理
+> - ValidatePayrollHandler 直接调用 Service 和 Repository，不需要 Orchestrator
+
+**组件调用关系**：
+```
+Controller
+    ↓
+ValidatePayrollHandler (总指挥)
+    ├── CsvParserService
+    ├── EmployeeSyncService
+    ├── ComplianceEngine Rules (4 个规则)
+    └── Repositories (Payslip, Validation, Issue)
+```
+
 ---
 
 ## 目录结构（当前状态）
@@ -45,8 +64,6 @@ Payroll/
 │       ├── ValidatePayrollValidator.cs
 │       ├── ValidatePayrollHandler.cs
 │       └── ValidationResultDto.cs
-├── Orchestrators/
-│   └── PayrollAiOrchestrator.cs      ⚠️ 骨架
 └── AI_GUIDE.md                       ← 本文件
 ```
 
@@ -215,4 +232,4 @@ public static class RateTableProvider
 
 ---
 
-*最后更新: 2026-01-01 (ISSUE_02 完成)*
+*最后更新: 2026-01-02 (添加架构说明)*

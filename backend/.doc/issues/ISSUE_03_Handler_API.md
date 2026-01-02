@@ -16,7 +16,7 @@
 
 **前置依赖**:
 - ISSUE_01 ✅ 已完成
-- ISSUE_02 ⏳ 待完成
+- ISSUE_02 ✅ 已完成
 
 ---
 
@@ -66,11 +66,17 @@ tests/FairWorkly.UnitTests/Integration/
 4. 解析 CSV → List<PayrollCsvRow>
 5. 同步员工 → Dictionary<EmployeeNumber, EmployeeId>
 6. 为每行创建 Payslip 记录
-7. 对每个 Payslip 执行 4 个规则检查 (根据开关控制)
-8. 创建 PayrollIssue 记录
-9. 更新 PayrollValidation (状态: Passed/Failed, 统计数据)
-10. 构建 ValidationResultDto 返回
+7. ⭐ Pre-Validation：检查必填字段完整性
+   - 如果缺失 → 输出 WARNING，跳过该员工的规则检查
+   - 如果完整 → 继续执行规则检查
+8. 对每个 Payslip 执行 4 个规则检查 (根据开关控制)
+9. 创建 PayrollIssue 记录
+10. 更新 PayrollValidation (状态: Passed/Failed, 统计数据)
+11. 构建 ValidationResultDto 返回
 ```
+
+> ⚠️ **架构说明**：根据 [ARCHITECTURE.md](../../.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md)，Pre-Validation 是 **Handler 的职责**。
+> Payroll 模块是纯规则计算，不需要 Orchestrator。Handler 直接调用 Service 和 ComplianceEngine Rules。
 
 ---
 
@@ -108,6 +114,46 @@ public class ValidatePayrollValidator : AbstractValidator<ValidatePayrollCommand
         RuleFor(x => x.WeekEnding).NotEmpty();
         RuleFor(x => x.State).NotEmpty();
     }
+}
+```
+
+### Pre-Validation（在 Handler 中实现）
+
+> 根据 [ARCHITECTURE.md](../../.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md)，数据校验是 Handler 的职责。
+
+**检查字段**：
+- Classification
+- Employment Type
+- Hourly Rate
+- Ordinary Hours
+- Ordinary Pay
+- Gross Pay
+
+**处理逻辑**：
+```csharp
+// 在 ValidatePayrollHandler 中，对每个 Payslip 执行
+private bool ValidatePayslipData(Payslip payslip, Guid validationId, List<PayrollIssue> issues)
+{
+    var missingFields = new List<string>();
+
+    if (string.IsNullOrEmpty(payslip.Classification)) missingFields.Add("Classification");
+    if (payslip.HourlyRate <= 0) missingFields.Add("Hourly Rate");
+    if (payslip.OrdinaryHours < 0) missingFields.Add("Ordinary Hours");
+    if (payslip.OrdinaryPay < 0) missingFields.Add("Ordinary Pay");
+    if (payslip.GrossPay < 0) missingFields.Add("Gross Pay");
+
+    if (missingFields.Any())
+    {
+        issues.Add(new PayrollIssue
+        {
+            Severity = IssueSeverity.Warning,
+            CheckType = "Pre-Validation",
+            Description = $"Unable to verify: Mandatory field(s) missing: {string.Join(", ", missingFields)}"
+            // ... other fields
+        });
+        return false; // Skip all rules for this employee
+    }
+    return true; // Continue with rule checks
 }
 ```
 

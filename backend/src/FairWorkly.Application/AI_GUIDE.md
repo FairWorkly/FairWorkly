@@ -5,11 +5,27 @@
 > ⚠️ **宪法文档提醒**：开始任何工作前，先阅读 [.raw_materials/AI_README_FIRST.md](../../.raw_materials/AI_README_FIRST.md)。
 > `.raw_materials/` 是只读的，`README.md` 也是只读的。详见 [.doc/AI_GUIDE.md](../../.doc/AI_GUIDE.md)。
 
+> ⚠️ **架构约束**：必读 [ARCHITECTURE.md](../../.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md) - Handler/Orchestrator 职责划分。
+
 ---
 
 ## 概述
 
 Application 层是业务逻辑的主要实现区域，采用 CQRS + Vertical Slicing 架构。
+
+### 核心组件职责
+
+| 组件 | 职责 | 示例 |
+|------|------|------|
+| **Handler** | 业务流程的"总指挥"，编排整个工作流 | ValidatePayrollHandler |
+| **Orchestrator** | 仅封装 AI 调用，不含业务逻辑 | ComplianceAiOrchestrator |
+| **Service** | 可复用的业务逻辑 | CsvParserService |
+| **Repository** | 数据访问（接口在此层，实现在 Infrastructure） | IPayslipRepository |
+
+**关键原则**：
+- 所有业务逻辑判断在 Handler 中
+- Orchestrator 只封装 Python AI 服务调用
+- 不需要 AI 的功能不创建 Orchestrator
 
 ---
 
@@ -44,8 +60,8 @@ FairWorkly.Application/
 
 | 模块 | AI_GUIDE | 状态 |
 |------|----------|------|
-| **Payroll** | [Payroll/AI_GUIDE.md](./Payroll/AI_GUIDE.md) | ⏳ ISSUE_02 进行中 |
-| Compliance | - | 待开发 |
+| **Payroll** | [Payroll/AI_GUIDE.md](./Payroll/AI_GUIDE.md) | ⏳ ISSUE_03 进行中 |
+| Compliance | - | 骨架已有 (Orchestrator) |
 | Documents | - | 已有骨架 |
 | Employees | - | Repository 接口已定义 |
 
@@ -108,16 +124,21 @@ Payroll/Features/
 |------|------|
 | ICsvParserService → CsvParserService | ✅ |
 | IEmployeeSyncService → EmployeeSyncService | ✅ |
+| IComplianceRule → BaseRateRule | ✅ |
+| IComplianceRule → PenaltyRateRule | ✅ |
+| IComplianceRule → CasualLoadingRule | ✅ |
+| IComplianceRule → SuperannuationRule | ✅ |
 | MediatR | ✅ |
 | FluentValidation | ✅ |
 | ValidationBehavior | ✅ |
 
-## 待注册的服务 (ISSUE_02)
+## 待注册的服务 (ISSUE_03)
 
 | 服务 | 状态 |
 |------|------|
-| IComplianceRule implementations | ⏳ |
-| RateTableProvider | ⏳ |
+| IPayslipRepository → PayslipRepository | ⏳ |
+| IPayrollValidationRepository → PayrollValidationRepository | ⏳ |
+| IPayrollIssueRepository → PayrollIssueRepository | ⏳ |
 
 ---
 
@@ -137,4 +158,4 @@ Payroll/Features/
 
 ---
 
-*最后更新: 2026-01-01*
+*最后更新: 2026-01-02 (添加架构约束，同步 ISSUE_02 完成状态)*
