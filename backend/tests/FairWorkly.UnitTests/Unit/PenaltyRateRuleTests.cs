@@ -48,10 +48,11 @@ public class PenaltyRateRuleTests
         issues.Should().HaveCount(1);
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Error);
-        issue.CheckType.Should().Be("Penalty Rate Check");
-        issue.Description.Should().Contain("Saturday");
+        issue.CategoryType.Should().Be(IssueCategory.PenaltyRate);
+        issue.ContextLabel.Should().Contain("Saturday");
         issue.ExpectedValue.Should().BeApproximately(271.60m, 0.01m);
         issue.ActualValue.Should().Be(217.28m);
+        issue.ImpactAmount.Should().BeApproximately(271.60m - 217.28m, 0.01m);
     }
 
     [Fact]
@@ -92,7 +93,7 @@ public class PenaltyRateRuleTests
         var issues = _rule.Evaluate(payslip, _validationId);
 
         issues.Should().HaveCount(1);
-        issues[0].Description.Should().Contain("Sunday");
+        issues[0].ContextLabel.Should().Contain("Sunday");
     }
 
     #endregion
@@ -120,7 +121,7 @@ public class PenaltyRateRuleTests
 
         issues.Should().HaveCount(1);
         var issue = issues[0];
-        issue.Description.Should().Contain("Public Holiday");
+        issue.ContextLabel.Should().Contain("Public Holiday");
         issue.ExpectedValue.Should().BeApproximately(271.60m, 0.01m);
     }
 
@@ -175,9 +176,9 @@ public class PenaltyRateRuleTests
         var issues = _rule.Evaluate(payslip, _validationId);
 
         issues.Should().HaveCount(3);
-        issues.Should().Contain(i => i.Description.Contains("Saturday"));
-        issues.Should().Contain(i => i.Description.Contains("Sunday"));
-        issues.Should().Contain(i => i.Description.Contains("Public Holiday"));
+        issues.Should().Contain(i => i.ContextLabel!.Contains("Saturday"));
+        issues.Should().Contain(i => i.ContextLabel!.Contains("Sunday"));
+        issues.Should().Contain(i => i.ContextLabel!.Contains("Public Holiday"));
     }
 
     [Fact]

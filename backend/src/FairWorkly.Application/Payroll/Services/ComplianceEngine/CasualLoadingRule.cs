@@ -48,7 +48,7 @@ public class CasualLoadingRule : IComplianceRule
                 payslip,
                 validationId,
                 IssueSeverity.Critical,
-                $"Casual loading not paid correctly: ${actualRate:F2}/hr instead of ${casualRate:F2}/hr",
+                null, // No warning message for underpayment - evidence fields are used
                 casualRate,
                 actualRate,
                 payslip.OrdinaryHours,
@@ -82,26 +82,29 @@ public class CasualLoadingRule : IComplianceRule
         Payslip payslip,
         Guid validationId,
         IssueSeverity severity,
-        string description,
+        string? warningMessage,
         decimal expectedValue,
         decimal actualValue,
         decimal affectedUnits,
         string contextLabel)
     {
+        var impactAmount = (expectedValue - actualValue) * affectedUnits;
+
         return new PayrollIssue
         {
             OrganizationId = payslip.OrganizationId,
             PayrollValidationId = validationId,
             PayslipId = payslip.Id,
             EmployeeId = payslip.EmployeeId,
-            CheckType = RuleName,
+            CategoryType = IssueCategory.CasualLoading,
             Severity = severity,
-            Description = description,
+            WarningMessage = warningMessage,
             ExpectedValue = expectedValue,
             ActualValue = actualValue,
             AffectedUnits = affectedUnits,
-            UnitType = "$/hr",
-            ContextLabel = contextLabel
+            UnitType = "Hour",
+            ContextLabel = contextLabel,
+            ImpactAmount = impactAmount
         };
     }
 }

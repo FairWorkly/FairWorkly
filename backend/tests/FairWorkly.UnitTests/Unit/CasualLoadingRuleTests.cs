@@ -83,10 +83,10 @@ public class CasualLoadingRuleTests
         issues.Should().HaveCount(1);
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Critical);
-        issue.CheckType.Should().Be("Casual Loading Check");
-        issue.Description.Should().Contain("Casual loading not paid correctly");
+        issue.CategoryType.Should().Be(IssueCategory.CasualLoading);
         issue.ExpectedValue.Should().Be(Level2CasualRate);
         issue.ActualValue.Should().BeApproximately(actualRate, 0.01m);
+        issue.ImpactAmount.Should().BeApproximately((Level2CasualRate - actualRate) * 20m, 0.01m);
     }
 
     [Fact]
@@ -117,7 +117,7 @@ public class CasualLoadingRuleTests
         issues.Should().HaveCount(1);
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
-        issue.Description.Should().Contain("System Casual rate");
+        issue.WarningMessage.Should().Contain("System Casual rate");
         issue.ExpectedValue.Should().Be(Level2CasualRate);
         issue.ActualValue.Should().Be(30.00m);
     }

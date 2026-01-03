@@ -75,9 +75,10 @@ public class SuperannuationRuleTests
         issues.Should().HaveCount(1);
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Error);
-        issue.CheckType.Should().Be("Superannuation Check");
+        issue.CategoryType.Should().Be(IssueCategory.Superannuation);
         issue.ExpectedValue.Should().Be(120m);
         issue.ActualValue.Should().Be(0m);
+        issue.ImpactAmount.Should().Be(120m);
     }
 
     [Fact]
@@ -91,10 +92,11 @@ public class SuperannuationRuleTests
         issues.Should().HaveCount(1);
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Error);
-        issue.Description.Should().Contain("Superannuation underpayment");
+        issue.CategoryType.Should().Be(IssueCategory.Superannuation);
         issue.ExpectedValue.Should().Be(240m);
         issue.ActualValue.Should().Be(200m);
         issue.AffectedUnits.Should().Be(2000m); // Gross pay as affected units
+        issue.ImpactAmount.Should().Be(40m);
     }
 
     [Theory]
@@ -132,7 +134,7 @@ public class SuperannuationRuleTests
         issues.Should().HaveCount(1);
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
-        issue.Description.Should().Contain("Missing Gross Pay Data");
+        issue.WarningMessage.Should().Contain("Missing Gross Pay Data");
         issue.ContextLabel.Should().Be("Data Issue");
     }
 

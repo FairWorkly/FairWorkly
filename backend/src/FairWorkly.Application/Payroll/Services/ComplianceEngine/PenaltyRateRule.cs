@@ -108,7 +108,7 @@ public class PenaltyRateRule : IComplianceRule
         decimal hours,
         decimal multiplier)
     {
-        var shortfall = expectedPay - actualPay;
+        var impactAmount = expectedPay - actualPay;
 
         return new PayrollIssue
         {
@@ -116,14 +116,14 @@ public class PenaltyRateRule : IComplianceRule
             PayrollValidationId = validationId,
             PayslipId = payslip.Id,
             EmployeeId = payslip.EmployeeId,
-            CheckType = RuleName,
+            CategoryType = IssueCategory.PenaltyRate,
             Severity = IssueSeverity.Error,
-            Description = $"{dayType} penalty underpayment: Paid ${actualPay:F2}, Expected ${expectedPay:F2}",
             ExpectedValue = expectedPay,
             ActualValue = actualPay,
             AffectedUnits = hours,
-            UnitType = "$",
-            ContextLabel = $"{dayType} ({multiplier:P0} rate)"
+            UnitType = "Currency",
+            ContextLabel = $"{dayType} ({multiplier:P0} rate)",
+            ImpactAmount = impactAmount
         };
     }
 }

@@ -57,10 +57,11 @@ public class BaseRateRuleTests
         issues.Should().HaveCount(1);
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Critical);
-        issue.CheckType.Should().Be("Base Rate Check");
+        issue.CategoryType.Should().Be(IssueCategory.BaseRate);
         issue.ExpectedValue.Should().Be(minimumRate);
         issue.ActualValue.Should().BeApproximately(actualRate, 0.01m);
         issue.AffectedUnits.Should().Be(hours);
+        issue.ImpactAmount.Should().BeApproximately((minimumRate - actualRate) * hours, 0.01m);
     }
 
     [Fact]
@@ -76,7 +77,7 @@ public class BaseRateRuleTests
         issues.Should().HaveCount(1);
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
-        issue.Description.Should().Contain("System rate");
+        issue.WarningMessage.Should().Contain("System rate");
         issue.ExpectedValue.Should().Be(26.55m);
         issue.ActualValue.Should().Be(25.00m);
     }

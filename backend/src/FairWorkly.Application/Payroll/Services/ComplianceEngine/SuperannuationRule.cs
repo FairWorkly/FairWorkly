@@ -33,14 +33,15 @@ public class SuperannuationRule : IComplianceRule
                     PayrollValidationId = validationId,
                     PayslipId = payslip.Id,
                     EmployeeId = payslip.EmployeeId,
-                    CheckType = RuleName,
+                    CategoryType = IssueCategory.Superannuation,
                     Severity = IssueSeverity.Warning,
-                    Description = "Missing Gross Pay Data: Cannot verify superannuation compliance",
+                    WarningMessage = "Missing Gross Pay Data: Cannot verify superannuation compliance",
                     ExpectedValue = 0,
                     ActualValue = 0,
                     AffectedUnits = totalWorkHours,
-                    UnitType = "hours",
-                    ContextLabel = "Data Issue"
+                    UnitType = "Hour",
+                    ContextLabel = "Data Issue",
+                    ImpactAmount = 0
                 });
             }
 
@@ -54,7 +55,7 @@ public class SuperannuationRule : IComplianceRule
         // Check if superannuation is underpaid
         if (payslip.Superannuation < expectedSuper - RateTableProvider.PayTolerance)
         {
-            var shortfall = expectedSuper - payslip.Superannuation;
+            var impactAmount = expectedSuper - payslip.Superannuation;
 
             issues.Add(new PayrollIssue
             {
@@ -62,14 +63,14 @@ public class SuperannuationRule : IComplianceRule
                 PayrollValidationId = validationId,
                 PayslipId = payslip.Id,
                 EmployeeId = payslip.EmployeeId,
-                CheckType = RuleName,
+                CategoryType = IssueCategory.Superannuation,
                 Severity = IssueSeverity.Error,
-                Description = $"Superannuation underpayment: Paid ${payslip.Superannuation:F2}, Expected ${expectedSuper:F2}",
                 ExpectedValue = expectedSuper,
                 ActualValue = payslip.Superannuation,
                 AffectedUnits = payslip.GrossPay,
-                UnitType = "$",
-                ContextLabel = $"12% of ${payslip.GrossPay:F2}"
+                UnitType = "Currency",
+                ContextLabel = $"12% of ${payslip.GrossPay:F2}",
+                ImpactAmount = impactAmount
             });
         }
 
