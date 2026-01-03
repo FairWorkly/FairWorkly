@@ -265,18 +265,102 @@ public const decimal PayTolerance = 0.05m;
 
 ---
 
+## Warning 场景说明（API v1.3 新增）
+
+> **v1.3 更新**：ComplianceEngine 规则现在可以产出 Warning 级别的 Issue，用于标记数据异常或配置风险（非欠薪）。
+
+### 各规则的 Warning 场景
+
+| 规则 | 场景 | Severity | CategoryType | WarningMessage 模板 |
+|------|------|----------|--------------|---------------------|
+| BaseRateRule | 系统费率配置错误（实际支付正确，但系统费率低于法定） | Warning | BaseRate | `System rate ${rate}/hr is below legal minimum ${min}/hr` |
+| CasualLoadingRule | 系统 Casual 费率配置错误 | Warning | CasualLoading | `System Casual rate ${rate}/hr is below legal minimum ${min}/hr` |
+| SuperannuationRule | 缺少 Gross Pay 但有工时 | Warning | Superannuation | `Missing Gross Pay Data: Cannot verify superannuation compliance` |
+
+### Warning vs Error/Critical 区别
+
+| 类型 | Severity | 含义 | ImpactAmount |
+|------|----------|------|--------------|
+| 欠薪 | Error (3) / Critical (4) | 员工实际被欠薪 | 计算欠薪金额 |
+| 警告 | Warning (2) | 数据异常或配置风险，当期未欠薪 | 0 |
+
+### 代码示例：产出 Warning
+
+```csharp
+// BaseRateRule 中的 Warning 场景
+if (payslip.HourlyRate < minimumRate - RateTableProvider.RateTolerance)
+{
+    issues.Add(new PayrollIssue
+    {
+        CategoryType = IssueCategory.BaseRate,
+        Severity = IssueSeverity.Warning,
+        WarningMessage = $"System rate ${payslip.HourlyRate:F2}/hr is below legal minimum ${minimumRate:F2}/hr",
+        ExpectedValue = minimumRate,
+        ActualValue = payslip.HourlyRate,
+        AffectedUnits = payslip.OrdinaryHours,
+        UnitType = "Hour",
+        ContextLabel = $"Retail Award {payslip.Classification}",
+        ImpactAmount = 0  // Warning 无欠薪
+    });
+}
+```
+
+---
+
 ## PayrollIssue 字段填充指南
+
+> **v1.3 更新**：字段已更新以匹配 API Contract v1.3 和 Entity 变更。
+
+### 欠薪类 Issue（Severity = Error 或 Critical）
 
 | 字段 | 说明 | 示例 |
 |------|------|------|
-| CheckType | 规则名称 | "Base Rate Check" |
-| Severity | 严重程度 | IssueSeverity.Critical |
-| Description | 简短描述 | "Base Rate below minimum" |
+| CategoryType | IssueCategory 枚举 | `IssueCategory.BaseRate` |
+| Severity | 严重程度 | `IssueSeverity.Critical` |
+| WarningMessage | **null**（欠薪类不使用） | `null` |
 | ExpectedValue | 法定标准值 | 26.55 |
 | ActualValue | 实际支付值 | 23.50 |
 | AffectedUnits | 涉及单位数 | 40.0 (小时) |
-| UnitType | 单位类型 | "Hour" 或 "Currency" |
+| UnitType | 单位类型 | `"Hour"` 或 `"Currency"` |
 | ContextLabel | 上下文标签 | "Retail Award Level 2" |
+| ImpactAmount | 欠薪金额 | 76.40 |
+
+### 警告类 Issue（Severity = Warning）
+
+| 字段 | 说明 | 示例 |
+|------|------|------|
+| CategoryType | IssueCategory 枚举 | `IssueCategory.BaseRate` |
+| Severity | 严重程度 | `IssueSeverity.Warning` |
+| WarningMessage | 警告消息（后端拼好） | "System rate ($23.50/hr) is below..." |
+| ExpectedValue | 可选，用于 context | 26.55 |
+| ActualValue | 可选，用于 context | 23.50 |
+| AffectedUnits | 可选 | 40.0 |
+| UnitType | 可选 | `"Hour"` |
+| ContextLabel | 可选 | "Retail Award Level 2" |
+| ImpactAmount | **0**（警告类无欠薪） | 0 |
+
+### IssueCategory 枚举值
+
+```csharp
+public enum IssueCategory
+{
+    PreValidation = 0,   // Pre-Validation 失败（由 Handler 产出，见 ISSUE_03）
+    BaseRate = 1,        // 基础费率问题
+    PenaltyRate = 2,     // 罚金费率问题
+    CasualLoading = 3,   // Casual Loading 问题
+    Superannuation = 4,  // 养老金问题
+    STPCompliance = 5    // 未来功能
+}
+```
+
+### ImpactAmount 计算逻辑
+
+| 规则 | 计算方式 | 说明 |
+|------|----------|------|
+| BaseRate | `(ExpectedValue - ActualValue) × AffectedUnits` | 时薪差额 × 小时数 |
+| PenaltyRate | `ExpectedValue - ActualValue` | 已是总金额差额 |
+| CasualLoading | `(ExpectedValue - ActualValue) × AffectedUnits` | 时薪差额 × 小时数 |
+| Superannuation | `ExpectedValue - ActualValue` | 已是总金额差额 |
 
 ---
 

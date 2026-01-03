@@ -62,16 +62,19 @@ tests/FairWorkly.UnitTests/Integration/
 ```
 1. Controller 接收 multipart/form-data
 2. 保存 CSV 到 wwwroot/uploads/{timestamp}_{filename}
-3. 创建 PayrollValidation 记录 (状态: InProgress)
+3. 创建 PayrollValidation 记录 (状态: InProgress, 文件信息, 检查开关)
+   → 详见 "PayrollValidation 生命周期" 章节
 4. 解析 CSV → List<PayrollCsvRow>
 5. 同步员工 → Dictionary<EmployeeNumber, EmployeeId>
-6. 为每行创建 Payslip 记录
+6. 为每行创建 Payslip 记录 (带 PayrollValidationId 外键)
 7. ⭐ Pre-Validation：检查必填字段完整性
    - 如果缺失 → 输出 WARNING，跳过该员工的规则检查
    - 如果完整 → 继续执行规则检查
 8. 对每个 Payslip 执行 4 个规则检查 (根据开关控制)
 9. 创建 PayrollIssue 记录
-10. 更新 PayrollValidation (状态: Passed/Failed, 统计数据)
+10. 更新 PayrollValidation (统计数据: TotalPayslips, PassedCount, FailedCount,
+    TotalIssuesCount, CriticalIssuesCount, Status, CompletedAt)
+    → 详见 "PayrollValidation 生命周期" 章节
 11. 构建 ValidationResultDto 返回
 ```
 
@@ -120,6 +123,8 @@ public class ValidatePayrollValidator : AbstractValidator<ValidatePayrollCommand
 ### Pre-Validation（在 Handler 中实现）
 
 > 根据 [ARCHITECTURE.md](../../.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md)，数据校验是 Handler 的职责。
+>
+> **v1.3 更新**：Pre-Validation 产出的 Issue 使用 `IssueCategory.PreValidation` 分类。
 
 **检查字段**：
 - Classification
@@ -128,6 +133,13 @@ public class ValidatePayrollValidator : AbstractValidator<ValidatePayrollCommand
 - Ordinary Hours
 - Ordinary Pay
 - Gross Pay
+
+**WarningMessage 模板**（根据 API Contract v1.3）：
+
+| 场景 | WarningMessage 模板 |
+|------|---------------------|
+| 字段缺失/无效 | `Unable to verify: ${fieldName} is missing or invalid` |
+| 格式错误 | `Unable to verify: ${fieldName} value '${value}' is not recognized` |
 
 **处理逻辑**：
 ```csharp
@@ -146,10 +158,20 @@ private bool ValidatePayslipData(Payslip payslip, Guid validationId, List<Payrol
     {
         issues.Add(new PayrollIssue
         {
+            OrganizationId = payslip.OrganizationId,
+            PayrollValidationId = validationId,
+            PayslipId = payslip.Id,
+            EmployeeId = payslip.EmployeeId,
+            CategoryType = IssueCategory.PreValidation,  // ← v1.3: 使用枚举
             Severity = IssueSeverity.Warning,
-            CheckType = "Pre-Validation",
-            Description = $"Unable to verify: Mandatory field(s) missing: {string.Join(", ", missingFields)}"
-            // ... other fields
+            WarningMessage = $"Unable to verify: {string.Join(", ", missingFields)} is missing or invalid",
+            // 欠薪字段全部为 null
+            ExpectedValue = null,
+            ActualValue = null,
+            AffectedUnits = null,
+            UnitType = null,
+            ContextLabel = null,
+            ImpactAmount = 0  // Warning 无欠薪
         });
         return false; // Skip all rules for this employee
     }
@@ -157,7 +179,126 @@ private bool ValidatePayslipData(Payslip payslip, Guid validationId, List<Payrol
 }
 ```
 
-### ValidationResultDto（必须符合 API 契约）
+### PayrollValidation 生命周期
+
+PayrollValidation 采用**两阶段更新**模式，原因是 `Payslip.PayrollValidationId` 是外键，必须先创建 PayrollValidation 拿到 ID 后才能创建 Payslip。
+
+#### 步骤 3 - 创建 PayrollValidation（初始数据）
+
+```csharp
+var validation = new PayrollValidation
+{
+    // 基础信息
+    OrganizationId = MVP_ORGANIZATION_ID,  // 硬编码
+    Status = ValidationStatus.InProgress,
+
+    // 文件信息（步骤 2 后可用）
+    FilePath = savedFilePath,
+    FileName = command.File.FileName,
+
+    // 时间范围（从 API 参数）
+    PayPeriodStart = command.WeekStarting.ToDateTime(TimeOnly.MinValue),
+    PayPeriodEnd = command.WeekEnding.ToDateTime(TimeOnly.MaxValue),
+
+    // 执行时间
+    StartedAt = _dateTimeProvider.Now,
+
+    // 检查开关（从 API 参数）
+    BaseRateCheckPerformed = command.EnableBaseRateCheck,
+    PenaltyRateCheckPerformed = command.EnablePenaltyCheck,
+    CasualLoadingCheckPerformed = command.EnableCasualLoadingCheck,
+    SuperannuationCheckPerformed = command.EnableSuperCheck,
+
+    // ⚠️ STP 是未来功能，当前硬编码 false
+    STPCheckPerformed = false
+};
+```
+
+> **注意**：`STPCheckPerformed` 是 Entity 中预留的未来功能占位符，API 尚未定义此开关，当前实现硬编码为 `false`。
+
+#### 步骤 10 - 更新 PayrollValidation（统计数据）
+
+所有检查完成后，更新统计字段：
+
+```csharp
+// 统计数据（步骤 8-9 完成后可计算）
+validation.TotalPayslips = payslips.Count;
+validation.PassedCount = payslips.Count(p => !issuesByPayslip.ContainsKey(p.Id));
+validation.FailedCount = payslips.Count(p => issuesByPayslip.ContainsKey(p.Id));
+validation.TotalIssuesCount = allIssues.Count;
+validation.CriticalIssuesCount = allIssues.Count(i => i.Severity == IssueSeverity.Critical);
+
+// 状态和完成时间
+validation.Status = validation.TotalIssuesCount > 0
+    ? ValidationStatus.Failed
+    : ValidationStatus.Passed;
+validation.CompletedAt = _dateTimeProvider.Now;
+```
+
+#### 字段计算时机总结
+
+| 字段 | 计算时机 | 来源 |
+|------|----------|------|
+| `FilePath`, `FileName` | 步骤 2 后 | 文件保存结果 |
+| `PayPeriodStart/End` | 步骤 3 | API 参数 |
+| `*CheckPerformed` | 步骤 3 | API 参数开关 |
+| `TotalPayslips` | 步骤 6 后 | Payslip 记录数 |
+| `PassedCount`, `FailedCount` | 步骤 9 后 | Issue 统计 |
+| `TotalIssuesCount`, `CriticalIssuesCount` | 步骤 9 后 | Issue 统计 |
+| `CompletedAt` | 步骤 10 | 当前时间 |
+
+### Entity ID 生成时机
+
+> ⚠️ **重要**：`BaseEntity.Id` 在对象创建时是 `Guid.Empty`，需要先添加到 DbContext 才会生成 ID。
+
+**EF Core 行为**：
+
+| 时机 | Id 值 |
+|------|-------|
+| `new Payslip()` | `Guid.Empty` |
+| `_context.Add(payslip)` | ✅ EF Core 自动生成 Guid |
+| `SaveChangesAsync()` | 已有值，持久化到数据库 |
+
+**流程要求**：
+
+ComplianceEngine 规则创建 `PayrollIssue` 时需要 `payslip.Id`（参见 `BaseRateRule.CreateIssue()`）。
+
+因此，**步骤 6 必须先将 Payslip 添加到 DbContext，再执行步骤 7-9 的规则检查**：
+
+```csharp
+// 步骤 6: 创建 Payslip 并添加到 Context（此时 Id 被生成）
+var payslips = csvRows.Select(row => CreatePayslip(row, validation.Id, employeeMap)).ToList();
+_context.Payslips.AddRange(payslips);  // ← Id 在这里自动生成
+
+// 步骤 7-9: 现在可以安全地使用 payslip.Id
+foreach (var payslip in payslips)
+{
+    if (!ValidatePayslipData(payslip, validation.Id, allIssues))
+        continue;  // Pre-validation failed, skip rules
+
+    foreach (var rule in _rules)
+    {
+        if (ShouldRunRule(rule, command))
+        {
+            var issues = rule.Evaluate(payslip, validation.Id);  // ← payslip.Id 有值
+            allIssues.AddRange(issues);
+        }
+    }
+}
+
+// 步骤 9: 添加所有 Issue
+_context.PayrollIssues.AddRange(allIssues);
+
+// 步骤 10-11: 更新统计，一次性保存
+await _context.SaveChangesAsync();
+```
+
+### ValidationResultDto（必须符合 API 契约 v1.3）
+
+> **v1.3 更新**：
+> - `Evidence` → `Description`（更直观）
+> - 新增 `Warning` 字段（警告类使用）
+> - `CategoryType` 新增 `"PreValidation"` 选项
 
 ```csharp
 public class ValidationResultDto
@@ -180,30 +321,70 @@ public class SummaryDto
 
 public class CategoryDto
 {
-    public string Key { get; set; }  // "BaseRate" | "PenaltyRate" | "Superannuation" | "CasualLoading"
+    public string Key { get; set; }  // "PreValidation" | "BaseRate" | "PenaltyRate" | "Superannuation" | "CasualLoading"
     public int AffectedEmployeeCount { get; set; }
-    public decimal TotalUnderpayment { get; set; }
+    public decimal TotalUnderpayment { get; set; }  // PreValidation 和警告类为 0
 }
 
 public class IssueDto
 {
     public Guid IssueId { get; set; }
-    public string CategoryType { get; set; }
+    public string CategoryType { get; set; }  // "PreValidation" | "BaseRate" | "PenaltyRate" | "Superannuation" | "CasualLoading"
     public string EmployeeName { get; set; }
     public string EmployeeId { get; set; }
     public string IssueStatus { get; set; }  // "OPEN" | "RESOLVED"
-    public int Severity { get; set; }  // 1-4
-    public decimal ImpactAmount { get; set; }
-    public EvidenceDto Evidence { get; set; }
+    public int Severity { get; set; }  // 1: Info, 2: Warning, 3: Error, 4: Critical
+    public decimal ImpactAmount { get; set; }  // 警告类为 0
+    public DescriptionDto? Description { get; set; }  // ← v1.3: 欠薪类使用（原 Evidence）
+    public string? Warning { get; set; }  // ← v1.3 新增: 警告类使用
 }
 
-public class EvidenceDto
+// v1.3: Evidence 重命名为 Description
+public class DescriptionDto
 {
     public decimal ActualValue { get; set; }
     public decimal ExpectedValue { get; set; }
     public decimal AffectedUnits { get; set; }
     public string UnitType { get; set; }  // "Hour" | "Currency"
     public string ContextLabel { get; set; }
+}
+```
+
+### Description vs Warning 互斥规则
+
+| Issue 类型 | Severity | Description | Warning |
+|------------|----------|-------------|---------|
+| 欠薪类 | 3 (Error) / 4 (Critical) | ✅ 填充 | `null` |
+| 警告类 | 2 (Warning) | `null` | ✅ 填充 |
+
+**映射逻辑**：
+```csharp
+// 构建 IssueDto 时
+private IssueDto MapToIssueDto(PayrollIssue issue, Employee employee)
+{
+    var isWarning = issue.Severity == IssueSeverity.Warning;
+
+    return new IssueDto
+    {
+        IssueId = issue.Id,
+        CategoryType = issue.CategoryType.ToString(),  // 枚举转字符串
+        EmployeeName = employee.Name,
+        EmployeeId = employee.EmployeeNumber,
+        IssueStatus = issue.IsResolved ? "RESOLVED" : "OPEN",
+        Severity = (int)issue.Severity,
+        ImpactAmount = issue.ImpactAmount ?? 0,
+
+        // 互斥逻辑
+        Description = isWarning ? null : new DescriptionDto
+        {
+            ActualValue = issue.ActualValue ?? 0,
+            ExpectedValue = issue.ExpectedValue ?? 0,
+            AffectedUnits = issue.AffectedUnits ?? 0,
+            UnitType = issue.UnitType ?? "Hour",
+            ContextLabel = issue.ContextLabel ?? ""
+        },
+        Warning = isWarning ? issue.WarningMessage : null
+    };
 }
 ```
 
@@ -232,45 +413,89 @@ public class PayrollController : ControllerBase
 
 ---
 
-## API 响应结构
+## API 响应结构（v1.3）
+
+> **v1.3 更新**：
+> - `evidence` → `description`
+> - 新增 `warning` 字段
+> - `categories.key` 新增 `"PreValidation"`
 
 ```json
 {
   "code": 200,
   "msg": "Audit completed successfully",
   "data": {
-    "validationId": "GUID",
-    "status": "Passed | Failed",
-    "timestamp": "ISO8601",
+    "validationId": "VAL-17029384",
+    "status": "Failed",
+    "timestamp": "2025-12-18T20:00:00Z",
     "summary": {
       "passedCount": 85,
-      "totalIssues": 15,
-      "totalUnderpayment": 1847.00,
-      "affectedEmployees": 5
+      "totalIssues": 4,
+      "totalUnderpayment": 327.58,
+      "affectedEmployees": 4
     },
     "categories": [
       {
+        "key": "PreValidation",
+        "affectedEmployeeCount": 1,
+        "totalUnderpayment": 0
+      },
+      {
         "key": "BaseRate",
-        "affectedEmployeeCount": 3,
-        "totalUnderpayment": 500.50
+        "affectedEmployeeCount": 2,
+        "totalUnderpayment": 180.80
+      },
+      {
+        "key": "Superannuation",
+        "affectedEmployeeCount": 1,
+        "totalUnderpayment": 50.00
       }
     ],
     "issues": [
       {
-        "issueId": "GUID",
+        "issueId": "f1e2d3c4-...",
+        "categoryType": "PreValidation",
+        "employeeName": "Tom Wilson",
+        "employeeId": "E003",
+        "issueStatus": "OPEN",
+        "severity": 2,
+        "impactAmount": 0,
+        "description": null,
+        "warning": "Unable to verify: Classification is missing or invalid"
+      },
+      {
+        "issueId": "a1b2c3d4-...",
         "categoryType": "BaseRate",
         "employeeName": "Jack Smith",
         "employeeId": "E001",
         "issueStatus": "OPEN",
         "severity": 4,
         "impactAmount": 76.40,
-        "evidence": {
+        "description": {
           "actualValue": 23.50,
           "expectedValue": 25.41,
           "affectedUnits": 40.0,
           "unitType": "Hour",
           "contextLabel": "Retail Award Level 2"
-        }
+        },
+        "warning": null
+      },
+      {
+        "issueId": "d4e5f6a7-...",
+        "categoryType": "Superannuation",
+        "employeeName": "Sarah Davis",
+        "employeeId": "E047",
+        "issueStatus": "OPEN",
+        "severity": 3,
+        "impactAmount": 50.00,
+        "description": {
+          "actualValue": 250.00,
+          "expectedValue": 300.00,
+          "affectedUnits": 2500.00,
+          "unitType": "Currency",
+          "contextLabel": "12%"
+        },
+        "warning": null
       }
     ]
   }
@@ -290,14 +515,29 @@ public class PayrollController : ControllerBase
 
 ---
 
-## CategoryType 映射
+## CategoryType 映射（v1.3 更新）
 
-| 规则 | CategoryType |
-|------|--------------|
-| BaseRateRule | "BaseRate" |
-| PenaltyRateRule | "PenaltyRate" |
-| CasualLoadingRule | "CasualLoading" |
-| SuperannuationRule | "Superannuation" |
+> **v1.3 更新**：新增 `PreValidation` 分类。
+
+| 来源 | IssueCategory 枚举 | API CategoryType |
+|------|-------------------|------------------|
+| Handler Pre-Validation | `IssueCategory.PreValidation` | `"PreValidation"` |
+| BaseRateRule | `IssueCategory.BaseRate` | `"BaseRate"` |
+| PenaltyRateRule | `IssueCategory.PenaltyRate` | `"PenaltyRate"` |
+| CasualLoadingRule | `IssueCategory.CasualLoading` | `"CasualLoading"` |
+| SuperannuationRule | `IssueCategory.Superannuation` | `"Superannuation"` |
+
+### categoryType 分类规则
+
+| 场景 | categoryType | 说明 |
+|------|--------------|------|
+| Rule 1 检查发现的问题（含警告） | **BaseRate** | 包括欠薪和数据异常 |
+| Rule 2 检查发现的问题 | **PenaltyRate** | Saturday/Sunday/Public Holiday |
+| Rule 3 检查发现的问题（含警告） | **CasualLoading** | 包括欠薪和配置风险 |
+| Rule 4 检查发现的问题（含警告） | **Superannuation** | 包括欠薪和缺数据 |
+| PreValidation 无法解析 | **PreValidation** | 字段缺失/格式错误，无法进入任何 Rule |
+
+> **注意**：警告类（severity=2）归属到**发现问题的那个 Rule 对应的分类**，只有 Handler Pre-Validation 阶段发现的问题才归到 PreValidation 分类。
 
 ---
 

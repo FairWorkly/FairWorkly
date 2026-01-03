@@ -16,9 +16,11 @@ public class PayrollIssueConfiguration : IEntityTypeConfiguration<PayrollIssue>
         builder.Property(i => i.ExpectedValue).HasPrecision(18, 2);
         builder.Property(i => i.ActualValue).HasPrecision(18, 2);
         builder.Property(i => i.AffectedUnits).HasPrecision(18, 2);
+        builder.Property(i => i.ImpactAmount).HasPrecision(18, 2);
 
-        // Property constraints (redundant with attributes on entity but safe)
-        builder.Property(i => i.Severity).HasConversion<string>(); // Store severity as string for readability in SQL
+        // Enum to string conversion for SQL readability
+        builder.Property(i => i.Severity).HasConversion<string>();
+        builder.Property(i => i.CategoryType).HasConversion<string>();
 
         // Relationship configuration
 
