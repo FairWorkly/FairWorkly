@@ -1,5 +1,52 @@
 # ISSUE_03: Handler 集成 + API 暴露
 
+## ⚠️ 开发前必读
+
+> **重要**：开始开发前，必须阅读以下链接的规则。这些规则在 compact 后容易被遗忘。
+
+### 🔴 红线规则（违反会被拒绝）
+
+| 规则 | 链接 | 关键点 |
+|------|------|--------|
+| **AI Commit 规则** | [CODING_RULES.md#8](../CODING_RULES.md#8-ai-commit-规则) | ❌ 全英文、禁止 AI 签名（Generated with Claude Code、Co-Authored-By） |
+| **禁止修改的文件** | [CODING_RULES.md#1](../CODING_RULES.md#1-禁止修改的文件绝对红线) | ❌ Entity、DbContext 不可修改 |
+| **文档权限层级** | [CODING_RULES.md#必读](../CODING_RULES.md#⚠️-必读文档权限层级) | .raw_materials/ 是宪法级只读文档 |
+
+### 🟡 架构约束
+
+| 规则 | 链接 | 关键点 |
+|------|------|--------|
+| **Handler vs Orchestrator** | [CODING_RULES.md#2.5](../CODING_RULES.md#25-handler-vs-orchestrator-职责划分) | Payroll 是纯规则计算，**不需要 Orchestrator** |
+| **Feature 目录结构** | [CODING_RULES.md#2.2](../CODING_RULES.md#22-feature-目录结构cqrs--vertical-slicing) | Command → Validator → Handler → Dto |
+| **分层架构** | [CODING_RULES.md#2.1](../CODING_RULES.md#21-分层架构) | Controller 是"哑巴"，只做转发 |
+
+### 🟢 代码规范
+
+| 规则 | 链接 | 关键点 |
+|------|------|--------|
+| **数据类型** | [CODING_RULES.md#3.1](../CODING_RULES.md#31-数据类型) | 金额用 `decimal`，时间用 `DateTimeOffset` |
+| **获取当前时间** | [CODING_RULES.md#3.2](../CODING_RULES.md#32-获取当前时间) | 注入 `IDateTimeProvider`，禁止 `DateTime.Now` |
+| **依赖注入** | [CODING_RULES.md#3.3](../CODING_RULES.md#33-依赖注入注册) | 注册在 `DependencyInjection.cs`，禁止在 `Program.cs` |
+| **数值容差** | [CODING_RULES.md#3.4](../CODING_RULES.md#34-数值精度与容差) | 时薪 $0.01，金额 $0.05 |
+| **语言规范** | [CODING_RULES.md#3.5](../CODING_RULES.md#35-语言规范) | 代码注释、命名、Commit 均用 English |
+
+### 📚 业务规则（宪法级只读）
+
+| 文档 | 链接 | 说明 |
+|------|------|------|
+| **API 契约 v1.3** | [API_Contract_v1.3.md](../../.raw_materials/BUSINESS_RULES/API_Contract_v1.3.md) | 响应结构、description/warning 互斥 |
+| **业务逻辑规格** | [Payroll_Engine_Logic.md](../../.raw_materials/BUSINESS_RULES/Payroll_Engine_Logic.md) | 费率表、4 规则伪代码 |
+| **架构设计** | [ARCHITECTURE.md](../../.raw_materials/TECH_CONSTRAINTS/ARCHITECTURE.md) | Handler 是总指挥，Orchestrator 仅封装 AI 调用 |
+
+### ✅ 前置依赖
+
+| Issue | 链接 | 状态 | 提供的能力 |
+|-------|------|------|-----------|
+| ISSUE_01 | [CsvParser + EmployeeSync](./ISSUE_01_CsvParser_EmployeeSync.md) | ✅ | `ICsvParserService`, `IEmployeeSyncService` |
+| ISSUE_02 | [ComplianceEngine](./ISSUE_02_ComplianceEngine.md) | ✅ | 4 个 `IComplianceRule` 实现 |
+
+---
+
 ## 目标
 
 集成所有组件，实现完整的验证流程并暴露 API 接口。

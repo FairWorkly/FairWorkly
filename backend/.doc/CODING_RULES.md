@@ -355,7 +355,7 @@ AI Agent 的 commit 权限由各 Issue 文档单独授权。
 
 | 规则 | 要求 |
 |------|------|
-| **语言** | Commit message 必须使用 **English** |
+| **语言** | Commit message 必须 **全英文**（标题、正文均不可出现中文） |
 | **格式** | Conventional Commits (`feat:`, `test:`, `fix:`, `chore:`, `docs:`) |
 | **粒度** | 按逻辑单元提交（一个功能点 = 代码 + 测试） |
 | **测试** | 提交前必须运行 `dotnet test` 确保通过 |
