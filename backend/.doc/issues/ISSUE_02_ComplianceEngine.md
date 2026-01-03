@@ -23,7 +23,7 @@
 ## 输入与输出
 
 - **输入**：Payslip 实体（包含员工信息、工时、工资等）
-- **输出**：PayrollIssue 列表（违规问题，包含 Severity、差额、Evidence）
+- **输出**：PayrollIssue 列表（违规问题，包含 Severity、差额、Description/Warning）
 
 ---
 
@@ -358,9 +358,9 @@ public enum IssueCategory
 | 规则 | 计算方式 | 说明 |
 |------|----------|------|
 | BaseRate | `(ExpectedValue - ActualValue) × AffectedUnits` | 时薪差额 × 小时数 |
-| PenaltyRate | `ExpectedValue - ActualValue` | 已是总金额差额 |
+| PenaltyRate | `(ExpectedValue - ActualValue) × AffectedUnits` | 时薪差额 × 小时数 |
 | CasualLoading | `(ExpectedValue - ActualValue) × AffectedUnits` | 时薪差额 × 小时数 |
-| Superannuation | `ExpectedValue - ActualValue` | 已是总金额差额 |
+| Superannuation | `ExpectedValue - ActualValue` | 直接金额差（总额对比） |
 
 ---
 
@@ -371,7 +371,7 @@ public enum IssueCategory
 - [x] CasualLoadingRule 仅对 Casual 员工生效
 - [x] SuperannuationRule 能正确计算 12% 养老金差额
 - [x] 所有规则的 Severity 判定正确
-- [x] 返回的 PayrollIssue 包含完整的 Evidence 数据
+- [x] 返回的 PayrollIssue 包含完整的 Description/Warning 数据
 - [x] 服务已在 DependencyInjection.cs 中注册
 - [x] 单元测试通过 (TC-BASE, TC-PENALTY, TC-CASUAL, TC-SUPER)
 

@@ -194,7 +194,9 @@ Content-Type: multipart/form-data
 | enableCasualLoadingCheck | bool | ❌ | 默认 true |
 | enableSuperCheck | bool | ❌ | 默认 true |
 
-### 6.2 响应
+### 6.2 响应（v1.3）
+
+> **v1.3 更新**：`evidence` → `description`，新增 `warning` 字段，`categories.key` 新增 `PreValidation`
 
 ```json
 {
@@ -212,7 +214,7 @@ Content-Type: multipart/form-data
     },
     "categories": [
       {
-        "key": "BaseRate | PenaltyRate | Superannuation | CasualLoading",
+        "key": "PreValidation | BaseRate | PenaltyRate | Superannuation | CasualLoading",
         "affectedEmployeeCount": 3,
         "totalUnderpayment": 500.50
       }
@@ -226,13 +228,14 @@ Content-Type: multipart/form-data
         "issueStatus": "OPEN",
         "severity": 4,
         "impactAmount": 76.40,
-        "evidence": {
+        "description": {
           "actualValue": 23.50,
           "expectedValue": 25.41,
           "affectedUnits": 40.0,
           "unitType": "Hour | Currency",
           "contextLabel": "Retail Award Level 2"
-        }
+        },
+        "warning": null
       }
     ]
   }

@@ -549,7 +549,7 @@ public class PayrollController : ControllerBase
 - [ ] 4 个开关（enableXxxCheck）能正确控制规则执行
 - [ ] PayrollValidation 记录正确创建
 - [ ] Payslip 记录包含正确的快照数据
-- [ ] PayrollIssue 记录包含完整的 Evidence 数据
+- [ ] PayrollIssue 记录包含完整的 Description/Warning 数据
 - [ ] Summary 统计数据准确
 - [ ] CSV 格式错误返回 400 + 详细错误信息
 - [ ] 集成测试通过 (TC-INT-001~004)

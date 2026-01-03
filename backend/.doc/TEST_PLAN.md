@@ -140,7 +140,7 @@ viol001.ImpactAmount.Should().BeApproximately(62.00m, 0.05m);
 result.Issues.Should().HaveCount(3);
 result.Issues.Should().AllSatisfy(i => i.Severity.Should().Be(3));  // ERROR
 result.Issues.Should().AllSatisfy(i =>
-    i.Evidence.ContextLabel.Should().Contain("Saturday"));
+    i.Description.ContextLabel.Should().Contain("Saturday"));
 ```
 
 #### TC-PENALTY-002: 周日罚金违规
