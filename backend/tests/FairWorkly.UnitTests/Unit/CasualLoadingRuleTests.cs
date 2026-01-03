@@ -120,6 +120,7 @@ public class CasualLoadingRuleTests
         issue.WarningMessage.Should().Contain("System Casual rate");
         issue.ExpectedValue.Should().Be(Level2CasualRate);
         issue.ActualValue.Should().Be(30.00m);
+        issue.ImpactAmount.Should().Be(0); // Warning has no financial impact
     }
 
     [Fact]

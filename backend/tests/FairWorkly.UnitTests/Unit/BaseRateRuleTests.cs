@@ -80,6 +80,7 @@ public class BaseRateRuleTests
         issue.WarningMessage.Should().Contain("System rate");
         issue.ExpectedValue.Should().Be(26.55m);
         issue.ActualValue.Should().Be(25.00m);
+        issue.ImpactAmount.Should().Be(0); // Warning has no financial impact
     }
 
     [Fact]

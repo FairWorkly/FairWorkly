@@ -82,7 +82,10 @@ public class BaseRateRule : IComplianceRule
         decimal affectedUnits,
         string contextLabel)
     {
-        var impactAmount = (expectedValue - actualValue) * affectedUnits;
+        // Warning has no financial impact (ImpactAmount = 0)
+        var impactAmount = severity == IssueSeverity.Warning
+            ? 0
+            : (expectedValue - actualValue) * affectedUnits;
 
         return new PayrollIssue
         {
