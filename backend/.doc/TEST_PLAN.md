@@ -336,16 +336,16 @@ result.Summary.AffectedEmployees.Should().Be(6);
 
 ### 8.1 测试文件汇总
 
-| 测试文件 | 当前数量 | 目标数量 | 状态 |
-|----------|----------|----------|------|
-| CsvParserServiceTests.cs | 7 | 12 | +5 待补充 |
-| EmployeeSyncServiceTests.cs | 6 | 6 | ✅ |
-| EmployeeSyncIntegrationTests.cs | 3 | 3 | ✅ |
-| BaseRateRuleTests.cs | 13 | 17 | +4 待补充 |
-| PenaltyRateRuleTests.cs | 13 | 13 | ✅ |
-| CasualLoadingRuleTests.cs | 17 | 17 | ✅ |
-| SuperannuationRuleTests.cs | 22 | 22 | ✅ |
-| **总计** | **81** | **90** | **+9** |
+| 测试文件 | 测试数 | 状态 |
+|----------|--------|------|
+| CsvParserServiceTests.cs | 11 | ✅ |
+| EmployeeSyncServiceTests.cs | 6 | ✅ |
+| EmployeeSyncIntegrationTests.cs | 3 | ✅ |
+| BaseRateRuleTests.cs | 17 | ✅ |
+| PenaltyRateRuleTests.cs | 13 | ✅ |
+| CasualLoadingRuleTests.cs | 17 | ✅ |
+| SuperannuationRuleTests.cs | 22 | ✅ |
+| **总计** | **89** | ✅ |
 
 ### 8.2 业务规则覆盖
 

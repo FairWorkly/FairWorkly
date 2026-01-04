@@ -136,6 +136,72 @@ public class BaseRateRuleTests
         issues.Should().BeEmpty();
     }
 
+    [Fact]
+    public void Evaluate_Level4_WhenAtMinimum_ShouldReturnNoIssues()
+    {
+        // Arrange: Level 4 minimum is $28.12
+        var payslip = CreatePayslip("Level 4", 28.12m, 38.00m, 1068.56m);
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert
+        issues.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Evaluate_Level6_WhenBelowMinimum_ShouldReturnCritical()
+    {
+        // Arrange: Level 6 minimum is $29.70, paying $28.00/hr
+        var payslip = CreatePayslip("Level 6", 28.00m, 40.00m, 1120.00m);
+        var actualRate = 1120.00m / 40.00m; // $28.00
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert
+        issues.Should().HaveCount(1);
+        var issue = issues[0];
+        issue.Severity.Should().Be(IssueSeverity.Critical);
+        issue.CategoryType.Should().Be(IssueCategory.BaseRate);
+        issue.ExpectedValue.Should().Be(29.70m);
+        issue.ActualValue.Should().BeApproximately(actualRate, 0.01m);
+        issue.ImpactAmount.Should().BeApproximately((29.70m - actualRate) * 40.00m, 0.05m);
+    }
+
+    [Fact]
+    public void Evaluate_Level7_WhenAtMinimum_ShouldReturnNoIssues()
+    {
+        // Arrange: Level 7 minimum is $31.19
+        var payslip = CreatePayslip("Level 7", 31.19m, 38.00m, 1185.22m);
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert
+        issues.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Evaluate_Level8_WhenBelowMinimum_ShouldReturnCritical()
+    {
+        // Arrange: Level 8 minimum is $32.45, paying $30.00/hr
+        var payslip = CreatePayslip("Level 8", 30.00m, 40.00m, 1200.00m);
+        var actualRate = 1200.00m / 40.00m; // $30.00
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert
+        issues.Should().HaveCount(1);
+        var issue = issues[0];
+        issue.Severity.Should().Be(IssueSeverity.Critical);
+        issue.CategoryType.Should().Be(IssueCategory.BaseRate);
+        issue.ExpectedValue.Should().Be(32.45m);
+        issue.ActualValue.Should().BeApproximately(actualRate, 0.01m);
+        issue.ImpactAmount.Should().BeApproximately((32.45m - actualRate) * 40.00m, 0.05m);
+    }
+
     private Payslip CreatePayslip(
         string classification,
         decimal hourlyRate,

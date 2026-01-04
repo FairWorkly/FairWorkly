@@ -381,17 +381,12 @@ public enum IssueCategory
 
 | 规则 | 测试文件 | 测试数 | 状态 |
 |------|----------|--------|------|
-| BaseRateRule | BaseRateRuleTests.cs | 13 → 17 | +4 待补充 |
+| BaseRateRule | BaseRateRuleTests.cs | 17 | ✅ |
 | PenaltyRateRule | PenaltyRateRuleTests.cs | 13 | ✅ |
 | CasualLoadingRule | CasualLoadingRuleTests.cs | 17 | ✅ |
 | SuperannuationRule | SuperannuationRuleTests.cs | 22 | ✅ |
 
 > 详细测试用例见 [TEST_PLAN.md](../TEST_PLAN.md#42-基础费率测试)
-
-### 待补充测试（Phase 2）
-
-- [ ] BaseRateRule 覆盖 Level 4-8 所有等级边界
-- [ ] CsvParser 错误场景测试完整（5 个新测试）
 
 ---
 
