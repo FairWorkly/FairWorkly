@@ -379,44 +379,19 @@ public enum IssueCategory
 
 ## 对应测试
 
-### 单元测试用例
+| 规则 | 测试文件 | 测试数 | 状态 |
+|------|----------|--------|------|
+| BaseRateRule | BaseRateRuleTests.cs | 13 → 17 | +4 待补充 |
+| PenaltyRateRule | PenaltyRateRuleTests.cs | 13 | ✅ |
+| CasualLoadingRule | CasualLoadingRuleTests.cs | 17 | ✅ |
+| SuperannuationRule | SuperannuationRuleTests.cs | 22 | ✅ |
 
-| 测试用例 ID | CSV 文件 | 验证目标 | 预期 Severity |
-|-------------|----------|----------|---------------|
-| TC-BASE-001 | TEST_04_BaseRate_AllPass.csv | 基础费率合规 | 无输出 |
-| TC-BASE-002 | TEST_05_BaseRate_Violations.csv (行2-5) | 基础费率违规 | CRITICAL |
-| TC-BASE-003 | TEST_05_BaseRate_Violations.csv (行6) | 系统费率配置错误 | WARNING |
-| TC-PENALTY-001 | TEST_06_Saturday_Violations.csv | 周六罚金违规 | ERROR |
-| TC-PENALTY-002 | TEST_07_Sunday_Violations.csv | 周日罚金违规 | ERROR |
-| TC-PENALTY-003 | TEST_08_PublicHoliday_Violations.csv | 公休罚金违规 | ERROR |
-| TC-CASUAL-001 | TEST_09_Casual_AllPass.csv | Casual Loading 合规 | 无输出 |
-| TC-CASUAL-002 | TEST_10_Casual_Violations.csv (行2-3) | Casual Loading 违规 | CRITICAL |
-| TC-CASUAL-003 | TEST_10_Casual_Violations.csv (行4) | 系统费率配置错误 | WARNING |
-| TC-CASUAL-004 | TEST_10_Casual_Violations.csv (行5) | 非 Casual 员工跳过 | 无输出 |
-| TC-SUPER-001 | TEST_11_Super_AllPass.csv | 养老金合规 | 无输出 |
-| TC-SUPER-002 | TEST_12_Super_Violations.csv (行2-5) | 养老金违规 | ERROR |
-| TC-SUPER-003 | TEST_12_Super_Violations.csv (行6) | 缺少 Gross Pay 但有工时 | WARNING |
-| TC-PREVAL-001 | TEST_17_PreValidation.csv | 必填字段缺失 | WARNING + Skip |
+> 详细测试用例见 [TEST_PLAN.md](../TEST_PLAN.md#42-基础费率测试)
 
-### 边界值测试 (TEST_16_EdgeCases.csv)
+### 待补充测试（Phase 2）
 
-| 测试用例 ID | Employee ID | 场景 | 预期结果 |
-|-------------|-------------|------|----------|
-| TC-EDGE-001 | EDGE001 | 恰好达到最低费率 | PASS |
-| TC-EDGE-002 | EDGE002 | 在容差边界 ($26.54 vs $26.55) | PASS (容差内) |
-| TC-EDGE-003 | EDGE003 | 零工时员工 | SKIP |
-| TC-EDGE-006 | EDGE006 | 养老金在容差内 ($0.04 差额) | PASS |
-| TC-EDGE-007 | EDGE007 | 罚金刚超容差 ($0.06 差额) | ERROR |
-| TC-EDGE-008 | EDGE008 | Level 8 Casual 最高等级 | PASS |
-
-### 集成测试
-
-| CSV 文件 | 场景 | 说明 |
-|----------|------|------|
-| TEST_13_AllCompliant.csv | 全部合规 | 无 PayrollIssue 输出 |
-| TEST_14_AllViolations.csv | 全部违规 | 多种违规组合 |
-| TEST_15_MixedScenarios.csv | 混合场景 | 部分合规部分违规 |
-| TEST_16_EdgeCases.csv | 边界值 | 容差边界测试 |
+- [ ] BaseRateRule 覆盖 Level 4-8 所有等级边界
+- [ ] CsvParser 错误场景测试完整（5 个新测试）
 
 ---
 

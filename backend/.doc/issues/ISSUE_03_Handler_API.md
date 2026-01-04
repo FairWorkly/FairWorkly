@@ -605,12 +605,18 @@ public class PayrollController : ControllerBase
 
 ## 对应测试
 
-| 测试用例 | CSV 文件 | 验证目标 |
+| 测试类型 | 测试文件 | 测试用例 |
 |----------|----------|----------|
-| TC-INT-001 | TEST_13_AllCompliant.csv | 全部合规，status="Passed" |
-| TC-INT-002 | TEST_14_AllViolations.csv | 全部违规，4 种 Category 都有 |
-| TC-INT-003 | TEST_15_MixedScenarios.csv | 真实混合场景 |
-| TC-INT-004 | TEST_16_EdgeCases.csv | 边界值测试 |
+| Pre-Validation | ValidatePayrollHandlerTests.cs | TC-PREVAL-001~003 |
+| 集成测试 | PayrollValidationTests.cs | TC-INT-001~004 |
+
+> 详细测试用例见 [TEST_PLAN.md](../TEST_PLAN.md#46-综合测试)
+
+### 测试范围
+
+- [ ] Pre-Validation 测试（字段缺失、格式错误）
+- [ ] Handler 集成测试（TC-INT-001 ~ TC-INT-004）
+- [ ] API 端点测试
 
 ---
 

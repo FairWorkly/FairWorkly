@@ -105,6 +105,18 @@ employees.Count.Should().Be(6);  // 3 更新 + 3 新建
 
 ---
 
+### 4.1.1 CsvParser 错误场景（待补充）
+
+| ID | 测试方法 | 场景 | 输入 | 预期输出 |
+|----|----------|------|------|----------|
+| CSV-ERR-001 | `ParseAsync_MissingEmployeeId_ReturnsError` | Employee ID 缺失 | `"",Alice,...` | Error: "Employee ID is required" |
+| CSV-ERR-002 | `ParseAsync_InvalidDateFormat_ReturnsError` | 日期格式错误 | `15/12/2025` (非 ISO) | Error: "Invalid date format" |
+| CSV-ERR-003 | `ParseAsync_InvalidEmploymentType_ReturnsError` | 无效 EmploymentType | `Contract` | Error: "Invalid Employment Type" |
+| CSV-ERR-004 | `ParseAsync_EmptyFile_ReturnsError` | 空文件 | 0 bytes | Error: "File is empty" |
+| CSV-ERR-005 | `ParseAsync_HeaderOnly_ReturnsEmptyRows` | 只有表头 | Header row only | rows = [], errors = [] |
+
+---
+
 ### 4.2 基础费率测试
 
 #### TC-BASE-001: 基础费率合规
@@ -127,6 +139,26 @@ result.Issues.Should().AllSatisfy(i => i.Severity.Should().Be(4));  // CRITICAL
 var viol001 = result.Issues.Single(i => i.EmployeeId == "VIOL001");
 viol001.ImpactAmount.Should().BeApproximately(62.00m, 0.05m);
 ```
+
+#### 4.2.1 BaseRateRule Level 边界测试（待补充）
+
+| ID | 测试方法 | Level | Permanent Rate | 预期 |
+|----|----------|-------|----------------|------|
+| BASE-LVL-004a | `Evaluate_Level4_WhenAtMinimum_ShouldReturnNoIssues` | Level 4 | $28.12 | Pass |
+| BASE-LVL-004b | `Evaluate_Level4_WhenBelowMinimum_ShouldReturnCritical` | Level 4 | < $28.12 | CRITICAL |
+| BASE-LVL-006 | `Evaluate_Level6_WhenBelowMinimum_ShouldReturnCritical` | Level 6 | < $29.70 | CRITICAL |
+| BASE-LVL-007 | `Evaluate_Level7_WhenAtMinimum_ShouldReturnNoIssues` | Level 7 | $31.19 | Pass |
+| BASE-LVL-008 | `Evaluate_Level8_WhenBelowMinimum_ShouldReturnCritical` | Level 8 | < $32.45 | CRITICAL |
+
+**费率参考** (from Payroll_Engine_Logic.md):
+
+| Level | Permanent Rate |
+|-------|----------------|
+| Level 4 | $28.12 |
+| Level 5 | $29.14 |
+| Level 6 | $29.70 |
+| Level 7 | $31.19 |
+| Level 8 | $32.45 |
 
 ---
 
@@ -297,3 +329,42 @@ result.Summary.AffectedEmployees.Should().Be(6);
 - [ ] `TEST_13` → status: "Passed", totalIssues: 0
 - [ ] `TEST_05` → 4 个 CRITICAL，CategoryType: "BaseRate"
 - [ ] `TEST_12` → 4 个 ERROR，CategoryType: "Superannuation"
+
+---
+
+## 8. 测试统计
+
+### 8.1 测试文件汇总
+
+| 测试文件 | 当前数量 | 目标数量 | 状态 |
+|----------|----------|----------|------|
+| CsvParserServiceTests.cs | 7 | 12 | +5 待补充 |
+| EmployeeSyncServiceTests.cs | 6 | 6 | ✅ |
+| EmployeeSyncIntegrationTests.cs | 3 | 3 | ✅ |
+| BaseRateRuleTests.cs | 13 | 17 | +4 待补充 |
+| PenaltyRateRuleTests.cs | 13 | 13 | ✅ |
+| CasualLoadingRuleTests.cs | 17 | 17 | ✅ |
+| SuperannuationRuleTests.cs | 22 | 22 | ✅ |
+| **总计** | **81** | **90** | **+9** |
+
+### 8.2 业务规则覆盖
+
+| 规则 | Severity 覆盖 | 状态 |
+|------|---------------|------|
+| BaseRate | CRITICAL ✅, WARNING ✅ | 完整 |
+| PenaltyRate | ERROR ✅ (Sat/Sun/PH) | 完整 |
+| CasualLoading | CRITICAL ✅, WARNING ✅ | 完整 |
+| Superannuation | ERROR ✅, WARNING ✅ | 完整 |
+
+### 8.3 数值一致性
+
+所有测试数据与 `Payroll_Engine_Logic.md` 一致：
+
+| 参数 | 文档值 | 测试值 | 状态 |
+|------|--------|--------|------|
+| Level 1 Permanent | $26.55 | $26.55 | ✅ |
+| Level 2 Permanent | $27.16 | $27.16 | ✅ |
+| Casual Loading | 25% | 25% | ✅ |
+| Superannuation | 12% | 12% | ✅ |
+| Rate Tolerance | $0.01 | $0.01 | ✅ |
+| Pay Tolerance | $0.05 | $0.05 | ✅ |

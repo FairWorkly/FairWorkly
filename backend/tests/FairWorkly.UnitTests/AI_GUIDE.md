@@ -41,17 +41,27 @@ FairWorkly.UnitTests/
 
 ## 测试进度
 
-| Issue | 测试类 | 测试数 | 状态 |
-|-------|--------|--------|------|
-| ISSUE_01 | CsvParserServiceTests | 7 | ✅ Pass |
-| ISSUE_01 | EmployeeSyncServiceTests | 6 | ✅ Pass |
-| ISSUE_01 | EmployeeSyncIntegrationTests | 3 | ✅ Pass |
-| ISSUE_02 | BaseRateRuleTests | 13 | ✅ Pass |
-| ISSUE_02 | PenaltyRateRuleTests | 13 | ✅ Pass |
-| ISSUE_02 | CasualLoadingRuleTests | 17 | ✅ Pass |
-| ISSUE_02 | SuperannuationRuleTests | 22 | ✅ Pass |
-| ISSUE_03 | PayrollValidationTests | - | ⏳ 待实现 |
-| **总计** | - | **81** | **81/81 Pass** |
+| Issue | 测试类 | 当前 | 目标 | 状态 |
+|-------|--------|------|------|------|
+| ISSUE_01 | CsvParserServiceTests | 7 | 12 | +5 待补充 |
+| ISSUE_01 | EmployeeSyncServiceTests | 6 | 6 | ✅ Pass |
+| ISSUE_01 | EmployeeSyncIntegrationTests | 3 | 3 | ✅ Pass |
+| ISSUE_02 | BaseRateRuleTests | 13 | 17 | +4 待补充 |
+| ISSUE_02 | PenaltyRateRuleTests | 13 | 13 | ✅ Pass |
+| ISSUE_02 | CasualLoadingRuleTests | 17 | 17 | ✅ Pass |
+| ISSUE_02 | SuperannuationRuleTests | 22 | 22 | ✅ Pass |
+| ISSUE_03 | ValidatePayrollHandlerTests | - | 3 | ⏳ 待实现 |
+| ISSUE_03 | PayrollValidationTests | - | 4 | ⏳ 待实现 |
+| **总计** | - | **81** | **97** | **81/97 Pass** |
+
+### 待补充测试（Phase 2）
+
+| 测试类 | 新增数 | 场景 |
+|--------|--------|------|
+| CsvParserServiceTests | +5 | 错误场景（空文件、格式错误等） |
+| BaseRateRuleTests | +4 | Level 4-8 边界测试 |
+
+> 详细测试用例见 [TEST_PLAN.md](../../.doc/TEST_PLAN.md#8-测试统计)
 
 ---
 
@@ -155,4 +165,4 @@ dotnet ef database update --project src/FairWorkly.Infrastructure --startup-proj
 
 ---
 
-*最后更新: 2026-01-01 (ISSUE_02 完成, 81 tests total)*
+*最后更新: 2026-01-04 (测试评估报告 Phase 1, 81 tests → 目标 97 tests)*
