@@ -155,7 +155,7 @@ viol001.ImpactAmount.Should().BeApproximately(62.00m, 0.05m);
 | Level | Permanent Rate |
 |-------|----------------|
 | Level 4 | $28.12 |
-| Level 5 | $29.14 |
+| Level 5 | $29.27 |
 | Level 6 | $29.70 |
 | Level 7 | $31.19 |
 | Level 8 | $32.45 |
