@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Templates - FairWorkly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.1);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --bg-white: #ffffff;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --shadow-xl: 0 20px 25px rgba(0,0,0,0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            color: var(--text-primary);
+            background: var(--bg-light);
+            line-height: 1.6;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 2rem; 
+        }
+        
+        .section { 
+            padding: 6rem 0; 
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .content-wrapper {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .icon-large {
+            font-size: 5rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            display: block;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(249, 115, 22, 0.1);
+            color: #ea580c;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 3rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            transition: color 0.2s ease;
+        }
+        
+        .back-link:hover {
+            color: var(--primary);
+        }
+        
+        .info-box {
+            background: var(--bg-white);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 3rem;
+            text-align: left;
+        }
+        
+        .info-box h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .info-box li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .info-box .material-icons-outlined {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <div class="content-wrapper">
+                <span class="material-icons-outlined icon-large">cloud_download</span>
+                
+                <div class="status-badge">Coming Soon</div>
+                
+                <h1>CSV Templates</h1>
+                
+                <p>
+                    We're preparing detailed CSV templates and examples to help you get started 
+                    with FairWorkly. Templates will be available before our official launch.
+                </p>
+                
+                <a href="mailto:support@fairworkly.com" class="btn btn-primary">
+                    <span class="material-icons-outlined" style="vertical-align: middle; font-size: 1.25rem; margin-right: 0.5rem;">email</span>
+                    Request Early Access
+                </a>
+                
+                <div class="info-box">
+                    <h3>What's Coming</h3>
+                    <ul>
+                        <li>
+                            <span class="material-icons-outlined">check_circle</span>
+                            Payslip CSV template with field descriptions
+                        </li>
+                        <li>
+                            <span class="material-icons-outlined">check_circle</span>
+                            Roster CSV template with shift examples
+                        </li>
+                        <li>
+                            <span class="material-icons-outlined">check_circle</span>
+                            Sample data for testing
+                        </li>
+                        <li>
+                            <span class="material-icons-outlined">check_circle</span>
+                            Export guides for Xero & MYOB
+                        </li>
+                    </ul>
+                </div>
+                
+                <a href="FairWorkly-HomePage-FINAL.html" class="back-link">
+                    <span class="material-icons-outlined" style="vertical-align: middle; font-size: 1rem;">arrow_back</span>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
