@@ -27,6 +27,11 @@ class LLMProviderFactory:
 
         if provider_type in {"online", "openai"}:
             model = model_params.get("online_model_name") or os.getenv("OPENAI_MODEL")
+            if not model:
+                raise ValueError(
+                    "OpenAI model name is not configured. Set model_params.online_model_name "
+                    "or the OPENAI_MODEL environment variable."
+                )
             api_base = model_params.get("openai_api_base") or os.getenv("OPENAI_API_BASE")
             temperature = model_params.get("temperature")
             return LangChainOpenAIProvider(model=model, api_base=api_base, temperature=temperature)

@@ -20,12 +20,12 @@ def _ensure_retriever(config, logger):
     """Ensure embeddings/vector store/retriever exist exactly once per process."""
     global _EMBEDDINGS, _VECTORSTORE, _RETRIEVER
 
-    if _RETRIEVER is not None:
-        return _RETRIEVER
+    if _RETRIEVER is not None and _VECTORSTORE is not None:
+        return _RETRIEVER, _VECTORSTORE
 
     with _RESOURCE_LOCK:
-        if _RETRIEVER is not None:
-            return _RETRIEVER
+        if _RETRIEVER is not None and _VECTORSTORE is not None:
+            return _RETRIEVER, _VECTORSTORE
 
         if _EMBEDDINGS is None:
             _EMBEDDINGS = create_embeddings(config, logger=logger)
@@ -36,7 +36,7 @@ def _ensure_retriever(config, logger):
             _VECTORSTORE = load_faiss(str(store_absolute), _EMBEDDINGS, logger=logger)
 
         _RETRIEVER = RAGRetriever(_VECTORSTORE, logger=logger)
-        return _RETRIEVER
+        return _RETRIEVER, _VECTORSTORE
 
 
 class ComplianceFeature(FeatureBase):
@@ -59,10 +59,9 @@ class ComplianceFeature(FeatureBase):
             self.llm = None
 
         try:
-            self.retriever = _ensure_retriever(self.config, self.logger)
-            self.vectorstore = _VECTORSTORE
+            self.retriever, self.vectorstore = _ensure_retriever(self.config, self.logger)
         except FileNotFoundError as exc:
-            self.logger.warning("Vector store unavailable: %s", exc)
+            self.logger.warning("Vector store unavailable: %s", exc, exc_info=True)
         except Exception as exc:
             self.logger.error("Failed to initialize retriever: %s", exc, exc_info=True)
             self.retriever = None
@@ -95,8 +94,7 @@ class ComplianceFeature(FeatureBase):
 
         if not self.retriever:
             try:
-                self.retriever = _ensure_retriever(self.config, self.logger)
-                self.vectorstore = _VECTORSTORE
+                self.retriever, self.vectorstore = _ensure_retriever(self.config, self.logger)
             except FileNotFoundError as exc:
                 self.logger.warning("Vector store unavailable: %s", exc)
             except Exception as exc:
