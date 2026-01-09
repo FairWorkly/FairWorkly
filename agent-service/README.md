@@ -16,6 +16,7 @@ poetry install
 ```bash
 cp .env.example .env
 # edit .env so OPENAI_API_KEY has a real value
+# optional: set OPENAI_API_BASE if you use a non-default endpoint
 ```
 
 
@@ -27,7 +28,7 @@ Before starting the API, ingest the PDF knowledge base (AWARD.pdf lives in `agen
 poetry run python scripts/ingest_assets_to_faiss.py
 ```
 
-This generates the vector store under the path defined by `paths.document_faiss_path` (default: `document_faiss/customer_1/`). Re-run the script whenever you update the source PDFs.
+This generates the vector store under the path defined by `paths.document_faiss_path` (default: `document_faiss/online/` when using online embeddings, `document_faiss/local/` for local mode). Re-run the script whenever you update the source PDFs or switch modes so each directory stays in sync with its embedding model.
 
 ### Security warning
 
@@ -35,10 +36,11 @@ Loading the FAISS store uses `allow_dangerous_deserialization=True`. Only load `
 
 ## Run
 
-Start the FastAPI server with Uvicorn via Poetry (after the FAISS index exists):
+Start the FastAPI server with Uvicorn via Poetry (after the FAISS index exists).  
+`config.yaml` defaults to the OpenAI “online” mode for both embeddings and LLM calls, so ensure `.env` has a valid `OPENAI_API_KEY`. To fall back to a local model, change `model_params.deployment_mode_llm` / `deployment_mode_embedding` back to `local` **and re-run** `scripts/ingest_assets_to_faiss.py` so the FAISS index matches the embedding model in use.
 
 ```bash
-poetry run uvicorn master_agent.main:app --reload --port 8000
+poetry run uvicorn master_agent.main:app --port 8000
 ```
 
 The root route (`/`) redirects to Swagger, so opening `http://localhost:8000/` immediately shows the API docs.

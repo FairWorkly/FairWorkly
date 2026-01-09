@@ -3,8 +3,8 @@ faiss:
   similarity_search_k_feedback: 1
 
 model_params:
-  deployment_mode_embedding: local  # local, online
-  deployment_mode_llm: local  # local, online
+  deployment_mode_embedding: online  # local, online
+  deployment_mode_llm: online  # local, online
   hf_model_repo_id: microsoft/Phi-3-mini-4k-instruct
   local_embedding_model: sentence-transformers/all-MiniLM-L6-v2
   local_max_tokens: 1000
@@ -13,12 +13,14 @@ model_params:
   local_top_k: 50
   local_top_p: 0.95
   local_model_id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
-  online_model_name: deepseek-r1
-  openai_api_base: https://genaiapi.cloudsway.net/v1/ai/XNBwkgPQnMudjcbs
+  online_model_name: gpt-4o-mini
+  openai_api_base: https://api.openai.com/v1
   temperature: 0.4
 
 paths:
-  document_faiss_path: document_faiss/customer_1/
+  document_faiss_path:
+    local: document_faiss/local/
+    online: document_faiss/online/
   ingested_docs_file: ingested_documents.json
   log_file: app.log
   prompt_file: prompt.yaml
