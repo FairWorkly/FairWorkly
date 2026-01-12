@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReduxProvider } from './ReduxProvider'
-import { ThemeProvider } from './ThemeProvider'
+import { ReduxProvider } from '@/app/providers/ReduxProvider'
+import { ThemeProvider } from '@/app/providers/ThemeProvider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
