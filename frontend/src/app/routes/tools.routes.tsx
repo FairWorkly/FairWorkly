@@ -1,5 +1,5 @@
 import { Navigate, type RouteObject } from 'react-router-dom'
-import { MainLayout } from '@/shared/components/layout/MainLayout'
+import { MainLayout } from '@/shared/components/layout/app/MainLayout'
 import { ProtectedRoute } from '@/shared/components/guards/ProtectedRoute'
 
 // Payroll pages
