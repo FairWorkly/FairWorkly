@@ -63,5 +63,7 @@ __pycache__/
 
 # Environment variables
 .env
+backend/src/FairWorkly.API/appsettings.Development.json
+
 ## FAISS indexes
 document_faiss/

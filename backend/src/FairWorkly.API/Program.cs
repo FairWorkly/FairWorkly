@@ -1,6 +1,7 @@
 using FairWorkly.API.ExceptionHandlers;
 using FairWorkly.Application;
 using FairWorkly.Infrastructure;
+using FairWorkly.Infrastructure.Persistence;
 using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -139,6 +140,7 @@ namespace FairWorkly.API
             // Enable Swagger UI in Development
             if (app.Environment.IsDevelopment())
             {
+                await DbSeeder.SeedAsync(app);
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }

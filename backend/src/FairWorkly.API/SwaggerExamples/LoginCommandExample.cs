@@ -8,6 +8,6 @@ public class LoginCommandExample : IExamplesProvider<LoginCommand>
     public LoginCommand GetExamples() => new LoginCommand
     {
         Email = "admin@fairworkly.com.au",
-        Password = "Password123!"
+        Password = "fairworkly123"
     };
 }
