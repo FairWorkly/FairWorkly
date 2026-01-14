@@ -1,76 +1,91 @@
 # FairWorkly Frontend
 
-React 18 + TypeScript + Vite SPA for FairWorkly, an AI-powered HR compliance copilot for Australian SMEs. This frontend will surface the four core agents outlined in the PRD (Compliance, Document & Contract, Payroll & STP Check, Employee Self-Service).
+React 18 + TypeScript + Vite SPA for FairWorkly, an AI-powered HR compliance copilot for Australian SMEs.
 
-> Repo status: scaffolded. Routing, state, and data layers are present as placeholders and need to be wired up to the API once backend contracts are ready.
+> Repo status: scaffolded. Feature modules, routes, state, and API layers exist; backend wiring is still pending.
 
-## Quick start
+## Quick start (from repo root)
 
 ```bash
-cd frontend
+cd FairWorkly/frontend
 npm install
-npm run dev       # start Vite dev server (http://localhost:5173)
-npm run build     # type-check + production build to dist/
+npm run dev       # Vite dev server (http://localhost:5173)
+npm run build     # tsc -b + Vite production build
 npm run preview   # serve the production build locally
-npm run lint      # ESLint across the workspace
+npm run lint      # ESLint
 ```
 
 Node 18+ is recommended. Dependencies are local (no global installs required).
 
+## Storybook
+
+```bash
+cd FairWorkly/frontend
+npm run storybook        # UI dev server (http://localhost:6006)
+npm run build-storybook  # static Storybook build
+```
+
 ## Project structure
 
-- `src/main.tsx` — Vite entry; wraps the app.
-- `src/App.tsx` — root component; add providers (router, Redux Toolkit, React Query) here.
-- `src/index.css`, `src/App.css` — global styles; Emotion + MUI are available for component styling.
-- `src/components/`, `src/pages/` — shared and page-level React components.
-- `src/routes/` — central place for React Router route definitions (empty scaffold).
-- `src/services/` — API client modules; align with backend/OpenAPI once available.
-- `src/store/` — Redux Toolkit slices/store setup (empty scaffold).
-- `src/constants/`, `src/types/`, `src/utils/` — shared definitions and helpers.
-- `public/` — static assets copied verbatim to the build.
-- `dist/` — production output after `npm run build` (checked in for reference; regenerate before release).
+- `src/main.tsx` - Vite entry; mounts BrowserRouter, React Query, Redux, and MUI Theme providers.
+- `src/app/App.tsx` - route assembly via `useRoutes`.
+- `src/app/routes/*.routes.tsx` - route arrays; `src/app/routes/index.tsx` includes `MainLayout` if you choose to use `AppRoutes`.
+- `src/app/providers/` - Redux and MUI theme providers.
+- `src/modules/*` - feature modules with `pages/`, `features/`, `hooks/`, `types/`, `ui/`.
+- `src/shared/components/` - reusable UI (`ui/`, `feedback/`, `layout/`, `guards/`, `storybook/`).
+- `src/shared/constants/`, `src/shared/types/`, `src/shared/utils/`, `src/shared/hooks/` - shared contracts and helpers (see `src/shared/README.md`).
+- `src/services/` - axios client and API modules.
+- `src/store/`, `src/slices/` - Redux store and slices (auth/ui/notifications scaffolds).
+- `src/assets/`, `public/` - static assets.
+- `src/index.css`, `src/styles/` - global styling entries.
+
+## Routing and navigation
+
+- Route configs live in `src/app/routes/*.routes.tsx`.
+- Navigation labels and routes are centralized in `src/shared/constants/navigation.constants.ts` and consumed by `Topbar`/`Sidebar`.
+- `ProtectedRoute` is stubbed to unauthenticated, so tool routes redirect to `/login` until auth is wired in `src/shared/components/guards/ProtectedRoute.tsx`.
+- Keep `NAV_ROUTES` aligned with route configs to avoid dead links while modules are scaffolded.
+- `FairBotChat` currently renders the shared `Sidebar` directly for a three-column layout; reconcile with `MainLayout` if you later wrap routes.
+- FairBot layout widths are set in `src/modules/fairbot/constants/fairbot.constants.ts` (`GRID_TEMPLATE_COLUMNS`, `SIDEBAR_COLUMN_WIDTH`).
+- Import alias: `@/` maps to `src/` (see `vite.config.ts` and `tsconfig.app.json`).
+
+## State, data, and API
+
+- React Query is wired in `src/main.tsx` and available through `useApiQuery`/`useApiMutation` in `src/shared/hooks/`.
+- Redux store is configured in `src/store/` with slices under `src/slices/`.
+- API modules live in `src/services/` and use the shared axios client in `src/services/httpClient.ts`.
 
 ## Styling and UI
 
-- MUI v7 with Emotion (`@mui/material`, `@emotion/react`, `@emotion/styled`) is available for layout and theming.
-- Keep lightweight globals in `index.css`/`App.css`; prefer component-scoped styling via Emotion/MUI system props.
-
-## State and data
-
-- `@reduxjs/toolkit` and `react-redux` are installed for app state; initialize the store in `src/store/` and wrap `App` with `<Provider>`.
-- `@tanstack/react-query` is available for server state/fetching; add a `QueryClientProvider` in `App` once API endpoints are defined.
-- `react-router-dom` is installed; define routes under `src/routes/` and mount `<Router>` in `App`.
+- MUI v7 + Emotion are used for layout and components.
+- Theme is defined in `src/shared/styles/theme.ts` and applied via `ThemeProvider`.
+- Keep global styles minimal; prefer component-scoped styling with MUI/Emotion.
 
 ## Environment variables
 
-Vite exposes env vars prefixed with `VITE_`. Common examples you may introduce:
+Vite exposes env vars prefixed with `VITE_`. Examples:
 
-```
+```env
 VITE_API_BASE_URL=https://api.example.com
 VITE_AUTH_AUDIENCE=...
 ```
 
-Create a `.env` or `.env.local` in `frontend/` as needed; do not commit secrets.
+Create a `.env` or `.env.local` under `FairWorkly/frontend/` as needed; do not commit secrets.
 
 ## Quality and testing
 
-- ESLint is configured via `eslint.config.js`. Run `npm run lint` before pushing.
-- Jest is listed as a dev dependency; a project-level config and tests are not yet present. Add tests under `src/__tests__/` or alongside components when implementing features.
+- ESLint is configured via `eslint.config.js` (`npm run lint`).
+- Storybook is configured under `.storybook/`. Vitest integration is set in `vite.config.ts` for storybook tests.
+- Jest is listed in dev dependencies, but no project-level test scripts/configs exist yet.
 
 ## Documentation links
 
 - Product/context: `../docs/PRD.md`, `../docs/TDD.md`, `../docs/erd.md`
-- Repo conventions: `AGENTS.md` in this directory
+- Repo conventions: `../../AGENTS.md`
 
 ## Contributing workflow
 
 1) Branch from `main`.
-2) Implement feature slices with routing/state/data wiring in `src/routes/` and `src/store/`.
-3) Add or update tests (and Jest config) as functionality appears.
-4) Run `npm run lint` and, when available, the test suite before raising a PR.
-
-Future TODOs:
-
-- Wire providers (Router, Redux, React Query) in `App.tsx`.
-- Implement initial navigation shell and layouts for the four agents.
-- Add API client modules once OpenAPI specs/contracts are defined.
+2) Add or adjust routes in `src/app/routes/*.routes.tsx` and update navigation constants if needed.
+3) Keep feature work inside `src/modules/*` and shared elements in `src/shared/`.
+4) Run `npm run lint` before opening a PR; add tests or Storybook stories when introducing new UI behavior.

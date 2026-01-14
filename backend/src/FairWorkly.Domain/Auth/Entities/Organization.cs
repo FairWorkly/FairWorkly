@@ -12,7 +12,7 @@ namespace FairWorkly.Domain.Auth.Entities;
 /// Multi-tenancy:Each Organization is a separate tenant with isolated data.
 /// All other entities (Employee, Payslip, etc.) belong to an Organization.
 /// </summary>
-public class Organization : BaseEntity
+public class Organization : AuditableEntity
 {
     [MaxLength(500)]
     public string? LogoUrl { get; set; }
@@ -105,13 +105,14 @@ public class Organization : BaseEntity
     /// Used for business logic validation
     /// </summary>
     [NotMapped]
-    public int MaxEmployees => SubscriptionTier switch
-    {
-        SubscriptionTier.Tier1 => 50,
-        SubscriptionTier.Tier2 => 100,
-        SubscriptionTier.Tier3 => 150,
-        _ => 50
-    };
+    public int MaxEmployees =>
+        SubscriptionTier switch
+        {
+            SubscriptionTier.Tier1 => 50,
+            SubscriptionTier.Tier2 => 100,
+            SubscriptionTier.Tier3 => 150,
+            _ => 50,
+        };
 
     /// <summary>
     /// Current employee count
@@ -133,6 +134,6 @@ public class Organization : BaseEntity
     /// Active Awards for this organization
     /// Shown in "Active Awards" section of Settings
     /// </summary>
-    public virtual ICollection<OrganizationAward> OrganizationAwards { get; set; } = new List<OrganizationAward>();
-
+    public virtual ICollection<OrganizationAward> OrganizationAwards { get; set; } =
+        new List<OrganizationAward>();
 }

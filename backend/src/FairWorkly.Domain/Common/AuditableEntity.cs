@@ -7,9 +7,10 @@ namespace FairWorkly.Domain.Common;
 /// </summary>
 public abstract class AuditableEntity : BaseEntity
 {
-    public Guid CreatedByUserId { get; set; }
+    //Who created this record,Null for self-registration (Owner creating Organization)
+    public Guid? CreatedByUserId { get; set; }
     public virtual User? CreatedByUser { get; set; }
     public Guid? UpdatedByUserId { get; set; }
     public virtual User? UpdatedByUser { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 }
