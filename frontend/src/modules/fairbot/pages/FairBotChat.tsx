@@ -1,4 +1,4 @@
-import { styled } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import Divider from '@mui/material/Divider'
@@ -17,7 +17,6 @@ import { MessageList } from '../features/conversation/MessageList'
 import { FileUploadZone } from '../features/conversation/FileUploadZone'
 import { MessageInput } from '../features/conversation/MessageInput'
 import { ResultsPanel } from '../features/resultsPanel/ResultsPanel'
-import { Sidebar } from '@/shared/components/layout/Sidebar'
 
 // FairBot chat page wires conversation and upload flows into a three-column layout.
 const PageContainer = styled('div')({
@@ -28,13 +27,6 @@ const PageContainer = styled('div')({
   width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
     gridTemplateColumns: FAIRBOT_TEXT.SINGLE_COLUMN,
-  },
-})
-
-// Left column that hosts the shared sidebar navigation.
-const SidebarColumn = styled('aside')({
-  [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
-    order: FAIRBOT_NUMBERS.ZERO,
   },
 })
 
@@ -101,16 +93,13 @@ export const FairBotChat = () => {
   const conversation = useConversation()
   // Treat file uploads as messages to keep the chat flow consistent.
   const { inputRef, controls: upload } = useFileUpload({
-    onFileAccepted: async (file) => {
+    onFileAccepted: async file => {
       await conversation.sendMessage(FAIRBOT_LABELS.FILE_UPLOAD_PROMPT, file)
     },
   })
 
   return (
     <PageContainer>
-      <SidebarColumn>
-        <Sidebar width={FAIRBOT_LAYOUT.SIDEBAR_COLUMN_WIDTH} />
-      </SidebarColumn>
       {/* Chat column: greeting, quick actions, message list, input. */}
       <ChatColumn aria-label={FAIRBOT_ARIA.CHAT_AREA}>
         <ChatHeader>
@@ -139,7 +128,10 @@ export const FairBotChat = () => {
             helperText={FAIRBOT_LABELS.UPLOAD_TIP}
           >
             <MessageInputWrapper>
-              <MessageInput upload={upload} onSendMessage={conversation.sendMessage} />
+              <MessageInput
+                upload={upload}
+                onSendMessage={conversation.sendMessage}
+              />
             </MessageInputWrapper>
           </FileUploadZone>
         </MessageComposer>
@@ -150,6 +142,6 @@ export const FairBotChat = () => {
           <ResultsPanel />
         </ResultsPanelWrapper>
       </ResultsColumn>
-    </PageContainer >
+    </PageContainer>
   )
 }

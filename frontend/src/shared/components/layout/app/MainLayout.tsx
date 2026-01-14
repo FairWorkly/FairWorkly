@@ -1,34 +1,38 @@
-import { Outlet } from 'react-router-dom'
-import { Box } from '@mui/material'
-import { styled } from '@mui/material/styles'
+import { useEffect, useCallback } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { useAuth } from '@/shared/hooks/useAuth'
 import { Sidebar } from './Sidebar'
-
-const SIDEBAR_WIDTH = 280
-
-const AppShell = styled('div')(() => ({
-  display: 'flex',
-  minHeight: '100vh',
-}))
-
-const MainArea = styled('main')(({ theme }) => ({
-  flex: 1,
-  minWidth: 0,
-  backgroundColor: theme.palette.background.default,
-  padding: theme.spacing(4),
-}))
+import { AppShell, AppMain, AppContent } from './MainLayout.styles'
 
 export function MainLayout() {
+  const navigate = useNavigate()
+  const { user, switchRole, logout } = useAuth()
+
+  const handleLogout = useCallback(() => {
+    logout()
+    navigate('/login', { replace: true })
+  }, [logout, navigate])
+
+  // DEV ONLY: Expose switchRole to window for easy testing
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      ;(
+        window as typeof window & { switchRole: typeof switchRole }
+      ).switchRole = switchRole
+      console.log(
+        '🔧 DEV: Use window.switchRole("admin") or window.switchRole("manager") to test role switching'
+      )
+    }
+  }, [switchRole])
+
   return (
     <AppShell>
-      <Sidebar width={SIDEBAR_WIDTH} />
-
-      {/* 右侧内容区 */}
-      <MainArea aria-label="Main content">
-        {/* 你页面里自己渲染 breadcrumb / title */}
-        <Box sx={{ maxWidth: 1200 }}>
+      <Sidebar user={user ?? undefined} onLogout={handleLogout} />
+      <AppMain>
+        <AppContent>
           <Outlet />
-        </Box>
-      </MainArea>
+        </AppContent>
+      </AppMain>
     </AppShell>
   )
 }
