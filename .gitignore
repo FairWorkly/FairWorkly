@@ -10,6 +10,7 @@
 
 # Claude Code CLI local configuration
 .claude/
+AGENTS.md
 
 # Visual Studio (Backend)
 .vs/
