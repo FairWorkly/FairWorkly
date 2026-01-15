@@ -1,13 +1,7 @@
-import type { Theme } from "@mui/material/styles";
 import { Box, Card, Typography, alpha, styled, type SvgIconProps } from "@mui/material";
 import { CheckCircleOutline, StoreOutlined, WarningOutlined } from "@mui/icons-material";
 
-
-type PaletteKey = keyof Theme['palette'];
-type Tone = Extract<
-    PaletteKey,
-    'primary' | 'success' | 'warning'   
->;
+type Tone = 'primary' | 'warning' | 'success';
 
 const PageSection = styled('section')(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
@@ -17,7 +11,7 @@ const PageSection = styled('section')(({ theme }) => ({
 }));
 
 const ContentContainer = styled(Box)(({ theme }) => ({
-    maxWidth: theme.fairworkly.layout.containerMaxWidth,          
+    maxWidth: theme.fairworkly.layout.containerMaxWidth,
     margin: '0 auto',
     padding: theme.spacing(0, 4),
 }));
@@ -35,7 +29,7 @@ const ContentLayout = styled(Box)(({ theme }) => ({
 
 const LeftDashboardContainer = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
-    borderRadius: theme.shape.borderRadius,     
+    borderRadius: theme.shape.borderRadius,
     padding: theme.spacing(3),
     boxShadow: theme.shadows[4],
     border: `1px solid ${theme.palette.divider}`,
@@ -60,15 +54,18 @@ const CardContainer = styled(Card)<{ tone: Tone }>(({ theme, tone }) => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(2),
-    borderRadius: theme.shape.borderRadius,       
+    borderRadius: theme.shape.borderRadius,
     border: `1px solid ${theme.palette[tone].main}`,
     padding: theme.spacing(2.5),
     backgroundColor: theme.palette.background.default,
-    transition: 'all 0.3 ease',
+    transition: theme.transitions.create(['transform'], {
+        duration: theme.transitions.duration.short, 
+        easing: theme.transitions.easing.easeInOut,
+      }),
 
     '&:hover': {
-        transform: 'translateX(4px)',      //hardcode: hover动画
-    }
+        transform: `translateX(${theme.spacing(0.5)})`,    
+    },
 }));
 
 const CardIconContainer = styled(Box)(({ theme }) => ({
@@ -79,16 +76,16 @@ const CardIconContainer = styled(Box)(({ theme }) => ({
     width: theme.spacing(6),
     height: theme.spacing(6),
     backgroundColor: alpha(theme.palette.primary.main, 0.12),
-    borderRadius: '12px',   //hardcode: 特定圆角
+    borderRadius: theme.shape.borderRadius,  
 
     '& svg': {
-        fontSize: '1.5rem',     //hardcode: icon大小
+        fontSize: theme.spacing(3),  
         color: theme.palette.primary.main,
     },
 }));
 
 const CardTextContainer = styled(Box)({
-    flexGrow: 1, 
+    flexGrow: 1,
 });
 
 const CardTitle = styled(Typography)(({ theme }) => ({
@@ -104,13 +101,13 @@ const CardBadgeContainer = styled(Typography)<{ tone: Tone }>(({ theme, tone }) 
     alignItems: 'center',
     gap: theme.spacing(0.75),
     padding: theme.spacing(0.75, 1.5),
-    borderRadius: '8px',   //hardcode: 特定圆角
+    borderRadius: theme.fairworkly.radius.sm,
     whiteSpace: 'nowrap',
     backgroundColor: alpha(theme.palette[tone].main, 0.1),
     color: theme.palette[tone].main,
 
     '& svg': {
-        fontSize: '1rem',     //hardcode: Icon大小
+        fontSize: theme.spacing(2),   
         verticalAlign: 'middle',
     },
 }));
@@ -124,7 +121,6 @@ const DashboardBottomNote = styled(Typography)(({ theme }) => ({
 
 const RightInfoContainer = styled(Box)(({ theme }) => ({
     color: theme.palette.text.primary,
-    lineHeight: '1.6',    //hardcode: 特定行高
 }));
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
@@ -175,7 +171,7 @@ const AwardsContainer = styled(Box)(({ theme }) => ({
     color: theme.palette.text.secondary,
     padding: theme.spacing(2),
     backgroundColor: alpha(theme.palette.primary.main, 0.12),
-    borderRadius: '12px',       //hardcode: 特定圆角
+    borderRadius: theme.shape.borderRadius,
     borderLeft: `3px solid ${theme.palette.primary.main}`,
     marginBottom: theme.spacing(3),
 }));

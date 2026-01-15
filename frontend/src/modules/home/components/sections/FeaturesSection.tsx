@@ -1,13 +1,8 @@
 import { AutoAwesomeOutlined, CheckCircleOutline, DescriptionOutlined, EventOutlined, PaymentsOutlined } from "@mui/icons-material";
 import { alpha, Box, Card, styled, Typography, type SvgIconProps, type TypographyProps } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
 
 
-type PaletteKey = keyof Theme['palette'];
-type Tone = Extract<
-    PaletteKey,
-    'primary' | 'warning' | 'info'     
->;
+type Tone = 'primary' | 'warning' | 'info';
 
 const PageSection = styled('section')(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
@@ -17,7 +12,7 @@ const PageSection = styled('section')(({ theme }) => ({
 }));
 
 const ContentContainer = styled(Box)(({ theme }) => ({
-    maxWidth: theme.fairworkly.layout.containerMaxWidth, 
+    maxWidth: theme.fairworkly.layout.containerMaxWidth,
     margin: '0 auto',
     padding: theme.spacing(0, 4),
 }));
@@ -35,7 +30,6 @@ const SectionEyebrow = styled(Typography)(({ theme }) => ({
     backgroundColor: alpha(theme.palette.primary.main, 0.12),
     color: theme.palette.primary.main,
     borderRadius: theme.shape.borderRadius,
-    textTransform: 'uppercase',
     marginBottom: theme.spacing(2),
 }));
 
@@ -78,12 +72,12 @@ const CardContainer = styled(Card)(({ theme }) => ({
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
     transition: 'all 0.3s ease',
-    minHeight: '450px',     //hardcode: 卡片特定高度
+    minHeight: theme.spacing(56.25),
 
     '&:hover': {
         boxShadow: theme.shadows[3],
         borderColor: theme.palette.primary.main,
-        transform: 'translateY(-4px)',     //hardcode: hover动画
+        transform: `translateY(${theme.spacing(-0.5)})`,
     },
 }));
 
@@ -109,17 +103,17 @@ const CardIconContainer = styled(Box)<{ tone: Tone }>(({ theme, tone }) => ({
     color: theme.palette[tone].main,
 
     '& svg': {
-        fontSize: '1.875rem',    //hardcode: icon大小
+        fontSize: theme.spacing(3.75),
     },
 }));
 
 const CardTitle = styled(Typography)({
-    whiteSpace: 'npwrap'
+    whiteSpace: 'nowrap'
 });
 
 const CardDescription = styled(Typography)(({ theme }) => ({
     color: theme.palette.text.secondary,
-    flexGrow: 1, 
+    flexGrow: 1,
     textAlign: 'center',
     marginBottom: theme.spacing(3),
 }));
@@ -130,7 +124,6 @@ const CardFeaturesLayout = styled('ul')(({ theme }) => ({
     listStyle: 'none',
     gap: theme.spacing(1.5),
     padding: 0,
-    margin: 0,
 }));
 
 const CardFeatureItem = styled(Typography)<TypographyProps>(({ theme }) => ({
@@ -142,7 +135,7 @@ const CardFeatureItem = styled(Typography)<TypographyProps>(({ theme }) => ({
 
 const CardCheckIcon = styled(CheckCircleOutline)(({ theme }) => ({
     color: theme.palette.success.main,
-    fontSize: '1.125rem',         //hardcode: Icon大小
+    fontSize: theme.spacing(2.25),
     flexShrink: 0,
     marginTop: theme.spacing(0.25),
 }));
@@ -192,7 +185,7 @@ export const FeaturesSection: React.FC = () => {
     };
     const cards: FeatureCardData[] = [
         {
-            id: 'roaster-compliance',
+            id: 'roster-compliance',
             tone: 'primary',
             icon: EventOutlined,
             title: 'Roster Compliance',
@@ -221,7 +214,7 @@ export const FeaturesSection: React.FC = () => {
         <PageSection>
             <ContentContainer>
                 <HeaderContainer>
-                    <SectionEyebrow variant='caption'>
+                    <SectionEyebrow variant='overline'>
                         <LabelIcon aria-hidden='true'>
                             <AutoAwesomeOutlined fontSize='inherit' />
                         </LabelIcon>
