@@ -123,6 +123,9 @@ export const theme = createTheme({
       md: '0 4px 6px -1px rgba(0,0,0,0.10)',
       lg: '0 10px 25px -5px rgba(0,0,0,0.10)',
       xl: '0 20px 40px -10px rgba(0,0,0,0.15)',
+      navScrolled: '0 4px 20px rgba(0,0,0,0.3)',
+      primaryButton: '0 4px 15px rgba(99, 102, 241, 0.4)',
+      primaryButtonHover: '0 8px 25px rgba(99, 102, 241, 0.5)',
     },
     gradient: {
       primary: 'linear-gradient(135deg, #6366f1, #ec4899)',
@@ -134,6 +137,8 @@ export const theme = createTheme({
     },
     effect: {
       primaryGlow: 'rgba(99, 102, 241, 0.12)',
+      primaryGlowHover: 'rgba(99, 102, 241, 0.18)',
+      primaryBorder: 'rgba(99, 102, 241, 0.2)',
       gridLine: 'rgba(99, 102, 241, 0.03)',
     },
     surface: {
@@ -142,6 +147,7 @@ export const theme = createTheme({
     layout: {
       containerMaxWidth: 1280,
       sidebarWidth: 280,
+      navHeight: 72,
     },
   },
 
