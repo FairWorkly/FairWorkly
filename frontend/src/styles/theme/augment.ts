@@ -14,6 +14,9 @@ export type FairworklyTokens = {
     md: string
     lg: string
     xl: string
+    navScrolled: string
+    primaryButton: string
+    primaryButtonHover: string
   }
   gradient: {
     primary: string
@@ -25,6 +28,8 @@ export type FairworklyTokens = {
   }
   effect: {
     primaryGlow: string
+    primaryGlowHover: string
+    primaryBorder: string
     gridLine: string
   }
   surface: {
@@ -33,6 +38,7 @@ export type FairworklyTokens = {
   layout: {
     containerMaxWidth: number
     sidebarWidth: number
+    navHeight: number
   }
 }
 
