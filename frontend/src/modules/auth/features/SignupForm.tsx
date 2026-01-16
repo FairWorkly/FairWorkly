@@ -2,6 +2,7 @@ import { useState } from 'react'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import type { SignupFormData } from '../types'
 import {
   AuthFormContainer,
   GoogleButton,
@@ -19,7 +20,7 @@ import {
 } from '../ui'
 
 interface SignupFormProps {
-  onSubmit: () => void
+  onSubmit: (values: SignupFormData) => void
   onGoogleLogin: () => void
   isSubmitting?: boolean
   isGoogleLoading?: boolean
@@ -56,13 +57,25 @@ export function SignupForm({
   isSubmitting = false,
   isGoogleLoading = false,
 }: SignupFormProps) {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [companyName, setCompanyName] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [employeeRange, setEmployeeRange] = useState('')
   const passwordStrength = getPasswordStrength(password)
   const isActionDisabled = isSubmitting || isGoogleLoading
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit()
+    onSubmit({
+      firstName,
+      lastName,
+      companyName,
+      email,
+      password,
+      employeeRange,
+    })
   }
 
   return (
@@ -84,6 +97,8 @@ export function SignupForm({
             required
             fullWidth
             autoComplete="given-name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
           />
           <TextField
             label="Last Name"
@@ -91,6 +106,8 @@ export function SignupForm({
             required
             fullWidth
             autoComplete="family-name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
           />
         </FormRow>
 
@@ -100,6 +117,8 @@ export function SignupForm({
           required
           fullWidth
           autoComplete="organization"
+          value={companyName}
+          onChange={(e) => setCompanyName(e.target.value)}
         />
 
         <TextField
@@ -109,6 +128,8 @@ export function SignupForm({
           required
           fullWidth
           autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <div>
@@ -128,7 +149,14 @@ export function SignupForm({
           <StrengthText>{getStrengthText(passwordStrength)}</StrengthText>
         </div>
 
-        <TextField label="Number of Employees" select required fullWidth defaultValue="">
+        <TextField
+          label="Number of Employees"
+          select
+          required
+          fullWidth
+          value={employeeRange}
+          onChange={(e) => setEmployeeRange(e.target.value)}
+        >
           <MenuItem value="" disabled>
             Select range
           </MenuItem>

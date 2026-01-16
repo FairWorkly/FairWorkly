@@ -3,6 +3,7 @@ import TextField from '@mui/material/TextField'
 import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import type { LoginFormData } from '../types'
 import {
   AuthFormContainer,
   GoogleButton,
@@ -17,7 +18,7 @@ import {
 } from '../ui'
 
 interface LoginFormProps {
-  onSubmit: () => void
+  onSubmit: (values: LoginFormData) => void
   onGoogleLogin: () => void
   onForgotPassword: () => void
   isSubmitting?: boolean
@@ -31,12 +32,14 @@ export function LoginForm({
   isSubmitting = false,
   isGoogleLoading = false,
 }: LoginFormProps) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const isActionDisabled = isSubmitting || isGoogleLoading
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit()
+    onSubmit({ email, password, rememberMe })
   }
 
   return (
@@ -58,6 +61,8 @@ export function LoginForm({
           required
           fullWidth
           autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
           label="Password"
@@ -66,6 +71,8 @@ export function LoginForm({
           required
           fullWidth
           autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
       </AuthFieldset>
 

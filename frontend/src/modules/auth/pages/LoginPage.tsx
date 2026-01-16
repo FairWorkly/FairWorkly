@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { LoginForm, SignupForm, ForgotPasswordModal } from '../features'
+import type { LoginFormData, SignupFormData } from '../types'
 import {
   AuthHeader,
   AuthTitle,
@@ -36,14 +37,16 @@ export function LoginPage() {
     }, AUTH_SIMULATED_DELAY_MS)
   }
 
-  const handleLogin = () => {
+  const handleLogin = (values: LoginFormData) => {
     // TODO: Implement actual login logic
-    simulateAuth({ name: 'Demo User', provider: 'email' })
+    const name = values.email ? values.email.split('@')[0] : 'Demo User'
+    simulateAuth({ name, provider: 'email' })
   }
 
-  const handleSignup = () => {
+  const handleSignup = (values: SignupFormData) => {
     // TODO: Implement actual signup logic
-    simulateAuth({ name: 'New User', provider: 'email' })
+    const name = values.firstName || values.email || 'New User'
+    simulateAuth({ name, provider: 'email' })
   }
 
   const handleGoogleLogin = () => {
