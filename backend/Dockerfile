@@ -13,7 +13,7 @@ RUN dotnet restore src/FairWorkly.API/FairWorkly.API.csproj
 
 COPY src/ src/
 
-RUN dotnet build src/FairWorkly.API/FairWorkly.API.csproj -c Release
+RUN dotnet build src/FairWorkly.API/FairWorkly.API.csproj -c Debug
 
 EXPOSE 5680
 
