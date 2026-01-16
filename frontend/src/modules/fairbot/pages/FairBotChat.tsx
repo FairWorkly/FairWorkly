@@ -12,13 +12,13 @@ import {
 import { useConversation } from '../features/conversation/useConversation'
 import { useFileUpload } from '../hooks/useFileUpload'
 import { WelcomeMessage } from '../ui/WelcomeMessage'
-import { QuickActions } from '../features/quickActions/QuickActions'
 import { MessageList } from '../features/conversation/MessageList'
 import { FileUploadZone } from '../features/conversation/FileUploadZone'
 import { MessageInput } from '../features/conversation/MessageInput'
 import { ResultsPanel } from '../features/resultsPanel/ResultsPanel'
 
-// FairBot chat page wires conversation and upload flows into a three-column layout.
+// FairBot chat page wires conversation and upload flows into a two-column layout.
+// Sidebar is provided by MainLayout, so this page only has Chat + Results columns.
 const PageContainer = styled('div')({
   display: 'grid',
   gridTemplateColumns: FAIRBOT_LAYOUT.GRID_TEMPLATE_COLUMNS,
@@ -30,7 +30,7 @@ const PageContainer = styled('div')({
   },
 })
 
-// Left column that holds the conversational UI stack.
+// Main column that holds the conversational UI stack.
 const ChatColumn = styled('section')({
   display: FAIRBOT_LAYOUT.DISPLAY_FLEX,
   flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
@@ -111,10 +111,6 @@ export const FairBotChat = () => {
         <Divider />
         <ScrollArea>
           <WelcomeMessage />
-          <QuickActions
-            upload={upload}
-            onSendMessage={conversation.sendMessage}
-          />
           <MessageList
             messages={conversation.messages}
             isTyping={conversation.isTyping}

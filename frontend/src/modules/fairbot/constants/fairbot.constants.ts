@@ -154,22 +154,22 @@ export const FAIRBOT_KEYWORDS = {
 } as const
 
 const FAIRBOT_GRID_COLUMNS = {
-  // Sidebar column width for the FairBot layout.
-  SIDEBAR: '20%',
-  // Chat column width definition for the grid.
+  // Chat column width definition for the grid (flexible, takes remaining space).
   CHAT: 'minmax(0, 1fr)',
   // Results column width for the FairBot layout.
-  RESULTS: '25%',
+  RESULTS: '320px',
 } as const
 
-const FAIRBOT_GRID_TEMPLATE_COLUMNS =
-  `${FAIRBOT_GRID_COLUMNS.SIDEBAR} ${FAIRBOT_GRID_COLUMNS.CHAT} ${FAIRBOT_GRID_COLUMNS.RESULTS}` as const
+// Two-column layout: Chat (flexible) + Results (fixed width).
+// Sidebar is provided by MainLayout, so no sidebar column needed here.
+const FAIRBOT_GRID_TEMPLATE_COLUMNS = 
+  `${FAIRBOT_GRID_COLUMNS.CHAT} ${FAIRBOT_GRID_COLUMNS.RESULTS}` as const
 
 export const FAIRBOT_LAYOUT = {
   // Uniform margin for chat sections (header, scroll area, composer).
   CHAT_SECTION_MARGIN_PX: 25,
   // Fixed height for the chat header.
-  CHAT_HEADER_HEIGHT_PX: 100,
+  CHAT_HEADER_HEIGHT_PX: 50,
   // Fixed width for the results panel.
   RESULTS_PANEL_WIDTH: 360,
   // Breakpoint for mobile layout adjustments.
@@ -190,9 +190,7 @@ export const FAIRBOT_LAYOUT = {
   MESSAGE_SECTION_GAP: 1.5,
   // Padding inside the message list container.
   MESSAGE_LIST_PADDING: 8,
-  // Sidebar column width for the FairBot grid layout.
-  SIDEBAR_COLUMN_WIDTH: FAIRBOT_GRID_COLUMNS.SIDEBAR,
-  // Grid template columns for the FairBot page container.
+  // Grid template columns for the FairBot page container (2-column: chat + results).
   GRID_TEMPLATE_COLUMNS: FAIRBOT_GRID_TEMPLATE_COLUMNS,
   // Minimum height for the page-level grid container.
   PAGE_MIN_HEIGHT: '100vh',
