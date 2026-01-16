@@ -1,13 +1,13 @@
-import { styled } from '@/styles/styled'
 import { alpha } from '@mui/material/styles'
-import { Box, Stack, Typography } from '@mui/material'
-import {
-  Schedule as ClockIcon,
-  Verified as AwardIcon,
-  SmartToy as AgentIcon,
-  SupportAgent as SupportIcon,
-  Bolt as BoltIcon,
-} from '@mui/icons-material'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import ScheduleIcon from '@mui/icons-material/Schedule'
+import VerifiedIcon from '@mui/icons-material/Verified'
+import SmartToyIcon from '@mui/icons-material/SmartToy'
+import SupportAgentIcon from '@mui/icons-material/SupportAgent'
+import BoltIcon from '@mui/icons-material/Bolt'
+import { styled } from '@/styles/styled'
 
 const LogoSection = styled(Stack)(({ theme }) => ({
   flexDirection: 'row',
@@ -108,6 +108,13 @@ const FeatureIconContent = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
 }))
 
+const features = [
+  { icon: ScheduleIcon, text: '2-minute validation' },
+  { icon: VerifiedIcon, text: '3 core Modern Awards' },
+  { icon: SmartToyIcon, text: '3 AI compliance agents' },
+  { icon: SupportAgentIcon, text: 'Melbourne-based support' },
+]
+
 export function AuthBranding() {
   return (
     <>
@@ -130,38 +137,16 @@ export function AuthBranding() {
         </BrandingSubtitle>
 
         <FeatureList>
-          <FeatureItem>
-            <FeatureIcon>
-              <FeatureIconContent>
-                <ClockIcon fontSize="inherit" />
-              </FeatureIconContent>
-            </FeatureIcon>
-            <FeatureText>2-minute validation</FeatureText>
-          </FeatureItem>
-          <FeatureItem>
-            <FeatureIcon>
-              <FeatureIconContent>
-                <AwardIcon fontSize="inherit" />
-              </FeatureIconContent>
-            </FeatureIcon>
-            <FeatureText>3 core Modern Awards</FeatureText>
-          </FeatureItem>
-          <FeatureItem>
-            <FeatureIcon>
-              <FeatureIconContent>
-                <AgentIcon fontSize="inherit" />
-              </FeatureIconContent>
-            </FeatureIcon>
-            <FeatureText>3 AI compliance agents</FeatureText>
-          </FeatureItem>
-          <FeatureItem>
-            <FeatureIcon>
-              <FeatureIconContent>
-                <SupportIcon fontSize="inherit" />
-              </FeatureIconContent>
-            </FeatureIcon>
-            <FeatureText>Melbourne-based support</FeatureText>
-          </FeatureItem>
+          {features.map(({ icon: Icon, text }) => (
+            <FeatureItem key={text}>
+              <FeatureIcon>
+                <FeatureIconContent>
+                  <Icon fontSize="inherit" />
+                </FeatureIconContent>
+              </FeatureIcon>
+              <FeatureText>{text}</FeatureText>
+            </FeatureItem>
+          ))}
         </FeatureList>
       </BrandingContent>
     </>
