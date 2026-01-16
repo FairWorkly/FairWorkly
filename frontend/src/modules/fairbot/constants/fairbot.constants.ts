@@ -182,10 +182,6 @@ export const FAIRBOT_LAYOUT = {
   RESULTS_PANEL_WIDTH: 360,
   // Breakpoint for mobile layout adjustments.
   MOBILE_BREAKPOINT: 900,
-  // Gap between quick action cards.
-  QUICK_ACTIONS_GAP: 12,
-  // Number of quick action columns on desktop.
-  QUICK_ACTIONS_COLUMNS: 2,
   // Padding inside the results panel.
   RESULTS_PANEL_PADDING: 24,
   // Gap between elements inside results panel.
@@ -200,8 +196,6 @@ export const FAIRBOT_LAYOUT = {
   MESSAGE_LIST_PADDING: 8,
   // Grid template columns for the FairBot page container (2-column: chat + results).
   GRID_TEMPLATE_COLUMNS: FAIRBOT_GRID_TEMPLATE_COLUMNS,
-  // Height for the page-level grid container (fills remaining space in AppContent).
-  PAGE_MIN_HEIGHT: '100%',
   // Flex display value for layout containers.
   DISPLAY_FLEX: 'flex',
   // Column direction for flex layouts.
@@ -216,8 +210,6 @@ export const FAIRBOT_LAYOUT = {
   COLUMN_FULL_WIDTH: '100%',
   // Full-height value for stretching columns/panels.
   COLUMN_FULL_HEIGHT: '100%',
-  // Grid alignment value for stretching items.
-  ALIGN_STRETCH: 'stretch',
 } as const
 
 export const FAIRBOT_UPLOAD = {
