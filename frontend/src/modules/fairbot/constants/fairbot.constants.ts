@@ -162,13 +162,13 @@ export const FAIRBOT_KEYWORDS = {
 } as const
 
 const FAIRBOT_GRID_COLUMNS = {
-  // Chat column width definition for the grid (flexible, takes remaining space).
-  CHAT: 'minmax(0, 1fr)',
-  // Results column width for the FairBot layout.
-  RESULTS: '320px',
+  // Chat column width (67% of container).
+  CHAT: '70%',
+  // Results column width (33% of container).
+  RESULTS: '30%',
 } as const
 
-// Two-column layout: Chat (flexible) + Results (fixed width).
+// Two-column layout: Chat (67%) + Results (33%).
 // Sidebar is provided by MainLayout, so no sidebar column needed here.
 const FAIRBOT_GRID_TEMPLATE_COLUMNS = 
   `${FAIRBOT_GRID_COLUMNS.CHAT} ${FAIRBOT_GRID_COLUMNS.RESULTS}` as const

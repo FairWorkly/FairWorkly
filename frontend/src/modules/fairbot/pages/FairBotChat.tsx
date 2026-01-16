@@ -21,10 +21,9 @@ import { ResultsPanel } from '../features/resultsPanel/ResultsPanel'
 const PageContainer = styled('div')({
   display: 'grid',
   gridTemplateColumns: FAIRBOT_LAYOUT.GRID_TEMPLATE_COLUMNS,
-  alignItems: 'stretch',
-  flex: 1,
-  minHeight: 0,
+  height: '100%',
   width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
+  overflow: 'hidden',
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
     gridTemplateColumns: FAIRBOT_TEXT.SINGLE_COLUMN,
   },
@@ -34,7 +33,7 @@ const PageContainer = styled('div')({
 const ChatColumn = styled('section')({
   display: FAIRBOT_LAYOUT.DISPLAY_FLEX,
   flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
-  minHeight: 0,
+  height: '100%',
   overflow: 'hidden',
 })
 
@@ -61,7 +60,7 @@ const ScrollArea = styled('div')({
 // Right column that hosts the summary panel (stacks below on mobile).
 const ResultsColumn = styled('aside')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
-  minHeight: 0,
+  height: '100%',
   overflow: 'auto',
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
     order: FAIRBOT_NUMBERS.TWO,

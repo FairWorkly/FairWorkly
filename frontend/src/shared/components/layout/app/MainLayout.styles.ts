@@ -1,8 +1,9 @@
 import { styled } from '@/styles/styled'
 
 export const AppShell = styled('div')(() => ({
-  minHeight: '100vh',
+  height: '100vh',
   display: 'flex',
+  overflow: 'hidden',
 }))
 
 export const AppMain = styled('main')(({ theme }) => ({
