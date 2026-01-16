@@ -11,7 +11,6 @@ import {
 } from '../constants/fairbot.constants'
 import { useConversation } from '../features/conversation/useConversation'
 import { useFileUpload } from '../hooks/useFileUpload'
-import { WelcomeMessage } from '../ui/WelcomeMessage'
 import { MessageList } from '../features/conversation/MessageList'
 import { FileUploadZone } from '../features/conversation/FileUploadZone'
 import { MessageInput } from '../features/conversation/MessageInput'
@@ -110,7 +109,6 @@ export const FairBotChat = () => {
         </ChatHeader>
         <Divider />
         <ScrollArea>
-          <WelcomeMessage />
           <MessageList
             messages={conversation.messages}
             isTyping={conversation.isTyping}

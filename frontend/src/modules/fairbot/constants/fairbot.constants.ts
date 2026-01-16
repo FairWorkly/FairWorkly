@@ -15,6 +15,14 @@ export const FAIRBOT_LABELS = {
   ],
   // Prompt shown after the welcome bullets.
   PROMPT_QUESTION: 'What would you like help with today?',
+  // Combined welcome message for chat display.
+  WELCOME_MESSAGE: `Hi! I'm FairBot, your AI-powered Fair Work assistant. I can help you with:
+
+• Roster compliance - Upload and check for penalty rate issues
+• Payroll verification - Identify underpayment risks
+• Fair Work questions
+
+What would you like help with today?`,
   // Placeholder for the message input field.
   INPUT_PLACEHOLDER: 'Type your message or upload a file...',
   // Empty-state title for results panel.
