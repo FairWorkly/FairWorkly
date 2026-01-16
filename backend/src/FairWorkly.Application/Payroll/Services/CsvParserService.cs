@@ -13,7 +13,8 @@ public class CsvParserService : ICsvParserService
 {
     public async Task<(List<PayrollCsvRow> Rows, List<string> Errors)> ParseAsync(
         Stream csvStream,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var rows = new List<PayrollCsvRow>();
         var errors = new List<string>();
@@ -21,22 +22,26 @@ public class CsvParserService : ICsvParserService
         try
         {
             using var reader = new StreamReader(csvStream);
-            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                // Allow missing fields for optional columns
-                MissingFieldFound = null,
-                // Trim whitespace from fields
-                TrimOptions = TrimOptions.Trim,
-                // Skip empty records
-                ShouldSkipRecord = args => args.Row.Parser.Record?.All(string.IsNullOrWhiteSpace) ?? true
-            });
+            using var csv = new CsvReader(
+                reader,
+                new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    // Allow missing fields for optional columns
+                    MissingFieldFound = null,
+                    // Trim whitespace from fields
+                    TrimOptions = TrimOptions.Trim,
+                    // Skip empty records
+                    ShouldSkipRecord = args =>
+                        args.Row.Parser.Record?.All(string.IsNullOrWhiteSpace) ?? true,
+                }
+            );
 
             csv.Context.RegisterClassMap<PayrollCsvRowMap>();
 
             await csv.ReadAsync();
             csv.ReadHeader();
 
-            var rowNumber = 1; // Header is row 0, data starts at row 1
+            var rowNumber = 1; // Header is Excel row 1, data starts at row 2
 
             while (await csv.ReadAsync())
             {
@@ -129,7 +134,9 @@ public class PayrollCsvRowMap : ClassMap<PayrollCsvRow>
         // Required fields
         Map(m => m.EmployeeId).Name("Employee ID");
         Map(m => m.EmployeeName).Name("Employee Name");
-        Map(m => m.PayPeriodStart).Name("Pay Period Start").TypeConverterOption.Format("yyyy-MM-dd");
+        Map(m => m.PayPeriodStart)
+            .Name("Pay Period Start")
+            .TypeConverterOption.Format("yyyy-MM-dd");
         Map(m => m.PayPeriodEnd).Name("Pay Period End").TypeConverterOption.Format("yyyy-MM-dd");
         Map(m => m.AwardType).Name("Award Type");
         Map(m => m.Classification).Name("Classification");
