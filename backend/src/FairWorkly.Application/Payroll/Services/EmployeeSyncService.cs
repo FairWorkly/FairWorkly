@@ -91,7 +91,7 @@ public class EmployeeSyncService : IEmployeeSyncService
                     FirstName = firstName,
                     LastName = lastName,
                     // Use a generated email for MVP (required field)
-                    Email = $"{employeeNumber.ToLower()}@placeholder.local",
+                    Email = GeneratePlaceholderEmail(employeeNumber),
                     JobTitle = "Employee", // Default value for MVP
                     AwardType = awardType,
                     AwardLevelNumber = awardLevelNumber,
@@ -194,5 +194,21 @@ public class EmployeeSyncService : IEmployeeSyncService
             "fixedterm" or "fixed-term" or "fixed term" => EmploymentType.FixedTerm,
             _ => EmploymentType.FullTime, // Default to FullTime
         };
+    }
+
+    /// <summary>
+    /// Generates a placeholder email for MVP
+    /// Sanitizes employee number to ensure valid email format
+    /// </summary>
+    private string GeneratePlaceholderEmail(string employeeNumber)
+    {
+        var sanitized = new string(
+            employeeNumber.Where(c => char.IsLetterOrDigit(c)).ToArray()
+        ).ToLower();
+
+        if (string.IsNullOrEmpty(sanitized))
+            sanitized = Guid.NewGuid().ToString("N")[..8];
+
+        return $"{sanitized}@placeholder.local";
     }
 }
