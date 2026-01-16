@@ -18,7 +18,8 @@ public class EmployeeSyncService : IEmployeeSyncService
 
     public EmployeeSyncService(
         IEmployeeRepository employeeRepository,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider
+    )
     {
         _employeeRepository = employeeRepository;
         _dateTimeProvider = dateTimeProvider;
@@ -27,7 +28,8 @@ public class EmployeeSyncService : IEmployeeSyncService
     public async Task<Dictionary<string, Guid>> SyncEmployeesAsync(
         List<PayrollCsvRow> rows,
         Guid organizationId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         // Early return for null or empty input
         if (rows == null || rows.Count == 0)
@@ -36,16 +38,14 @@ public class EmployeeSyncService : IEmployeeSyncService
         var employeeMapping = new Dictionary<string, Guid>();
 
         // Get unique employee numbers from CSV
-        var employeeNumbers = rows
-            .Select(r => r.EmployeeId)
-            .Distinct()
-            .ToList();
+        var employeeNumbers = rows.Select(r => r.EmployeeId).Distinct().ToList();
 
         // Fetch existing employees by organization and employee numbers
         var existingEmployees = await _employeeRepository.GetByEmployeeNumbersAsync(
             organizationId,
             employeeNumbers,
-            cancellationToken);
+            cancellationToken
+        );
 
         // Filter out any employees with null EmployeeNumber (defensive against dirty data)
         var existingEmployeesDict = existingEmployees
@@ -53,14 +53,13 @@ public class EmployeeSyncService : IEmployeeSyncService
             .ToDictionary(e => e.EmployeeNumber!);
 
         // Group rows by EmployeeId to get the latest data for each employee
-        var employeeGroups = rows
-            .GroupBy(r => r.EmployeeId)
-            .ToList();
+        var employeeGroups = rows.GroupBy(r => r.EmployeeId).ToList();
 
         foreach (var group in employeeGroups)
         {
             var employeeNumber = group.Key;
-            var latestRow = group.First(); // Take first row for employee data
+            // Take most recent pay period data
+            var latestRow = group.OrderByDescending(r => r.PayPeriodEnd).First();
 
             // Parse employee data from CSV row
             var (firstName, lastName) = ParseEmployeeName(latestRow.EmployeeName);
@@ -98,7 +97,7 @@ public class EmployeeSyncService : IEmployeeSyncService
                     AwardLevelNumber = awardLevelNumber,
                     EmploymentType = employmentType,
                     StartDate = _dateTimeProvider.UtcNow.UtcDateTime,
-                    IsActive = true
+                    IsActive = true,
                 };
 
                 await _employeeRepository.CreateAsync(employee, cancellationToken);
@@ -193,7 +192,7 @@ public class EmployeeSyncService : IEmployeeSyncService
             "parttime" or "part-time" or "part time" => EmploymentType.PartTime,
             "casual" => EmploymentType.Casual,
             "fixedterm" or "fixed-term" or "fixed term" => EmploymentType.FixedTerm,
-            _ => EmploymentType.FullTime // Default to FullTime
+            _ => EmploymentType.FullTime, // Default to FullTime
         };
     }
 }
