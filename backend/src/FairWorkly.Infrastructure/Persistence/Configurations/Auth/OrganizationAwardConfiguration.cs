@@ -19,7 +19,7 @@ public class OrganizationAwardConfiguration : IEntityTypeConfiguration<Organizat
             .HasOne(oa => oa.Organization)
             .WithMany(o => o.OrganizationAwards)
             .HasForeignKey(oa => oa.OrganizationId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
         // Unique constraint: One organization can have each award type only once
