@@ -1,0 +1,232 @@
+import { createTheme } from '@mui/material/styles'
+import type { Theme } from '@mui/material/styles'
+
+export const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#6366f1',
+      light: '#818cf8',
+      dark: '#4f46e5',
+      contrastText: '#ffffff',
+    },
+    secondary: {
+      main: '#ec4899',
+      contrastText: '#ffffff',
+    },
+    success: { main: '#10b981', dark: '#047857' },
+    warning: { main: '#f97316', dark: '#c2410c' },
+    error: { main: '#ef4444', dark: '#b91c1c' },
+
+    background: {
+      default: '#f8fafc',
+      paper: '#ffffff',
+    },
+
+    divider: '#e2e8f0',
+
+    text: {
+      primary: '#1e293b',
+      secondary: '#64748b',
+      disabled: '#94a3b8',
+    },
+  },
+
+  shape: {
+    borderRadius: 12,
+  },
+
+  typography: {
+    fontFamily: [
+      'Inter',
+      'system-ui',
+      '-apple-system',
+      'Segoe UI',
+      'Roboto',
+      'Arial',
+    ].join(','),
+
+    h1: {
+      fontSize: 56,
+      fontWeight: 900,
+      letterSpacing: '-0.03em',
+      lineHeight: 1.1,
+    },
+    h2: {
+      fontSize: 40,
+      fontWeight: 800,
+      letterSpacing: '-0.02em',
+      lineHeight: 1.15,
+    },
+    h3: {
+      fontSize: 30,
+      fontWeight: 800,
+      letterSpacing: '-0.02em',
+      lineHeight: 1.2,
+    },
+    h4: {
+      fontSize: 22,
+      fontWeight: 700,
+      letterSpacing: '-0.01em',
+      lineHeight: 1.25,
+    },
+    h6: {
+      fontSize: 18,
+      fontWeight: 900,
+      letterSpacing: '-0.02em',
+      lineHeight: 1.3,
+    },
+    subtitle1: { fontSize: 16, fontWeight: 700, lineHeight: 1.55 },
+    subtitle2: { fontSize: 14, fontWeight: 700, lineHeight: 1.55 },
+
+    body1: { fontSize: 16, fontWeight: 500, lineHeight: 1.65 },
+    body2: { fontSize: 14, fontWeight: 500, lineHeight: 1.65 },
+
+    caption: { fontSize: 12, fontWeight: 600, lineHeight: 1.4 },
+    overline: {
+      fontSize: 11,
+      fontWeight: 800,
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase',
+      lineHeight: 1.4,
+    },
+    uiBadge: {
+      fontSize: 11,
+      fontWeight: 800,
+      letterSpacing: '0.04em',
+      lineHeight: 1,
+      textTransform: 'uppercase',
+    },
+    uiLabel: {
+      fontSize: 13,
+      fontWeight: 700,
+      lineHeight: 1.4,
+    },
+
+    button: { textTransform: 'none', fontWeight: 700 },
+  },
+
+  /**
+   * 只保留“品牌级、跨页面一致”的材料
+   * 其它（radius/shadow/layout/grid）回归 MUI 或放 feature/ui
+   */
+  fairworkly: {
+    radius: {
+      sm: 10,
+      md: 12,
+      lg: 16,
+      xl: 20,
+      pill: 9999,
+    },
+    shadow: {
+      sm: '0 1px 2px rgba(0,0,0,0.05)',
+      md: '0 4px 6px -1px rgba(0,0,0,0.10)',
+      lg: '0 10px 25px -5px rgba(0,0,0,0.10)',
+      xl: '0 20px 40px -10px rgba(0,0,0,0.15)',
+      navScrolled: '0 4px 20px rgba(0,0,0,0.3)',
+      primaryButton: '0 4px 15px rgba(99, 102, 241, 0.4)',
+      primaryButtonHover: '0 8px 25px rgba(99, 102, 241, 0.5)',
+    },
+    gradient: {
+      primary: 'linear-gradient(135deg, #6366f1, #ec4899)',
+      brandText: 'linear-gradient(135deg, #a5b4fc, #f9a8d4)',
+    },
+    color: {
+      brandLight: '#a5b4fc',
+      brandPink: '#f9a8d4',
+    },
+    effect: {
+      primaryGlow: 'rgba(99, 102, 241, 0.12)',
+      primaryGlowHover: 'rgba(99, 102, 241, 0.18)',
+      primaryBorder: 'rgba(99, 102, 241, 0.2)',
+      gridLine: 'rgba(99, 102, 241, 0.03)',
+    },
+    surface: {
+      navDark: '#1e1b4b',
+    },
+    layout: {
+      containerMaxWidth: 1280,
+      sidebarWidth: 280,
+      navHeight: 72,
+    },
+  },
+
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: ({ theme }: { theme: Theme }) => ({
+          backgroundColor: theme.palette.background.default,
+          // 把 grid 背景移到 marketing/auth 的 CssBaseline（feature 级）
+          // 这里保留轻量的“氛围”即可（否则 app 内页也一直有网格）
+          backgroundImage: `
+            radial-gradient(ellipse 80% 50% at 20% 0%, rgba(99,102,241,0.08) 0%, transparent 50%),
+            radial-gradient(ellipse 60% 40% at 80% 100%, rgba(236,72,153,0.06) 0%, transparent 50%)
+          `,
+          backgroundAttachment: 'fixed',
+          overflowX: 'hidden',
+        }),
+      },
+    },
+
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: theme.shape.borderRadius,
+          background: theme.palette.background.paper,
+          transition: theme.transitions.create(['box-shadow', 'border-color'], {
+            duration: theme.transitions.duration.short,
+            easing: theme.transitions.easing.easeInOut,
+          }),
+          '&.Mui-focused': {
+            boxShadow: `0 0 0 3px ${theme.fairworkly.effect.primaryGlow}`,
+          },
+        }),
+        notchedOutline: ({ theme }) => ({
+          borderColor: theme.palette.divider,
+        }),
+      },
+    },
+
+    MuiButton: {
+      defaultProps: { disableElevation: true },
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: theme.shape.borderRadius,
+          padding: theme.spacing(1.25, 2),
+          transition: theme.transitions.create(['transform', 'box-shadow', 'background'], {
+            duration: theme.transitions.duration.short,
+            easing: theme.transitions.easing.easeInOut,
+          }),
+        }),
+      },
+    },
+
+    MuiPaper: {
+      defaultProps: { elevation: 0 },
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: theme.shape.borderRadius, // 24-ish；需要更大就放 feature/ui
+          backgroundImage: 'none',
+        }),
+      },
+    },
+
+    MuiBackdrop: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(4px)',
+        },
+      },
+    },
+
+    MuiDialog: {
+      styleOverrides: {
+        paper: ({ theme }) => ({
+          borderRadius: theme.shape.borderRadius,
+          boxShadow: theme.shadows[24],
+        }),
+      },
+    },
+  },
+})

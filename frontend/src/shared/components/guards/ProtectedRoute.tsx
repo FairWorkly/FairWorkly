@@ -1,17 +1,10 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
+import { useAuth } from '@/shared/hooks/useAuth'
 
-interface ProtectedRouteProps {
-  children: React.ReactNode
-  requiredModule?: string
-}
+export function ProtectedRoute() {
+  const { isAuthenticated, isLoading } = useAuth()
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  // TODO: 后续接入真实的auth context
-  const isAuthenticated = false // 暂时写死false，开发时改成true
+  if (isLoading) return null
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
-
-  return <>{children}</>
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />
 }

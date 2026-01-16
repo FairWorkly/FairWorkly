@@ -26,9 +26,9 @@ router = IntentRouter()
 registry = FeatureRegistry()
 
 # Register Features
-compliance_feature = ComplianceFeature
-registry.register("compliance_qa", compliance_feature())
-registry.register("compliance_roster", compliance_feature())
+compliance_feature = ComplianceFeature()
+registry.register("compliance_qa", compliance_feature)
+registry.register("compliance_roster", compliance_feature)
 registry.register("payroll_verify", DemoPayrollFeature())
 
 
