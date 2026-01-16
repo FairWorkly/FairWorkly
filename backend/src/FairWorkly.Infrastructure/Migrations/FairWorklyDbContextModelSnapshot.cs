@@ -184,15 +184,8 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("organization_id");
 
-                    b.Property<Guid?>("OrganizationId1")
-                        .HasColumnType("uuid")
-                        .HasColumnName("organization_id1");
-
                     b.HasKey("Id")
                         .HasName("pk_organization_award");
-
-                    b.HasIndex("OrganizationId1")
-                        .HasDatabaseName("ix_organization_award_organization_id1");
 
                     b.HasIndex("OrganizationId", "AwardType")
                         .IsUnique()
@@ -1079,10 +1072,6 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by_user_id");
 
-                    b.Property<Guid?>("CreatedByUserId1")
-                        .HasColumnType("uuid")
-                        .HasColumnName("created_by_user_id1");
-
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("date_of_birth");
@@ -1145,10 +1134,6 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("organization_id");
 
-                    b.Property<Guid?>("OrganizationId1")
-                        .HasColumnType("uuid")
-                        .HasColumnName("organization_id1");
-
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
@@ -1181,21 +1166,14 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("updated_by_user_id");
 
-                    b.Property<Guid?>("UpdatedByUserId1")
-                        .HasColumnType("uuid")
-                        .HasColumnName("updated_by_user_id1");
-
                     b.HasKey("Id")
                         .HasName("pk_employees");
 
-                    b.HasIndex("CreatedByUserId1")
-                        .HasDatabaseName("ix_employees_created_by_user_id1");
+                    b.HasIndex("CreatedByUserId")
+                        .HasDatabaseName("ix_employees_created_by_user_id");
 
-                    b.HasIndex("OrganizationId1")
-                        .HasDatabaseName("ix_employees_organization_id1");
-
-                    b.HasIndex("UpdatedByUserId1")
-                        .HasDatabaseName("ix_employees_updated_by_user_id1");
+                    b.HasIndex("UpdatedByUserId")
+                        .HasDatabaseName("ix_employees_updated_by_user_id");
 
                     b.HasIndex("OrganizationId", "Email")
                         .IsUnique()
@@ -1669,16 +1647,11 @@ namespace FairWorkly.Infrastructure.Migrations
             modelBuilder.Entity("FairWorkly.Domain.Auth.Entities.OrganizationAward", b =>
                 {
                     b.HasOne("FairWorkly.Domain.Auth.Entities.Organization", "Organization")
-                        .WithMany()
+                        .WithMany("OrganizationAwards")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_organization_award_organization_organization_id");
-
-                    b.HasOne("FairWorkly.Domain.Auth.Entities.Organization", null)
-                        .WithMany("OrganizationAwards")
-                        .HasForeignKey("OrganizationId1")
-                        .HasConstraintName("fk_organization_award_organization_organization_id1");
 
                     b.Navigation("Organization");
                 });
@@ -1929,25 +1902,22 @@ namespace FairWorkly.Infrastructure.Migrations
                 {
                     b.HasOne("FairWorkly.Domain.Auth.Entities.User", "CreatedByUser")
                         .WithMany()
-                        .HasForeignKey("CreatedByUserId1")
-                        .HasConstraintName("fk_employees_user_created_by_user_id1");
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_employees_user_created_by_user_id");
 
                     b.HasOne("FairWorkly.Domain.Auth.Entities.Organization", "Organization")
-                        .WithMany()
+                        .WithMany("Employees")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_employees_organization_organization_id");
 
-                    b.HasOne("FairWorkly.Domain.Auth.Entities.Organization", null)
-                        .WithMany("Employees")
-                        .HasForeignKey("OrganizationId1")
-                        .HasConstraintName("fk_employees_organization_organization_id1");
-
                     b.HasOne("FairWorkly.Domain.Auth.Entities.User", "UpdatedByUser")
                         .WithMany()
-                        .HasForeignKey("UpdatedByUserId1")
-                        .HasConstraintName("fk_employees_user_updated_by_user_id1");
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_employees_user_updated_by_user_id");
 
                     b.Navigation("CreatedByUser");
 

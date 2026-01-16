@@ -27,8 +27,21 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         // Relationship configuration
         builder
             .HasOne(e => e.Organization)
-            .WithMany()
+            .WithMany(o => o.Employees)
             .HasForeignKey(e => e.OrganizationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // audit relationship configurations
+        builder
+            .HasOne(e => e.CreatedByUser)
+            .WithMany()
+            .HasForeignKey(e => e.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(e => e.UpdatedByUser)
+            .WithMany()
+            .HasForeignKey(e => e.UpdatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Employee -> Payslips already configured in PayslipConfiguration

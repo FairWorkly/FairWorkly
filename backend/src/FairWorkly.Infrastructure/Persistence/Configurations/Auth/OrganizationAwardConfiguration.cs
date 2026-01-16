@@ -15,8 +15,9 @@ public class OrganizationAwardConfiguration : IEntityTypeConfiguration<Organizat
         builder.HasKey(oa => oa.Id);
 
         // OrganizationAward -> Organization
-        builder.HasOne(oa => oa.Organization)
-            .WithMany()
+        builder
+            .HasOne(oa => oa.Organization)
+            .WithMany(o => o.OrganizationAwards)
             .HasForeignKey(oa => oa.OrganizationId)
             .OnDelete(DeleteBehavior.Cascade);
 
