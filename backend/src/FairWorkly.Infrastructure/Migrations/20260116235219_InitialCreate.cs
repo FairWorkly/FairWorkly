@@ -184,7 +184,7 @@ namespace FairWorkly.Infrastructure.Migrations
                         column: x => x.organization_id,
                         principalTable: "organization",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(

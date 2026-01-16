@@ -1649,7 +1649,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasOne("FairWorkly.Domain.Auth.Entities.Organization", "Organization")
                         .WithMany("OrganizationAwards")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_organization_award_organization_organization_id");
 

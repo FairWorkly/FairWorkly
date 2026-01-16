@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FairWorkly.Infrastructure.Migrations
 {
     [DbContext(typeof(FairWorklyDbContext))]
-    [Migration("20260116110501_InitialCreate")]
+    [Migration("20260116235219_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1652,7 +1652,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasOne("FairWorkly.Domain.Auth.Entities.Organization", "Organization")
                         .WithMany("OrganizationAwards")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_organization_award_organization_organization_id");
 
