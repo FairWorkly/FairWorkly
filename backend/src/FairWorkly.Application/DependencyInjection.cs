@@ -8,8 +8,8 @@ using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Employees.Orchestrators;
 using FairWorkly.Application.Employees.Services;
 using FairWorkly.Application.Payroll.Interfaces;
-using FairWorkly.Application.Payroll.Orchestrators;
 using FairWorkly.Application.Payroll.Services;
+using FairWorkly.Application.Payroll.Services.ComplianceEngine;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,9 +42,14 @@ public static class DependencyInjection
         services.AddScoped<ICsvParserService, CsvParserService>();
         services.AddScoped<IEmployeeSyncService, EmployeeSyncService>();
 
+        // Register Compliance Rules
+        services.AddScoped<IComplianceRule, BaseRateRule>();
+        services.AddScoped<IComplianceRule, PenaltyRateRule>();
+        services.AddScoped<IComplianceRule, CasualLoadingRule>();
+        services.AddScoped<IComplianceRule, SuperannuationRule>();
+
         // Register AI Orchestrators
         services.AddScoped<ComplianceAiOrchestrator>();
-        services.AddScoped<PayrollAiOrchestrator>();
         services.AddScoped<DocumentAiOrchestrator>();
         services.AddScoped<EmployeeAiOrchestrator>();
 

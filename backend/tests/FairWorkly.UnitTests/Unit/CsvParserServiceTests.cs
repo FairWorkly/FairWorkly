@@ -169,6 +169,82 @@ NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,-26.55,38.00,
     }
 
     [Fact]
+    public async Task ParseAsync_MissingEmployeeId_ReturnsError()
+    {
+        // Arrange - First row has empty Employee ID
+        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07";
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        await writer.WriteAsync(csvContent);
+        await writer.FlushAsync();
+        stream.Position = 0;
+
+        // Act
+        var (rows, errors) = await _csvParserService.ParseAsync(stream);
+
+        // Assert
+        errors.Should().NotBeEmpty();
+        errors.Should().Contain(e => e.Contains("Employee ID is required"));
+    }
+
+    [Fact]
+    public async Task ParseAsync_InvalidEmploymentType_ReturnsError()
+    {
+        // Arrange - Invalid employment type "Contract"
+        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,Contract,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07";
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        await writer.WriteAsync(csvContent);
+        await writer.FlushAsync();
+        stream.Position = 0;
+
+        // Act
+        var (rows, errors) = await _csvParserService.ParseAsync(stream);
+
+        // Assert
+        errors.Should().NotBeEmpty();
+        errors.Should().Contain(e => e.Contains("Employment Type") || e.Contains("Invalid"));
+    }
+
+    [Fact]
+    public async Task ParseAsync_EmptyFile_ReturnsError()
+    {
+        // Arrange - Completely empty file (0 bytes)
+        using var stream = new MemoryStream(Array.Empty<byte>());
+
+        // Act
+        var (rows, errors) = await _csvParserService.ParseAsync(stream);
+
+        // Assert
+        rows.Should().BeEmpty();
+        errors.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task ParseAsync_HeaderOnly_ReturnsEmptyRows()
+    {
+        // Arrange - Only header row, no data rows
+        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid";
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        await writer.WriteAsync(csvContent);
+        await writer.FlushAsync();
+        stream.Position = 0;
+
+        // Act
+        var (rows, errors) = await _csvParserService.ParseAsync(stream);
+
+        // Assert
+        rows.Should().BeEmpty();
+        errors.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task ParseAsync_FromTestFile_TEST_01_NewEmployees()
     {
         // Arrange
