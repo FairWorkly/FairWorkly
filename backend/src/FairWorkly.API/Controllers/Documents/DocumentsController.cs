@@ -1,5 +1,4 @@
 ﻿using FairWorkly.Application.Documents.Interfaces;
-using FairWorkly.Application.Documents.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FairWorkly.API.Controllers.Documents;
