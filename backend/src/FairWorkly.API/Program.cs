@@ -59,7 +59,17 @@ try
             "AllowAll",
             policy =>
             {
-                policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                if (builder.Environment.IsDevelopment())
+                {
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                }
+                else
+                {
+                    var allowedOrigins =
+                        builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                        ?? Array.Empty<string>();
+                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
+                }
             }
         );
     });
