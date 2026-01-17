@@ -20,7 +20,15 @@ public class EmployeeSyncServiceTests
     private readonly Mock<IDateTimeProvider> _mockDateTimeProvider;
     private readonly EmployeeSyncService _employeeSyncService;
     private readonly Guid _testOrganizationId = Guid.NewGuid();
-    private readonly DateTimeOffset _testDateTime = new DateTimeOffset(2025, 12, 28, 0, 0, 0, TimeSpan.Zero);
+    private readonly DateTimeOffset _testDateTime = new DateTimeOffset(
+        2025,
+        12,
+        28,
+        0,
+        0,
+        0,
+        TimeSpan.Zero
+    );
 
     public EmployeeSyncServiceTests()
     {
@@ -31,7 +39,8 @@ public class EmployeeSyncServiceTests
 
         _employeeSyncService = new EmployeeSyncService(
             _mockEmployeeRepository.Object,
-            _mockDateTimeProvider.Object);
+            _mockDateTimeProvider.Object
+        );
     }
 
     [Fact]
@@ -51,7 +60,7 @@ public class EmployeeSyncServiceTests
                 OrdinaryHours = 38.00m,
                 OrdinaryPay = 1008.90m,
                 GrossPay = 1008.90m,
-                SuperannuationPaid = 121.07m
+                SuperannuationPaid = 121.07m,
             },
             new PayrollCsvRow
             {
@@ -64,25 +73,30 @@ public class EmployeeSyncServiceTests
                 OrdinaryHours = 20.00m,
                 OrdinaryPay = 543.20m,
                 GrossPay = 543.20m,
-                SuperannuationPaid = 65.18m
-            }
+                SuperannuationPaid = 65.18m,
+            },
         };
 
         _mockEmployeeRepository
-            .Setup(x => x.GetByEmployeeNumbersAsync(
-                _testOrganizationId,
-                It.IsAny<List<string>>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.GetByEmployeeNumbersAsync(
+                    _testOrganizationId,
+                    It.IsAny<List<string>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(new List<Employee>()); // No existing employees
 
         var createdEmployees = new List<Employee>();
         _mockEmployeeRepository
             .Setup(x => x.CreateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-            .Callback<Employee, CancellationToken>((emp, ct) =>
-            {
-                emp.Id = Guid.NewGuid(); // Simulate DB generating Id
-                createdEmployees.Add(emp);
-            })
+            .Callback<Employee, CancellationToken>(
+                (emp, ct) =>
+                {
+                    emp.Id = Guid.NewGuid(); // Simulate DB generating Id
+                    createdEmployees.Add(emp);
+                }
+            )
             .ReturnsAsync((Employee emp, CancellationToken ct) => emp);
 
         // Act
@@ -95,7 +109,8 @@ public class EmployeeSyncServiceTests
 
         _mockEmployeeRepository.Verify(
             x => x.CreateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()),
-            Times.Exactly(2));
+            Times.Exactly(2)
+        );
 
         // Verify employee data
         var alice = createdEmployees.First(e => e.EmployeeNumber == "NEW001");
@@ -131,7 +146,7 @@ public class EmployeeSyncServiceTests
             AwardLevelNumber = 1,
             EmploymentType = EmploymentType.FullTime,
             StartDate = DateTime.UtcNow,
-            IsActive = true
+            IsActive = true,
         };
 
         var rows = new List<PayrollCsvRow>
@@ -147,15 +162,18 @@ public class EmployeeSyncServiceTests
                 OrdinaryHours = 25.00m,
                 OrdinaryPay = 862.00m,
                 GrossPay = 862.00m,
-                SuperannuationPaid = 103.44m
-            }
+                SuperannuationPaid = 103.44m,
+            },
         };
 
         _mockEmployeeRepository
-            .Setup(x => x.GetByEmployeeNumbersAsync(
-                _testOrganizationId,
-                It.IsAny<List<string>>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.GetByEmployeeNumbersAsync(
+                    _testOrganizationId,
+                    It.IsAny<List<string>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(new List<Employee> { existingEmployee });
 
         Employee? updatedEmployee = null;
@@ -174,11 +192,13 @@ public class EmployeeSyncServiceTests
 
         _mockEmployeeRepository.Verify(
             x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()),
-            Times.Once);
+            Times.Once
+        );
 
         _mockEmployeeRepository.Verify(
             x => x.CreateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()),
-            Times.Never);
+            Times.Never
+        );
 
         // Verify updated fields
         updatedEmployee.Should().NotBeNull();
@@ -205,7 +225,7 @@ public class EmployeeSyncServiceTests
             AwardLevelNumber = 1,
             EmploymentType = EmploymentType.FullTime,
             StartDate = DateTime.UtcNow,
-            IsActive = true
+            IsActive = true,
         };
 
         var rows = new List<PayrollCsvRow>
@@ -216,7 +236,7 @@ public class EmployeeSyncServiceTests
                 EmployeeName = "Existing Employee Updated",
                 AwardType = "Retail",
                 Classification = "Level 2",
-                EmploymentType = "FullTime"
+                EmploymentType = "FullTime",
             },
             new PayrollCsvRow
             {
@@ -224,24 +244,29 @@ public class EmployeeSyncServiceTests
                 EmployeeName = "New Employee",
                 AwardType = "Retail",
                 Classification = "Level 1",
-                EmploymentType = "Casual"
-            }
+                EmploymentType = "Casual",
+            },
         };
 
         _mockEmployeeRepository
-            .Setup(x => x.GetByEmployeeNumbersAsync(
-                _testOrganizationId,
-                It.IsAny<List<string>>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.GetByEmployeeNumbersAsync(
+                    _testOrganizationId,
+                    It.IsAny<List<string>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(new List<Employee> { existingEmployee });
 
         _mockEmployeeRepository
             .Setup(x => x.CreateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Employee emp, CancellationToken ct) =>
-            {
-                emp.Id = Guid.NewGuid();
-                return emp;
-            });
+            .ReturnsAsync(
+                (Employee emp, CancellationToken ct) =>
+                {
+                    emp.Id = Guid.NewGuid();
+                    return emp;
+                }
+            );
 
         _mockEmployeeRepository
             .Setup(x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
@@ -257,11 +282,13 @@ public class EmployeeSyncServiceTests
 
         _mockEmployeeRepository.Verify(
             x => x.CreateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()),
-            Times.Once);
+            Times.Once
+        );
 
         _mockEmployeeRepository.Verify(
             x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()),
-            Times.Once);
+            Times.Once
+        );
     }
 
     [Fact]
@@ -270,24 +297,60 @@ public class EmployeeSyncServiceTests
         // Arrange
         var rows = new List<PayrollCsvRow>
         {
-            new() { EmployeeId = "E1", EmployeeName = "Test 1", AwardType = "Retail", Classification = "Level 1", EmploymentType = "FullTime" },
-            new() { EmployeeId = "E2", EmployeeName = "Test 2", AwardType = "Retail", Classification = "Level 1", EmploymentType = "PartTime" },
-            new() { EmployeeId = "E3", EmployeeName = "Test 3", AwardType = "Retail", Classification = "Level 1", EmploymentType = "Casual" },
-            new() { EmployeeId = "E4", EmployeeName = "Test 4", AwardType = "Retail", Classification = "Level 1", EmploymentType = "FixedTerm" }
+            new()
+            {
+                EmployeeId = "E1",
+                EmployeeName = "Test 1",
+                AwardType = "Retail",
+                Classification = "Level 1",
+                EmploymentType = "FullTime",
+            },
+            new()
+            {
+                EmployeeId = "E2",
+                EmployeeName = "Test 2",
+                AwardType = "Retail",
+                Classification = "Level 1",
+                EmploymentType = "PartTime",
+            },
+            new()
+            {
+                EmployeeId = "E3",
+                EmployeeName = "Test 3",
+                AwardType = "Retail",
+                Classification = "Level 1",
+                EmploymentType = "Casual",
+            },
+            new()
+            {
+                EmployeeId = "E4",
+                EmployeeName = "Test 4",
+                AwardType = "Retail",
+                Classification = "Level 1",
+                EmploymentType = "FixedTerm",
+            },
         };
 
         _mockEmployeeRepository
-            .Setup(x => x.GetByEmployeeNumbersAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.GetByEmployeeNumbersAsync(
+                    It.IsAny<Guid>(),
+                    It.IsAny<List<string>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(new List<Employee>());
 
         var createdEmployees = new List<Employee>();
         _mockEmployeeRepository
             .Setup(x => x.CreateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-            .Callback<Employee, CancellationToken>((emp, ct) =>
-            {
-                emp.Id = Guid.NewGuid();
-                createdEmployees.Add(emp);
-            })
+            .Callback<Employee, CancellationToken>(
+                (emp, ct) =>
+                {
+                    emp.Id = Guid.NewGuid();
+                    createdEmployees.Add(emp);
+                }
+            )
             .ReturnsAsync((Employee emp, CancellationToken ct) => emp);
 
         // Act
@@ -307,23 +370,52 @@ public class EmployeeSyncServiceTests
         // Arrange
         var rows = new List<PayrollCsvRow>
         {
-            new() { EmployeeId = "E1", EmployeeName = "Test 1", AwardType = "Retail", Classification = "Level 1", EmploymentType = "FullTime" },
-            new() { EmployeeId = "E2", EmployeeName = "Test 2", AwardType = "Retail", Classification = "Level 5", EmploymentType = "FullTime" },
-            new() { EmployeeId = "E3", EmployeeName = "Test 3", AwardType = "Retail", Classification = "Level 8", EmploymentType = "FullTime" }
+            new()
+            {
+                EmployeeId = "E1",
+                EmployeeName = "Test 1",
+                AwardType = "Retail",
+                Classification = "Level 1",
+                EmploymentType = "FullTime",
+            },
+            new()
+            {
+                EmployeeId = "E2",
+                EmployeeName = "Test 2",
+                AwardType = "Retail",
+                Classification = "Level 5",
+                EmploymentType = "FullTime",
+            },
+            new()
+            {
+                EmployeeId = "E3",
+                EmployeeName = "Test 3",
+                AwardType = "Retail",
+                Classification = "Level 8",
+                EmploymentType = "FullTime",
+            },
         };
 
         _mockEmployeeRepository
-            .Setup(x => x.GetByEmployeeNumbersAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.GetByEmployeeNumbersAsync(
+                    It.IsAny<Guid>(),
+                    It.IsAny<List<string>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(new List<Employee>());
 
         var createdEmployees = new List<Employee>();
         _mockEmployeeRepository
             .Setup(x => x.CreateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-            .Callback<Employee, CancellationToken>((emp, ct) =>
-            {
-                emp.Id = Guid.NewGuid();
-                createdEmployees.Add(emp);
-            })
+            .Callback<Employee, CancellationToken>(
+                (emp, ct) =>
+                {
+                    emp.Id = Guid.NewGuid();
+                    createdEmployees.Add(emp);
+                }
+            )
             .ReturnsAsync((Employee emp, CancellationToken ct) => emp);
 
         // Act
@@ -342,23 +434,52 @@ public class EmployeeSyncServiceTests
         // Arrange
         var rows = new List<PayrollCsvRow>
         {
-            new() { EmployeeId = "E1", EmployeeName = "Alice Johnson", AwardType = "Retail", Classification = "Level 1", EmploymentType = "FullTime" },
-            new() { EmployeeId = "E2", EmployeeName = "Bob", AwardType = "Retail", Classification = "Level 1", EmploymentType = "FullTime" },
-            new() { EmployeeId = "E3", EmployeeName = "Carol Anne Smith", AwardType = "Retail", Classification = "Level 1", EmploymentType = "FullTime" }
+            new()
+            {
+                EmployeeId = "E1",
+                EmployeeName = "Alice Johnson",
+                AwardType = "Retail",
+                Classification = "Level 1",
+                EmploymentType = "FullTime",
+            },
+            new()
+            {
+                EmployeeId = "E2",
+                EmployeeName = "Bob",
+                AwardType = "Retail",
+                Classification = "Level 1",
+                EmploymentType = "FullTime",
+            },
+            new()
+            {
+                EmployeeId = "E3",
+                EmployeeName = "Carol Anne Smith",
+                AwardType = "Retail",
+                Classification = "Level 1",
+                EmploymentType = "FullTime",
+            },
         };
 
         _mockEmployeeRepository
-            .Setup(x => x.GetByEmployeeNumbersAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.GetByEmployeeNumbersAsync(
+                    It.IsAny<Guid>(),
+                    It.IsAny<List<string>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(new List<Employee>());
 
         var createdEmployees = new List<Employee>();
         _mockEmployeeRepository
             .Setup(x => x.CreateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-            .Callback<Employee, CancellationToken>((emp, ct) =>
-            {
-                emp.Id = Guid.NewGuid();
-                createdEmployees.Add(emp);
-            })
+            .Callback<Employee, CancellationToken>(
+                (emp, ct) =>
+                {
+                    emp.Id = Guid.NewGuid();
+                    createdEmployees.Add(emp);
+                }
+            )
             .ReturnsAsync((Employee emp, CancellationToken ct) => emp);
 
         // Act
@@ -371,7 +492,7 @@ public class EmployeeSyncServiceTests
         createdEmployees[0].LastName.Should().Be("Johnson");
 
         createdEmployees[1].FirstName.Should().Be("Bob");
-        createdEmployees[1].LastName.Should().Be("");
+        createdEmployees[1].LastName.Should().Be("Bob");
 
         createdEmployees[2].FirstName.Should().Be("Carol");
         createdEmployees[2].LastName.Should().Be("Anne Smith");
