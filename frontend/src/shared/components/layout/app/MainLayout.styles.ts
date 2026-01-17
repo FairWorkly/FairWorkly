@@ -1,20 +1,24 @@
 import { styled } from '@/styles/styled'
 
 export const AppShell = styled('div')(() => ({
-  minHeight: '100vh',
+  height: '100vh',
   display: 'flex',
+  overflow: 'hidden',
 }))
 
 export const AppMain = styled('main')(({ theme }) => ({
   flex: 1,
   minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
   background: theme.palette.background.default,
-  overflow: 'auto',
+  overflow: 'hidden',
 }))
 
-export const AppContent = styled('div')(({ theme }) => ({
-  padding: theme.spacing(3),
-  minHeight: '100%',
-  maxWidth: theme.fairworkly.layout.containerMaxWidth,
-  margin: '0 auto',
+export const AppContent = styled('div')(() => ({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: 0,
+  width: '100%',
 }))

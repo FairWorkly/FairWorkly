@@ -11,32 +11,30 @@ import {
 } from '../constants/fairbot.constants'
 import { useConversation } from '../features/conversation/useConversation'
 import { useFileUpload } from '../hooks/useFileUpload'
-import { WelcomeMessage } from '../ui/WelcomeMessage'
-import { QuickActions } from '../features/quickActions/QuickActions'
 import { MessageList } from '../features/conversation/MessageList'
 import { FileUploadZone } from '../features/conversation/FileUploadZone'
 import { MessageInput } from '../features/conversation/MessageInput'
 import { ResultsPanel } from '../features/resultsPanel/ResultsPanel'
 
-// FairBot chat page wires conversation and upload flows into a three-column layout.
+// FairBot chat page wires conversation and upload flows into a two-column layout.
+// Sidebar is provided by MainLayout, so this page only has Chat + Results columns.
 const PageContainer = styled('div')({
   display: 'grid',
   gridTemplateColumns: FAIRBOT_LAYOUT.GRID_TEMPLATE_COLUMNS,
-  alignItems: 'start',
-  minHeight: FAIRBOT_LAYOUT.PAGE_MIN_HEIGHT,
+  height: '100%',
   width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
+  overflow: 'hidden',
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
     gridTemplateColumns: FAIRBOT_TEXT.SINGLE_COLUMN,
   },
 })
 
-// Left column that holds the conversational UI stack.
+// Main column that holds the conversational UI stack.
 const ChatColumn = styled('section')({
   display: FAIRBOT_LAYOUT.DISPLAY_FLEX,
   flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
-  alignSelf: FAIRBOT_LAYOUT.ALIGN_STRETCH,
-  height: FAIRBOT_LAYOUT.PAGE_MIN_HEIGHT,
-  minHeight: FAIRBOT_NUMBERS.ZERO,
+  height: '100%',
+  overflow: 'hidden',
 })
 
 // Page header for title/subtitle within the chat column.
@@ -62,8 +60,8 @@ const ScrollArea = styled('div')({
 // Right column that hosts the summary panel (stacks below on mobile).
 const ResultsColumn = styled('aside')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
-  alignSelf: FAIRBOT_LAYOUT.ALIGN_STRETCH,
-  height: FAIRBOT_LAYOUT.COLUMN_FULL_HEIGHT,
+  height: '100%',
+  overflow: 'auto',
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
     order: FAIRBOT_NUMBERS.TWO,
   },
@@ -110,11 +108,6 @@ export const FairBotChat = () => {
         </ChatHeader>
         <Divider />
         <ScrollArea>
-          <WelcomeMessage />
-          <QuickActions
-            upload={upload}
-            onSendMessage={conversation.sendMessage}
-          />
           <MessageList
             messages={conversation.messages}
             isTyping={conversation.isTyping}

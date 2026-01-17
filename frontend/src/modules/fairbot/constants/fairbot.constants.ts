@@ -15,6 +15,14 @@ export const FAIRBOT_LABELS = {
   ],
   // Prompt shown after the welcome bullets.
   PROMPT_QUESTION: 'What would you like help with today?',
+  // Combined welcome message for chat display.
+  WELCOME_MESSAGE: `Hi! I'm FairBot, your AI-powered Fair Work assistant. I can help you with:
+
+• Roster compliance - Upload and check for penalty rate issues
+• Payroll verification - Identify underpayment risks
+• Fair Work questions
+
+What would you like help with today?`,
   // Placeholder for the message input field.
   INPUT_PLACEHOLDER: 'Type your message or upload a file...',
   // Empty-state title for results panel.
@@ -154,30 +162,26 @@ export const FAIRBOT_KEYWORDS = {
 } as const
 
 const FAIRBOT_GRID_COLUMNS = {
-  // Sidebar column width for the FairBot layout.
-  SIDEBAR: '20%',
-  // Chat column width definition for the grid.
-  CHAT: 'minmax(0, 1fr)',
-  // Results column width for the FairBot layout.
-  RESULTS: '25%',
+  // Chat column width (67% of container).
+  CHAT: '70%',
+  // Results column width (33% of container).
+  RESULTS: '30%',
 } as const
 
-const FAIRBOT_GRID_TEMPLATE_COLUMNS =
-  `${FAIRBOT_GRID_COLUMNS.SIDEBAR} ${FAIRBOT_GRID_COLUMNS.CHAT} ${FAIRBOT_GRID_COLUMNS.RESULTS}` as const
+// Two-column layout: Chat (67%) + Results (33%).
+// Sidebar is provided by MainLayout, so no sidebar column needed here.
+const FAIRBOT_GRID_TEMPLATE_COLUMNS = 
+  `${FAIRBOT_GRID_COLUMNS.CHAT} ${FAIRBOT_GRID_COLUMNS.RESULTS}` as const
 
 export const FAIRBOT_LAYOUT = {
   // Uniform margin for chat sections (header, scroll area, composer).
   CHAT_SECTION_MARGIN_PX: 25,
   // Fixed height for the chat header.
-  CHAT_HEADER_HEIGHT_PX: 100,
+  CHAT_HEADER_HEIGHT_PX: 50,
   // Fixed width for the results panel.
   RESULTS_PANEL_WIDTH: 360,
   // Breakpoint for mobile layout adjustments.
   MOBILE_BREAKPOINT: 900,
-  // Gap between quick action cards.
-  QUICK_ACTIONS_GAP: 12,
-  // Number of quick action columns on desktop.
-  QUICK_ACTIONS_COLUMNS: 2,
   // Padding inside the results panel.
   RESULTS_PANEL_PADDING: 24,
   // Gap between elements inside results panel.
@@ -190,12 +194,8 @@ export const FAIRBOT_LAYOUT = {
   MESSAGE_SECTION_GAP: 1.5,
   // Padding inside the message list container.
   MESSAGE_LIST_PADDING: 8,
-  // Sidebar column width for the FairBot grid layout.
-  SIDEBAR_COLUMN_WIDTH: FAIRBOT_GRID_COLUMNS.SIDEBAR,
-  // Grid template columns for the FairBot page container.
+  // Grid template columns for the FairBot page container (2-column: chat + results).
   GRID_TEMPLATE_COLUMNS: FAIRBOT_GRID_TEMPLATE_COLUMNS,
-  // Minimum height for the page-level grid container.
-  PAGE_MIN_HEIGHT: '100vh',
   // Flex display value for layout containers.
   DISPLAY_FLEX: 'flex',
   // Column direction for flex layouts.
@@ -210,8 +210,6 @@ export const FAIRBOT_LAYOUT = {
   COLUMN_FULL_WIDTH: '100%',
   // Full-height value for stretching columns/panels.
   COLUMN_FULL_HEIGHT: '100%',
-  // Grid alignment value for stretching items.
-  ALIGN_STRETCH: 'stretch',
 } as const
 
 export const FAIRBOT_UPLOAD = {
