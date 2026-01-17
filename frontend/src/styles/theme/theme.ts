@@ -70,7 +70,12 @@ export const theme = createTheme({
       letterSpacing: '-0.01em',
       lineHeight: 1.25,
     },
-
+    h6: {
+      fontSize: 18,
+      fontWeight: 900,
+      letterSpacing: '-0.02em',
+      lineHeight: 1.3,
+    },
     subtitle1: { fontSize: 16, fontWeight: 700, lineHeight: 1.55 },
     subtitle2: { fontSize: 14, fontWeight: 700, lineHeight: 1.55 },
 
@@ -85,6 +90,18 @@ export const theme = createTheme({
       textTransform: 'uppercase',
       lineHeight: 1.4,
     },
+    uiBadge: {
+      fontSize: 11,
+      fontWeight: 800,
+      letterSpacing: '0.04em',
+      lineHeight: 1,
+      textTransform: 'uppercase',
+    },
+    uiLabel: {
+      fontSize: 13,
+      fontWeight: 700,
+      lineHeight: 1.4,
+    },
 
     button: { textTransform: 'none', fontWeight: 700 },
   },
@@ -94,20 +111,44 @@ export const theme = createTheme({
    * 其它（radius/shadow/layout/grid）回归 MUI 或放 feature/ui
    */
   fairworkly: {
+    radius: {
+      sm: 10,
+      md: 12,
+      lg: 16,
+      xl: 20,
+      pill: 9999,
+    },
+    shadow: {
+      sm: '0 1px 2px rgba(0,0,0,0.05)',
+      md: '0 4px 6px -1px rgba(0,0,0,0.10)',
+      lg: '0 10px 25px -5px rgba(0,0,0,0.10)',
+      xl: '0 20px 40px -10px rgba(0,0,0,0.15)',
+      navScrolled: '0 4px 20px rgba(0,0,0,0.3)',
+      primaryButton: '0 4px 15px rgba(99, 102, 241, 0.4)',
+      primaryButtonHover: '0 8px 25px rgba(99, 102, 241, 0.5)',
+    },
     gradient: {
       primary: 'linear-gradient(135deg, #6366f1, #ec4899)',
       brandText: 'linear-gradient(135deg, #a5b4fc, #f9a8d4)',
     },
+    color: {
+      brandLight: '#a5b4fc',
+      brandPink: '#f9a8d4',
+    },
     effect: {
       primaryGlow: 'rgba(99, 102, 241, 0.12)',
+      primaryGlowHover: 'rgba(99, 102, 241, 0.18)',
+      primaryBorder: 'rgba(99, 102, 241, 0.2)',
       gridLine: 'rgba(99, 102, 241, 0.03)',
     },
     surface: {
       navDark: '#1e1b4b',
     },
     layout: {
-      containerMaxWidth: 0
-    }
+      containerMaxWidth: 1280,
+      sidebarWidth: 280,
+      navHeight: 72,
+    },
   },
 
   components: {
@@ -132,7 +173,10 @@ export const theme = createTheme({
         root: ({ theme }) => ({
           borderRadius: theme.shape.borderRadius,
           background: theme.palette.background.paper,
-          transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
+          transition: theme.transitions.create(['box-shadow', 'border-color'], {
+            duration: theme.transitions.duration.short,
+            easing: theme.transitions.easing.easeInOut,
+          }),
           '&.Mui-focused': {
             boxShadow: `0 0 0 3px ${theme.fairworkly.effect.primaryGlow}`,
           },
@@ -149,8 +193,10 @@ export const theme = createTheme({
         root: ({ theme }) => ({
           borderRadius: theme.shape.borderRadius,
           padding: theme.spacing(1.25, 2),
-          transition:
-            'transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease',
+          transition: theme.transitions.create(['transform', 'box-shadow', 'background'], {
+            duration: theme.transitions.duration.short,
+            easing: theme.transitions.easing.easeInOut,
+          }),
         }),
       },
     },

@@ -14,50 +14,72 @@ import { RosterResults } from '@/modules/compliance/pages/RosterResults'
 import { DocumentTemplates } from '@/modules/documents/pages/DocumentTemplates'
 import { GenerateDocument } from '@/modules/documents/pages/GenerateDocument'
 import { DocumentLibrary } from '@/modules/documents/pages/DocumentLibrary'
+
+// Settings pages
+import { Settings } from '@/modules/settings/pages/Settings'
+
 import { RoleBasedRoute } from '@/shared/components/guards/RoleBasedRoute'
 
 export const toolRoutes: RouteObject[] = [
   {
-    // First Layer：handle loading, Auth, Deep Linking
     element: <ProtectedRoute />,
     children: [
       {
-        // Second Layer: MainLayout ( Sidebar, Topbar, backgroud)
         element: <MainLayout />,
         children: [
+          // Admin only - Payroll
           {
-            path: '/payroll',
-            children: [
-              { path: 'upload', element: <PayrollUpload /> },
-              { path: 'results', element: <PayrollResults /> },
-              // this Navigate only for UX, when users access to /payroll then direct to upload page
-              { index: true, element: <Navigate to="upload" replace /> },
-            ],
-          },
-
-          {
-            path: '/compliance',
-            children: [
-              { path: 'roster-upload', element: <RosterUpload /> },
-              { path: 'roster-results', element: <RosterResults /> },
-            ],
-          },
-
-          {
-            path: '/documents',
-            children: [
-              { path: 'templates', element: <DocumentTemplates /> },
-              { path: 'generate', element: <GenerateDocument /> },
-              { path: 'library', element: <DocumentLibrary /> },
-            ],
-          },
-
-          {
-            element: <RoleBasedRoute allowedRoles={['admin']} />,
+            element: <RoleBasedRoute allow={['admin']} />,
             children: [
               {
-                path: '/settings/system',
-                element: <div>Admin Only System Settings</div>,
+                path: '/payroll',
+                children: [
+                  { path: 'upload', element: <PayrollUpload /> },
+                  { path: 'results', element: <PayrollResults /> },
+                  { index: true, element: <Navigate to="upload" replace /> },
+                ],
+              },
+            ],
+          },
+
+          // Admin + Manager - Roster
+          {
+            element: <RoleBasedRoute allow={['admin', 'manager']} />,
+            children: [
+              {
+                path: '/roster',
+                children: [
+                  { path: 'upload', element: <RosterUpload /> },
+                  { path: 'results', element: <RosterResults /> },
+                  { index: true, element: <Navigate to="upload" replace /> },
+                ],
+              },
+            ],
+          },
+
+          // Admin only - Documents
+          {
+            element: <RoleBasedRoute allow={['admin']} />,
+            children: [
+              {
+                path: '/documents',
+                children: [
+                  { path: 'templates', element: <DocumentTemplates /> },
+                  { path: 'generate', element: <GenerateDocument /> },
+                  { path: 'library', element: <DocumentLibrary /> },
+                  { index: true, element: <Navigate to="templates" replace /> },
+                ],
+              },
+            ],
+          },
+
+          // Admin only - Settings
+          {
+            element: <RoleBasedRoute allow={['admin']} />,
+            children: [
+              {
+                path: '/settings',
+                element: <Settings />,
               },
             ],
           },

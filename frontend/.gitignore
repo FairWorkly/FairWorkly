@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Claude Code CLI local configuration
+.claude/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -25,3 +28,15 @@ dist-ssr
 
 *storybook.log
 storybook-static
+
+# Local documentation and temporary files
+docs/local/           # Personal notes and temporary screenshots
+temp/                 # Temporary files and folders
+scratch/              # Scratch/draft work
+*.tmp
+*.temp
+.cache/
+
+# System screenshots (macOS/Windows auto-generated)
+Screenshot*.png
+屏幕截图*.png

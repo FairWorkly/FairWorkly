@@ -1,4 +1,4 @@
-// Force-load theme module augmentation
-import '@/styles/theme/theme'
+// Force-load theme module augmentation (types only)
+import type {} from '@/styles/theme/augment'
 
-
+export {}
