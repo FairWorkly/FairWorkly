@@ -121,7 +121,7 @@ public class EmployeeSyncService : IEmployeeSyncService
             return ("Unknown", "Unknown");
 
         if (parts.Length == 1)
-            return (parts[0], "");
+            return (parts[0], parts[0]);
 
         // First part is first name, rest is last name
         var firstName = parts[0];
