@@ -38,7 +38,8 @@ public class EmployeeSyncService : IEmployeeSyncService
         var employeeMapping = new Dictionary<string, Guid>();
 
         // Get unique employee numbers from CSV
-        var employeeNumbers = rows.Select(r => r.EmployeeId).Distinct().ToList();
+        var validRows = rows.Where(r => !string.IsNullOrWhiteSpace(r.EmployeeId)).ToList();
+        var employeeNumbers = validRows.Select(r => r.EmployeeId).Distinct().ToList();
 
         // Fetch existing employees by organization and employee numbers
         var existingEmployees = await _employeeRepository.GetByEmployeeNumbersAsync(
@@ -53,7 +54,7 @@ public class EmployeeSyncService : IEmployeeSyncService
             .ToDictionary(e => e.EmployeeNumber!);
 
         // Group rows by EmployeeId to get the latest data for each employee
-        var employeeGroups = rows.GroupBy(r => r.EmployeeId).ToList();
+        var employeeGroups = validRows.GroupBy(r => r.EmployeeId).ToList();
 
         foreach (var group in employeeGroups)
         {
