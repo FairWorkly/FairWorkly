@@ -111,7 +111,7 @@ const BottomBar = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   paddingTop: theme.spacing(4),
-  borderTop: '1px solid ${alpha(theme.palette.common.white, 0.1)},',
+  borderTop: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
   fontSize: theme.typography.body2.fontSize,
   color: alpha(theme.palette.common.white, 0.5),
   [theme.breakpoints.down('sm')]: {
