@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { useAuth } from '@/shared/hooks/useAuth'
+import { useAuth } from '@/modules/auth'
 import { Sidebar } from './Sidebar'
 import { AppShell, AppMain, AppContent } from './MainLayout.styles'
 

@@ -1,0 +1,11 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+COMP001,Alice FullTime L1,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07
+COMP002,Bob FullTime L3,2025-12-15,2025-12-21,Retail,Level 3,FullTime,27.58,38.00,1048.04,0.00,0.00,0.00,0.00,0.00,0.00,1048.04,125.76
+COMP003,Carol FullTime L5,2025-12-15,2025-12-21,Retail,Level 5,FullTime,29.27,38.00,1112.26,4.00,146.35,0.00,0.00,0.00,0.00,1258.61,151.03
+COMP004,David PartTime L2,2025-12-15,2025-12-21,Retail,Level 2,PartTime,27.16,20.00,543.20,0.00,0.00,0.00,0.00,0.00,0.00,543.20,65.18
+COMP005,Eve PartTime L4,2025-12-15,2025-12-21,Retail,Level 4,PartTime,28.12,25.00,703.00,0.00,0.00,4.00,168.72,0.00,0.00,871.72,104.61
+COMP006,Frank PartTime L6,2025-12-15,2025-12-21,Retail,Level 6,PartTime,29.70,30.00,891.00,0.00,0.00,0.00,0.00,0.00,0.00,891.00,106.92
+COMP007,Grace Casual L1,2025-12-15,2025-12-21,Retail,Level 1,Casual,33.19,20.00,663.80,0.00,0.00,0.00,0.00,0.00,0.00,663.80,79.66
+COMP008,Henry Casual L2,2025-12-15,2025-12-21,Retail,Level 2,Casual,33.95,25.00,848.75,5.00,203.70,0.00,0.00,0.00,0.00,1052.45,126.29
+COMP009,Iris Casual L3,2025-12-15,2025-12-21,Retail,Level 3,Casual,34.48,15.00,517.20,0.00,0.00,0.00,0.00,0.00,0.00,517.20,62.06
+COMP010,Jack Casual L4,2025-12-15,2025-12-21,Retail,Level 4,Casual,35.15,30.00,1054.50,0.00,0.00,6.00,295.26,0.00,0.00,1349.76,161.97

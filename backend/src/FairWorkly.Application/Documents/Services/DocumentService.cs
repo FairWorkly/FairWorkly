@@ -1,7 +1,6 @@
 ﻿using FairWorkly.Application.Common.Interfaces;
+using FairWorkly.Application.Documents.Interfaces;
 using FairWorkly.Application.Documents.Orchestrators;
-
-// TODO: using FairWorkly.Domain.Documents.Interfaces;
 
 namespace FairWorkly.Application.Documents.Services;
 

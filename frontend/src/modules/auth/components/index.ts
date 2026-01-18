@@ -1,1 +1,0 @@
-export { AuthBranding } from './AuthBranding'

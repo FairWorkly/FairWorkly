@@ -1,0 +1,5 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+BASE001,Pass Level1 FT,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07
+BASE002,Pass Level2 PT,2025-12-15,2025-12-21,Retail,Level 2,PartTime,27.16,20.00,543.20,0.00,0.00,0.00,0.00,0.00,0.00,543.20,65.18
+BASE003,Pass Level3 Casual,2025-12-15,2025-12-21,Retail,Level 3,Casual,34.48,25.00,862.00,0.00,0.00,0.00,0.00,0.00,0.00,862.00,103.44
+BASE004,Pass Level5 FT,2025-12-15,2025-12-21,Retail,Level 5,FullTime,29.27,38.00,1112.26,0.00,0.00,0.00,0.00,0.00,0.00,1112.26,133.47
