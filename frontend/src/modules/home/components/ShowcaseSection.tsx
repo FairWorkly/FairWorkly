@@ -59,12 +59,12 @@ const CardContainer = styled(Card)<{ tone: Tone }>(({ theme, tone }) => ({
     padding: theme.spacing(2.5),
     backgroundColor: theme.palette.background.default,
     transition: theme.transitions.create(['transform'], {
-        duration: theme.transitions.duration.short, 
+        duration: theme.transitions.duration.short,
         easing: theme.transitions.easing.easeInOut,
-      }),
+    }),
 
     '&:hover': {
-        transform: `translateX(${theme.spacing(0.5)})`,    
+        transform: `translateX(${theme.spacing(0.5)})`,
     },
 }));
 
@@ -76,10 +76,10 @@ const CardIconContainer = styled(Box)(({ theme }) => ({
     width: theme.spacing(6),
     height: theme.spacing(6),
     backgroundColor: alpha(theme.palette.primary.main, 0.12),
-    borderRadius: theme.shape.borderRadius,  
+    borderRadius: theme.shape.borderRadius,
 
     '& svg': {
-        fontSize: theme.spacing(3),  
+        fontSize: theme.spacing(3),
         color: theme.palette.primary.main,
     },
 }));
@@ -107,7 +107,7 @@ const CardBadgeContainer = styled(Typography)<{ tone: Tone }>(({ theme, tone }) 
     color: theme.palette[tone].main,
 
     '& svg': {
-        fontSize: theme.spacing(2),   
+        fontSize: theme.spacing(2),
         verticalAlign: 'middle',
     },
 }));
@@ -190,7 +190,7 @@ interface DashboardCardData {
     badgeInfo: string,
 };
 
-const DashbordCard = ({ data }: { data: DashboardCardData }) => {
+const DashboardCard = ({ data }: { data: DashboardCardData }) => {
     const { tone, badgeIcon: IconComponent, title, description, badgeInfo } = data;
 
     return (
@@ -274,7 +274,7 @@ export const ShowcaseSection: React.FC = () => {
                         <DashboardHeader variant='subtitle2'>{content.dashboardHeader}</DashboardHeader>
                         <DashboardCardsLayout>
                             {cards.map((card) => (
-                                <DashbordCard key={card.id} data={card} />
+                                <DashboardCard key={card.id} data={card} />
                             ))}
                         </DashboardCardsLayout>
                         <DashboardBottomNote variant='body2'>{content.dashboardNote}</DashboardBottomNote>
