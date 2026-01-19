@@ -1,1 +1,61 @@
+name: Overdue Issue Reminder
+
+on:
+  schedule:
+    - cron: "0 1 * * *" # daily at 12:00 AEDT (01:00 UTC)
+  workflow_dispatch:
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - name: Comment on overdue issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const overdueLabel = "overdue";
+
+            const issues = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner, repo, state: "open", labels: overdueLabel, per_page: 100 }
+            );
+
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+
+              const comments = await github.rest.issues.listComments({
+                owner,
+                repo,
+                issue_number: issue.number,
+                per_page: 100,
+              });
+
+              const recentlyReminded = comments.data.some(c => {
+                const isBot = c.user?.login === "github-actions[bot]";
+                const isReminder = c.body?.includes("overdue");
+                const ageMs = Date.now() - new Date(c.created_at).getTime();
+                return isBot && isReminder && ageMs < 24 * 60 * 60 * 1000;
+              });
+
+              if (recentlyReminded) continue;
+
+              const assignees = issue.assignees?.length
+                ? issue.assignees.map(a => `@${a.login}`).join(" ")
+                : "@team";
+
+              const body = `Reminder: this issue is overdue. ${assignees}`;
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issue.number,
+                body,
+              });
+            }
+
 
