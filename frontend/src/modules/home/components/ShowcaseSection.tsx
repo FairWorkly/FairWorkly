@@ -1,9 +1,9 @@
-import { Box, Card, Typography, alpha, styled, type SvgIconProps } from "@mui/material";
+import { Box, Card, Stack, Typography, alpha, styled, type SvgIconProps } from "@mui/material";
 import { CheckCircleOutline, StoreOutlined, WarningOutlined } from "@mui/icons-material";
 
 type Tone = 'primary' | 'warning' | 'success';
 
-const PageSection = styled('section')(({ theme }) => ({
+const PageSection = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
     padding: theme.spacing(12, 0),
     borderTop: `1px solid ${theme.palette.divider}`,
@@ -132,14 +132,12 @@ const SectionSubTitle = styled(Typography)(({ theme }) => ({
     marginBottom: theme.spacing(3),
 }));
 
-const ChainList = styled('ul')(({ theme }) => ({
-    listStyle: 'none',
+const ChainList = styled(Stack)(({ theme }) => ({
     marginBottom: theme.spacing(3),
-    padding: 0,
 }));
 
 
-const ChainItem = styled('li')(({ theme }) => ({
+const ChainItem = styled(Typography)(({ theme }) => ({
     display: 'flex',
     alignItems: 'flex-start',
     gap: theme.spacing(1.5),

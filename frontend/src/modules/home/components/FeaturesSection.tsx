@@ -1,10 +1,10 @@
 import { AutoAwesomeOutlined, CheckCircleOutline, DescriptionOutlined, EventOutlined, PaymentsOutlined } from "@mui/icons-material";
-import { alpha, Box, Card, styled, Typography, type SvgIconProps, type TypographyProps } from "@mui/material";
+import { alpha, Box, Card, Stack, styled, Typography, type SvgIconProps, } from "@mui/material";
 
 
 type Tone = 'primary' | 'warning' | 'info';
 
-const PageSection = styled('section')(({ theme }) => ({
+const PageSection = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(12, 0),
     borderTop: `1px solid ${theme.palette.divider}`,
@@ -17,12 +17,12 @@ const ContentContainer = styled(Box)(({ theme }) => ({
     padding: theme.spacing(0, 4),
 }));
 
-const HeaderContainer = styled('header')(({ theme }) => ({
+const HeaderContainer = styled(Box)(({ theme }) => ({
     textAlign: 'center',
     marginBottom: theme.spacing(8),
 }));
 
-const SectionEyebrow = styled(Typography)(({ theme }) => ({
+const SectionLabel = styled(Box)(({ theme }) => ({
     display: 'inline-flex',
     alignItems: 'center',
     gap: theme.spacing(1),
@@ -31,17 +31,11 @@ const SectionEyebrow = styled(Typography)(({ theme }) => ({
     color: theme.palette.primary.main,
     borderRadius: theme.shape.borderRadius,
     marginBottom: theme.spacing(2),
+    '& .MuiSvgIcon-root': {
+        fontSize: theme.spacing(2),
+    }
 }));
 
-const LabelIcon = styled(Box)({
-    display: 'inline-flex',
-    alignItems: 'center',
-    color: 'inherit',
-});
-
-const TitleContainer = styled("header")(({ theme }) => ({
-    marginBottom: theme.spacing(8),
-}));
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
     marginBottom: theme.spacing(2),
@@ -49,6 +43,7 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
 
 const SectionSubTitle = styled(Typography)(({ theme }) => ({
     margin: '0 auto',
+    maxWidth: theme.spacing(75),
     color: theme.palette.text.secondary,
 }));
 
@@ -72,7 +67,7 @@ const CardContainer = styled(Card)(({ theme }) => ({
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
     transition: 'all 0.3s ease',
-    minHeight: theme.spacing(56.25),
+    minHeight: theme.spacing(56),
 
     '&:hover': {
         boxShadow: theme.shadows[3],
@@ -118,15 +113,11 @@ const CardDescription = styled(Typography)(({ theme }) => ({
     marginBottom: theme.spacing(3),
 }));
 
-const CardFeaturesLayout = styled('ul')(({ theme }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    listStyle: 'none',
+const CardFeaturesLayout = styled(Stack)(({ theme }) => ({
     gap: theme.spacing(1.5),
-    padding: 0,
 }));
 
-const CardFeatureItem = styled(Typography)<TypographyProps>(({ theme }) => ({
+const CardFeatureItem = styled(Typography)(({ theme }) => ({
     display: 'flex',
     alignItems: 'flex-start',
     gap: theme.spacing(1.25),
@@ -167,7 +158,7 @@ const FeatureCard = ({ data }: { data: FeatureCardData }) => {
 
             <CardFeaturesLayout>
                 {features.map((feature) => (
-                    <CardFeatureItem key={feature} variant='body2' component='li'>
+                    <CardFeatureItem key={feature} variant='body2'>
                         <CardCheckIcon aria-hidden='true' />
                         {feature}
                     </CardFeatureItem>
@@ -214,16 +205,12 @@ export const FeaturesSection: React.FC = () => {
         <PageSection>
             <ContentContainer>
                 <HeaderContainer>
-                    <SectionEyebrow variant='overline'>
-                        <LabelIcon aria-hidden='true'>
+                    <SectionLabel>
                             <AutoAwesomeOutlined fontSize='inherit' />
-                        </LabelIcon>
                         {content.label}
-                    </SectionEyebrow>
-                    <TitleContainer>
+                    </SectionLabel>
                         <SectionTitle variant='h2'>{content.title}</SectionTitle>
                         <SectionSubTitle variant='h5'>{content.subtitle}</SectionSubTitle>
-                    </TitleContainer>
                 </HeaderContainer>
                 <CardsLayout>
                     {cards.map((card) => (
