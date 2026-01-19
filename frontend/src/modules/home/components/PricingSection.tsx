@@ -1,9 +1,9 @@
-import { Box, Button, Card, Chip, styled, Typography, alpha } from "@mui/material";
+import { Box, Button, Card, Chip, styled, Typography, alpha, Stack } from "@mui/material";
 import { CheckCircleOutline, SellOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 
-const PageSection = styled('section')(({ theme }) => ({
+const PageSection = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(12, 0),
     borderTop: `1px solid ${theme.palette.divider}`,
@@ -15,12 +15,12 @@ const ContentContainer = styled(Box)(({ theme }) => ({
     padding: theme.spacing(0, 4),
 }));
 
-const HeaderContainer = styled('header')(({ theme }) => ({
+const HeaderContainer = styled(Box)(({ theme }) => ({
     textAlign: 'center',
     marginBottom: theme.spacing(8),
 }));
 
-const SectionEyebrow = styled(Typography)(({ theme }) => ({
+const SectionLabel = styled(Box)(({ theme }) => ({
     display: 'inline-flex',
     alignItems: 'center',
     gap: theme.spacing(1),
@@ -29,13 +29,11 @@ const SectionEyebrow = styled(Typography)(({ theme }) => ({
     color: theme.palette.primary.main,
     borderRadius: theme.shape.borderRadius,
     marginBottom: theme.spacing(2),
+    '& .MuiSvgIcon-root': {
+        fontSize: theme.spacing(2),
+    }
 }));
 
-const LabelIcon = styled(Box)({
-    display: 'inline-flex',
-    alignItems: 'center',
-    color: 'inherit',
-});
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
     marginBottom: theme.spacing(2),
@@ -51,7 +49,7 @@ const SectionSubTitle = styled(Typography)(({ theme }) => ({
 const CardsLayout = styled(Box)(({ theme }) => ({
     display: 'grid',
     gap: theme.spacing(4),
-    maxWidth: 1100,
+    maxWidth: 1100,    //hardcode
     margin: '0 auto',
     gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
 
@@ -122,14 +120,12 @@ const PricePeriod = styled(Typography)(({ theme }) => ({
 }));
 
 
-const FeaturesList = styled('ul')(({ theme }) => ({
-    listStyle: 'none',
-    padding: 0,
+const FeaturesList = styled(Stack)(({ theme }) => ({
     marginBottom: theme.spacing(4),
     flexGrow: 1,
 }));
 
-const FeatureItem = styled('li')(({ theme }) => ({
+const FeatureItem = styled(Typography)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(1.5),
@@ -317,12 +313,10 @@ export const PricingSection: React.FC = () => {
         <PageSection id="pricing">
             <ContentContainer>
                 <HeaderContainer>
-                    <SectionEyebrow variant="overline">
-                        <LabelIcon aria-hidden="true">
-                            <SellOutlined fontSize="inherit" />
-                        </LabelIcon>
+                    <SectionLabel>
+                        <SellOutlined fontSize="inherit" />
                         {content.label}
-                    </SectionEyebrow>
+                    </SectionLabel>
                     <SectionTitle variant="h2">{content.title}</SectionTitle>
                     <SectionSubTitle variant="h5">{content.subtitle}</SectionSubTitle>
                 </HeaderContainer>

@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 
 
-const PageSection = styled('section')(({ theme }) => ({
+const PageSection = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
     padding: theme.spacing(12, 0),
 }));
@@ -25,12 +25,12 @@ const ContentContainer = styled(Box)(({ theme }) => ({
     padding: theme.spacing(0, 4),
 }));
 
-const HeaderContainer = styled('header')(({ theme }) => ({
+const HeaderContainer = styled(Box)(({ theme }) => ({
     textAlign: 'center',
     marginBottom: theme.spacing(8),
 }));
 
-const SectionEyebrow = styled(Typography)(({ theme }) => ({
+const SectionLabel = styled(Box)(({ theme }) => ({
     display: 'inline-flex',
     alignItems: 'center',
     gap: theme.spacing(1),
@@ -39,13 +39,11 @@ const SectionEyebrow = styled(Typography)(({ theme }) => ({
     color: theme.palette.primary.main,
     borderRadius: theme.shape.borderRadius,
     marginBottom: theme.spacing(2),
+    '& .MuiSvgIcon-root': {
+        fontSize: theme.spacing(2),
+    }
 }));
 
-const LabelIcon = styled(Box)({
-    display: 'inline-flex',
-    alignItems: 'center',
-    color: 'inherit',
-});
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
     marginBottom: theme.spacing(2),
@@ -57,8 +55,7 @@ const SectionSubTitle = styled(Typography)(({ theme }) => ({
 }));
 
 
-
-const FaqGrid = styled(Box)(({ theme }) => ({
+const FaqLayout = styled(Box)(({ theme }) => ({
     display: 'grid',
     gridTemplateColumns: '1fr',
     gap: theme.spacing(4),
@@ -98,25 +95,22 @@ const QuestionIcon = styled(Box)(({ theme }) => ({
     flexShrink: 0,
 
     '& svg': {
-        fontSize: theme.spacing(3), // 24px icon size
+        fontSize: theme.spacing(3),
     },
 }));
 
 const QuestionText = styled(Typography)(({ theme }) => ({
-    fontWeight: 600,
+    fontWeight: 600,   //hardcode 
     color: theme.palette.text.primary,
-    lineHeight: 1.3,
 }));
 
 
 const AnswerText = styled(Typography)(({ theme }) => ({
     color: theme.palette.text.secondary,
-    lineHeight: 1.7,
 
-    // Style <strong> tags inside answer
     '& strong': {
         color: theme.palette.text.primary,
-        fontWeight: 600,
+        fontWeight: 600,   //hardcode
     },
 }));
 
@@ -132,7 +126,6 @@ const NoteBox = styled(Box)(({ theme }) => ({
 const NoteText = styled(Typography)(({ theme }) => ({
     color: theme.palette.text.secondary,
     fontSize: theme.typography.body2.fontSize,
-    lineHeight: 1.6,
 }));
 
 
@@ -277,17 +270,15 @@ export const FaqSection: React.FC = () => {
         <PageSection id="faq">
             <ContentContainer>
                 <HeaderContainer>
-                    <SectionEyebrow variant="overline">
-                        <LabelIcon aria-hidden="true">
-                            <HelpOutlineOutlined fontSize="inherit" />
-                        </LabelIcon>
+                    <SectionLabel>
+                        <HelpOutlineOutlined fontSize="inherit" />
                         {content.label}
-                    </SectionEyebrow>
+                    </SectionLabel>
                     <SectionTitle variant="h2">{content.title}</SectionTitle>
                     <SectionSubTitle variant="h5">{content.subtitle}</SectionSubTitle>
                 </HeaderContainer>
 
-                <FaqGrid>
+                <FaqLayout>
                     {faqs.map((faq) => {
                         const IconComponent = faq.icon;
                         return (
@@ -319,7 +310,7 @@ export const FaqSection: React.FC = () => {
                             </FaqCard>
                         );
                     })}
-                </FaqGrid>
+                </FaqLayout>
             </ContentContainer>
         </PageSection>
     );
