@@ -1,11 +1,6 @@
 #!/bin/bash
 set -e
 
-cd ~/FairWorkly/backend
-
-git fetch origin
-git reset --hard origin/zoe-devops-api-healthcheck
-
 docker stop fairworkly-api || true
 docker rm fairworkly-api || true
 
