@@ -25,7 +25,7 @@ const SectionLabel = styled(Box)(({ theme }) => ({
     alignItems: 'center',
     gap: theme.spacing(1),
     padding: theme.spacing(0.75, 2),
-    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+    backgroundColor: theme.fairworkly.effect.primaryGlow,
     color: theme.palette.primary.main,
     borderRadius: theme.shape.borderRadius,
     marginBottom: theme.spacing(2),
@@ -49,9 +49,9 @@ const SectionSubTitle = styled(Typography)(({ theme }) => ({
 const CardsLayout = styled(Box)(({ theme }) => ({
     display: 'grid',
     gap: theme.spacing(4),
-    maxWidth: 1100,    //hardcode
+    maxWidth: theme.fairworkly.layout.containerMaxWidth * 0.86,
     margin: '0 auto',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+    gridTemplateColumns: `repeat(auto-fit, minmax(${theme.spacing(40)}, 1fr))`,
 
 }));
 
@@ -60,10 +60,13 @@ const CardContainer = styled(Card, {
     shouldForwardProp: (prop) => prop !== 'featured',
 })<{ featured?: boolean }>(({ theme, featured }) => ({
     padding: theme.spacing(5),
-    borderRadius: '24px',
+    borderRadius: theme.spacing(3),
     border: `2px solid ${featured ? theme.palette.primary.main : theme.palette.divider}`,
     backgroundColor: featured ? theme.palette.background.paper : theme.palette.background.default,
-    transition: 'all 0.3s ease',
+    transition: theme.transitions.create(['transform', 'box-shadow'], {
+        duration: theme.transitions.duration.standard,
+        easing: theme.transitions.easing.easeInOut,
+    }),
     position: 'relative',
     height: '100%',
     display: 'flex',
@@ -71,11 +74,13 @@ const CardContainer = styled(Card, {
     overflow: 'visible',
     ...(featured && {
         transform: 'scale(1.05)',
-        boxShadow: theme.shadows[10],
+        boxShadow: theme.fairworkly.shadow.lg,
     }),
     '&:hover': {
-        transform: featured ? 'scale(1.05) translateY(-8px)' : 'translateY(-8px)',
-        boxShadow: theme.shadows[10],
+        transform: featured
+            ? `scale(1.05) translateY(${theme.spacing(-1)})`
+            : `translateY(${theme.spacing(-1)})`,
+        boxShadow: theme.fairworkly.shadow.lg,
     },
 }));
 
@@ -149,15 +154,17 @@ const FeatureCheckIcon = styled(CheckCircleOutline)(({ theme }) => ({
 const ActionButton = styled(Button, {
     shouldForwardProp: (prop) => prop !== 'featured',
 })<{ featured?: boolean }>(({ theme, featured }) => ({
-    borderRadius: theme.spacing(1.25),
+    borderRadius: theme.fairworkly.radius.sm,
     padding: theme.spacing(1.5),
     fontWeight: 600,
-    background: featured ? 'linear-gradient(135deg, #6366f1, #ec4899)' : theme.palette.background.paper,
-    boxShadow: featured ? '0 4px 15px rgba(99, 102, 241, 0.4)' : 'none',
+    background: featured ? theme.fairworkly.gradient.primary : theme.palette.background.paper,
+    boxShadow: featured ? theme.fairworkly.shadow.primaryButton : 'none',
     '&:hover': {
-        background: featured ? 'linear-gradient(135deg, #4f46e5, #db2777)' : 'linear-gradient(rgba(99, 102, 241, 0.12))',
-        transform: 'translateY(-2px)',
-        boxShadow: featured ? '0 8px 25px rgba(99, 102, 241, 0.5)' : 'none',
+        background: featured
+            ? `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.main})`
+            : `linear-gradient(${theme.fairworkly.effect.primaryGlow})`,
+        transform: `translateY(${theme.spacing(-0.25)})`,
+        boxShadow: featured ? theme.fairworkly.shadow.primaryButtonHover : 'none',
     },
 }));
 
