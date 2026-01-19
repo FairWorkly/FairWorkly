@@ -24,6 +24,8 @@ const PageContainer = styled('div')({
   overflow: 'hidden',
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
     gridTemplateColumns: '1fr',
+    height: 'auto',
+    overflow: 'auto',
   },
 })
 

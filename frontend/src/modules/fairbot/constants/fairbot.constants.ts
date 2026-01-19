@@ -168,7 +168,7 @@ const FAIRBOT_GRID_COLUMNS = {
   RESULTS: '30%',
 } as const
 
-// Two-column layout: Chat (67%) + Results (33%).
+// Two-column layout: Chat (70%) + Results (30%).
 // Sidebar is provided by MainLayout, so no sidebar column needed here.
 const FAIRBOT_GRID_TEMPLATE_COLUMNS = 
   `${FAIRBOT_GRID_COLUMNS.CHAT} ${FAIRBOT_GRID_COLUMNS.RESULTS}` as const

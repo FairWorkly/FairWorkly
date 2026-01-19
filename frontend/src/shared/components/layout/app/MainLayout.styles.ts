@@ -21,4 +21,5 @@ export const AppContent = styled('div')(() => ({
   flexDirection: 'column',
   minHeight: 0,
   width: '100%',
+  overflowY: 'auto',
 }))
