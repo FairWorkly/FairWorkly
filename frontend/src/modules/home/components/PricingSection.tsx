@@ -1,7 +1,15 @@
-import { Box, Button, Card, Chip, styled, Typography, alpha, Stack } from "@mui/material";
+import { Box, Button, Card, Chip, styled, Typography, Stack } from "@mui/material";
 import { CheckCircleOutline, SellOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { ContactModal } from "./ContactModel";
 
+const CTAAction = {
+    Signup: 'signup',
+    Contact: 'contact',
+} as const;
+
+type CTAAction = 'signup' | 'contact';
 
 const PageSection = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
@@ -192,15 +200,14 @@ interface PricingPlan {
     featured?: boolean;
     buttonText: string;
     buttonVariant: 'contained' | 'outlined';
-    buttonAction: 'signup' | 'contact';
+    buttonAction: CTAAction;
 
 }
 
 
 
-const PricingCard = ({ plan, onButtonClick }: { plan: PricingPlan; onButtonClick: (action: string) => void }) => {
+const PricingCard = ({ plan, onButtonClick }: { plan: PricingPlan; onButtonClick: (action: CTAAction) => void }) => {
     const { name, description, price, period, features, featured, buttonText, buttonVariant, buttonAction } = plan;
-
 
     return (
         <CardContainer elevation={0} featured={featured}>
@@ -241,19 +248,27 @@ const PricingCard = ({ plan, onButtonClick }: { plan: PricingPlan; onButtonClick
 
 export const PricingSection: React.FC = () => {
     const navigate = useNavigate();
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-    const handleClick = (action: string) => {
-        switch (action) {
-            case 'signup':
-                navigate('/login?signup=true');
-                break;
-            case 'contact':
-                window.location.href = 'mailto:support@fairworkly.com?subject=Enterprise Inquiry';
-                break;
-            default:
-                console.warn('Unknown CTA action:', action);
+    const handleNavigation = (action: CTAAction) => {
+        if (action === CTAAction.Signup) {
+            navigate('/login?signup=true');
         }
     };
+    const handleModalAction = (action: CTAAction) => {
+        if (action === CTAAction.Contact) {
+            setIsContactModalOpen(true);
+        }
+    };
+
+    const handleClick = (action: CTAAction) => {
+        if (action === CTAAction.Signup) {
+            handleNavigation(action);  
+        } else if (action === CTAAction.Contact) {
+            handleModalAction(action);
+        }
+    };
+
 
     const content = {
         label: 'PRICING',
@@ -279,7 +294,7 @@ export const PricingSection: React.FC = () => {
             ],
             buttonText: 'Start Free Trial',
             buttonVariant: 'outlined',
-            buttonAction: 'signup',
+            buttonAction: CTAAction.Signup,
         },
         {
             id: 'professional',
@@ -297,7 +312,7 @@ export const PricingSection: React.FC = () => {
             featured: true,
             buttonText: 'Start Free Trial',
             buttonVariant: 'contained',
-            buttonAction: 'signup',
+            buttonAction: CTAAction.Signup,
         },
         {
             id: 'enterprise',
@@ -312,36 +327,43 @@ export const PricingSection: React.FC = () => {
             ],
             buttonText: 'Contact Sales',
             buttonVariant: 'outlined',
-            buttonAction: 'contact',
+            buttonAction: CTAAction.Contact,
         },
     ];
 
     return (
-        <PageSection id="pricing">
-            <ContentContainer>
-                <HeaderContainer>
-                    <SectionLabel>
-                        <SellOutlined fontSize="inherit" />
-                        {content.label}
-                    </SectionLabel>
-                    <SectionTitle variant="h2">{content.title}</SectionTitle>
-                    <SectionSubTitle variant="h5">{content.subtitle}</SectionSubTitle>
-                </HeaderContainer>
+        <>
+            <PageSection id="pricing">
+                <ContentContainer>
+                    <HeaderContainer>
+                        <SectionLabel>
+                            <SellOutlined fontSize="inherit" />
+                            {content.label}
+                        </SectionLabel>
+                        <SectionTitle variant="h2">{content.title}</SectionTitle>
+                        <SectionSubTitle variant="h5">{content.subtitle}</SectionSubTitle>
+                    </HeaderContainer>
 
-                <CardsLayout>
-                    {plans.map((plan) => (
-                        <PricingCard
-                            key={plan.id}
-                            plan={plan}
-                            onButtonClick={handleClick}
-                        />
-                    ))}
-                </CardsLayout>
+                    <CardsLayout>
+                        {plans.map((plan) => (
+                            <PricingCard
+                                key={plan.id}
+                                plan={plan}
+                                onButtonClick={handleClick}
+                            />
+                        ))}
+                    </CardsLayout>
 
-                <BottomNoteContainer>
-                    <BottomNote variant="body1">{content.bottomNote}</BottomNote>
-                </BottomNoteContainer>
-            </ContentContainer>
-        </PageSection>
+                    <BottomNoteContainer>
+                        <BottomNote variant="body1">{content.bottomNote}</BottomNote>
+                    </BottomNoteContainer>
+                </ContentContainer>
+            </PageSection>
+            <ContactModal
+                open={isContactModalOpen}
+                onClose={() => setIsContactModalOpen(false)}
+            />
+        </>
+
     );
 };
