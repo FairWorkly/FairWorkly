@@ -1,4 +1,4 @@
-import { styled } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
 import { Box, Typography, Container } from '@mui/material'
 
 /**
@@ -18,7 +18,7 @@ const PageWrapper = styled(Box)(({ theme }) => ({
 // 2. 局部渐变组件：体现“部分地区渐变色”
 const HeroBanner = styled(Box)(({ theme }) => ({
   // 引用 theme.ts 中定义的自定义渐变
-  background: theme.palette.brand.gradient,
+  background: theme.fairworkly.gradient.primary,
   borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(6),
   color: theme.palette.common.white,
