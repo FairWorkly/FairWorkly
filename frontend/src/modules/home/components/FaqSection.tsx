@@ -11,7 +11,8 @@ import {
     CloudDownloadOutlined,
     ArrowForward,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import templatesUrl from '../../../FairWorklyHomePage-Test/templates.html?url'
+import React from "react";
 
 
 
@@ -100,7 +101,7 @@ const QuestionIcon = styled(Box)(({ theme }) => ({
 }));
 
 const QuestionText = styled(Typography)(({ theme }) => ({
-    fontWeight: 600,   //hardcode 
+    fontWeight: 600,
     color: theme.palette.text.primary,
 }));
 
@@ -108,12 +109,12 @@ const QuestionText = styled(Typography)(({ theme }) => ({
 const AnswerText = styled(Typography)(({ theme }) => ({
     color: theme.palette.text.secondary,
 
-    '& strong': {
-        color: theme.palette.text.primary,
-        fontWeight: 600,   //hardcode
-    },
 }));
 
+const BoldText = styled('span')(({ theme }) => ({
+    color: theme.palette.text.primary,
+    fontWeight: 600,
+}));
 
 const NoteBox = styled(Box)(({ theme }) => ({
     backgroundColor: alpha(theme.palette.primary.main, 0.05),
@@ -151,20 +152,95 @@ const TemplateButton = styled(Button)(({ theme }) => ({
     },
 }));
 
+const ListContainer = styled(Box)(({ theme }) => ({
+    marginTop: theme.spacing(1),
+}));
 
+const ListItemText = styled(AnswerText)(({ theme }) => ({
+    marginTop: theme.spacing(0.5),
+}));
 
-interface FaqItem {
-    id: string;
-    icon: React.ComponentType;
+const parseTextWithBold = (text: string): React.ReactNode => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+
+    return parts.map((part, index) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+            return <BoldText key={index}>{part.slice(2, -2)}</BoldText>;
+        }
+        return <React.Fragment key={index}>{part}</React.Fragment>;
+    });
+};
+
+interface FaqMessage {
     question: string;
-    answer: string | React.ReactNode;
+    answer: string;
     note?: string;
+    list?: string[];
     hasButton?: boolean;
 }
 
+const FAQ_MESSAGES: Record<string, FaqMessage> = {
+    systems: {
+        question: 'What systems does FairWorkly work with?',
+        answer: "**FairWorkly doesn't require integration.** We accept standard CSV files, which means you can use any payroll or rostering system that can export CSV — including Xero, MYOB, QuickBooks, Keypay, Deputy, Tanda, and many others.",
+        note: '💡 Simply export your data as CSV and upload. No API keys, no IT setup required.',
+    },
+    rostering: {
+        question: 'Do I need rostering software?',
+        answer: "No! While we work great with Deputy and Tanda exports, you can also upload roster data from Excel. We provide a **free template** that makes it easy to convert your existing schedules to CSV format.",
+    },
+    awards: {
+        question: 'Which Awards do you cover?',
+        answer: 'We currently support the three most common Awards:',
+        list: [
+            'Hospitality Industry Award 2020',
+            'General Retail Industry Award',
+            'Clerks Private Sector Award',
+        ],
+    },
+    validationTime: {
+        question: 'How long does validation take?',
+        answer: "Most validations complete in **2-3 minutes**. Upload your CSV, grab a coffee, and your compliance report will be ready. Larger files (100+ employees) may take up to 5 minutes.",
+    },
+    contracts: {
+        question: 'Do you generate employment contracts?',
+        answer: "No, we don't generate documents in the MVP. Our **Document Agent** helps you **track mandatory documents** like Fair Work Information Statement (FWIS), Separation Certificates, and Casual Conversion Notices — ensuring you don't miss critical deadlines.",
+    },
+    issues: {
+        question: 'What if I find issues in my payroll?',
+        answer: 'We provide **detailed reports** with expected vs actual values and step-by-step recommendations. You can then fix issues in your payroll system (Xero/MYOB/etc) and re-upload to verify.',
+        note: '📌 For complex issues, we recommend consulting the Fair Work Ombudsman or an employment lawyer.',
+    },
+    legal: {
+        question: 'Is this a substitute for legal advice?',
+        answer: '**No.** FairWorkly is a compliance validation tool, not legal advice. We check your payroll and rosters against Fair Work rules and highlight potential issues. For complex situations or disputes, consult the Fair Work Ombudsman or an employment lawyer.',
+    },
+    templates: {
+        question: 'Do you provide CSV templates?',
+        answer: 'Yes! We provide **CSV templates** for both payslip and roster data to help you get started with FairWorkly.',
+        hasButton: true,
+    },
+};
+
+interface FaqConfig {
+    id: keyof typeof FAQ_MESSAGES;
+    icon: React.ComponentType;
+}
+
+const FAQ_CONFIGS: FaqConfig[] = [
+    { id: 'systems', icon: ComputerOutlined },
+    { id: 'rostering', icon: EventOutlined },
+    { id: 'awards', icon: VerifiedOutlined },
+    { id: 'validationTime', icon: ScheduleOutlined },
+    { id: 'contracts', icon: DescriptionOutlined },
+    { id: 'issues', icon: BuildOutlined },
+    { id: 'legal', icon: GavelOutlined },
+    { id: 'templates', icon: CloudDownloadOutlined },
+];
+
+
 
 export const FaqSection: React.FC = () => {
-    const navigate = useNavigate();
 
     const content = {
         label: 'FAQ',
@@ -173,97 +249,8 @@ export const FaqSection: React.FC = () => {
     };
 
 
-    const faqs: FaqItem[] = [
-        {
-            id: 'systems',
-            icon: ComputerOutlined,
-            question: 'What systems does FairWorkly work with?',
-            answer: (
-                <>
-                    <strong>FairWorkly doesn't require integration.</strong> We accept standard CSV files, which means you can use any payroll or rostering system that can export CSV — including Xero, MYOB, QuickBooks, Keypay, Deputy, Tanda, and many others.
-                </>
-            ),
-            note: '💡 Simply export your data as CSV and upload. No API keys, no IT setup required.',
-        },
-        {
-            id: 'rostering',
-            icon: EventOutlined,
-            question: 'Do I need rostering software?',
-            answer: (
-                <>
-                    No! While we work great with Deputy and Tanda exports, you can also upload roster data from Excel. We provide a <strong>free template</strong> that makes it easy to convert your existing schedules to CSV format.
-                </>
-            ),
-        },
-        {
-            id: 'awards',
-            icon: VerifiedOutlined,
-            question: 'Which Awards do you cover?',
-            answer: (
-                <>
-                    We currently support the three most common Awards:
-                    <br />• <strong>Hospitality Industry Award 2020</strong>
-                    <br />• <strong>General Retail Industry Award</strong>
-                    <br />• <strong>Clerks Private Sector Award</strong>
-                </>
-            ),
-        },
-        {
-            id: 'validation-time',
-            icon: ScheduleOutlined,
-            question: 'How long does validation take?',
-            answer: (
-                <>
-                    Most validations complete in <strong>2-3 minutes</strong>. Upload your CSV, grab a coffee, and your compliance report will be ready. Larger files (100+ employees) may take up to 5 minutes.
-                </>
-            ),
-        },
-        {
-            id: 'contracts',
-            icon: DescriptionOutlined,
-            question: 'Do you generate employment contracts?',
-            answer: (
-                <>
-                    No, we don't generate documents in the MVP. Our <strong>Document Agent</strong> helps you <strong>track mandatory documents</strong> like Fair Work Information Statement (FWIS), Separation Certificates, and Casual Conversion Notices — ensuring you don't miss critical deadlines.
-                </>
-            ),
-        },
-        {
-            id: 'issues',
-            icon: BuildOutlined,
-            question: 'What if I find issues in my payroll?',
-            answer: (
-                <>
-                    We provide <strong>detailed reports</strong> with expected vs actual values and step-by-step recommendations. You can then fix issues in your payroll system (Xero/MYOB/etc) and re-upload to verify.
-                </>
-            ),
-            note: '📌 For complex issues, we recommend consulting the Fair Work Ombudsman or an employment lawyer.',
-        },
-        {
-            id: 'legal',
-            icon: GavelOutlined,
-            question: 'Is this a substitute for legal advice?',
-            answer: (
-                <>
-                    <strong>No.</strong> FairWorkly is a compliance validation tool, not legal advice. We check your payroll and rosters against Fair Work rules and highlight potential issues. For complex situations or disputes, consult the Fair Work Ombudsman or an employment lawyer.
-                </>
-            ),
-        },
-        {
-            id: 'templates',
-            icon: CloudDownloadOutlined,
-            question: 'Do you provide CSV templates?',
-            answer: (
-                <>
-                    Yes! We provide <strong>CSV templates</strong> for both payslip and roster data to help you get started with FairWorkly.
-                </>
-            ),
-            hasButton: true,
-        },
-    ];
-
     const handleTemplateClick = () => {
-        navigate('/templates');
+        window.open(templatesUrl, '_blank');
     };
 
     return (
@@ -279,26 +266,37 @@ export const FaqSection: React.FC = () => {
                 </HeaderContainer>
 
                 <FaqLayout>
-                    {faqs.map((faq) => {
-                        const IconComponent = faq.icon;
+                    {FAQ_CONFIGS.map((config: FaqConfig) => {
+                        const message = FAQ_MESSAGES[config.id];
+                        const IconComponent = config.icon;
                         return (
-                            <FaqCard key={faq.id} elevation={0}>
+                            <FaqCard key={config.id} elevation={0}>
                                 <QuestionContainer>
                                     <QuestionIcon aria-hidden="true">
                                         <IconComponent />
                                     </QuestionIcon>
-                                    <QuestionText variant="h6">{faq.question}</QuestionText>
+                                    <QuestionText variant="h6">{message.question}</QuestionText>
                                 </QuestionContainer>
+                                <AnswerText variant="body1">
+                                    {parseTextWithBold(message.answer)}
+                                </AnswerText>
 
-                                <AnswerText variant="body1">{faq.answer}</AnswerText>
-
-                                {faq.note && (
+                                {message.list && (
+                                    <ListContainer>
+                                        {message.list.map((item) => (
+                                            <ListItemText key={item} variant="body1">
+                                                • <BoldText>{item}</BoldText>
+                                            </ListItemText>
+                                        ))}
+                                    </ListContainer>
+                                )}
+                                {message.note && (
                                     <NoteBox>
-                                        <NoteText>{faq.note}</NoteText>
+                                        <NoteText>{message.note}</NoteText>
                                     </NoteBox>
                                 )}
 
-                                {faq.hasButton && (
+                                {message.hasButton && (
                                     <TemplateButton
                                         fullWidth
                                         endIcon={<ArrowForward />}
