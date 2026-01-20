@@ -5,15 +5,12 @@ type Tone = 'primary' | 'warning' | 'success';
 
 const PageSection = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
-    padding: theme.spacing(12, 0),
-    borderTop: `1px solid ${theme.palette.divider}`,
     borderBottom: `1px solid ${theme.palette.divider}`,
 }));
 
 const ContentContainer = styled(Box)(({ theme }) => ({
     maxWidth: theme.fairworkly.layout.containerMaxWidth,
     margin: '0 auto',
-    padding: theme.spacing(0, 4),
 }));
 
 const ContentLayout = styled(Box)(({ theme }) => ({

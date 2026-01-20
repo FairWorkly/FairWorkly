@@ -6,15 +6,12 @@ type Tone = 'primary' | 'warning' | 'info';
 
 const PageSection = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(12, 0),
-    borderTop: `1px solid ${theme.palette.divider}`,
     borderBottom: `1px solid ${theme.palette.divider}`,
 }));
 
 const ContentContainer = styled(Box)(({ theme }) => ({
     maxWidth: theme.fairworkly.layout.containerMaxWidth,
     margin: '0 auto',
-    padding: theme.spacing(0, 4),
 }));
 
 const HeaderContainer = styled(Box)(({ theme }) => ({
