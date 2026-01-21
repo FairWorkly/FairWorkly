@@ -16,6 +16,23 @@ public class BaseRateRule : IComplianceRule
     {
         var issues = new List<PayrollIssue>();
 
+        // Check for negative pay (possible correction/reversal entry)
+        if (payslip.OrdinaryPay < 0)
+        {
+            issues.Add(new PayrollIssue
+            {
+                OrganizationId = payslip.OrganizationId,
+                PayrollValidationId = validationId,
+                PayslipId = payslip.Id,
+                EmployeeId = payslip.EmployeeId,
+                CategoryType = IssueCategory.BaseRate,
+                Severity = IssueSeverity.Warning,
+                WarningMessage = $"Negative Ordinary Pay detected (${Math.Abs(payslip.OrdinaryPay):F2}). Possible correction/reversal entry. Skipping compliance check.",
+                ImpactAmount = 0
+            });
+            return issues;
+        }
+
         // Skip if no ordinary hours worked
         if (payslip.OrdinaryHours <= 0)
         {

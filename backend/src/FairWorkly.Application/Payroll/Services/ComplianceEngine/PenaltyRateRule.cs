@@ -28,7 +28,11 @@ public class PenaltyRateRule : IComplianceRule
         var isCasual = payslip.EmploymentType == EmploymentType.Casual;
 
         // Check Saturday
-        if (payslip.SaturdayHours > 0)
+        if (payslip.SaturdayPay < 0)
+        {
+            issues.Add(CreateNegativePayWarning(payslip, validationId, "Saturday", payslip.SaturdayPay));
+        }
+        else if (payslip.SaturdayHours > 0)
         {
             var multiplier = isCasual
                 ? RateTableProvider.CasualMultipliers.Saturday
@@ -51,7 +55,11 @@ public class PenaltyRateRule : IComplianceRule
         }
 
         // Check Sunday
-        if (payslip.SundayHours > 0)
+        if (payslip.SundayPay < 0)
+        {
+            issues.Add(CreateNegativePayWarning(payslip, validationId, "Sunday", payslip.SundayPay));
+        }
+        else if (payslip.SundayHours > 0)
         {
             var multiplier = isCasual
                 ? RateTableProvider.CasualMultipliers.Sunday
@@ -74,7 +82,11 @@ public class PenaltyRateRule : IComplianceRule
         }
 
         // Check Public Holiday
-        if (payslip.PublicHolidayHours > 0)
+        if (payslip.PublicHolidayPay < 0)
+        {
+            issues.Add(CreateNegativePayWarning(payslip, validationId, "Public Holiday", payslip.PublicHolidayPay));
+        }
+        else if (payslip.PublicHolidayHours > 0)
         {
             var multiplier = isCasual
                 ? RateTableProvider.CasualMultipliers.PublicHoliday
@@ -124,6 +136,25 @@ public class PenaltyRateRule : IComplianceRule
             UnitType = "Currency",
             ContextLabel = $"{dayType} ({multiplier:P0} rate)",
             ImpactAmount = impactAmount
+        };
+    }
+
+    private PayrollIssue CreateNegativePayWarning(
+        Payslip payslip,
+        Guid validationId,
+        string payType,
+        decimal amount)
+    {
+        return new PayrollIssue
+        {
+            OrganizationId = payslip.OrganizationId,
+            PayrollValidationId = validationId,
+            PayslipId = payslip.Id,
+            EmployeeId = payslip.EmployeeId,
+            CategoryType = IssueCategory.PenaltyRate,
+            Severity = IssueSeverity.Warning,
+            WarningMessage = $"Negative {payType} Pay detected (${Math.Abs(amount):F2}). Possible correction/reversal entry. Skipping compliance check.",
+            ImpactAmount = 0
         };
     }
 }
