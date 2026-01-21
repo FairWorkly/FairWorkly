@@ -7,8 +7,8 @@ import { PayrollUpload } from '@/modules/payroll/pages/PayrollUpload'
 import { PayrollResults } from '@/modules/payroll/pages/PayrollResults'
 
 // Compliance pages
-import { RosterUpload } from '@/modules/compliance/pages/RosterUpload'
-import { RosterResults } from '@/modules/compliance/pages/RosterResults'
+import { RosterUpload } from '@/modules/roster/pages/RosterUpload'
+import { RosterResults } from '@/modules/roster/pages/RosterResults'
 
 // Documents pages
 import { DocumentTemplates } from '@/modules/documents/pages/DocumentTemplates'

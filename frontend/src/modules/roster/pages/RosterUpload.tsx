@@ -12,21 +12,21 @@ import type {
 } from '@/shared/compliance-check'
 
 const mockConfig: ComplianceConfig = {
-  title: 'Upload Payroll',
+  title: 'Upload Roster',
   fileTypes: ['CSV'],
   maxFileSize: '50MB',
-  coverageAreas: ['Awards', 'Classifications', 'Allowances'],
+  coverageAreas: ['Shifts', 'Breaks', 'Hours'],
 }
 
-const payrollValidationItems = [
-  'Base rates & award classifications',
-  'Penalty rates (weekends & public holidays)',
-  'Casual loading (25%)',
-  'Superannuation guarantee',
-  'Single Touch Payroll (STP) compliance',
+const rosterValidationItems = [
+  'Minimum shift hours compliance',
+  'Maximum consecutive days worked',
+  'Meal break requirements',
+  'Rest period between shifts',
+  'Weekly hours limit',
 ]
 
-export function PayrollUpload() {
+export function RosterUpload() {
   const navigate = useNavigate()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
@@ -84,7 +84,7 @@ export function PayrollUpload() {
           window.clearInterval(pollingTimerRef.current)
           pollingTimerRef.current = null
         }
-        navigate('/payroll/results')
+        navigate('/roster/results')
       }
     }
 
@@ -119,7 +119,7 @@ export function PayrollUpload() {
       onRemoveFile={handleRemoveFile}
       onStartAnalysis={handleStartAnalysis}
       onCancel={handleCancel}
-      validationItems={payrollValidationItems}
+      validationItems={rosterValidationItems}
       configSection={
         <AwardSelector
           selectedAward={selectedAward}
