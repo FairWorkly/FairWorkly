@@ -4,6 +4,8 @@ import { styled } from '@/styles/styled'
 import { Navbar } from '../features/Navbar'
 import { Hero } from '../features/Hero'
 import { TrustBar } from '../features/TrustBar'
+import { FeaturesSection } from '../components/FeaturesSection'
+import { ShowcaseSection } from '../components/ShowcaseSection'
 
 const HomePageRoot = styled(Box)({
   minHeight: '100vh',
@@ -48,7 +50,8 @@ export function HomePage() {
       <HomePageSection id="features">
         <HomePageSectionHeading variant="h4">Features</HomePageSectionHeading>
         <HomePageSectionBody variant="body1">
-          Coming soon...
+          <FeaturesSection/>
+          <ShowcaseSection/>
         </HomePageSectionBody>
       </HomePageSection>
       <HomePageSection id="pricing">
