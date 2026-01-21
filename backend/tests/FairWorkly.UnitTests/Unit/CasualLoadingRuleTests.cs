@@ -196,6 +196,29 @@ public class CasualLoadingRuleTests
 
     #endregion
 
+    #region Negative Pay Tests
+
+    [Fact]
+    public void Evaluate_CasualEmployee_WhenOrdinaryPayNegative_ShouldReturnWarning()
+    {
+        // Arrange: Negative pay indicates correction/reversal entry for casual employee
+        var payslip = CreatePayslip(EmploymentType.Casual, hourlyRate: 33.95m, hours: 20m, pay: -679.00m);
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert
+        issues.Should().HaveCount(1);
+        var issue = issues[0];
+        issue.Severity.Should().Be(IssueSeverity.Warning);
+        issue.CategoryType.Should().Be(IssueCategory.CasualLoading);
+        issue.ImpactAmount.Should().Be(0);
+        issue.WarningMessage.Should().Contain("Negative");
+        issue.WarningMessage.Should().Contain("Ordinary Pay");
+    }
+
+    #endregion
+
     private Payslip CreatePayslip(
         EmploymentType employmentType,
         decimal hourlyRate,

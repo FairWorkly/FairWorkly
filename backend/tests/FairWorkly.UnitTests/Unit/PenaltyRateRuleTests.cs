@@ -196,6 +196,88 @@ public class PenaltyRateRuleTests
 
     #endregion
 
+    #region Negative Pay Tests
+
+    [Fact]
+    public void Evaluate_WhenSaturdayPayNegative_ShouldReturnWarning()
+    {
+        // Arrange: Negative Saturday pay indicates correction/reversal entry
+        var payslip = CreatePayslip(EmploymentType.FullTime, saturdayHours: 8m, saturdayPay: -271.60m);
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert
+        issues.Should().HaveCount(1);
+        var issue = issues[0];
+        issue.Severity.Should().Be(IssueSeverity.Warning);
+        issue.CategoryType.Should().Be(IssueCategory.PenaltyRate);
+        issue.ImpactAmount.Should().Be(0);
+        issue.WarningMessage.Should().Contain("Negative");
+        issue.WarningMessage.Should().Contain("Saturday Pay");
+    }
+
+    [Fact]
+    public void Evaluate_WhenSundayPayNegative_ShouldReturnWarning()
+    {
+        // Arrange: Negative Sunday pay indicates correction/reversal entry
+        var payslip = CreatePayslip(EmploymentType.FullTime, sundayHours: 6m, sundayPay: -244.44m);
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert
+        issues.Should().HaveCount(1);
+        var issue = issues[0];
+        issue.Severity.Should().Be(IssueSeverity.Warning);
+        issue.CategoryType.Should().Be(IssueCategory.PenaltyRate);
+        issue.ImpactAmount.Should().Be(0);
+        issue.WarningMessage.Should().Contain("Negative");
+        issue.WarningMessage.Should().Contain("Sunday Pay");
+    }
+
+    [Fact]
+    public void Evaluate_WhenPublicHolidayPayNegative_ShouldReturnWarning()
+    {
+        // Arrange: Negative public holiday pay indicates correction/reversal entry
+        var payslip = CreatePayslip(EmploymentType.FullTime, phHours: 8m, phPay: -488.88m);
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert
+        issues.Should().HaveCount(1);
+        var issue = issues[0];
+        issue.Severity.Should().Be(IssueSeverity.Warning);
+        issue.CategoryType.Should().Be(IssueCategory.PenaltyRate);
+        issue.ImpactAmount.Should().Be(0);
+        issue.WarningMessage.Should().Contain("Negative");
+        issue.WarningMessage.Should().Contain("Public Holiday Pay");
+    }
+
+    [Fact]
+    public void Evaluate_WhenMixedPositiveAndNegativePay_ShouldHandleSeparately()
+    {
+        // Arrange: Saturday positive (underpaid), Sunday negative (reversal)
+        // Saturday: Expected $271.60, Actual $200 (underpaid - should return Error)
+        // Sunday: Negative pay (reversal - should return Warning)
+        var payslip = CreatePayslip(
+            EmploymentType.FullTime,
+            saturdayHours: 8m, saturdayPay: 200m,
+            sundayHours: 6m, sundayPay: -244.44m
+        );
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert: Should have 2 issues - one Error for Saturday, one Warning for Sunday
+        issues.Should().HaveCount(2);
+        issues.Should().Contain(i => i.Severity == IssueSeverity.Error && i.ContextLabel!.Contains("Saturday"));
+        issues.Should().Contain(i => i.Severity == IssueSeverity.Warning && i.WarningMessage!.Contains("Negative") && i.WarningMessage.Contains("Sunday Pay"));
+    }
+
+    #endregion
+
     private Payslip CreatePayslip(
         EmploymentType employmentType,
         decimal saturdayHours = 0,

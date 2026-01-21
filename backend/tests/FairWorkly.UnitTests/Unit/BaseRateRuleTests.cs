@@ -202,6 +202,42 @@ public class BaseRateRuleTests
         issue.ImpactAmount.Should().BeApproximately((32.45m - actualRate) * 40.00m, 0.05m);
     }
 
+    #region Negative Pay Tests
+
+    [Fact]
+    public void Evaluate_WhenOrdinaryPayNegative_ShouldReturnWarning()
+    {
+        // Arrange: Negative pay indicates correction/reversal entry
+        var payslip = CreatePayslip("Level 1", 26.55m, 10.00m, -265.50m);
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert
+        issues.Should().HaveCount(1);
+        var issue = issues[0];
+        issue.Severity.Should().Be(IssueSeverity.Warning);
+        issue.CategoryType.Should().Be(IssueCategory.BaseRate);
+        issue.ImpactAmount.Should().Be(0);
+        issue.WarningMessage.Should().Contain("Negative");
+        issue.WarningMessage.Should().Contain("Ordinary Pay");
+    }
+
+    [Fact]
+    public void Evaluate_WhenOrdinaryPayNegative_ShouldNotReturnCritical()
+    {
+        // Arrange: Negative pay should never trigger CRITICAL even if rate would be wrong
+        var payslip = CreatePayslip("Level 1", 20.00m, 10.00m, -200.00m);
+
+        // Act
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        // Assert
+        issues.Should().NotContain(i => i.Severity == IssueSeverity.Critical);
+    }
+
+    #endregion
+
     private Payslip CreatePayslip(
         string classification,
         decimal hourlyRate,
