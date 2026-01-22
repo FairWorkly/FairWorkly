@@ -1,0 +1,9 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+FAIL001,BaseRate Violation 1,2025-12-15,2025-12-21,Retail,Level 1,FullTime,24.00,40.00,960.00,0.00,0.00,0.00,0.00,0.00,0.00,960.00,115.20
+FAIL002,BaseRate Violation 2,2025-12-15,2025-12-21,Retail,Level 3,PartTime,25.00,30.00,750.00,0.00,0.00,0.00,0.00,0.00,0.00,750.00,90.00
+FAIL003,Saturday Penalty Fail,2025-12-15,2025-12-21,Retail,Level 2,FullTime,27.16,30.00,814.80,8.00,200.00,0.00,0.00,0.00,0.00,1014.80,121.78
+FAIL004,Sunday Penalty Fail,2025-12-15,2025-12-21,Retail,Level 1,PartTime,26.55,25.00,663.75,0.00,0.00,6.00,159.30,0.00,0.00,823.05,98.77
+FAIL005,Casual No Loading,2025-12-15,2025-12-21,Retail,Level 2,Casual,27.16,20.00,543.20,0.00,0.00,0.00,0.00,0.00,0.00,543.20,65.18
+FAIL006,Casual Partial Loading,2025-12-15,2025-12-21,Retail,Level 1,Casual,30.00,25.00,750.00,0.00,0.00,0.00,0.00,0.00,0.00,750.00,90.00
+FAIL007,Super Zero Paid,2025-12-15,2025-12-21,Retail,Level 4,FullTime,28.12,38.00,1068.56,0.00,0.00,0.00,0.00,0.00,0.00,1068.56,0.00
+FAIL008,Super Only 8%,2025-12-15,2025-12-21,Retail,Level 5,PartTime,29.27,30.00,878.10,0.00,0.00,0.00,0.00,0.00,0.00,878.10,70.25

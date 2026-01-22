@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { styled } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
 import SendRounded from '@mui/icons-material/SendRounded'
@@ -20,23 +20,23 @@ interface MessageInputProps {
   disabled?: boolean
 }
 
-const InputRow = styled('form')({
+const InputRow = styled('form')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  gap: `${FAIRBOT_INPUT_UI.GAP}px`,
-})
+  gap: theme.spacing(1.5),
+}))
 
-const StyledTextField = styled(TextField)({
+const StyledTextField = styled(TextField)(({ theme }) => ({
   flex: 1,
   '& .MuiOutlinedInput-root': {
-    borderRadius: `${FAIRBOT_INPUT_UI.FIELD_RADIUS}px`,
+    borderRadius: theme.fairworkly.radius.md,
   },
-})
+}))
 
 const InputButton = styled(IconButton)(({ theme }) => ({
   width: `${FAIRBOT_INPUT_UI.BUTTON_SIZE}px`,
   height: `${FAIRBOT_INPUT_UI.BUTTON_SIZE}px`,
-  borderRadius: `${FAIRBOT_INPUT_UI.BORDER_RADIUS}px`,
+  borderRadius: theme.fairworkly.radius.lg,
   border: `1px solid ${theme.palette.divider}`,
 }))
 

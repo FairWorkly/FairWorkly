@@ -1,0 +1,5 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+SUP001,Super Exact 12%,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07
+SUP002,Super Over 12%,2025-12-15,2025-12-21,Retail,Level 2,PartTime,27.16,20.00,543.20,0.00,0.00,0.00,0.00,0.00,0.00,543.20,70.00
+SUP003,Super Generous,2025-12-15,2025-12-21,Retail,Level 3,Casual,34.48,25.00,862.00,0.00,0.00,0.00,0.00,0.00,0.00,862.00,120.00
+SUP004,Super Exact Edge,2025-12-15,2025-12-21,Retail,Level 5,FullTime,29.27,38.00,1112.26,0.00,0.00,0.00,0.00,0.00,0.00,1112.26,133.47

@@ -1,10 +1,9 @@
-import { styled } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import AttachFileOutlined from '@mui/icons-material/AttachFileOutlined'
 import {
   FAIRBOT_LABELS,
-  FAIRBOT_LAYOUT,
   FAIRBOT_FILE_SIZE,
   FAIRBOT_MESSAGE_UI,
   FAIRBOT_NUMBERS,
@@ -23,19 +22,19 @@ interface BubbleProps {
 
 const MessageRow = styled('div', {
   shouldForwardProp: (prop) => prop !== 'isUser',
-})<BubbleProps>(({ isUser }) => ({
+})<BubbleProps>(({ theme, isUser }) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: isUser ? 'flex-end' : 'flex-start',
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_STACK_GAP}px`,
+  gap: theme.spacing(1),
 }))
 
 const Bubble = styled('div', {
   shouldForwardProp: (prop) => prop !== 'isUser',
 })<BubbleProps>(({ theme, isUser }) => ({
   maxWidth: `${FAIRBOT_MESSAGE_UI.BUBBLE_MAX_WIDTH}px`,
-  borderRadius: `${FAIRBOT_MESSAGE_UI.BUBBLE_RADIUS}px`,
-  padding: `${FAIRBOT_MESSAGE_UI.BUBBLE_PADDING}px`,
+  borderRadius: theme.fairworkly.radius.lg,
+  padding: theme.spacing(1.5),
   backgroundColor: isUser
     ? theme.palette.primary.main
     : theme.palette.action.hover,
@@ -47,16 +46,16 @@ const MetaRow = styled('div', {
 })<BubbleProps>(({ theme, isUser }) => ({
   display: 'flex',
   alignItems: 'center',
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_STACK_GAP}px`,
+  gap: theme.spacing(1),
   color: isUser ? theme.palette.primary.main : theme.palette.text.secondary,
 }))
 
 const FileBadge = styled('div')(({ theme }) => ({
   display: 'inline-flex',
   alignItems: 'center',
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_STACK_GAP}px`,
-  borderRadius: `${FAIRBOT_MESSAGE_UI.FILE_BADGE_RADIUS}px`,
-  padding: `${FAIRBOT_MESSAGE_UI.FILE_BADGE_PADDING_Y}px ${FAIRBOT_MESSAGE_UI.FILE_BADGE_PADDING_X}px`,
+  gap: theme.spacing(1),
+  borderRadius: theme.fairworkly.radius.md,
+  padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
   border: `1px solid ${theme.palette.divider}`,
   backgroundColor: theme.palette.background.paper,
   color: theme.palette.text.secondary,

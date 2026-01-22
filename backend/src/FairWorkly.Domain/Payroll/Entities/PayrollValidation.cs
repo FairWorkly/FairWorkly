@@ -29,10 +29,10 @@ public class PayrollValidation : AuditableEntity
     /// Pay period being validated
     /// </summary>
     [Required]
-    public DateTime PayPeriodStart { get; set; }
+    public DateTimeOffset PayPeriodStart { get; set; }
 
     [Required]
-    public DateTime PayPeriodEnd { get; set; }
+    public DateTimeOffset PayPeriodEnd { get; set; }
 
     // Upload Info
 

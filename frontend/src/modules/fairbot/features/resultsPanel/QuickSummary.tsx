@@ -1,4 +1,4 @@
-import { styled } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import Divider from '@mui/material/Divider'
@@ -7,7 +7,6 @@ import { RosterSummary } from './RosterSummary'
 import {
   FAIRBOT_LABELS,
   FAIRBOT_RESULTS,
-  FAIRBOT_RESULTS_UI,
 } from '../../constants/fairbot.constants'
 import type { FairBotResult } from '../../types/fairbot.types'
 
@@ -16,11 +15,11 @@ interface QuickSummaryProps {
 }
 
 // Container for summary content with vertical spacing.
-const SummaryContainer = styled('div')({
+const SummaryContainer = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: `${FAIRBOT_RESULTS_UI.STACK_GAP}px`,
-})
+  gap: theme.spacing(2),
+}))
 
 export const QuickSummary = ({ result }: QuickSummaryProps) => {
   // Switch on result type to render the appropriate summary card.
@@ -47,7 +46,7 @@ export const QuickSummary = ({ result }: QuickSummaryProps) => {
       )
     default:
       return (
-        <Stack spacing={FAIRBOT_RESULTS_UI.STAT_GAP}>
+        <Stack spacing={1.5}>
           <Typography variant="h6">{FAIRBOT_LABELS.RESULTS_PANEL_TITLE}</Typography>
           <Typography variant="body2">{FAIRBOT_LABELS.RESULTS_PANEL_SUBTITLE}</Typography>
         </Stack>

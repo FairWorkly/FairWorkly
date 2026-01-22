@@ -1,0 +1,4 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+EMP001,John Updated,2025-12-15,2025-12-21,Retail,Level 2,FullTime,27.16,38.00,1032.08,0.00,0.00,0.00,0.00,0.00,0.00,1032.08,123.85
+EMP002,Jane Updated,2025-12-15,2025-12-21,Retail,Level 3,Casual,34.48,30.00,1034.40,0.00,0.00,0.00,0.00,0.00,0.00,1034.40,124.13
+EMP003,Jack Updated,2025-12-15,2025-12-21,Retail,Level 4,PartTime,28.12,20.00,562.40,0.00,0.00,0.00,0.00,0.00,0.00,562.40,67.49

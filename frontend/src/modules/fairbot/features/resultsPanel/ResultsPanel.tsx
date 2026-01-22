@@ -1,4 +1,4 @@
-import { styled } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
 import {
   FAIRBOT_ARIA,
   FAIRBOT_LAYOUT,
@@ -9,18 +9,18 @@ import { ResultsEmpty } from './ResultsEmpty'
 import { QuickSummary } from './QuickSummary'
 
 // Results panel reads the latest summary from session storage and renders the right state.
-const PanelContainer = styled('section')({
-  display: FAIRBOT_LAYOUT.DISPLAY_FLEX,
-  flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
-  gap: `${FAIRBOT_LAYOUT.RESULTS_PANEL_GAP}px`,
-  padding: `${FAIRBOT_LAYOUT.RESULTS_PANEL_PADDING}px`,
-  boxSizing: FAIRBOT_LAYOUT.BOX_SIZING_BORDER_BOX,
-  borderRadius: `${FAIRBOT_RESULTS_UI.CARD_RADIUS}px`,
-  border: FAIRBOT_RESULTS_UI.PANEL_BORDER,
-  width: `min(${FAIRBOT_LAYOUT.RESULTS_PANEL_WIDTH}px, ${FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH})`,
-  maxWidth: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
+const PanelContainer = styled('section')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(2),
+  padding: theme.spacing(3),
+  boxSizing: 'border-box',
+  borderRadius: theme.fairworkly.radius.lg,
+  border: `1px solid ${theme.palette.divider}`,
+  width: `min(${FAIRBOT_LAYOUT.RESULTS_PANEL_WIDTH}px, 100%)`,
+  maxWidth: '100%',
   minHeight: `${FAIRBOT_RESULTS_UI.MIN_HEIGHT}px`,
-})
+}))
 
 export const ResultsPanel = () => {
   const { currentResult } = useResultsPanel()

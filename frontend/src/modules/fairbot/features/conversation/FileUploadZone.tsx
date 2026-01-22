@@ -1,4 +1,4 @@
-import { styled } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
 import type { ReactNode, RefObject } from 'react'
 import {
   FAIRBOT_ARIA,
@@ -28,8 +28,8 @@ const UploadContainer = styled('div', {
     prop !== 'isDragging' && prop !== 'isDisabled',
 })<UploadContainerProps>(({ theme, isDragging, isDisabled }) => ({
   border: FAIRBOT_UPLOAD.BORDER_NONE,
-  borderRadius: `${FAIRBOT_UPLOAD.BORDER_RADIUS}px`,
-  padding: `${FAIRBOT_UPLOAD.PADDING}px`,
+  borderRadius: theme.fairworkly.radius.lg,
+  padding: theme.spacing(1),
   minHeight: `${FAIRBOT_UPLOAD.MIN_HEIGHT}px`,
   backgroundColor: isDragging
     ? theme.palette.action.hover
@@ -39,13 +39,13 @@ const UploadContainer = styled('div', {
   pointerEvents: isDisabled ? 'none' : 'auto',
 }))
 
-const UploadSurface = styled('label')({
+const UploadSurface = styled('label')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  gap: `${FAIRBOT_UPLOAD.GAP}px`,
+  gap: theme.spacing(1),
   width: '100%',
   cursor: 'pointer',
-})
+}))
 
 const HiddenInput = styled('input')({
   display: 'none',
@@ -53,7 +53,7 @@ const HiddenInput = styled('input')({
 
 const HelperText = styled('p')(({ theme }) => ({
   ...theme.typography.body2,
-  marginTop: `${FAIRBOT_UPLOAD.GAP}px`,
+  marginTop: theme.spacing(1),
   marginLeft: `${FAIRBOT_UPLOAD.HELPER_TEXT_OFFSET_PX}px`,
   marginBottom: 0,
   color: theme.palette.text.secondary,
@@ -61,7 +61,7 @@ const HelperText = styled('p')(({ theme }) => ({
 
 const ErrorText = styled('p')(({ theme }) => ({
   ...theme.typography.body2,
-  marginTop: `${FAIRBOT_UPLOAD.GAP}px`,
+  marginTop: theme.spacing(1),
   marginBottom: 0,
   color: theme.palette.error.main,
 }))

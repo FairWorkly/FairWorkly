@@ -1,9 +1,8 @@
-import { styled } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
 import Typography from '@mui/material/Typography'
 import {
   FAIRBOT_ARIA,
   FAIRBOT_LABELS,
-  FAIRBOT_LAYOUT,
   FAIRBOT_NUMBERS,
 } from '../../constants/fairbot.constants'
 import type { FairBotMessage } from '../../types/fairbot.types'
@@ -15,22 +14,22 @@ interface MessageListProps {
   isTyping: boolean
 }
 
-const ListContainer = styled('section')({
+const ListContainer = styled('section')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_LIST_GAP}px`,
-  padding: `${FAIRBOT_LAYOUT.MESSAGE_LIST_PADDING}px`,
-})
+  gap: theme.spacing(2),
+  padding: theme.spacing(1),
+}))
 
 const ListHeader = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
-const MessageStack = styled('div')({
+const MessageStack = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_LIST_GAP}px`,
-})
+  gap: theme.spacing(2),
+}))
 
 // Renders message bubbles and the typing indicator for active responses.
 export const MessageList = ({ messages, isTyping }: MessageListProps) => {
