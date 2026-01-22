@@ -1,4 +1,5 @@
-﻿using FairWorkly.Application.Employees.Services;
+﻿using FairWorkly.Application.Employees.Interfaces;
+using FairWorkly.Application.Employees.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FairWorkly.API.Controllers.Employees

@@ -10,6 +10,7 @@
 
 # Claude Code CLI local configuration
 .claude/
+CLAUDE.md
 AGENTS.md
 
 # Visual Studio (Backend)
@@ -22,6 +23,16 @@ AGENTS.md
 # Build Output (Backend)
 [Bb]in/
 [Oo]bj/
+
+# Backend AI Files
+.raw_materials/
+.claude/
+
+# Backend Scripts
+backend/scripts/
+
+# Serilog log files
+logs/
 
 # Database and Logs
 *.db
@@ -67,5 +78,7 @@ __pycache__/
 
 # Environment variables
 .env
+backend/src/FairWorkly.API/appsettings.Development.json
+
 ## FAISS indexes
 document_faiss/

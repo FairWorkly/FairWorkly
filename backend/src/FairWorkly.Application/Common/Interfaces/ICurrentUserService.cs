@@ -3,6 +3,6 @@
 public interface ICurrentUserService
 {
     string? UserId { get; }
-    string? TenantId { get; }
+    string? OrganizationId { get; }
     string? Email { get; }
 }

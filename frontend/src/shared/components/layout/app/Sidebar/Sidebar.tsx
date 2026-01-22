@@ -1,3 +1,4 @@
+import type { DrawerProps } from '@mui/material/Drawer'
 import { SidebarDrawer, SidebarPaper } from './Sidebar.styles'
 import { SidebarBrand } from './components/SidebarBrand'
 import { FairBotCard } from './components/FairBotCard'
@@ -13,11 +14,33 @@ export interface SidebarUser {
 export interface SidebarProps {
   user?: SidebarUser
   onLogout?: () => void
+  variant?: DrawerProps['variant']
+  open?: boolean
+  onClose?: () => void
 }
 
-export function Sidebar({ user, onLogout }: SidebarProps) {
+export function Sidebar({
+  user,
+  onLogout,
+  variant = 'permanent',
+  open = true,
+  onClose,
+}: SidebarProps) {
+  const isTemporary = variant === 'temporary'
   return (
-    <SidebarDrawer variant="permanent" open>
+    <SidebarDrawer
+      variant={variant}
+      open={open}
+      onClose={onClose}
+      ModalProps={
+        isTemporary
+          ? {
+              disableScrollLock: true,
+              keepMounted: true,
+            }
+          : undefined
+      }
+    >
       <SidebarPaper>
         <SidebarBrand />
 

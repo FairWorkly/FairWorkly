@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom'
-import { useAuth, type AuthUser } from '@/shared/hooks/useAuth'
+import { useAuth, type AuthUser } from '@/modules/auth'
 import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner'
 
 type Role = NonNullable<AuthUser>['role']

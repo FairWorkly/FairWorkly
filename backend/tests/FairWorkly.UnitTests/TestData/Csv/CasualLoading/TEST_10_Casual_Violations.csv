@@ -1,0 +1,5 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+CASVIOL001,Casual No Loading,2025-12-15,2025-12-21,Retail,Level 1,Casual,26.55,20.00,531.00,0.00,0.00,0.00,0.00,0.00,0.00,531.00,63.72
+CASVIOL002,Casual Partial Loading,2025-12-15,2025-12-21,Retail,Level 2,Casual,30.00,25.00,750.00,0.00,0.00,0.00,0.00,0.00,0.00,750.00,90.00
+CASVIOL003,Casual Wrong Rate In System,2025-12-15,2025-12-21,Retail,Level 3,Casual,27.58,15.00,517.20,0.00,0.00,0.00,0.00,0.00,0.00,517.20,62.06
+CASVIOL004,FullTime Not Affected,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07

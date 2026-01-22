@@ -1,0 +1,9 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+EDGE001,Exact Minimum Rate,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,40.00,1062.00,0.00,0.00,0.00,0.00,0.00,0.00,1062.00,127.44
+EDGE002,Just Below Minimum,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.54,40.00,1061.60,0.00,0.00,0.00,0.00,0.00,0.00,1061.60,127.39
+EDGE003,Zero Hours Worker,2025-12-15,2025-12-21,Retail,Level 2,PartTime,27.16,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00
+EDGE004,High Hours Worker,2025-12-15,2025-12-21,Retail,Level 3,FullTime,27.58,60.00,1654.80,0.00,0.00,0.00,0.00,0.00,0.00,1654.80,198.58
+EDGE005,Zero Gross Pay,2025-12-15,2025-12-21,Retail,Level 4,PartTime,28.12,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00
+EDGE006,Super Within Tolerance,2025-12-15,2025-12-21,Retail,Level 5,FullTime,29.27,38.00,1112.26,0.00,0.00,0.00,0.00,0.00,0.00,1112.26,133.43
+EDGE007,Penalty Over Tolerance,2025-12-15,2025-12-21,Retail,Level 2,FullTime,27.16,30.00,814.80,8.00,271.54,0.00,0.00,0.00,0.00,1086.34,130.36
+EDGE008,Level 8 Casual Max,2025-12-15,2025-12-21,Retail,Level 8,Casual,40.56,25.00,1014.00,0.00,0.00,0.00,0.00,0.00,0.00,1014.00,121.68

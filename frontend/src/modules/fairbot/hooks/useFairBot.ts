@@ -26,26 +26,37 @@ interface UseFairBotResult extends FairBotConversationState {
   sendMessage: (text: string, file?: File) => Promise<void>
 }
 
-const EMPTY_MESSAGES: FairBotMessage[] = []
+// Initial welcome message from assistant shown when conversation is empty.
+const createWelcomeMessage = (): FairBotMessage => ({
+  id: 'welcome',
+  role: FAIRBOT_ROLES.ASSISTANT,
+  text: FAIRBOT_LABELS.WELCOME_MESSAGE,
+  timestamp: new Date().toISOString(),
+})
+
+const INITIAL_MESSAGES: FairBotMessage[] = [createWelcomeMessage()]
 
 const canUseSessionStorage = (): boolean =>
   typeof window !== FAIRBOT_ENV.TYPEOF_UNDEFINED && Boolean(window.sessionStorage)
 
 const readMessagesFromSession = (): FairBotMessage[] => {
   if (!canUseSessionStorage()) {
-    return EMPTY_MESSAGES
+    return INITIAL_MESSAGES
   }
 
   try {
     const stored = window.sessionStorage.getItem(FAIRBOT_SESSION_KEYS.CONVERSATION)
     if (!stored) {
-      return EMPTY_MESSAGES
+      return INITIAL_MESSAGES
     }
 
     const parsed = JSON.parse(stored) as unknown
-    return Array.isArray(parsed) ? (parsed as FairBotMessage[]) : EMPTY_MESSAGES
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed as FairBotMessage[]
+    }
+    return INITIAL_MESSAGES
   } catch {
-    return EMPTY_MESSAGES
+    return INITIAL_MESSAGES
   }
 }
 

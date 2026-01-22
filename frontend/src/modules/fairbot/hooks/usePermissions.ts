@@ -1,4 +1,4 @@
-import { useAuth } from '@/shared/hooks/useAuth'
+import { useAuth } from '@/modules/auth'
 import type { FairBotPermission } from '../types/fairbot.types'
 
 interface UsePermissionsResult {
