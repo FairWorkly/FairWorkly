@@ -26,40 +26,39 @@ jobs:
 
       - name: Publish
         run: dotnet publish backend/src/FairWorkly.API/FairWorkly.API.csproj -c Release -o publish --no-build
-      
 
-        - name: Setup SSH
+      - name: Setup SSH
         shell: bash
         run: |
+          set -e
           mkdir -p ~/.ssh
           printf '%s' "${{ secrets.EY_EC2_SSH_KEY }}" > ~/.ssh/id_ed25519
           sed -i 's/\r$//' ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.EY_EC2_HOST }} >> ~/.ssh/known_hosts
-      # - name: Setup SSH
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     echo "${{ secrets.EY_EC2_SSH_KEY }}" > ~/.ssh/id_ed25519
-      #     chmod 600 ~/.ssh/id_ed25519
-      #     ssh-keyscan -H ${{ secrets.EY_EC2_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.EY_EC2_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy
+      - name: Verify SSH key loads
+        shell: bash
+        run: |
+          ssh-keygen -l -f ~/.ssh/id_ed25519
+
+      - name: Deploy to EC2
+        shell: bash
         run: |
           set -e
           RELEASE_ID=$(date +%Y%m%d%H%M%S)
 
-          ssh ${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }} \
-            "mkdir -p ${{ secrets.EY_APP_DIR }}/releases/$RELEASE_ID"
+          ssh "${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }}" \
+            "mkdir -p '${{ secrets.EY_APP_DIR }}/releases/$RELEASE_ID'"
 
-          rsync -az --delete publish/ \
-            ${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }}:${{ secrets.EY_APP_DIR }}/releases/$RELEASE_ID/
+          rsync -az --delete -e "ssh" publish/ \
+            "${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }}:${{ secrets.EY_APP_DIR }}/releases/$RELEASE_ID/"
 
-          ssh ${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }} "
-            ln -sfn ${{ secrets.EY_APP_DIR }}/releases/$RELEASE_ID ${{ secrets.EY_APP_DIR }}/current &&
-            sudo /usr/bin/systemctl restart fairworkly-api
-          "
+          ssh "${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }}" \
+            "ln -sfn '${{ secrets.EY_APP_DIR }}/releases/$RELEASE_ID' '${{ secrets.EY_APP_DIR }}/current' && sudo /usr/bin/systemctl restart fairworkly-api"
 
       - name: Health Check (on EC2)
+        shell: bash
         run: |
-          ssh ${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }} \
+          ssh "${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }}" \
             "curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:5680"
