@@ -37,7 +37,6 @@ public class RosterConfiguration : IEntityTypeConfiguration<Roster>
         // Roster -> RosterValidation (One-to-One, optional)
         // Roster is the principal, RosterValidation is the dependent
         // RosterValidation has the required FK (RosterId)
-        // This side only has an optional reference (RosterValidationId is nullable)
         builder
             .HasOne(r => r.RosterValidation)
             .WithOne(rv => rv.Roster)
@@ -56,10 +55,16 @@ public class RosterConfiguration : IEntityTypeConfiguration<Roster>
             .HasMany(r => r.Issues)
             .WithOne(i => i.Roster)
             .HasForeignKey(i => i.RosterId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
         builder.HasIndex(r => new { r.OrganizationId, r.WeekStartDate });
+        builder.HasIndex(r => new
+        {
+            r.OrganizationId,
+            r.Year,
+            r.WeekNumber,
+        });
 
         // Property configurations
         builder.Property(r => r.Notes).HasMaxLength(1000);

@@ -87,32 +87,11 @@ namespace FairWorkly.Infrastructure.Persistence
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder
-                .Entity<Roster>()
-                .HasOne(roster => roster.CreatedByUser)
-                .WithMany()
-                .HasForeignKey(roster => roster.CreatedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<Roster>()
-                .HasOne(roster => roster.UpdatedByUser)
-                .WithMany()
-                .HasForeignKey(roster => roster.UpdatedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
                 .Entity<Shift>()
                 .HasOne(shift => shift.Organization)
                 .WithMany()
                 .HasForeignKey(shift => shift.OrganizationId)
                 .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<Shift>()
-                .HasOne(shift => shift.Roster)
-                .WithMany(roster => roster.Shifts)
-                .HasForeignKey(shift => shift.RosterId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder
                 .Entity<Shift>()
@@ -136,13 +115,6 @@ namespace FairWorkly.Infrastructure.Persistence
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder
-                .Entity<RosterValidation>()
-                .HasOne(rosterValidation => rosterValidation.Roster)
-                .WithOne(roster => roster.RosterValidation)
-                .HasForeignKey<RosterValidation>(rosterValidation => rosterValidation.RosterId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder
                 .Entity<RosterIssue>()
                 .HasOne(ri => ri.Organization)
                 .WithMany()
@@ -154,13 +126,6 @@ namespace FairWorkly.Infrastructure.Persistence
                 .HasOne(ri => ri.RosterValidation)
                 .WithMany(rv => rv.Issues)
                 .HasForeignKey(ri => ri.RosterValidationId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder
-                .Entity<RosterIssue>()
-                .HasOne(ri => ri.Roster)
-                .WithMany(r => r.Issues)
-                .HasForeignKey(ri => ri.RosterId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder
