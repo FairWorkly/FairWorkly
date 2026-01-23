@@ -1,0 +1,56 @@
+name: Deploy Backend to EC2 (EY - devops/eric)
+
+on:
+  push:
+    branches:
+      - devops/eric
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore backend/src/FairWorkly.API/FairWorkly.API.csproj
+
+      - name: Build
+        run: dotnet build backend/src/FairWorkly.API/FairWorkly.API.csproj -c Release --no-restore
+
+      - name: Publish
+        run: dotnet publish backend/src/FairWorkly.API/FairWorkly.API.csproj -c Release -o publish --no-build
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EY_EC2_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.EY_EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          set -e
+          RELEASE_ID=$(date +%Y%m%d%H%M%S)
+
+          ssh ${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }} \
+            "mkdir -p ${{ secrets.EY_APP_DIR }}/releases/$RELEASE_ID"
+
+          rsync -az --delete publish/ \
+            ${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }}:${{ secrets.EY_APP_DIR }}/releases/$RELEASE_ID/
+
+          ssh ${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }} "
+            ln -sfn ${{ secrets.EY_APP_DIR }}/releases/$RELEASE_ID ${{ secrets.EY_APP_DIR }}/current &&
+            sudo /usr/bin/systemctl restart fairworkly-api
+          "
+
+      - name: Health Check (on EC2)
+        run: |
+          ssh ${{ secrets.EY_EC2_USER }}@${{ secrets.EY_EC2_HOST }} \
+            "curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:5680"
