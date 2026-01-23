@@ -33,6 +33,12 @@ registry.register("payroll_verify", DemoPayrollFeature())
 
 
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker/K8s probes"""
+    return {"status": "healthy"}
+
+
 @app.get("/", include_in_schema=False)
 async def root():
     # Redirect root requests straight to Swagger UI for convenience

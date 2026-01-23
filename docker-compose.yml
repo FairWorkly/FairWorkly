@@ -1,0 +1,111 @@
+# ============================================
+# FairWorkly Docker Compose Configuration
+# ============================================
+# Usage:
+#   Development: docker compose up
+#   Rebuild:     docker compose up --build
+#   Reset DB:    docker compose down -v && docker compose up
+#
+# Environment Setup:
+#   1. Copy agent-service/.env.example to agent-service/.env
+#   2. Fill in your API keys in agent-service/.env:
+#      - OPENAI_API_KEY (for Roster Agent)
+#      - ANTHROPIC_API_KEY (for Payroll Agent)
+#   3. (Optional) Create .env in repo root for overrides
+#
+# Connection Info:
+#   - Local dev (outside Docker): DB port 5433, API port 5680
+#   - Inside Docker containers: DB port 5432, use service names as hosts
+
+services:
+  # --------------------------------------------
+  # PostgreSQL Database
+  # --------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: fairworkly-postgres
+    environment:
+      POSTGRES_DB: FairWorklyDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - fairworkly_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d FairWorklyDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --------------------------------------------
+  # Agent Service (AI/LLM)
+  # --------------------------------------------
+  # Note: FAISS index is optional. Without it, RAG features will be disabled
+  # but the service will still run. To enable RAG:
+  #   cd agent-service && poetry run python scripts/ingest_assets_to_faiss.py
+  agent-service:
+    build:
+      context: ./agent-service
+      dockerfile: Dockerfile
+    container_name: fairworkly-agent
+    env_file:
+      - ./agent-service/.env
+    environment:
+      # env_file values can be overridden here or via shell
+      HOST: 0.0.0.0
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # --------------------------------------------
+  # Backend API (.NET)
+  # --------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: fairworkly-backend
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://0.0.0.0:5680
+      JwtSettings__Secret: ${JWT_SECRET:-change-me-dev-secret-at-least-32-chars}
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=FairWorklyDb;Username=postgres;Password=postgres
+      AiSettings__BaseUrl: http://agent-service:8000
+      AiSettings__UseMockAi: ${USE_MOCK_AI:-true}
+    ports:
+      - "5680:5680"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      agent-service:
+        condition: service_healthy
+
+  # --------------------------------------------
+  # Frontend (React/Vite)
+  # --------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: fairworkly-frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:5680
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount source for hot reload, but use container's node_modules
+      - ./frontend/src:/app/src:ro
+      - ./frontend/public:/app/public:ro
+    depends_on:
+      - backend
+
+volumes:
+  fairworkly_postgres:
