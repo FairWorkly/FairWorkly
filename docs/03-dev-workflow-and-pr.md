@@ -193,7 +193,32 @@ Before marking a PR as ready:
 - Frontend integration works end-to-end
 - Errors return a consistent JSON shape (message + optional code)
 
-## 10. What This Document Is NOT
+## 10. Local Environment Setup (Dev)
+
+Keep secrets out of git. Use example files as templates.
+
+### Frontend (Vite)
+
+- Create `frontend/.env` from `frontend/.env.example`.
+- `VITE_API_BASE_URL` should point to the backend (default dev port: `http://localhost:5680`).
+
+### Backend (ASP.NET Core)
+
+- Copy `backend/src/FairWorkly.API/appsettings.Development.example.json` to `appsettings.Development.json`.
+- Set `JwtSettings:Secret` to a non-empty, 32+ character value.
+- Database connection defaults to `localhost:5433` in the example.
+
+### Agent Service
+
+- Copy `agent-service/.env.example` to `agent-service/.env`.
+- Set `OPENAI_API_KEY` (required for online mode).
+
+### Docker (Optional)
+
+- Use `docker-compose.yml` to run frontend, backend, agent-service, and Postgres together.
+- Backend listens on `http://localhost:5680`, frontend on `http://localhost:5173`, agent-service on `http://localhost:8000`.
+
+## 11. What This Document Is NOT
 
 - This is not a tutorial
 - This is not a complete architecture guide
@@ -203,7 +228,7 @@ It defines **how we collaborate**, not how to write every line of code.
 
 ---
 
-## 11. Final Principle
+## 12. Final Principle
 
 > **Speed comes from clarity, not from skipping rules.**
 

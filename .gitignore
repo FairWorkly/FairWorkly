@@ -78,6 +78,10 @@ __pycache__/
 
 # Environment variables
 .env
+agent-service/.env
+
+# Backend sensitive config (use .example files as templates)
+backend/src/FairWorkly.API/appsettings.json
 backend/src/FairWorkly.API/appsettings.Development.json
 
 ## FAISS indexes

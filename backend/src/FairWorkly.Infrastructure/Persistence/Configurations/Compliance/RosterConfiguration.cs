@@ -15,18 +15,21 @@ public class RosterConfiguration : IEntityTypeConfiguration<Roster>
         builder.HasKey(r => r.Id);
 
         // Configure AuditableEntity navigation properties
-        builder.HasOne(r => r.CreatedByUser)
+        builder
+            .HasOne(r => r.CreatedByUser)
             .WithMany()
             .HasForeignKey(r => r.CreatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(r => r.UpdatedByUser)
+        builder
+            .HasOne(r => r.UpdatedByUser)
             .WithMany()
             .HasForeignKey(r => r.UpdatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Roster -> Organization
-        builder.HasOne(r => r.Organization)
+        builder
+            .HasOne(r => r.Organization)
             .WithMany()
             .HasForeignKey(r => r.OrganizationId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -34,27 +37,34 @@ public class RosterConfiguration : IEntityTypeConfiguration<Roster>
         // Roster -> RosterValidation (One-to-One, optional)
         // Roster is the principal, RosterValidation is the dependent
         // RosterValidation has the required FK (RosterId)
-        // This side only has an optional reference (RosterValidationId is nullable)
-        builder.HasOne(r => r.RosterValidation)
+        builder
+            .HasOne(r => r.RosterValidation)
             .WithOne(rv => rv.Roster)
             .HasForeignKey<RosterValidation>(rv => rv.RosterId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Roster -> Shifts (One-to-Many)
-        builder.HasMany(r => r.Shifts)
+        builder
+            .HasMany(r => r.Shifts)
             .WithOne(s => s.Roster)
             .HasForeignKey(s => s.RosterId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Roster -> RosterIssues (One-to-Many)
-        builder.HasMany(r => r.Issues)
+        builder
+            .HasMany(r => r.Issues)
             .WithOne(i => i.Roster)
             .HasForeignKey(i => i.RosterId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
         builder.HasIndex(r => new { r.OrganizationId, r.WeekStartDate });
-        builder.HasIndex(r => new { r.OrganizationId, r.Year, r.WeekNumber }).IsUnique();
+        builder.HasIndex(r => new
+        {
+            r.OrganizationId,
+            r.Year,
+            r.WeekNumber,
+        });
 
         // Property configurations
         builder.Property(r => r.Notes).HasMaxLength(1000);

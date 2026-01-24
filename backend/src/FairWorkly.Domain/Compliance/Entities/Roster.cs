@@ -81,12 +81,6 @@ public class Roster : AuditableEntity
     // Validation Reference
 
     /// <summary>
-    /// Link to the validation that checked this roster
-    /// Null if not yet validated
-    /// </summary>
-    public Guid? RosterValidationId { get; set; }
-
-    /// <summary>
     /// Navigation property to validation
     /// </summary>
     public virtual RosterValidation? RosterValidation { get; set; }

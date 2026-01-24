@@ -36,6 +36,21 @@ cd backend
 dotnet restore
 dotnet run
 
+### Docker (Dev)
+
+Run the full stack with Docker (frontend dev server + backend + agent-service + Postgres):
+
+```
+docker compose up --build
+```
+
+Note: copy the example env files (`frontend/.env.example`, `backend/src/FairWorkly.API/appsettings.Development.example.json`, `agent-service/.env.example`) to their real names before running.
+
+Ports:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5680
+- Agent-service: http://localhost:8000
+
 ## 📚 Documentation
 
 Start here to understand how FairWorkly works and how to contribute safely.
