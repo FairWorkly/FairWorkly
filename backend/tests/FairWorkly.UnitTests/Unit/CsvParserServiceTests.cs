@@ -245,6 +245,50 @@ NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,Contract,26.55,38.00,1
     }
 
     [Fact]
+    public async Task ParseAsync_WhenOrdinaryPayNegative_ShouldParseSuccessfully()
+    {
+        // Arrange - Negative OrdinaryPay (correction/reversal entry)
+        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,-500.00,0.00,0.00,0.00,0.00,0.00,0.00,508.90,61.07";
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        await writer.WriteAsync(csvContent);
+        await writer.FlushAsync();
+        stream.Position = 0;
+
+        // Act
+        var (rows, errors) = await _csvParserService.ParseAsync(stream);
+
+        // Assert
+        errors.Should().BeEmpty();
+        rows.Should().HaveCount(1);
+        rows[0].OrdinaryPay.Should().Be(-500.00m);
+    }
+
+    [Fact]
+    public async Task ParseAsync_WhenGrossPayNegative_ShouldParseSuccessfully()
+    {
+        // Arrange - Negative GrossPay (correction/reversal entry)
+        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,-1008.90,121.07";
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        await writer.WriteAsync(csvContent);
+        await writer.FlushAsync();
+        stream.Position = 0;
+
+        // Act
+        var (rows, errors) = await _csvParserService.ParseAsync(stream);
+
+        // Assert
+        errors.Should().BeEmpty();
+        rows.Should().HaveCount(1);
+        rows[0].GrossPay.Should().Be(-1008.90m);
+    }
+
+    [Fact]
     public async Task ParseAsync_FromTestFile_TEST_01_NewEmployees()
     {
         // Arrange
