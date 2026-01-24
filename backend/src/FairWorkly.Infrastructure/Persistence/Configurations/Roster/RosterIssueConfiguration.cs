@@ -56,10 +56,17 @@ public class RosterIssueConfiguration : IEntityTypeConfiguration<RosterIssue>
             .HasForeignKey(ri => ri.WaivedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Indexes
+        // Indexes - Composite indexes for common queries
         builder.HasIndex(ri => new { ri.RosterValidationId, ri.Severity });
         builder.HasIndex(ri => new { ri.RosterValidationId, ri.EmployeeId });
         builder.HasIndex(ri => ri.CheckType);
+
+        // Indexes - Explicit FK indexes for consistency with ModelSnapshot
+        builder.HasIndex(ri => ri.EmployeeId);
+        builder.HasIndex(ri => ri.OrganizationId);
+        builder.HasIndex(ri => ri.ResolvedByUserId);
+        builder.HasIndex(ri => ri.ShiftId);
+        builder.HasIndex(ri => ri.WaivedByUserId);
 
         // Ignore computed properties
         builder.Ignore(ri => ri.Variance);

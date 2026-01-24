@@ -717,7 +717,8 @@ namespace FairWorkly.Infrastructure.Migrations
                 table: "user",
                 column: "employee_id",
                 principalTable: "employees",
-                principalColumn: "id");
+                principalColumn: "id",
+                onDelete: ReferentialAction.SetNull);
 
             migrationBuilder.AddForeignKey(
                 name: "fk_user_organizations_organization_id",
