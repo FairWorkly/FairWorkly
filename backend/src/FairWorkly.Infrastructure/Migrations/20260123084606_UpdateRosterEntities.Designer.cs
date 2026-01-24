@@ -3,6 +3,7 @@ using System;
 using FairWorkly.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FairWorkly.Infrastructure.Migrations
 {
     [DbContext(typeof(FairWorklyDbContext))]
-    partial class FairWorklyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260123084606_UpdateRosterEntities")]
+    partial class UpdateRosterEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -574,6 +577,7 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasDatabaseName("ix_rosters_organization_id_week_start_date");
 
                     b.HasIndex("OrganizationId", "Year", "WeekNumber")
+                        .IsUnique()
                         .HasDatabaseName("ix_rosters_organization_id_year_week_number");
 
                     b.ToTable("rosters", (string)null);
@@ -1704,7 +1708,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasOne("FairWorkly.Domain.Auth.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("fk_rosters_users_created_by_user_id");
 
                     b.HasOne("FairWorkly.Domain.Auth.Entities.Organization", "Organization")
@@ -1717,7 +1721,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasOne("FairWorkly.Domain.Auth.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("fk_rosters_users_updated_by_user_id");
 
                     b.Navigation("CreatedByUser");
@@ -1752,7 +1756,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasOne("FairWorkly.Domain.Compliance.Entities.Roster", "Roster")
                         .WithMany("Issues")
                         .HasForeignKey("RosterId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_roster_issues_rosters_roster_id");
 
