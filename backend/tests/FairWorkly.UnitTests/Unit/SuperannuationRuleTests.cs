@@ -117,12 +117,12 @@ public class SuperannuationRuleTests
 
     #endregion
 
-    #region Missing Gross Pay Tests
+    #region GrossPay Data Validity Tests
 
     [Fact]
     public void Evaluate_WhenGrossPayZeroWithWorkHours_ShouldReturnWarning()
     {
-        // Has work hours but no gross pay - data issue
+        // Has work hours but zero gross pay - data anomaly
         var payslip = CreatePayslip(
             grossPay: 0m,
             superannuation: 0m,
@@ -134,31 +134,42 @@ public class SuperannuationRuleTests
         issues.Should().HaveCount(1);
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
-        issue.WarningMessage.Should().Contain("Missing Gross Pay Data");
-        issue.ContextLabel.Should().Be("Data Issue");
+        issue.CategoryType.Should().Be(IssueCategory.Superannuation);
+        issue.ImpactAmount.Should().Be(0);
+        issue.WarningMessage.Should().Contain("Zero Gross Pay");
+        issue.WarningMessage.Should().Contain("38");
     }
 
-    [Fact]
-    public void Evaluate_WhenGrossPayZeroWithSaturdayHours_ShouldReturnWarning()
+    [Theory]
+    [InlineData(0, 8, 0, 0)]   // Only Saturday hours
+    [InlineData(0, 0, 5, 0)]   // Only Sunday hours
+    [InlineData(0, 0, 0, 8)]   // Only Public Holiday hours
+    public void Evaluate_WhenGrossPayZeroWithAnyWorkHours_ShouldReturnWarning(
+        decimal ordinaryHours, decimal saturdayHours, decimal sundayHours, decimal phHours)
     {
         var payslip = CreatePayslip(
             grossPay: 0m,
             superannuation: 0m,
-            ordinaryHours: 0m,
-            saturdayHours: 8m
+            ordinaryHours: ordinaryHours,
+            saturdayHours: saturdayHours,
+            sundayHours: sundayHours,
+            phHours: phHours
         );
 
         var issues = _rule.Evaluate(payslip, _validationId);
 
         issues.Should().HaveCount(1);
-        issues[0].Severity.Should().Be(IssueSeverity.Warning);
-        issues[0].AffectedUnits.Should().Be(8m);
+        var issue = issues[0];
+        issue.Severity.Should().Be(IssueSeverity.Warning);
+        issue.CategoryType.Should().Be(IssueCategory.Superannuation);
+        issue.ImpactAmount.Should().Be(0);
+        issue.WarningMessage.Should().Contain("Zero Gross Pay");
     }
 
     [Fact]
     public void Evaluate_WhenGrossPayZeroWithNoWorkHours_ShouldReturnNoIssues()
     {
-        // No hours and no pay - unpaid period, skip
+        // No hours and no pay - unpaid period (e.g. unpaid leave), skip
         var payslip = CreatePayslip(
             grossPay: 0m,
             superannuation: 0m,
@@ -168,6 +179,44 @@ public class SuperannuationRuleTests
         var issues = _rule.Evaluate(payslip, _validationId);
 
         issues.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Evaluate_WhenGrossPayNegative_ShouldReturnWarning()
+    {
+        // Negative gross pay indicates correction/reversal entry
+        var payslip = CreatePayslip(
+            grossPay: -500m,
+            superannuation: -60m,
+            ordinaryHours: 0m
+        );
+
+        var issues = _rule.Evaluate(payslip, _validationId);
+
+        issues.Should().HaveCount(1);
+        var issue = issues[0];
+        issue.Severity.Should().Be(IssueSeverity.Warning);
+        issue.CategoryType.Should().Be(IssueCategory.Superannuation);
+        issue.ImpactAmount.Should().Be(0);
+        issue.WarningMessage.Should().Contain("Negative Gross Pay");
+    }
+
+    [Fact]
+    public void Evaluate_WhenGrossPayPositive_ShouldContinueNormalValidation()
+    {
+        // Scenario A: Underpaid super (should trigger ERROR)
+        var payslipUnderpaid = CreatePayslip(grossPay: 1000m, superannuation: 100m);
+        var issuesA = _rule.Evaluate(payslipUnderpaid, _validationId);
+
+        issuesA.Should().HaveCount(1);
+        issuesA[0].Severity.Should().Be(IssueSeverity.Error);
+        issuesA[0].ImpactAmount.Should().Be(20m);
+
+        // Scenario B: Compliant super (should PASS)
+        var payslipCompliant = CreatePayslip(grossPay: 1000m, superannuation: 120m);
+        var issuesB = _rule.Evaluate(payslipCompliant, _validationId);
+
+        issuesB.Should().BeEmpty();
     }
 
     #endregion
