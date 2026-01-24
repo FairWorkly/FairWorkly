@@ -4,7 +4,7 @@ using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Employees.Entities;
 
-namespace FairWorkly.Domain.Compliance.Entities;
+namespace FairWorkly.Domain.Roster.Entities;
 
 /// <summary>
 /// Represents a single work shift assigned to an employee
@@ -198,5 +198,5 @@ public class Shift : BaseEntity
     /// <summary>
     /// Compliance issues found for this specific shift
     /// </summary>
-    public virtual ICollection<RosterIssue> Issues { get; set; } = new List<RosterIssue>();
+    public virtual ICollection<RosterIssue> Issues { get; set; } = [];
 }

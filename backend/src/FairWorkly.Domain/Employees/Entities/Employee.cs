@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
-using FairWorkly.Domain.Compliance.Entities;
 using FairWorkly.Domain.Documents.Entities;
 using FairWorkly.Domain.Payroll.Entities;
+using FairWorkly.Domain.Roster.Entities;
 
 namespace FairWorkly.Domain.Employees.Entities;
 

@@ -5,7 +5,7 @@ using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Employees.Entities;
 
-namespace FairWorkly.Domain.Compliance.Entities;
+namespace FairWorkly.Domain.Roster.Entities;
 
 /// <summary>
 /// RosterIssue entity
