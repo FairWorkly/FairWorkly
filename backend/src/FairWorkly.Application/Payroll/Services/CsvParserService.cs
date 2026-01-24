@@ -125,8 +125,9 @@ public class CsvParserService : ICsvParserService
     /// </summary>
     private static bool IsValidEmploymentType(string employmentType)
     {
-        var validTypes = new[] { "FullTime", "PartTime", "Casual", "FixedTerm" };
-        return validTypes.Contains(employmentType, StringComparer.OrdinalIgnoreCase);
+        var normalized = employmentType.Trim().ToLowerInvariant().Replace("-", "").Replace(" ", "");
+        var validTypes = new[] { "fulltime", "parttime", "casual", "fixedterm" };
+        return validTypes.Contains(normalized);
     }
 }
 
