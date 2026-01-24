@@ -30,7 +30,9 @@ public class PenaltyRateRule : IComplianceRule
         // Check Saturday
         if (payslip.SaturdayPay < 0)
         {
-            issues.Add(CreateNegativePayWarning(payslip, validationId, "Saturday", payslip.SaturdayPay));
+            issues.Add(
+                CreateNegativePayWarning(payslip, validationId, "Saturday", payslip.SaturdayPay)
+            );
         }
         else if (payslip.SaturdayHours > 0)
         {
@@ -42,22 +44,26 @@ public class PenaltyRateRule : IComplianceRule
 
             if (payslip.SaturdayPay < expectedPay - RateTableProvider.PayTolerance)
             {
-                issues.Add(CreateIssue(
-                    payslip,
-                    validationId,
-                    "Saturday",
-                    expectedPay,
-                    payslip.SaturdayPay,
-                    payslip.SaturdayHours,
-                    multiplier
-                ));
+                issues.Add(
+                    CreateIssue(
+                        payslip,
+                        validationId,
+                        "Saturday",
+                        expectedPay,
+                        payslip.SaturdayPay,
+                        payslip.SaturdayHours,
+                        multiplier
+                    )
+                );
             }
         }
 
         // Check Sunday
         if (payslip.SundayPay < 0)
         {
-            issues.Add(CreateNegativePayWarning(payslip, validationId, "Sunday", payslip.SundayPay));
+            issues.Add(
+                CreateNegativePayWarning(payslip, validationId, "Sunday", payslip.SundayPay)
+            );
         }
         else if (payslip.SundayHours > 0)
         {
@@ -69,22 +75,31 @@ public class PenaltyRateRule : IComplianceRule
 
             if (payslip.SundayPay < expectedPay - RateTableProvider.PayTolerance)
             {
-                issues.Add(CreateIssue(
-                    payslip,
-                    validationId,
-                    "Sunday",
-                    expectedPay,
-                    payslip.SundayPay,
-                    payslip.SundayHours,
-                    multiplier
-                ));
+                issues.Add(
+                    CreateIssue(
+                        payslip,
+                        validationId,
+                        "Sunday",
+                        expectedPay,
+                        payslip.SundayPay,
+                        payslip.SundayHours,
+                        multiplier
+                    )
+                );
             }
         }
 
         // Check Public Holiday
         if (payslip.PublicHolidayPay < 0)
         {
-            issues.Add(CreateNegativePayWarning(payslip, validationId, "Public Holiday", payslip.PublicHolidayPay));
+            issues.Add(
+                CreateNegativePayWarning(
+                    payslip,
+                    validationId,
+                    "Public Holiday",
+                    payslip.PublicHolidayPay
+                )
+            );
         }
         else if (payslip.PublicHolidayHours > 0)
         {
@@ -96,15 +111,17 @@ public class PenaltyRateRule : IComplianceRule
 
             if (payslip.PublicHolidayPay < expectedPay - RateTableProvider.PayTolerance)
             {
-                issues.Add(CreateIssue(
-                    payslip,
-                    validationId,
-                    "Public Holiday",
-                    expectedPay,
-                    payslip.PublicHolidayPay,
-                    payslip.PublicHolidayHours,
-                    multiplier
-                ));
+                issues.Add(
+                    CreateIssue(
+                        payslip,
+                        validationId,
+                        "Public Holiday",
+                        expectedPay,
+                        payslip.PublicHolidayPay,
+                        payslip.PublicHolidayHours,
+                        multiplier
+                    )
+                );
             }
         }
 
@@ -118,7 +135,8 @@ public class PenaltyRateRule : IComplianceRule
         decimal expectedPay,
         decimal actualPay,
         decimal hours,
-        decimal multiplier)
+        decimal multiplier
+    )
     {
         return new PayrollIssue
         {
@@ -128,11 +146,11 @@ public class PenaltyRateRule : IComplianceRule
             EmployeeId = payslip.EmployeeId,
             CategoryType = IssueCategory.PenaltyRate,
             Severity = IssueSeverity.Error,
-            ExpectedValue = expectedPay,
-            ActualValue = actualPay,
+            ExpectedValue = expectedPay / hours,
+            ActualValue = actualPay / hours,
             AffectedUnits = hours,
-            UnitType = "Currency",
-            ContextLabel = $"{dayType} ({multiplier:P0} rate)"
+            UnitType = "Hour",
+            ContextLabel = $"{dayType} ({multiplier:P0} rate)",
         };
     }
 
@@ -140,7 +158,8 @@ public class PenaltyRateRule : IComplianceRule
         Payslip payslip,
         Guid validationId,
         string payType,
-        decimal amount)
+        decimal amount
+    )
     {
         return new PayrollIssue
         {
@@ -150,7 +169,8 @@ public class PenaltyRateRule : IComplianceRule
             EmployeeId = payslip.EmployeeId,
             CategoryType = IssueCategory.PenaltyRate,
             Severity = IssueSeverity.Warning,
-            WarningMessage = $"Negative {payType} Pay detected (${Math.Abs(amount):F2}). Possible correction/reversal entry. Skipping compliance check."
+            WarningMessage =
+                $"Negative {payType} Pay detected (${Math.Abs(amount):F2}). Possible correction/reversal entry. Skipping compliance check.",
         };
     }
 }

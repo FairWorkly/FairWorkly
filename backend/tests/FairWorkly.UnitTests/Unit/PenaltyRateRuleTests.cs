@@ -50,8 +50,8 @@ public class PenaltyRateRuleTests
         issue.Severity.Should().Be(IssueSeverity.Error);
         issue.CategoryType.Should().Be(IssueCategory.PenaltyRate);
         issue.ContextLabel.Should().Contain("Saturday");
-        issue.ExpectedValue.Should().BeApproximately(271.60m, 0.01m);
-        issue.ActualValue.Should().Be(217.28m);
+        issue.ExpectedValue.Should().BeApproximately(33.95m, 0.01m);
+        issue.ActualValue.Should().BeApproximately(27.16m, 0.01m);
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class PenaltyRateRuleTests
 
         issues.Should().HaveCount(1);
         var issue = issues[0];
-        issue.ExpectedValue.Should().BeApproximately(203.70m, 0.01m);
+        issue.ExpectedValue.Should().BeApproximately(40.74m, 0.01m);
     }
 
     #endregion
@@ -121,7 +121,7 @@ public class PenaltyRateRuleTests
         issues.Should().HaveCount(1);
         var issue = issues[0];
         issue.ContextLabel.Should().Contain("Public Holiday");
-        issue.ExpectedValue.Should().BeApproximately(271.60m, 0.01m);
+        issue.ExpectedValue.Should().BeApproximately(67.90m, 0.01m);
     }
 
     #endregion
@@ -190,7 +190,7 @@ public class PenaltyRateRuleTests
         var issues = _rule.Evaluate(payslip, _validationId);
 
         issues.Should().HaveCount(1);
-        issues[0].ExpectedValue.Should().BeApproximately(271.60m, 0.01m);
+        issues[0].ExpectedValue.Should().BeApproximately(33.95m, 0.01m);
     }
 
     #endregion
