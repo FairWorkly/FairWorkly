@@ -28,6 +28,7 @@ AGENTS.md
 .claude/
 .doc/
 **/AI_GUIDE.md
+CLAUDE.md
 
 # Backend Scripts
 backend/scripts/
