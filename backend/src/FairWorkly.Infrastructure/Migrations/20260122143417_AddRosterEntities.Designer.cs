@@ -3,6 +3,7 @@ using System;
 using FairWorkly.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FairWorkly.Infrastructure.Migrations
 {
     [DbContext(typeof(FairWorklyDbContext))]
-    partial class FairWorklyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260122143417_AddRosterEntities")]
+    partial class AddRosterEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -302,6 +305,10 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasIndex("CreatedByUserId")
                         .HasDatabaseName("ix_user_created_by_user_id");
 
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_email");
+
                     b.HasIndex("EmployeeId")
                         .HasDatabaseName("ix_user_employee_id");
 
@@ -524,6 +531,10 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("organization_id");
 
+                    b.Property<Guid?>("RosterValidationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("roster_validation_id");
+
                     b.Property<int>("TotalEmployees")
                         .HasColumnType("integer")
                         .HasColumnName("total_employees");
@@ -574,6 +585,7 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasDatabaseName("ix_rosters_organization_id_week_start_date");
 
                     b.HasIndex("OrganizationId", "Year", "WeekNumber")
+                        .IsUnique()
                         .HasDatabaseName("ix_rosters_organization_id_year_week_number");
 
                     b.ToTable("rosters", (string)null);
@@ -865,6 +877,10 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("employee_id");
 
+                    b.Property<Guid?>("EmployeeId1")
+                        .HasColumnType("uuid")
+                        .HasColumnName("employee_id1");
+
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("interval")
                         .HasColumnName("end_time");
@@ -926,6 +942,9 @@ namespace FairWorkly.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_shifts");
+
+                    b.HasIndex("EmployeeId1")
+                        .HasDatabaseName("ix_shifts_employee_id1");
 
                     b.HasIndex("EmployeeId", "Date")
                         .HasDatabaseName("ix_shifts_employee_id_date");
@@ -1704,7 +1723,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasOne("FairWorkly.Domain.Auth.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("fk_rosters_users_created_by_user_id");
 
                     b.HasOne("FairWorkly.Domain.Auth.Entities.Organization", "Organization")
@@ -1717,7 +1736,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasOne("FairWorkly.Domain.Auth.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("fk_rosters_users_updated_by_user_id");
 
                     b.Navigation("CreatedByUser");
@@ -1759,7 +1778,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasOne("FairWorkly.Domain.Compliance.Entities.RosterValidation", "RosterValidation")
                         .WithMany("Issues")
                         .HasForeignKey("RosterValidationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("fk_roster_issues_roster_validations_roster_validation_id");
 
@@ -1830,11 +1849,16 @@ namespace FairWorkly.Infrastructure.Migrations
             modelBuilder.Entity("FairWorkly.Domain.Compliance.Entities.Shift", b =>
                 {
                     b.HasOne("FairWorkly.Domain.Employees.Entities.Employee", "Employee")
-                        .WithMany("Shifts")
+                        .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("fk_shifts_employees_employee_id");
+
+                    b.HasOne("FairWorkly.Domain.Employees.Entities.Employee", null)
+                        .WithMany("Shifts")
+                        .HasForeignKey("EmployeeId1")
+                        .HasConstraintName("fk_shifts_employees_employee_id1");
 
                     b.HasOne("FairWorkly.Domain.Auth.Entities.Organization", "Organization")
                         .WithMany()
@@ -1846,7 +1870,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasOne("FairWorkly.Domain.Compliance.Entities.Roster", "Roster")
                         .WithMany("Shifts")
                         .HasForeignKey("RosterId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("fk_shifts_rosters_roster_id");
 
