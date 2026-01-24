@@ -21,12 +21,34 @@ public class SuperannuationRule : IComplianceRule
             + payslip.SundayHours
             + payslip.PublicHolidayHours;
 
-        // Check if there's no gross pay
-        if (payslip.GrossPay <= 0)
+        // Scenario A: GrossPay is negative (correction/reversal entry)
+        if (payslip.GrossPay < 0)
         {
-            // If there are work hours but no gross pay, that's a data issue
+            issues.Add(new PayrollIssue
+            {
+                OrganizationId = payslip.OrganizationId,
+                PayrollValidationId = validationId,
+                PayslipId = payslip.Id,
+                EmployeeId = payslip.EmployeeId,
+                CategoryType = IssueCategory.Superannuation,
+                Severity = IssueSeverity.Warning,
+                WarningMessage = $"Negative Gross Pay detected (-${Math.Abs(payslip.GrossPay):F2}). Possible correction/reversal entry. Skipping compliance check.",
+                ExpectedValue = 0,
+                ActualValue = 0,
+                AffectedUnits = 0,
+                UnitType = "Currency",
+                ContextLabel = "Data Issue",
+                ImpactAmount = 0
+            });
+            return issues;
+        }
+
+        // Scenario B: GrossPay is zero
+        if (payslip.GrossPay == 0)
+        {
             if (totalWorkHours > 0)
             {
+                // Has work hours but zero pay - data anomaly
                 issues.Add(new PayrollIssue
                 {
                     OrganizationId = payslip.OrganizationId,
@@ -35,7 +57,7 @@ public class SuperannuationRule : IComplianceRule
                     EmployeeId = payslip.EmployeeId,
                     CategoryType = IssueCategory.Superannuation,
                     Severity = IssueSeverity.Warning,
-                    WarningMessage = "Missing Gross Pay Data: Cannot verify superannuation compliance",
+                    WarningMessage = $"Zero Gross Pay but worked {totalWorkHours} hours. Please verify data.",
                     ExpectedValue = 0,
                     ActualValue = 0,
                     AffectedUnits = totalWorkHours,
@@ -44,8 +66,7 @@ public class SuperannuationRule : IComplianceRule
                     ImpactAmount = 0
                 });
             }
-
-            // Either way, can't check super without gross pay
+            // No hours and no pay = unpaid leave, PASS
             return issues;
         }
 
