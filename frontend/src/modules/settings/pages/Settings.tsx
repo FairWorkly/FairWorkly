@@ -72,17 +72,10 @@ export function Settings() {
         </SettingsNav>
 
         <SettingsContent>
-          {activeSection === 'company' && <CompanyProfile />
-
-            // (
-            //   <SectionContent>
-            //     <Typography variant="h5">Company Profile</Typography>
-            //     <Typography variant="body2" color="text.secondary">
-            //       Coming soon...
-            //     </Typography>
-            //   </SectionContent>
-            // )
-
+          {activeSection === 'company' && (
+            <SectionContent>
+              <CompanyProfile />
+            </SectionContent>)
           }
 
           {activeSection === 'team' && (

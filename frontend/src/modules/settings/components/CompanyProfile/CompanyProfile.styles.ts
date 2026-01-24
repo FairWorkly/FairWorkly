@@ -1,22 +1,7 @@
-// modules/settings/components/CompanyProfile/CompanyProfile.styles.ts
-
-import { Box, Paper} from '@mui/material'
+import { Box, Button, Paper, Typography } from '@mui/material'
 import { styled } from '@/styles/styled'
 
-/**
- * 主容器 - Company Profile区域的最外层容器
- * 使用flexbox布局，垂直排列所有卡片
- */
-export const CompanyProfileContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing(3), // 卡片之间的间距
-}))
 
-/**
- * 卡片容器 - 统一的卡片外观
- * 提供白色背景、圆角、边框和阴影
- */
 export const ProfileCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   borderRadius: `${theme.fairworkly.radius.lg}px`,
@@ -25,16 +10,12 @@ export const ProfileCard = styled(Paper)(({ theme }) => ({
     duration: theme.transitions.duration.short,
   }),
 
-  // hover效果 - 提升用户体验
   '&:hover': {
     borderColor: theme.palette.primary.light,
     boxShadow: theme.fairworkly.shadow.md,
   },
 }))
 
-/**
- * 卡片头部 - 包含标题和编辑/保存/取消按钮
- */
 export const CardHeader = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
@@ -44,52 +25,65 @@ export const CardHeader = styled(Box)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,
 }))
 
-/**
- * 卡片内容区域 - 包含所有表单字段或显示内容
- */
+export const CardHeaderContent = styled(Box)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+}))
+
+export const CardTitle = styled(Typography)(({ theme }) => ({
+  ...theme.typography.h6,
+  color: theme.palette.text.primary,
+  fontWeight: theme.typography.fontWeightBold,
+}))
+
+export const CardDescription = styled(Typography)(({ theme }) => ({
+  ...theme.typography.body2,
+  color: theme.palette.text.secondary,
+  marginTop: theme.spacing(0.5),
+}))
+
+
 export const CardContent = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing(2.5),
 }))
 
-/**
- * 表单行 - 在查看模式下显示label和value
- * 使用grid布局实现label和value的对齐
- */
+
 export const FormRow = styled(Box)(({ theme }) => ({
   display: 'grid',
-  gridTemplateColumns: '180px 1fr', // label宽度固定，value自适应
+  gridTemplateColumns: '180px 1fr',
   gap: theme.spacing(2),
   alignItems: 'start',
 
-  // 响应式：小屏幕改为垂直布局
   [theme.breakpoints.down('sm')]: {
     gridTemplateColumns: '1fr',
     gap: theme.spacing(1),
   },
 }))
 
-/**
- * 字段标签 - 灰色、加粗
- */
+export const FormField = styled(Box)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
+}))
+
+
 export const FieldLabel = styled(Box)(({ theme }) => ({
   fontSize: theme.typography.body2.fontSize,
   fontWeight: theme.typography.fontWeightBold,
   color: theme.palette.text.secondary,
   lineHeight: 1.6,
-  paddingTop: theme.spacing(1.5), // 对齐输入框的视觉中心
+  paddingTop: theme.spacing(1.5),
 }))
 
-/**
- * 字段值 - 查看模式下显示的数据
- */
+
 export const FieldValue = styled(Box)(({ theme }) => ({
   fontSize: theme.typography.body1.fontSize,
   color: theme.palette.text.primary,
   lineHeight: 1.6,
   paddingTop: theme.spacing(1.5),
-  minHeight: theme.spacing(5), // 确保即使空值也有高度
+  minHeight: theme.spacing(5),
 
   // 空值显示占位符
   '&:empty::before': {
@@ -98,9 +92,7 @@ export const FieldValue = styled(Box)(({ theme }) => ({
   },
 }))
 
-/**
- * Logo占位符容器 - 用于显示公司Logo
- */
+
 export const LogoPlaceholder = styled(Box)(({ theme }) => ({
   width: 120,
   height: 120,
@@ -117,7 +109,6 @@ export const LogoPlaceholder = styled(Box)(({ theme }) => ({
     duration: theme.transitions.duration.short,
   }),
 
-  // hover效果
   '&:hover': {
     borderColor: theme.palette.primary.main,
     backgroundColor: theme.palette.action.hover,
@@ -125,19 +116,41 @@ export const LogoPlaceholder = styled(Box)(({ theme }) => ({
   },
 }))
 
-/**
- * 按钮组 - 编辑模式下的Save/Cancel按钮容器
- */
-export const ActionButtons = styled(Box)(({ theme }) => ({
+
+export const ButtonContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(1.5),
   justifyContent: 'flex-end',
   marginTop: theme.spacing(1),
 }))
 
-/**
- * Badge容器 - 用于显示Primary badge
- */
+export const EditButton = styled(Button)(({ theme }) => ({
+  minWidth: theme.spacing(10),
+  fontWeight: theme.typography.fontWeightMedium,
+}))
+
+export const CancelButton = styled(Button)(({ theme }) => ({
+  minWidth: theme.spacing(10),
+  color: theme.palette.text.secondary,
+  borderColor: theme.palette.divider,
+  fontWeight: theme.typography.fontWeightMedium,
+
+  '&:hover': {
+    borderColor: theme.palette.text.secondary,
+    backgroundColor: theme.palette.action.hover,
+  },
+}))
+
+export const SaveButton = styled(Button)(({ theme }) => ({
+  minWidth: theme.spacing(10),
+  fontWeight: theme.typography.fontWeightMedium,
+
+  '&.Mui-disabled': {
+    backgroundColor: theme.palette.action.disabledBackground,
+    color: theme.palette.action.disabled,
+  },
+}))
+
 export const BadgeContainer = styled(Box)(({ theme }) => ({
   display: 'inline-flex',
   alignItems: 'center',
@@ -151,13 +164,11 @@ export const BadgeContainer = styled(Box)(({ theme }) => ({
   letterSpacing: '0.05em',
 }))
 
-/**
- * Awards列表项 - 显示单个Award的信息
- */
+
 export const AwardItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'flex-start',
+  alignItems: 'center',
   padding: theme.spacing(2),
   borderRadius: `${theme.fairworkly.radius.md}px`,
   backgroundColor: theme.palette.background.default,
@@ -172,30 +183,36 @@ export const AwardItem = styled(Box)(({ theme }) => ({
   },
 }))
 
-/**
- * Award信息左侧 - Award类型和badge
- */
+
 export const AwardInfo = styled(Box)(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing(1),
+  alignItems: 'center',
+  gap: theme.spacing(1.5),
 }))
 
-/**
- * Award元数据 - 员工数和添加日期
- */
+
 export const AwardMeta = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing(0.5),
+  alignItems: 'flex-end',
   fontSize: theme.typography.body2.fontSize,
   color: theme.palette.text.secondary,
-  textAlign: 'right',
 }))
 
-/**
- * 错误提示文本 - 表单验证错误
- */
+
+export const AddAwardButton = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(1),
+  borderColor: theme.palette.divider,
+  color: theme.palette.text.primary,
+  fontWeight: theme.typography.fontWeightMedium,
+
+  '&:hover': {
+    borderColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.action.hover,
+  },
+}))
+
 export const ErrorText = styled(Box)(({ theme }) => ({
   fontSize: theme.typography.caption.fontSize,
   color: theme.palette.error.main,

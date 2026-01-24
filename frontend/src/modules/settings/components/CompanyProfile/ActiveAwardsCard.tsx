@@ -1,8 +1,8 @@
 // modules/settings/components/CompanyProfile/ActiveAwardsCard.tsx
 
 import { useState } from 'react'
-import { Typography, Button } from '@mui/material'
-import { Add as AddIcon } from '@mui/icons-material'
+import { Typography, IconButton } from '@mui/material'
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import { CompanyProfileCard } from './CompanyProfileCard'
 import { AddAwardDialog } from './AddAwardDialog'
 import {
@@ -10,6 +10,7 @@ import {
     AwardInfo,
     AwardMeta,
     BadgeContainer,
+    AddAwardButton,
 } from './CompanyProfile.styles'
 import type { Award } from '../../types/companyProfile.types'
 import type { AwardType } from '@/shared/compliance-check/components/AwardSelector'
@@ -17,20 +18,27 @@ import type { AwardType } from '@/shared/compliance-check/components/AwardSelect
 interface ActiveAwardsCardProps {
     awards: Award[]
     onAddAward?: (awardType: AwardType, employeeCount: number) => void
+    onDeleteAward?: (awardId: string) => void
 }
 
 /**
  * Active Awards卡片
  * 
- * 显示公司使用的Award规则列表
- * 
  * 功能：
- * - 展示已配置的 Awards（类型、Primary badge、员工数、添加日期）
- * - 点击"Add Award"打开对话框，使用共享的 AwardSelector 选择新Award
+ * - 查看模式：显示已配置的 Awards 列表
+ * - 编辑模式：每个 Award 显示删除按钮
+ * - 点击 Add Award：打开对话框，使用共享的 AwardSelector 选择新Award
  * 
- * MVP阶段：只是UI演示，不调用API
+ * MVP阶段：只更新本地state，不调用API
  */
-export function ActiveAwardsCard({ awards, onAddAward }: ActiveAwardsCardProps) {
+export function ActiveAwardsCard({ 
+    awards, 
+    onAddAward,
+    onDeleteAward,
+}: ActiveAwardsCardProps) {
+    // 编辑状态
+    const [isEditing, setIsEditing] = useState(false)
+    
     // 对话框开关状态
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -59,20 +67,42 @@ export function ActiveAwardsCard({ awards, onAddAward }: ActiveAwardsCardProps) 
     }
 
     /**
+     * 开始编辑
+     */
+    const handleEdit = () => {
+        setIsEditing(true)
+    }
+
+    /**
+     * 保存更改（实际上编辑模式下只有删除操作，没有需要保存的内容）
+     */
+    const handleSave = () => {
+        setIsEditing(false)
+    }
+
+    /**
+     * 取消编辑
+     */
+    const handleCancel = () => {
+        setIsEditing(false)
+    }
+
+    /**
+     * 处理删除 Award
+     */
+    const handleDelete = (awardId: string) => {
+        if (onDeleteAward) {
+            onDeleteAward(awardId)
+        }
+    }
+
+    /**
      * 处理添加 Award
-     * MVP阶段：只是console.log
-     * 未来：调用 onAddAward 回调，更新后端
      */
     const handleAddAward = (awardType: AwardType, employeeCount: number) => {
-        console.log('Add Award:', { awardType, employeeCount })
-
-        // MVP阶段：可以在这里更新本地state来演示效果
         if (onAddAward) {
             onAddAward(awardType, employeeCount)
         }
-
-        // TODO: 未来调用 API
-        // await organizationApi.addAward({ awardType, employeeCount })
     }
 
     return (
@@ -80,10 +110,10 @@ export function ActiveAwardsCard({ awards, onAddAward }: ActiveAwardsCardProps) 
             <CompanyProfileCard
                 title="Active Awards"
                 description="Award rules applied to your employees"
-                isEditing={false}
-                onEdit={() => { }} // Awards卡片不使用卡片级别的编辑模式
-                onSave={() => { }}
-                onCancel={() => { }}
+                isEditing={isEditing}
+                onEdit={handleEdit}
+                onSave={handleSave}
+                onCancel={handleCancel}
             >
                 {/* Awards列表 */}
                 {awards.length === 0 ? (
@@ -96,38 +126,50 @@ export function ActiveAwardsCard({ awards, onAddAward }: ActiveAwardsCardProps) 
                         <AwardItem key={award.id}>
                             {/* 左侧：Award信息 */}
                             <AwardInfo>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <Typography variant="subtitle2">
-                                        {getAwardDisplayName(award.awardType)}
-                                    </Typography>
-                                    {award.isPrimary && (
-                                        <BadgeContainer>Primary</BadgeContainer>
-                                    )}
-                                </div>
+                                <Typography variant="subtitle2">
+                                    {getAwardDisplayName(award.awardType)}
+                                </Typography>
+                                {award.isPrimary && (
+                                    <BadgeContainer>Primary</BadgeContainer>
+                                )}
                             </AwardInfo>
 
-                            {/* 右侧：元数据 */}
-                            <AwardMeta>
-                                <Typography variant="body2">
-                                    {award.employeeCount} {award.employeeCount === 1 ? 'employee' : 'employees'}
-                                </Typography>
-                                <Typography variant="caption">
-                                    Added {formatDate(award.addedAt)}
-                                </Typography>
-                            </AwardMeta>
+                            {/* 右侧：元数据或删除按钮 */}
+                            {isEditing ? (
+                                // 编辑模式：显示删除按钮
+                                <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => handleDelete(award.id)}
+                                    aria-label="Delete award"
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
+                            ) : (
+                                // 查看模式：显示元数据
+                                <AwardMeta>
+                                    <Typography variant="body2">
+                                        {award.employeeCount} {award.employeeCount === 1 ? 'employee' : 'employees'}
+                                    </Typography>
+                                    <Typography variant="caption">
+                                        Added {formatDate(award.addedAt)}
+                                    </Typography>
+                                </AwardMeta>
+                            )}
                         </AwardItem>
                     ))
                 )}
 
-                {/* Add Award按钮 - 打开对话框 */}
-                <Button
-                    variant="outlined"
-                    startIcon={<AddIcon />}
-                    onClick={() => setIsDialogOpen(true)}
-                    sx={{ mt: 1 }}
-                >
-                    Add Award
-                </Button>
+                {/* Add Award按钮 - 只在非编辑模式显示 */}
+                {!isEditing && (
+                    <AddAwardButton
+                        variant='outlined'
+                        startIcon={<AddIcon />}
+                        onClick={() => setIsDialogOpen(true)}
+                    >
+                        Add Award
+                    </AddAwardButton>
+                )}
             </CompanyProfileCard>
 
             {/* Add Award对话框 - 内部使用共享的 AwardSelector */}
