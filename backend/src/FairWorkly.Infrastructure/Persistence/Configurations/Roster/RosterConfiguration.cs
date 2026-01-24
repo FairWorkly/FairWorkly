@@ -1,16 +1,17 @@
-using FairWorkly.Domain.Compliance.Entities;
+using FairWorkly.Domain.Roster.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using RosterEntity = FairWorkly.Domain.Roster.Entities.Roster;
 
-namespace FairWorkly.Infrastructure.Persistence.Configurations.Compliance;
+namespace FairWorkly.Infrastructure.Persistence.Configurations.Roster;
 
 /// <summary>
 /// EF Core configuration for Roster entity
 /// Configures one-to-one relationship with RosterValidation
 /// </summary>
-public class RosterConfiguration : IEntityTypeConfiguration<Roster>
+public class RosterConfiguration : IEntityTypeConfiguration<RosterEntity>
 {
-    public void Configure(EntityTypeBuilder<Roster> builder)
+    public void Configure(EntityTypeBuilder<RosterEntity> builder)
     {
         builder.HasKey(r => r.Id);
 
@@ -37,6 +38,7 @@ public class RosterConfiguration : IEntityTypeConfiguration<Roster>
         // Roster -> RosterValidation (One-to-One, optional)
         // Roster is the principal, RosterValidation is the dependent
         // RosterValidation has the required FK (RosterId)
+        // This side only has an optional reference (RosterValidationId is nullable)
         builder
             .HasOne(r => r.RosterValidation)
             .WithOne(rv => rv.Roster)
@@ -48,13 +50,6 @@ public class RosterConfiguration : IEntityTypeConfiguration<Roster>
             .HasMany(r => r.Shifts)
             .WithOne(s => s.Roster)
             .HasForeignKey(s => s.RosterId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // Roster -> RosterIssues (One-to-Many)
-        builder
-            .HasMany(r => r.Issues)
-            .WithOne(i => i.Roster)
-            .HasForeignKey(i => i.RosterId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
