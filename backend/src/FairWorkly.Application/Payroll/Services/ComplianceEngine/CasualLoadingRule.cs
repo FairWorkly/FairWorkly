@@ -33,8 +33,7 @@ public class CasualLoadingRule : IComplianceRule
                 EmployeeId = payslip.EmployeeId,
                 CategoryType = IssueCategory.CasualLoading,
                 Severity = IssueSeverity.Warning,
-                WarningMessage = $"Negative Ordinary Pay detected (${Math.Abs(payslip.OrdinaryPay):F2}). Possible correction/reversal entry. Skipping compliance check.",
-                ImpactAmount = 0
+                WarningMessage = $"Negative Ordinary Pay detected (${Math.Abs(payslip.OrdinaryPay):F2}). Possible correction/reversal entry. Skipping compliance check."
             });
             return issues;
         }
@@ -105,11 +104,6 @@ public class CasualLoadingRule : IComplianceRule
         decimal affectedUnits,
         string contextLabel)
     {
-        // Warning has no financial impact (ImpactAmount = 0)
-        var impactAmount = severity == IssueSeverity.Warning
-            ? 0
-            : (expectedValue - actualValue) * affectedUnits;
-
         return new PayrollIssue
         {
             OrganizationId = payslip.OrganizationId,
@@ -123,8 +117,7 @@ public class CasualLoadingRule : IComplianceRule
             ActualValue = actualValue,
             AffectedUnits = affectedUnits,
             UnitType = "Hour",
-            ContextLabel = contextLabel,
-            ImpactAmount = impactAmount
+            ContextLabel = contextLabel
         };
     }
 }

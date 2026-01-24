@@ -27,8 +27,7 @@ public class BaseRateRule : IComplianceRule
                 EmployeeId = payslip.EmployeeId,
                 CategoryType = IssueCategory.BaseRate,
                 Severity = IssueSeverity.Warning,
-                WarningMessage = $"Negative Ordinary Pay detected (${Math.Abs(payslip.OrdinaryPay):F2}). Possible correction/reversal entry. Skipping compliance check.",
-                ImpactAmount = 0
+                WarningMessage = $"Negative Ordinary Pay detected (${Math.Abs(payslip.OrdinaryPay):F2}). Possible correction/reversal entry. Skipping compliance check."
             });
             return issues;
         }
@@ -99,11 +98,6 @@ public class BaseRateRule : IComplianceRule
         decimal affectedUnits,
         string contextLabel)
     {
-        // Warning has no financial impact (ImpactAmount = 0)
-        var impactAmount = severity == IssueSeverity.Warning
-            ? 0
-            : (expectedValue - actualValue) * affectedUnits;
-
         return new PayrollIssue
         {
             OrganizationId = payslip.OrganizationId,
@@ -117,8 +111,7 @@ public class BaseRateRule : IComplianceRule
             ActualValue = actualValue,
             AffectedUnits = affectedUnits,
             UnitType = "Hour",
-            ContextLabel = contextLabel,
-            ImpactAmount = impactAmount
+            ContextLabel = contextLabel
         };
     }
 }

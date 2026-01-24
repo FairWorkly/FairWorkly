@@ -124,15 +124,6 @@ public class PayrollIssue : BaseEntity
     [MaxLength(100)]
     public string? ContextLabel { get; set; }
 
-    /// <summary>
-    /// Calculated underpayment amount
-    /// </summary>
-    /// <example>
-    /// Hourly: (ExpectedValue - ActualValue) × AffectedUnits = 76.40
-    /// Super: ExpectedValue - ActualValue = 50.00
-    /// </example>
-    public decimal? ImpactAmount { get; set; }
-
     // ═══════════════════════════════════════════════════════════════
     //  Resolution Tracking
     // ═══════════════════════════════════════════════════════════════

@@ -78,7 +78,6 @@ public class SuperannuationRuleTests
         issue.CategoryType.Should().Be(IssueCategory.Superannuation);
         issue.ExpectedValue.Should().Be(120m);
         issue.ActualValue.Should().Be(0m);
-        issue.ImpactAmount.Should().Be(120m);
     }
 
     [Fact]
@@ -96,7 +95,6 @@ public class SuperannuationRuleTests
         issue.ExpectedValue.Should().Be(240m);
         issue.ActualValue.Should().Be(200m);
         issue.AffectedUnits.Should().Be(2000m); // Gross pay as affected units
-        issue.ImpactAmount.Should().Be(40m);
     }
 
     [Theory]
@@ -135,7 +133,6 @@ public class SuperannuationRuleTests
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
         issue.CategoryType.Should().Be(IssueCategory.Superannuation);
-        issue.ImpactAmount.Should().Be(0);
         issue.WarningMessage.Should().Contain("Zero Gross Pay");
         issue.WarningMessage.Should().Contain("38");
     }
@@ -162,7 +159,6 @@ public class SuperannuationRuleTests
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
         issue.CategoryType.Should().Be(IssueCategory.Superannuation);
-        issue.ImpactAmount.Should().Be(0);
         issue.WarningMessage.Should().Contain("Zero Gross Pay");
     }
 
@@ -197,7 +193,6 @@ public class SuperannuationRuleTests
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
         issue.CategoryType.Should().Be(IssueCategory.Superannuation);
-        issue.ImpactAmount.Should().Be(0);
         issue.WarningMessage.Should().Contain("Negative Gross Pay");
     }
 
@@ -210,7 +205,6 @@ public class SuperannuationRuleTests
 
         issuesA.Should().HaveCount(1);
         issuesA[0].Severity.Should().Be(IssueSeverity.Error);
-        issuesA[0].ImpactAmount.Should().Be(20m);
 
         // Scenario B: Compliant super (should PASS)
         var payslipCompliant = CreatePayslip(grossPay: 1000m, superannuation: 120m);

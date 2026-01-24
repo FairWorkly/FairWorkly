@@ -37,8 +37,7 @@ public class SuperannuationRule : IComplianceRule
                 ActualValue = 0,
                 AffectedUnits = 0,
                 UnitType = "Currency",
-                ContextLabel = "Data Issue",
-                ImpactAmount = 0
+                ContextLabel = "Data Issue"
             });
             return issues;
         }
@@ -62,8 +61,7 @@ public class SuperannuationRule : IComplianceRule
                     ActualValue = 0,
                     AffectedUnits = totalWorkHours,
                     UnitType = "Hour",
-                    ContextLabel = "Data Issue",
-                    ImpactAmount = 0
+                    ContextLabel = "Data Issue"
                 });
             }
             // No hours and no pay = unpaid leave, PASS
@@ -76,8 +74,6 @@ public class SuperannuationRule : IComplianceRule
         // Check if superannuation is underpaid
         if (payslip.Superannuation < expectedSuper - RateTableProvider.PayTolerance)
         {
-            var impactAmount = expectedSuper - payslip.Superannuation;
-
             issues.Add(new PayrollIssue
             {
                 OrganizationId = payslip.OrganizationId,
@@ -90,8 +86,7 @@ public class SuperannuationRule : IComplianceRule
                 ActualValue = payslip.Superannuation,
                 AffectedUnits = payslip.GrossPay,
                 UnitType = "Currency",
-                ContextLabel = $"12% of ${payslip.GrossPay:F2}",
-                ImpactAmount = impactAmount
+                ContextLabel = $"12% of ${payslip.GrossPay:F2}"
             });
         }
 

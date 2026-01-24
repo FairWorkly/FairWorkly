@@ -86,7 +86,6 @@ public class CasualLoadingRuleTests
         issue.CategoryType.Should().Be(IssueCategory.CasualLoading);
         issue.ExpectedValue.Should().Be(Level2CasualRate);
         issue.ActualValue.Should().BeApproximately(actualRate, 0.01m);
-        issue.ImpactAmount.Should().BeApproximately((Level2CasualRate - actualRate) * 20m, 0.01m);
     }
 
     [Fact]
@@ -120,7 +119,6 @@ public class CasualLoadingRuleTests
         issue.WarningMessage.Should().Contain("System Casual rate");
         issue.ExpectedValue.Should().Be(Level2CasualRate);
         issue.ActualValue.Should().Be(30.00m);
-        issue.ImpactAmount.Should().Be(0); // Warning has no financial impact
     }
 
     [Fact]
@@ -212,7 +210,6 @@ public class CasualLoadingRuleTests
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
         issue.CategoryType.Should().Be(IssueCategory.CasualLoading);
-        issue.ImpactAmount.Should().Be(0);
         issue.WarningMessage.Should().Contain("Negative");
         issue.WarningMessage.Should().Contain("Ordinary Pay");
     }

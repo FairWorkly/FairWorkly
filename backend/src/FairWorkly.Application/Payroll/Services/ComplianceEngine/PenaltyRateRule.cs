@@ -120,8 +120,6 @@ public class PenaltyRateRule : IComplianceRule
         decimal hours,
         decimal multiplier)
     {
-        var impactAmount = expectedPay - actualPay;
-
         return new PayrollIssue
         {
             OrganizationId = payslip.OrganizationId,
@@ -134,8 +132,7 @@ public class PenaltyRateRule : IComplianceRule
             ActualValue = actualPay,
             AffectedUnits = hours,
             UnitType = "Currency",
-            ContextLabel = $"{dayType} ({multiplier:P0} rate)",
-            ImpactAmount = impactAmount
+            ContextLabel = $"{dayType} ({multiplier:P0} rate)"
         };
     }
 
@@ -153,8 +150,7 @@ public class PenaltyRateRule : IComplianceRule
             EmployeeId = payslip.EmployeeId,
             CategoryType = IssueCategory.PenaltyRate,
             Severity = IssueSeverity.Warning,
-            WarningMessage = $"Negative {payType} Pay detected (${Math.Abs(amount):F2}). Possible correction/reversal entry. Skipping compliance check.",
-            ImpactAmount = 0
+            WarningMessage = $"Negative {payType} Pay detected (${Math.Abs(amount):F2}). Possible correction/reversal entry. Skipping compliance check."
         };
     }
 }

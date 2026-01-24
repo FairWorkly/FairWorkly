@@ -52,7 +52,6 @@ public class PenaltyRateRuleTests
         issue.ContextLabel.Should().Contain("Saturday");
         issue.ExpectedValue.Should().BeApproximately(271.60m, 0.01m);
         issue.ActualValue.Should().Be(217.28m);
-        issue.ImpactAmount.Should().BeApproximately(271.60m - 217.28m, 0.01m);
     }
 
     [Fact]
@@ -212,7 +211,6 @@ public class PenaltyRateRuleTests
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
         issue.CategoryType.Should().Be(IssueCategory.PenaltyRate);
-        issue.ImpactAmount.Should().Be(0);
         issue.WarningMessage.Should().Contain("Negative");
         issue.WarningMessage.Should().Contain("Saturday Pay");
     }
@@ -231,7 +229,6 @@ public class PenaltyRateRuleTests
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
         issue.CategoryType.Should().Be(IssueCategory.PenaltyRate);
-        issue.ImpactAmount.Should().Be(0);
         issue.WarningMessage.Should().Contain("Negative");
         issue.WarningMessage.Should().Contain("Sunday Pay");
     }
@@ -250,7 +247,6 @@ public class PenaltyRateRuleTests
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
         issue.CategoryType.Should().Be(IssueCategory.PenaltyRate);
-        issue.ImpactAmount.Should().Be(0);
         issue.WarningMessage.Should().Contain("Negative");
         issue.WarningMessage.Should().Contain("Public Holiday Pay");
     }

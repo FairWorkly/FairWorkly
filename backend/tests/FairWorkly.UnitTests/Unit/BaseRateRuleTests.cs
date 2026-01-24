@@ -61,7 +61,6 @@ public class BaseRateRuleTests
         issue.ExpectedValue.Should().Be(minimumRate);
         issue.ActualValue.Should().BeApproximately(actualRate, 0.01m);
         issue.AffectedUnits.Should().Be(hours);
-        issue.ImpactAmount.Should().BeApproximately((minimumRate - actualRate) * hours, 0.01m);
     }
 
     [Fact]
@@ -80,7 +79,6 @@ public class BaseRateRuleTests
         issue.WarningMessage.Should().Contain("System rate");
         issue.ExpectedValue.Should().Be(26.55m);
         issue.ActualValue.Should().Be(25.00m);
-        issue.ImpactAmount.Should().Be(0); // Warning has no financial impact
     }
 
     [Fact]
@@ -166,7 +164,6 @@ public class BaseRateRuleTests
         issue.CategoryType.Should().Be(IssueCategory.BaseRate);
         issue.ExpectedValue.Should().Be(29.70m);
         issue.ActualValue.Should().BeApproximately(actualRate, 0.01m);
-        issue.ImpactAmount.Should().BeApproximately((29.70m - actualRate) * 40.00m, 0.05m);
     }
 
     [Fact]
@@ -199,7 +196,6 @@ public class BaseRateRuleTests
         issue.CategoryType.Should().Be(IssueCategory.BaseRate);
         issue.ExpectedValue.Should().Be(32.45m);
         issue.ActualValue.Should().BeApproximately(actualRate, 0.01m);
-        issue.ImpactAmount.Should().BeApproximately((32.45m - actualRate) * 40.00m, 0.05m);
     }
 
     #region Negative Pay Tests
@@ -218,7 +214,6 @@ public class BaseRateRuleTests
         var issue = issues[0];
         issue.Severity.Should().Be(IssueSeverity.Warning);
         issue.CategoryType.Should().Be(IssueCategory.BaseRate);
-        issue.ImpactAmount.Should().Be(0);
         issue.WarningMessage.Should().Contain("Negative");
         issue.WarningMessage.Should().Contain("Ordinary Pay");
     }
