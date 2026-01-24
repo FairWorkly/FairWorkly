@@ -8,6 +8,7 @@ import {
   FieldLabel,
   FieldValue,
   ErrorText,
+  FormField,
 } from './CompanyProfile.styles'
 import type { AddressInfo, ValidationErrors } from '../../types/companyProfile.types'
 import { AUSTRALIAN_STATES } from '../../types/companyProfile.types'
@@ -17,28 +18,13 @@ interface AddressCardProps {
   onSave: (data: AddressInfo) => void
 }
 
-/**
- * 地址卡片
- * 
- * 包含字段：
- * - Address Line 1 (必填)
- * - Address Line 2 (可选)
- * - Suburb (必填)
- * - State (下拉选择，必填)
- * - Postcode (4位数字，必填)
- * 
- * 验证规则：
- * - Postcode必须是4位数字
- */
+
 export function AddressCard({ data, onSave }: AddressCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<AddressInfo>(data)
   const [errors, setErrors] = useState<ValidationErrors>({})
 
-  /**
-   * 验证Postcode格式
-   * 必须是恰好4位数字
-   */
+
   const validatePostcode = (postcode: string): string => {
     if (!postcode) return 'Postcode is required'
     if (!/^\d{4}$/.test(postcode)) return 'Postcode must be exactly 4 digits'
@@ -105,11 +91,11 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
       onCancel={handleCancel}
       isSaveDisabled={Object.keys(errors).length > 0}
     >
-      {/* Address Line 1 */}
+
       <FormRow>
         <FieldLabel>Address Line 1</FieldLabel>
         {isEditing ? (
-          <div>
+          <FormField>
             <TextField
               fullWidth
               size="small"
@@ -121,13 +107,12 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
             {errors.addressLine1 && (
               <ErrorText>{errors.addressLine1}</ErrorText>
             )}
-          </div>
+          </FormField>
         ) : (
           <FieldValue>{data.addressLine1}</FieldValue>
         )}
       </FormRow>
 
-      {/* Address Line 2 (可选) */}
       <FormRow>
         <FieldLabel>Address Line 2</FieldLabel>
         {isEditing ? (
@@ -143,11 +128,11 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
         )}
       </FormRow>
 
-      {/* Suburb */}
+  
       <FormRow>
         <FieldLabel>Suburb</FieldLabel>
         {isEditing ? (
-          <div>
+          <FormField>
             <TextField
               fullWidth
               size="small"
@@ -159,17 +144,17 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
             {errors.suburb && (
               <ErrorText>{errors.suburb}</ErrorText>
             )}
-          </div>
+          </FormField>
         ) : (
           <FieldValue>{data.suburb}</FieldValue>
         )}
       </FormRow>
 
-      {/* State */}
+
       <FormRow>
         <FieldLabel>State</FieldLabel>
         {isEditing ? (
-          <div>
+          <FormField>
             <TextField
               fullWidth
               select
@@ -187,7 +172,7 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
             {errors.state && (
               <ErrorText>{errors.state}</ErrorText>
             )}
-          </div>
+          </FormField>
         ) : (
           <FieldValue>
             {AUSTRALIAN_STATES.find(s => s.value === data.state)?.label || data.state}
@@ -195,11 +180,11 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
         )}
       </FormRow>
 
-      {/* Postcode */}
+
       <FormRow>
         <FieldLabel>Postcode</FieldLabel>
         {isEditing ? (
-          <div>
+          <FormField>
             <TextField
               fullWidth
               size="small"
@@ -213,7 +198,7 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
             {errors.postcode && (
               <ErrorText>{errors.postcode}</ErrorText>
             )}
-          </div>
+          </FormField>
         ) : (
           <FieldValue>{data.postcode}</FieldValue>
         )}

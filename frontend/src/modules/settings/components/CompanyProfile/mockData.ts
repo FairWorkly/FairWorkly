@@ -1,12 +1,6 @@
-// modules/settings/components/CompanyProfile/mockData.ts
-
-import type { CompanyProfile } from "../../types/companyProfile.types";
+import type { CompanyProfile } from "@/modules/settings/types/companyProfile.types";
 
 
-/**
- * Mock数据 - 用于开发和测试
- * 后续将替换为真实API调用
- */
 export const mockCompanyProfile: CompanyProfile = {
   companyName: 'FairWorkly Pty Ltd',
   abn: '12345678901',
