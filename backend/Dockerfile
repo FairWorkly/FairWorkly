@@ -13,7 +13,7 @@ WORKDIR /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:5680
 
 COPY --from=build /app/publish .
-COPY --from=build /src/backend/src/FairWorkly.API/appsettings*.json ./
+COPY --from=build /src/backend/src/FairWorkly.API/appsettings.example.json ./appsettings.json
 
 EXPOSE 5680
 
