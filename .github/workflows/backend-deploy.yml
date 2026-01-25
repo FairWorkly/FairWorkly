@@ -9,6 +9,7 @@ on:
 env:
   AWS_REGION: ap-southeast-2
   ECR_REPOSITORY: fairworkly-backend
+  CONTAINER_NAME: fairworkly-api 
 
 jobs:
   build-and-deploy:
