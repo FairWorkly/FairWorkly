@@ -27,6 +27,9 @@ AGENTS.md
 # Backend AI Files
 .raw_materials/
 .claude/
+.doc/
+**/AI_GUIDE.md
+CLAUDE.md
 
 # Backend Scripts
 backend/scripts/
