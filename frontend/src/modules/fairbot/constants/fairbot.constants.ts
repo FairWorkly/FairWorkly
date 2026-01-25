@@ -324,7 +324,7 @@ export const FAIRBOT_FILE = {
   // Accept attribute value for file inputs.
   ACCEPT_ATTRIBUTE: '.csv,.xlsx',
   // Separator used when parsing file extensions.
-  NAME_SEPARATOR: '.csv',
+  NAME_SEPARATOR: '.',
 } as const
 
 export const FAIRBOT_ERRORS = {
