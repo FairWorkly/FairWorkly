@@ -6,6 +6,8 @@ on:
       - main
       - zoe-devops-week3-workflow
 
+env:
+  AWS_REGION: ap-southeast-2
 
 jobs:
   build-and-deploy:
