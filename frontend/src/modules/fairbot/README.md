@@ -4,137 +4,123 @@
 
 FairBot provides a chat-style assistant UI for Fair Work compliance help. It lets users send messages, upload roster/payroll files, and view a quick summary of results in a side panel.
 
+## Architecture Pattern: Thin Module with Shared Core
+
+This module follows the "Thin Module with Shared Core" pattern:
+
+- **Page components** (`pages/`) act as **orchestrators** - they manage state, navigation, and wire callbacks to shared components
+- **UI components** live in `@/shared/chat` - generic, reusable chat primitives
+- **FairBot-specific configuration** stays in this module (labels, mock data, result types)
+
+For the shared chat components, see `src/shared/chat/README.md`.
+
 ## File Structure
 
-```Structure
+```
 src/modules/fairbot/
   constants/
-    fairbot.constants.ts
+    fairbot.constants.ts     # FairBot-specific labels, layout, mock data
   features/
-    conversation/
-      FileUploadZone.tsx
-      MessageInput.tsx
-      MessageList.tsx
-      useConversation.ts
-    quickActions/
-      actions.config.ts
-      QuickActions.tsx
     resultsPanel/
-      PayrollSummary.tsx
-      QuickSummary.tsx
-      ResultsEmpty.tsx
-      ResultsPanel.tsx
-      RosterSummary.tsx
+      PayrollSummary.tsx     # Payroll result card
+      QuickSummary.tsx       # Result type router
+      ResultsEmpty.tsx       # Empty state
+      ResultsPanel.tsx       # Panel container
+      RosterSummary.tsx      # Roster result card
   hooks/
-    useFairBot.ts
-    useFileUpload.ts
-    useMessageStream.ts
-    useResultsPanel.ts
+    useConversation.ts       # View-model combining useFairBot + typing indicator
+    useFairBot.ts            # Core state: messages, mock responses, persistence
+    useResultsPanel.ts       # Results summary state + session persistence
+    usePermissions.ts        # Permission checks (dev mode)
   pages/
-    FairBotChat.tsx
+    FairBotChat.tsx          # Orchestrator page (wires shared components)
   types/
-    fairbot.types.ts
+    fairbot.types.ts         # FairBot-specific types (results, quick actions)
   ui/
-    MessageBubble.tsx
-    TypingIndicator.tsx
-    WelcomeMessage.tsx
+    WelcomeMessage.tsx       # FairBot-specific welcome card
 ```
 
-For shared UI, hooks, and constants referenced here, see `src/shared/README.md`.
+## Shared Components Used
+
+From `@/shared/chat`:
+
+| Component | Purpose |
+|-----------|---------|
+| `MessageList` | Renders chat messages with typing indicator |
+| `MessageInput` | Text input with send/attach buttons |
+| `MessageBubble` | Individual message display |
+| `TypingIndicator` | Animated typing dots |
+| `FileUploadZone` | Drag/drop file upload area |
+| `useFileUpload` | File validation and upload state |
+| `useMessageStream` | Typing indicator timing |
+
+## Data Flow
+
+```
+FairBotChat (orchestrator page)
+    ├── useConversation (view-model)
+    │       └── useFairBot (state + mock responses)
+    │               └── useResultsPanel (results summary)
+    └── useFileUpload (from @/shared/chat)
+            └── calls conversation.sendMessage on file accept
+```
+
+## Configuration via Props
+
+The page passes FairBot-specific configuration to shared components:
+
+```typescript
+// Labels for message display
+const CHAT_LABELS = {
+  userLabel: FAIRBOT_LABELS.USER_LABEL,
+  assistantLabel: FAIRBOT_LABELS.ASSISTANT_LABEL,
+  loadingMessage: FAIRBOT_LABELS.LOADING_MESSAGE,
+  // ...
+}
+
+// Usage in orchestrator
+<MessageList
+  messages={conversation.messages}
+  isTyping={conversation.isTyping}
+  labels={CHAT_LABELS}
+/>
+```
 
 ## Entry Point and Routing
 
-- Route: `src/app/routes/fairbot.routes.tsx` maps `/fairbot` to the page.
+- Route: `src/app/routes/fairbot.routes.tsx` maps `/fairbot` to the page
 - Page component: `src/modules/fairbot/pages/FairBotChat.tsx`
-- Access control: `fairbot.routes.tsx` currently renders `FairBotChat` directly; wrap with
-  `ProtectedRoute` once auth is wired.
-
-## UI Composition (FairBotChat)
-
-Two-column CSS grid layout (70% Chat + 30% Results). The sidebar is provided by `MainLayout`.
-
-- Chat column (70%)
-  - `ChatHeader` (title + subtitle)
-  - `MessageList` (includes welcome message as first assistant message)
-  - `FileUploadZone` (drag/drop + browse)
-  - `MessageInput` (text input + send)
-- Results column (30%)
-  - `ResultsPanel` (summary or empty state)
-
-## Core Data Flow
-
-1. User submits a message (MessageInput or QuickActions).
-2. `useConversation` delegates to `useFairBot`.
-3. `useFairBot` creates a user message, simulates a response, and appends an assistant message.
-4. If a summary is detected, `useResultsPanel` updates the results state.
-5. Conversation and results are persisted in `sessionStorage`.
-
-## Key Hooks
-
-- `useFairBot`
-  - Owns message state, mock response building, and error handling.
-  - Persists conversation (files are stripped before save).
-  - Includes welcome message as initial assistant message.
-- `useConversation`
-  - View-model wrapper for messages, typing, and errors.
-- `useMessageStream`
-  - Controls typing indicator delays while loading.
-- `useFileUpload`
-  - Drag/drop + file picker validation.
-  - Accepts `.csv` and `.xlsx`, max 5MB.
-  - Returns `{ inputRef, controls }` where `controls` is ref-free render state and handlers.
-- `useResultsPanel`
-  - Reads/writes current results to `sessionStorage`.
-
-Permission checks use the shared `usePermissions` hook from `@/shared/hooks/usePermissions`.
-
-Note: `FileUploadZone` receives `inputRef` separately to avoid ref-like props in render.
-
-## Quick Actions
-
-- Config lives in `features/quickActions/actions.config.ts`.
-- Each action can:
-  - Pre-fill an initial message.
-  - Require a file upload.
-  - Gate visibility via permissions.
-
-## Results Panel
-
-- `ResultsPanel` renders:
-  - `QuickSummary` when results exist.
-  - `ResultsEmpty` otherwise.
-- Summary cards:
-  - `PayrollSummary` and `RosterSummary` show stats and top issues.
-  - Navigates via `FAIRBOT_ROUTES`:
-    - `/payroll/upload`, `/compliance/upload`, `/my-profile`, `/documents`.
-
-## Constants and Types
-
-- Strings, layout values, timing, and IDs: `constants/fairbot.constants.ts`.
-- Type contracts: `types/fairbot.types.ts`.
+- Access control: Wrap with `ProtectedRoute` when auth is wired
 
 ## Extending the Module
 
-- Add a new quick action:
-  - Update `FAIRBOT_QUICK_ACTIONS` constants.
-  - Add to `features/quickActions/actions.config.ts`.
-  - Map an icon in `QuickActions.tsx`.
-- Add a new result type:
-  - Extend `FairBotResult` union in `fairbot.types.ts`.
-  - Update `FAIRBOT_RESULTS` and `FAIRBOT_MOCK_DATA`.
-  - Add rendering to `QuickSummary`.
-- Connect real agent service:
-  - Replace `buildMockResponse` in `useFairBot` with an API call returning
-    `FairBotAgentResponse`.
+### Add a New Result Type
+
+1. Add interface to `types/fairbot.types.ts` and extend `FairBotResult` union
+2. Add to `FAIRBOT_RESULTS.TYPES` and `FAIRBOT_MOCK_DATA` in constants
+3. Add rendering branch in `features/resultsPanel/QuickSummary.tsx`
+4. Add route to `FAIRBOT_ROUTES`
+
+### Connect Real Agent Service
+
+Replace in `hooks/useFairBot.ts`:
+
+```typescript
+// Current mock:
+const response = buildMockResponse(trimmedText, file)
+
+// Replace with:
+const response = await agentApi.chat({ text: trimmedText, file })
+```
 
 ## Testing Notes
 
-- No tests exist yet.
+- No tests exist yet
 - Add colocated `*.test.tsx` for key flows:
-  - Message sending, file validation, summary rendering, typing indicator timing.
+  - Message sending, file validation, summary rendering
 
 ## Current Limitations
 
-- Responses and summaries use mock data.
-- Permission checks use dev-mode defaults (switch via `window.switchRole()`).
-- Files are not persisted to session storage.
+- Responses and summaries use mock data
+- Permission checks use dev-mode defaults (`window.switchRole()`)
+- Files are not persisted to session storage

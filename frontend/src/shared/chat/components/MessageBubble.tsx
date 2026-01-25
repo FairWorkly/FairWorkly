@@ -3,26 +3,33 @@ import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import AttachFileOutlined from '@mui/icons-material/AttachFileOutlined'
 import {
-  FAIRBOT_LABELS,
-  FAIRBOT_FILE_SIZE,
-  FAIRBOT_MESSAGE_UI,
-  FAIRBOT_NUMBERS,
-  FAIRBOT_ROLES,
-  FAIRBOT_TIME_FORMAT,
-} from '../constants/fairbot.constants'
-import type { FairBotMessage } from '../types/fairbot.types'
+  CHAT_DEFAULT_LABELS,
+  CHAT_MESSAGE_UI,
+  CHAT_NUMBERS,
+  CHAT_ROLES,
+} from '../constants/chat.constants'
+import { formatTimestamp, formatFileSize } from '../utils/formatters'
+import type { ChatMessage } from '../types/chat.types'
 
-interface MessageBubbleProps {
-  message: FairBotMessage
+export interface MessageBubbleLabels {
+  userLabel?: string
+  assistantLabel?: string
+  messageTimePrefix?: string
+  attachmentLabel?: string
 }
 
-interface BubbleProps {
+export interface MessageBubbleProps {
+  message: ChatMessage
+  labels?: MessageBubbleLabels
+}
+
+interface BubbleStyleProps {
   isUser: boolean
 }
 
 const MessageRow = styled('div', {
   shouldForwardProp: (prop) => prop !== 'isUser',
-})<BubbleProps>(({ theme, isUser }) => ({
+})<BubbleStyleProps>(({ theme, isUser }) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: isUser ? 'flex-end' : 'flex-start',
@@ -31,8 +38,8 @@ const MessageRow = styled('div', {
 
 const Bubble = styled('div', {
   shouldForwardProp: (prop) => prop !== 'isUser',
-})<BubbleProps>(({ theme, isUser }) => ({
-  maxWidth: `${FAIRBOT_MESSAGE_UI.BUBBLE_MAX_WIDTH}px`,
+})<BubbleStyleProps>(({ theme, isUser }) => ({
+  maxWidth: `${CHAT_MESSAGE_UI.BUBBLE_MAX_WIDTH}px`,
   borderRadius: theme.fairworkly.radius.lg,
   padding: theme.spacing(1.5),
   backgroundColor: isUser
@@ -43,7 +50,7 @@ const Bubble = styled('div', {
 
 const MetaRow = styled('div', {
   shouldForwardProp: (prop) => prop !== 'isUser',
-})<BubbleProps>(({ theme, isUser }) => ({
+})<BubbleStyleProps>(({ theme, isUser }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(1),
@@ -61,45 +68,23 @@ const FileBadge = styled('div')(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
-// Format message timestamps for display, falling back to raw input if invalid.
-const formatTimestamp = (timestamp: string): string => {
-  const date = new Date(timestamp)
-  if (Number.isNaN(date.getTime())) {
-    return timestamp
-  }
+export const MessageBubble = ({ message, labels = {} }: MessageBubbleProps) => {
+  const {
+    userLabel = CHAT_DEFAULT_LABELS.USER_LABEL,
+    assistantLabel = CHAT_DEFAULT_LABELS.ASSISTANT_LABEL,
+    messageTimePrefix = CHAT_DEFAULT_LABELS.MESSAGE_TIME_PREFIX,
+    attachmentLabel = CHAT_DEFAULT_LABELS.ATTACHMENT_LABEL,
+  } = labels
 
-  return date.toLocaleTimeString([], {
-    hour: FAIRBOT_TIME_FORMAT.HOUR,
-    minute: FAIRBOT_TIME_FORMAT.MINUTE,
-  })
-}
-
-const formatFileSize = (bytes: number): string => {
-  if (!Number.isFinite(bytes) || bytes <= FAIRBOT_NUMBERS.ZERO) {
-    return FAIRBOT_FILE_SIZE.ZERO_KB
-  }
-
-  if (bytes >= FAIRBOT_FILE_SIZE.MEGA_THRESHOLD) {
-    return `${(bytes / FAIRBOT_FILE_SIZE.MEGA_THRESHOLD).toFixed(
-      FAIRBOT_FILE_SIZE.MEGA_DECIMALS,
-    )} ${FAIRBOT_FILE_SIZE.MEGA_SUFFIX}`
-  }
-
-  return `${Math.ceil(bytes / FAIRBOT_FILE_SIZE.KILO_THRESHOLD)} ${
-    FAIRBOT_FILE_SIZE.KILO_SUFFIX
-  }`
-}
-
-export const MessageBubble = ({ message }: MessageBubbleProps) => {
-  const isUser = message.role === FAIRBOT_ROLES.USER
-  const senderLabel = isUser ? FAIRBOT_LABELS.USER_LABEL : FAIRBOT_LABELS.ASSISTANT_LABEL
+  const isUser = message.role === CHAT_ROLES.USER
+  const senderLabel = isUser ? userLabel : assistantLabel
 
   return (
     <MessageRow isUser={isUser}>
       <MetaRow isUser={isUser}>
         <Typography variant="caption">{senderLabel}</Typography>
         <Typography variant="caption">
-          {FAIRBOT_LABELS.MESSAGE_TIME_PREFIX} {formatTimestamp(message.timestamp)}
+          {messageTimePrefix} {formatTimestamp(message.timestamp)}
         </Typography>
       </MetaRow>
       <Bubble isUser={isUser}>
@@ -108,8 +93,8 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
       {message.fileMeta ? (
         <FileBadge>
           <AttachFileOutlined fontSize="small" />
-          <Stack spacing={FAIRBOT_NUMBERS.ZERO}>
-            <Typography variant="caption">{FAIRBOT_LABELS.ATTACHMENT_LABEL}</Typography>
+          <Stack spacing={CHAT_NUMBERS.ZERO}>
+            <Typography variant="caption">{attachmentLabel}</Typography>
             <Typography variant="caption">{message.fileMeta.name}</Typography>
             <Typography variant="caption">{formatFileSize(message.fileMeta.size)}</Typography>
           </Stack>

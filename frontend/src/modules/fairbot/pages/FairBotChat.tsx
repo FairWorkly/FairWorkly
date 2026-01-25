@@ -1,26 +1,44 @@
 import { styled } from '@/styles/styled'
-import Typography from '@mui/material/Typography'
-import Stack from '@mui/material/Stack'
-import Divider from '@mui/material/Divider'
+import { Box, Typography, Container, Stack, Divider } from '@mui/material'
+import {
+  MessageList,
+  MessageInput,
+  FileUploadZone,
+  useFileUpload,
+} from '@/shared/chat'
 import {
   FAIRBOT_ARIA,
   FAIRBOT_LABELS,
   FAIRBOT_LAYOUT,
+  FAIRBOT_IDS,
 } from '../constants/fairbot.constants'
-import { useConversation } from '../features/conversation/useConversation'
-import { useFileUpload } from '../hooks/useFileUpload'
-import { MessageList } from '../features/conversation/MessageList'
-import { FileUploadZone } from '../features/conversation/FileUploadZone'
-import { MessageInput } from '../features/conversation/MessageInput'
+import { useConversation } from '../hooks/useConversation'
 import { ResultsPanel } from '../features/resultsPanel/ResultsPanel'
+
+// FairBot-specific labels for chat components.
+const CHAT_LABELS = {
+  userLabel: FAIRBOT_LABELS.USER_LABEL,
+  assistantLabel: FAIRBOT_LABELS.ASSISTANT_LABEL,
+  messageTimePrefix: FAIRBOT_LABELS.MESSAGE_TIME_PREFIX,
+  attachmentLabel: FAIRBOT_LABELS.ATTACHMENT_LABEL,
+  messageListHeading: FAIRBOT_LABELS.MESSAGE_LIST_HEADING,
+  loadingMessage: FAIRBOT_LABELS.LOADING_MESSAGE,
+}
+
+const INPUT_LABELS = {
+  inputPlaceholder: FAIRBOT_LABELS.INPUT_PLACEHOLDER,
+  sendButtonLabel: FAIRBOT_LABELS.SEND_BUTTON_LABEL,
+  attachButtonLabel: FAIRBOT_LABELS.ATTACH_BUTTON_LABEL,
+  messageInputLabel: FAIRBOT_LABELS.MESSAGE_INPUT_LABEL,
+}
 
 // FairBot chat page wires conversation and upload flows into a two-column layout.
 // Sidebar is provided by MainLayout, so this page only has Chat + Results columns.
-const PageContainer = styled('div')({
+const PageContainer = styled(Box)({
   display: 'grid',
   gridTemplateColumns: FAIRBOT_LAYOUT.GRID_TEMPLATE_COLUMNS,
-  height: '100%',
-  width: '100%',
+  minHeight: '100vh',
+  minWidth: '100vh',
   overflow: 'hidden',
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
     gridTemplateColumns: '1fr',
@@ -30,7 +48,7 @@ const PageContainer = styled('div')({
 })
 
 // Main column that holds the conversational UI stack.
-const ChatColumn = styled('section')({
+const ChatColumn = styled(Box)({
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
@@ -38,7 +56,7 @@ const ChatColumn = styled('section')({
 })
 
 // Page header for title/subtitle within the chat column.
-const ChatHeader = styled('header')(({ theme }) => ({
+const ChatHeader = styled(Container)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   height: `${FAIRBOT_LAYOUT.CHAT_HEADER_HEIGHT_PX}px`,
@@ -47,7 +65,7 @@ const ChatHeader = styled('header')(({ theme }) => ({
 }))
 
 // Scrollable wrapper around message list to keep input/footer in view.
-const ScrollArea = styled('div')(({ theme }) => ({
+const ScrollArea = styled(Container)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing(2),
@@ -58,7 +76,7 @@ const ScrollArea = styled('div')(({ theme }) => ({
 }))
 
 // Right column that hosts the summary panel (stacks below on mobile).
-const ResultsColumn = styled('aside')(({ theme }) => ({
+const ResultsColumn = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   height: '100%',
   overflow: 'auto',
@@ -67,7 +85,7 @@ const ResultsColumn = styled('aside')(({ theme }) => ({
   },
 }))
 
-const ResultsPanelWrapper = styled('div')({
+const ResultsPanelWrapper = styled(Container)({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -80,7 +98,7 @@ const MessageComposer = styled(Stack)(({ theme }) => ({
   margin: theme.spacing(2),
 }))
 
-const MessageInputWrapper = styled('div')({
+const MessageInputWrapper = styled(Container)({
   width: '100%',
   '& > *': {
     width: '100%',
@@ -89,8 +107,9 @@ const MessageInputWrapper = styled('div')({
 
 export const FairBotChat = () => {
   const conversation = useConversation()
+
   // Treat file uploads as messages to keep the chat flow consistent.
-  const { inputRef, controls: upload } = useFileUpload({
+  const { inputRef, controls: uploadControls } = useFileUpload({
     onFileAccepted: async file => {
       await conversation.sendMessage(FAIRBOT_LABELS.FILE_UPLOAD_PROMPT, file)
     },
@@ -111,19 +130,23 @@ export const FairBotChat = () => {
           <MessageList
             messages={conversation.messages}
             isTyping={conversation.isTyping}
+            labels={CHAT_LABELS}
           />
         </ScrollArea>
         <Divider />
         <MessageComposer spacing={1.5}>
           <FileUploadZone
-            upload={upload}
+            controls={uploadControls}
             inputRef={inputRef}
             helperText={FAIRBOT_LABELS.UPLOAD_TIP}
+            inputId={FAIRBOT_IDS.FILE_INPUT}
           >
             <MessageInputWrapper>
               <MessageInput
-                upload={upload}
+                controls={{ openFileDialog: uploadControls.openFileDialog }}
                 onSendMessage={conversation.sendMessage}
+                labels={INPUT_LABELS}
+                inputId={FAIRBOT_IDS.MESSAGE_INPUT}
               />
             </MessageInputWrapper>
           </FileUploadZone>

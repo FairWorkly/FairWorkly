@@ -1,45 +1,48 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  FAIRBOT_ENV,
+  CHAT_ENV,
+  CHAT_ROLES,
+  createMessageId,
+  type ChatMessage,
+  type ChatFileMeta,
+  type ChatError,
+  type ChatConversationState,
+} from '@/shared/chat'
+import {
   FAIRBOT_KEYWORDS,
   FAIRBOT_LABELS,
   FAIRBOT_MESSAGES,
   FAIRBOT_RESULTS,
-  FAIRBOT_ROLES,
   FAIRBOT_ROUTES,
   FAIRBOT_SESSION_KEYS,
   FAIRBOT_MOCK_DATA,
 } from '../constants/fairbot.constants'
 import type {
   FairBotAgentResponse,
-  FairBotConversationState,
-  FairBotError,
-  FairBotFileMeta,
-  FairBotMessage,
   FairBotResult,
   FairBotResultType,
 } from '../types/fairbot.types'
 import { useResultsPanel } from './useResultsPanel'
 
 // Manages FairBot conversation state, mock agent replies, and persistence.
-interface UseFairBotResult extends FairBotConversationState {
+interface UseFairBotResult extends ChatConversationState {
   sendMessage: (text: string, file?: File) => Promise<void>
 }
 
 // Initial welcome message from assistant shown when conversation is empty.
-const createWelcomeMessage = (): FairBotMessage => ({
+const createWelcomeMessage = (): ChatMessage => ({
   id: 'welcome',
-  role: FAIRBOT_ROLES.ASSISTANT,
+  role: CHAT_ROLES.ASSISTANT,
   text: FAIRBOT_LABELS.WELCOME_MESSAGE,
   timestamp: new Date().toISOString(),
 })
 
-const INITIAL_MESSAGES: FairBotMessage[] = [createWelcomeMessage()]
+const INITIAL_MESSAGES: ChatMessage[] = [createWelcomeMessage()]
 
 const canUseSessionStorage = (): boolean =>
-  typeof window !== FAIRBOT_ENV.TYPEOF_UNDEFINED && Boolean(window.sessionStorage)
+  typeof window !== CHAT_ENV.TYPEOF_UNDEFINED && Boolean(window.sessionStorage)
 
-const readMessagesFromSession = (): FairBotMessage[] => {
+const readMessagesFromSession = (): ChatMessage[] => {
   if (!canUseSessionStorage()) {
     return INITIAL_MESSAGES
   }
@@ -52,7 +55,7 @@ const readMessagesFromSession = (): FairBotMessage[] => {
 
     const parsed = JSON.parse(stored) as unknown
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed as FairBotMessage[]
+      return parsed as ChatMessage[]
     }
     return INITIAL_MESSAGES
   } catch {
@@ -60,7 +63,7 @@ const readMessagesFromSession = (): FairBotMessage[] => {
   }
 }
 
-const persistMessagesToSession = (messages: FairBotMessage[]) => {
+const persistMessagesToSession = (messages: ChatMessage[]) => {
   if (!canUseSessionStorage()) {
     return
   }
@@ -80,20 +83,17 @@ const persistMessagesToSession = (messages: FairBotMessage[]) => {
   }
 }
 
-const createMessageId = (): string =>
-  globalThis.crypto?.randomUUID?.() ?? String(Date.now())
-
-const createFileMeta = (file: File): FairBotFileMeta => ({
+const createFileMeta = (file: File): ChatFileMeta => ({
   name: file.name,
   size: file.size,
   type: file.type,
 })
 
 const createMessage = (
-  role: FairBotMessage['role'],
+  role: ChatMessage['role'],
   text: string,
   file?: File,
-): FairBotMessage => ({
+): ChatMessage => ({
   id: createMessageId(),
   role,
   text,
@@ -102,7 +102,7 @@ const createMessage = (
   fileMeta: file ? createFileMeta(file) : undefined,
 })
 
-const createError = (error: unknown): FairBotError => {
+const createError = (error: unknown): ChatError => {
   if (error instanceof Error && error.message) {
     return { message: error.message }
   }
@@ -180,11 +180,11 @@ const buildMockResponse = (text: string, file?: File): FairBotAgentResponse => {
 export const useFairBot = (): UseFairBotResult => {
   const { setCurrentResult } = useResultsPanel()
 
-  const [messages, setMessages] = useState<FairBotMessage[]>(
+  const [messages, setMessages] = useState<ChatMessage[]>(
     readMessagesFromSession,
   )
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<FairBotError | null>(null)
+  const [error, setError] = useState<ChatError | null>(null)
 
   useEffect(() => {
     persistMessagesToSession(messages)
@@ -202,7 +202,7 @@ export const useFairBot = (): UseFairBotResult => {
       setError(null)
 
       const userMessage = createMessage(
-        FAIRBOT_ROLES.USER,
+        CHAT_ROLES.USER,
         trimmedText,
         file,
       )
@@ -213,7 +213,7 @@ export const useFairBot = (): UseFairBotResult => {
         await Promise.resolve()
         const response = buildMockResponse(trimmedText, file)
         const assistantMessage = createMessage(
-          FAIRBOT_ROLES.ASSISTANT,
+          CHAT_ROLES.ASSISTANT,
           response.textResponse,
         )
 

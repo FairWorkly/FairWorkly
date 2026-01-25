@@ -7,20 +7,42 @@ import {
   type DragEvent,
   type RefObject,
 } from 'react'
-import {
-  FAIRBOT_ERRORS,
-  FAIRBOT_FILE,
-  FAIRBOT_NUMBERS,
-  FAIRBOT_TEXT,
-} from '../constants/fairbot.constants'
-import type { FairBotError, FairBotUploadState } from '../types/fairbot.types'
+import { CHAT_NUMBERS, CHAT_TEXT } from '../constants/chat.constants'
+import type { ChatError, ChatUploadState, ChatFileConfig } from '../types/chat.types'
 
-// Encapsulates drag/drop + file picker logic and validation for FairBot uploads.
-export interface UseFileUploadOptions {
-  onFileAccepted?: (file: File) => void
+// Default file configuration (can be overridden).
+const DEFAULT_FILE_CONFIG: ChatFileConfig = {
+  acceptedTypes: ['csv', 'xlsx'],
+  acceptedMime: [
+    'text/csv',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ],
+  maxSizeBytes: 5 * 1024 * 1024,
+  maxSizeLabel: '5MB',
+  acceptAttribute: '.csv,.xlsx',
 }
 
-export interface FileUploadControls extends FairBotUploadState {
+// Default error messages (can be overridden).
+const DEFAULT_ERRORS = {
+  invalidFileType: 'Unsupported file type. Please upload a valid file.',
+  fileTooLarge: 'File is too large.',
+  fileRequired: 'Please select a file to continue.',
+}
+
+export interface FileUploadErrorMessages {
+  invalidFileType?: string
+  fileTooLarge?: string
+  fileRequired?: string
+}
+
+export interface UseFileUploadOptions {
+  onFileAccepted?: (file: File) => void
+  fileConfig?: Partial<ChatFileConfig>
+  errorMessages?: FileUploadErrorMessages
+}
+
+export interface FileUploadControls extends ChatUploadState {
   acceptAttribute: string
   openFileDialog: () => void
   handleDragEnter: (event: DragEvent<HTMLElement>) => void
@@ -32,55 +54,72 @@ export interface FileUploadControls extends FairBotUploadState {
 }
 
 export interface UseFileUploadResult {
-  inputRef: RefObject<HTMLInputElement>
+  inputRef: RefObject<HTMLInputElement | null>
   controls: FileUploadControls
 }
 
 const getFileExtension = (fileName: string): string => {
-  const segments = fileName.split(FAIRBOT_FILE.NAME_SEPARATOR)
-  if (segments.length < FAIRBOT_NUMBERS.ONE) {
-    return FAIRBOT_TEXT.EMPTY
+  const segments = fileName.split('.')
+  if (segments.length < CHAT_NUMBERS.ONE) {
+    return CHAT_TEXT.EMPTY
   }
 
-  return segments[segments.length - FAIRBOT_NUMBERS.ONE].toLowerCase()
-}
-
-const isAcceptedFileType = (file: File): boolean => {
-  const extension = getFileExtension(file.name)
-  if (FAIRBOT_FILE.ACCEPTED_TYPES.includes(extension)) {
-    return true
-  }
-
-  if (FAIRBOT_FILE.ACCEPTED_MIME.includes(file.type)) {
-    return true
-  }
-
-  return false
-}
-
-const validateFile = (file: File): FairBotError | null => {
-  if (!isAcceptedFileType(file)) {
-    return { message: FAIRBOT_ERRORS.INVALID_FILE_TYPE }
-  }
-
-  if (file.size > FAIRBOT_FILE.MAX_SIZE_BYTES) {
-    return { message: FAIRBOT_ERRORS.FILE_TOO_LARGE }
-  }
-
-  return null
+  return segments[segments.length - CHAT_NUMBERS.ONE].toLowerCase()
 }
 
 export const useFileUpload = (
   options: UseFileUploadOptions = {},
 ): UseFileUploadResult => {
-  const { onFileAccepted } = options
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [state, setState] = useState<FairBotUploadState>({
+  const { onFileAccepted, fileConfig, errorMessages } = options
+
+  const config = useMemo<ChatFileConfig>(
+    () => ({ ...DEFAULT_FILE_CONFIG, ...fileConfig }),
+    [fileConfig],
+  )
+
+  const errors = useMemo(
+    () => ({ ...DEFAULT_ERRORS, ...errorMessages }),
+    [errorMessages],
+  )
+
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const [state, setState] = useState<ChatUploadState>({
     isDragging: false,
     isUploading: false,
     error: null,
-    acceptedFileTypes: [...FAIRBOT_FILE.ACCEPTED_TYPES],
+    acceptedFileTypes: [...config.acceptedTypes],
   })
+
+  const isAcceptedFileType = useCallback(
+    (file: File): boolean => {
+      const extension = getFileExtension(file.name)
+      if (config.acceptedTypes.includes(extension)) {
+        return true
+      }
+
+      if (config.acceptedMime.includes(file.type)) {
+        return true
+      }
+
+      return false
+    },
+    [config.acceptedTypes, config.acceptedMime],
+  )
+
+  const validateFile = useCallback(
+    (file: File): ChatError | null => {
+      if (!isAcceptedFileType(file)) {
+        return { message: errors.invalidFileType }
+      }
+
+      if (file.size > config.maxSizeBytes) {
+        return { message: `${errors.fileTooLarge} Max size is ${config.maxSizeLabel}.` }
+      }
+
+      return null
+    },
+    [isAcceptedFileType, errors, config.maxSizeBytes, config.maxSizeLabel],
+  )
 
   const reset = useCallback(() => {
     setState((prev) => ({
@@ -95,7 +134,6 @@ export const useFileUpload = (
     (file: File) => {
       const validationError = validateFile(file)
       if (validationError) {
-        // Surface validation errors through the shared upload state.
         setState((prev) => ({ ...prev, error: validationError }))
         return
       }
@@ -103,7 +141,7 @@ export const useFileUpload = (
       setState((prev) => ({ ...prev, error: null, isUploading: false }))
       onFileAccepted?.(file)
     },
-    [onFileAccepted],
+    [onFileAccepted, validateFile],
   )
 
   const handleDragEnter = useCallback((event: DragEvent<HTMLElement>) => {
@@ -130,36 +168,36 @@ export const useFileUpload = (
 
       setState((prev) => ({ ...prev, isDragging: false }))
       const files = event.dataTransfer.files
-      if (files.length < FAIRBOT_NUMBERS.ONE) {
+      if (files.length < CHAT_NUMBERS.ONE) {
         setState((prev) => ({
           ...prev,
-          error: { message: FAIRBOT_ERRORS.FILE_REQUIRED },
+          error: { message: errors.fileRequired },
         }))
         return
       }
 
-      const file = files[FAIRBOT_NUMBERS.ZERO]
+      const file = files[CHAT_NUMBERS.ZERO]
       handleAcceptedFile(file)
     },
-    [handleAcceptedFile],
+    [handleAcceptedFile, errors.fileRequired],
   )
 
   const handleFileSelect = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files
-      if (!files || files.length < FAIRBOT_NUMBERS.ONE) {
+      if (!files || files.length < CHAT_NUMBERS.ONE) {
         setState((prev) => ({
           ...prev,
-          error: { message: FAIRBOT_ERRORS.FILE_REQUIRED },
+          error: { message: errors.fileRequired },
         }))
         return
       }
 
-      const file = files[FAIRBOT_NUMBERS.ZERO]
+      const file = files[CHAT_NUMBERS.ZERO]
       handleAcceptedFile(file)
-      event.target.value = FAIRBOT_TEXT.EMPTY
+      event.target.value = CHAT_TEXT.EMPTY
     },
-    [handleAcceptedFile],
+    [handleAcceptedFile, errors.fileRequired],
   )
 
   const openFileDialog = useCallback(() => {
@@ -169,7 +207,7 @@ export const useFileUpload = (
   const controls = useMemo(
     () => ({
       ...state,
-      acceptAttribute: FAIRBOT_FILE.ACCEPT_ATTRIBUTE,
+      acceptAttribute: config.acceptAttribute,
       openFileDialog,
       handleDragEnter,
       handleDragLeave,
@@ -187,6 +225,7 @@ export const useFileUpload = (
       openFileDialog,
       reset,
       state,
+      config.acceptAttribute,
     ],
   )
 
@@ -195,6 +234,6 @@ export const useFileUpload = (
       inputRef,
       controls,
     }),
-    [controls, inputRef],
+    [controls],
   )
 }

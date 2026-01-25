@@ -1,20 +1,31 @@
 import { styled } from '@/styles/styled'
-import type { ReactNode, RefObject } from 'react'
+import type { ReactNode, RefObject, ChangeEvent, DragEvent } from 'react'
 import {
-  FAIRBOT_ARIA,
-  FAIRBOT_IDS,
-  FAIRBOT_INPUT_TYPES,
-  FAIRBOT_LABELS,
-  FAIRBOT_UPLOAD,
-} from '../../constants/fairbot.constants'
-import type { FileUploadControls } from '../../hooks/useFileUpload'
+  CHAT_ARIA,
+  CHAT_INPUT_TYPES,
+  CHAT_UPLOAD_UI,
+} from '../constants/chat.constants'
+import type { ChatError } from '../types/chat.types'
 
-interface FileUploadZoneProps {
-  upload: FileUploadControls
-  inputRef: RefObject<HTMLInputElement>
+export interface FileUploadControls {
+  isDragging: boolean
+  isUploading: boolean
+  error: ChatError | null
+  acceptAttribute: string
+  handleDragEnter: (event: DragEvent<HTMLElement>) => void
+  handleDragLeave: (event: DragEvent<HTMLElement>) => void
+  handleDragOver: (event: DragEvent<HTMLElement>) => void
+  handleDrop: (event: DragEvent<HTMLElement>) => void
+  handleFileSelect: (event: ChangeEvent<HTMLInputElement>) => void
+}
+
+export interface FileUploadZoneProps {
+  controls: FileUploadControls
+  inputRef: RefObject<HTMLInputElement | null>
   children: ReactNode
   helperText?: string
   disabled?: boolean
+  inputId?: string
 }
 
 interface UploadContainerProps {
@@ -27,14 +38,14 @@ const UploadContainer = styled('div', {
   shouldForwardProp: (prop) =>
     prop !== 'isDragging' && prop !== 'isDisabled',
 })<UploadContainerProps>(({ theme, isDragging, isDisabled }) => ({
-  border: FAIRBOT_UPLOAD.BORDER_NONE,
+  border: CHAT_UPLOAD_UI.BORDER_NONE,
   borderRadius: theme.fairworkly.radius.lg,
   padding: theme.spacing(1),
-  minHeight: `${FAIRBOT_UPLOAD.MIN_HEIGHT}px`,
+  minHeight: `${CHAT_UPLOAD_UI.MIN_HEIGHT}px`,
   backgroundColor: isDragging
     ? theme.palette.action.hover
     : theme.palette.background.default,
-  transition: `${FAIRBOT_UPLOAD.TRANSITION_PROPERTIES} ${FAIRBOT_UPLOAD.TRANSITION_MS}ms ${FAIRBOT_UPLOAD.TRANSITION_EASING}`,
+  transition: `${CHAT_UPLOAD_UI.TRANSITION_PROPERTIES} ${CHAT_UPLOAD_UI.TRANSITION_MS}ms ${CHAT_UPLOAD_UI.TRANSITION_EASING}`,
   opacity: isDisabled ? theme.palette.action.disabledOpacity : 1,
   pointerEvents: isDisabled ? 'none' : 'auto',
 }))
@@ -54,7 +65,7 @@ const HiddenInput = styled('input')({
 const HelperText = styled('p')(({ theme }) => ({
   ...theme.typography.body2,
   marginTop: theme.spacing(1),
-  marginLeft: `${FAIRBOT_UPLOAD.HELPER_TEXT_OFFSET_PX}px`,
+  marginLeft: `${CHAT_UPLOAD_UI.HELPER_TEXT_OFFSET_PX}px`,
   marginBottom: 0,
   color: theme.palette.text.secondary,
 }))
@@ -68,22 +79,23 @@ const ErrorText = styled('p')(({ theme }) => ({
 
 // Drag-and-drop file zone that wires to the shared upload controls.
 export const FileUploadZone = ({
-  upload,
+  controls,
   inputRef,
   children,
-  helperText = FAIRBOT_LABELS.UPLOAD_TIP,
+  helperText,
   disabled = false,
+  inputId = 'chat-file-input',
 }: FileUploadZoneProps) => {
-  const handleDragEnter = disabled ? undefined : upload.handleDragEnter
-  const handleDragLeave = disabled ? undefined : upload.handleDragLeave
-  const handleDragOver = disabled ? undefined : upload.handleDragOver
-  const handleDrop = disabled ? undefined : upload.handleDrop
-  const handleFileSelect = disabled ? undefined : upload.handleFileSelect
+  const handleDragEnter = disabled ? undefined : controls.handleDragEnter
+  const handleDragLeave = disabled ? undefined : controls.handleDragLeave
+  const handleDragOver = disabled ? undefined : controls.handleDragOver
+  const handleDrop = disabled ? undefined : controls.handleDrop
+  const handleFileSelect = disabled ? undefined : controls.handleFileSelect
 
   return (
     <UploadContainer
-      aria-label={FAIRBOT_ARIA.FILE_UPLOAD}
-      isDragging={upload.isDragging}
+      aria-label={CHAT_ARIA.FILE_UPLOAD}
+      isDragging={controls.isDragging}
       isDisabled={disabled}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -91,16 +103,16 @@ export const FileUploadZone = ({
       onDrop={handleDrop}
     >
       <HiddenInput
-        id={FAIRBOT_IDS.FILE_INPUT}
+        id={inputId}
         ref={inputRef}
-        type={FAIRBOT_INPUT_TYPES.FILE}
-        accept={upload.acceptAttribute}
+        type={CHAT_INPUT_TYPES.FILE}
+        accept={controls.acceptAttribute}
         onChange={handleFileSelect}
         disabled={disabled}
       />
-      <UploadSurface htmlFor={FAIRBOT_IDS.FILE_INPUT}>{children}</UploadSurface>
+      <UploadSurface htmlFor={inputId}>{children}</UploadSurface>
       {helperText ? <HelperText>{helperText}</HelperText> : null}
-      {upload.error ? <ErrorText role="alert">{upload.error.message}</ErrorText> : null}
+      {controls.error ? <ErrorText role="alert">{controls.error.message}</ErrorText> : null}
     </UploadContainer>
   )
 }
