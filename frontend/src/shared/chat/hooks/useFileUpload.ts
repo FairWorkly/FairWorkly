@@ -18,8 +18,8 @@ const DEFAULT_FILE_CONFIG: ChatFileConfig = {
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   ],
-  maxSizeBytes: 5 * 1024 * 1024,
-  maxSizeLabel: '5MB',
+  maxSizeBytes: 50 * 1024 * 1024,
+  maxSizeLabel: '50MB',
   acceptAttribute: '.csv,.xlsx',
 }
 
