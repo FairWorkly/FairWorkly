@@ -6,86 +6,84 @@ import {
   FAIRBOT_ARIA,
   FAIRBOT_LABELS,
   FAIRBOT_LAYOUT,
-  FAIRBOT_NUMBERS,
-  FAIRBOT_TEXT,
 } from '../constants/fairbot.constants'
 import { useConversation } from '../features/conversation/useConversation'
 import { useFileUpload } from '../hooks/useFileUpload'
-import { WelcomeMessage } from '../ui/WelcomeMessage'
-import { QuickActions } from '../features/quickActions/QuickActions'
 import { MessageList } from '../features/conversation/MessageList'
 import { FileUploadZone } from '../features/conversation/FileUploadZone'
 import { MessageInput } from '../features/conversation/MessageInput'
 import { ResultsPanel } from '../features/resultsPanel/ResultsPanel'
 
-// FairBot chat page wires conversation and upload flows into a three-column layout.
+// FairBot chat page wires conversation and upload flows into a two-column layout.
+// Sidebar is provided by MainLayout, so this page only has Chat + Results columns.
 const PageContainer = styled('div')({
   display: 'grid',
   gridTemplateColumns: FAIRBOT_LAYOUT.GRID_TEMPLATE_COLUMNS,
-  alignItems: 'start',
-  minHeight: FAIRBOT_LAYOUT.PAGE_MIN_HEIGHT,
-  width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
+  height: '100%',
+  width: '100%',
+  overflow: 'hidden',
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
-    gridTemplateColumns: FAIRBOT_TEXT.SINGLE_COLUMN,
+    gridTemplateColumns: '1fr',
+    height: 'auto',
+    overflow: 'auto',
   },
 })
 
-// Left column that holds the conversational UI stack.
+// Main column that holds the conversational UI stack.
 const ChatColumn = styled('section')({
-  display: FAIRBOT_LAYOUT.DISPLAY_FLEX,
-  flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
-  alignSelf: FAIRBOT_LAYOUT.ALIGN_STRETCH,
-  height: FAIRBOT_LAYOUT.PAGE_MIN_HEIGHT,
-  minHeight: FAIRBOT_NUMBERS.ZERO,
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  overflow: 'hidden',
 })
 
 // Page header for title/subtitle within the chat column.
-const ChatHeader = styled('header')({
+const ChatHeader = styled('header')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   height: `${FAIRBOT_LAYOUT.CHAT_HEADER_HEIGHT_PX}px`,
-  margin: `${FAIRBOT_LAYOUT.CHAT_SECTION_MARGIN_PX}px`,
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_STACK_GAP}px`,
-})
+  margin: theme.spacing(2),
+  gap: theme.spacing(1),
+}))
 
 // Scrollable wrapper around message list to keep input/footer in view.
-const ScrollArea = styled('div')({
+const ScrollArea = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_LIST_GAP}px`,
-  flex: FAIRBOT_NUMBERS.ONE,
-  minHeight: FAIRBOT_NUMBERS.ZERO,
+  gap: theme.spacing(2),
+  flex: 1,
+  minHeight: 0,
   overflowY: 'auto',
-  margin: `${FAIRBOT_LAYOUT.CHAT_SECTION_MARGIN_PX}px`,
-})
+  margin: theme.spacing(2),
+}))
 
 // Right column that hosts the summary panel (stacks below on mobile).
 const ResultsColumn = styled('aside')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
-  alignSelf: FAIRBOT_LAYOUT.ALIGN_STRETCH,
-  height: FAIRBOT_LAYOUT.COLUMN_FULL_HEIGHT,
+  height: '100%',
+  overflow: 'auto',
   [`@media (max-width: ${FAIRBOT_LAYOUT.MOBILE_BREAKPOINT}px)`]: {
-    order: FAIRBOT_NUMBERS.TWO,
+    order: 2,
   },
 }))
 
 const ResultsPanelWrapper = styled('div')({
-  display: FAIRBOT_LAYOUT.DISPLAY_FLEX,
-  flexDirection: FAIRBOT_LAYOUT.FLEX_DIRECTION_COLUMN,
-  alignItems: FAIRBOT_LAYOUT.ALIGN_CENTER,
-  justifyContent: FAIRBOT_LAYOUT.JUSTIFY_CENTER,
-  height: FAIRBOT_LAYOUT.COLUMN_FULL_HEIGHT,
-  width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: '100%',
+  width: '100%',
 })
 
-const MessageComposer = styled(Stack)({
-  margin: `${FAIRBOT_LAYOUT.CHAT_SECTION_MARGIN_PX}px`,
-})
+const MessageComposer = styled(Stack)(({ theme }) => ({
+  margin: theme.spacing(2),
+}))
 
 const MessageInputWrapper = styled('div')({
-  width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
+  width: '100%',
   '& > *': {
-    width: FAIRBOT_LAYOUT.COLUMN_FULL_WIDTH,
+    width: '100%',
   },
 })
 
@@ -110,18 +108,13 @@ export const FairBotChat = () => {
         </ChatHeader>
         <Divider />
         <ScrollArea>
-          <WelcomeMessage />
-          <QuickActions
-            upload={upload}
-            onSendMessage={conversation.sendMessage}
-          />
           <MessageList
             messages={conversation.messages}
             isTyping={conversation.isTyping}
           />
         </ScrollArea>
         <Divider />
-        <MessageComposer spacing={FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}>
+        <MessageComposer spacing={1.5}>
           <FileUploadZone
             upload={upload}
             inputRef={inputRef}

@@ -1,31 +1,31 @@
-import { styled } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
 import Typography from '@mui/material/Typography'
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline'
-import { FAIRBOT_LABELS, FAIRBOT_LAYOUT } from '../constants/fairbot.constants'
+import { FAIRBOT_LABELS } from '../constants/fairbot.constants'
 
 const MessageCard = styled('div')(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
-  padding: `${FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}px`,
+  padding: theme.spacing(1.5),
   backgroundColor: theme.palette.background.paper,
   border: `1px solid ${theme.palette.divider}`,
   display: 'flex',
   flexDirection: 'column',
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}px`,
+  gap: theme.spacing(1.5),
 }))
 
-const BulletList = styled('ul')({
+const BulletList = styled('ul')(({ theme }) => ({
   margin: 0,
-  paddingLeft: `${FAIRBOT_LAYOUT.MESSAGE_SECTION_GAP}px`,
+  paddingLeft: theme.spacing(1.5),
   display: 'flex',
   flexDirection: 'column',
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_STACK_GAP}px`,
-})
+  gap: theme.spacing(1),
+}))
 
-const BulletItem = styled('li')({
+const BulletItem = styled('li')(({ theme }) => ({
   display: 'flex',
   alignItems: 'flex-start',
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_STACK_GAP}px`,
-})
+  gap: theme.spacing(1),
+}))
 
 const BulletIcon = styled(CheckCircleOutline)(({ theme }) => ({
   color: theme.palette.primary.main,

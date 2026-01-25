@@ -29,7 +29,6 @@ src/modules/fairbot/
     useFairBot.ts
     useFileUpload.ts
     useMessageStream.ts
-    usePermissions.ts
     useResultsPanel.ts
   pages/
     FairBotChat.tsx
@@ -52,19 +51,15 @@ For shared UI, hooks, and constants referenced here, see `src/shared/README.md`.
 
 ## UI Composition (FairBotChat)
 
-- Sidebar column
-  - `Sidebar` from `src/shared/components/layout` (navigation)
-- Chat column
-  - `WelcomeMessage` (intro + bullet list)
-  - `QuickActions` (prebuilt actions + optional file upload)
-  - `MessageList` + `TypingIndicator`
+Two-column CSS grid layout (70% Chat + 30% Results). The sidebar is provided by `MainLayout`.
+
+- Chat column (70%)
+  - `ChatHeader` (title + subtitle)
+  - `MessageList` (includes welcome message as first assistant message)
   - `FileUploadZone` (drag/drop + browse)
   - `MessageInput` (text input + send)
-- Results column
+- Results column (30%)
   - `ResultsPanel` (summary or empty state)
-
-Note: `FairBotChat` renders `Sidebar` directly to achieve a three-column layout.
-If `MainLayout` is wired in later, avoid double sidebars.
 
 ## Core Data Flow
 
@@ -79,6 +74,7 @@ If `MainLayout` is wired in later, avoid double sidebars.
 - `useFairBot`
   - Owns message state, mock response building, and error handling.
   - Persists conversation (files are stripped before save).
+  - Includes welcome message as initial assistant message.
 - `useConversation`
   - View-model wrapper for messages, typing, and errors.
 - `useMessageStream`
@@ -89,8 +85,8 @@ If `MainLayout` is wired in later, avoid double sidebars.
   - Returns `{ inputRef, controls }` where `controls` is ref-free render state and handlers.
 - `useResultsPanel`
   - Reads/writes current results to `sessionStorage`.
-- `usePermissions`
-  - Placeholder hook; currently allows all actions.
+
+Permission checks use the shared `usePermissions` hook from `@/shared/hooks/usePermissions`.
 
 Note: `FileUploadZone` receives `inputRef` separately to avoid ref-like props in render.
 
@@ -140,5 +136,5 @@ Note: `FileUploadZone` receives `inputRef` separately to avoid ref-like props in
 ## Current Limitations
 
 - Responses and summaries use mock data.
-- Permission checks always pass.
+- Permission checks use dev-mode defaults (switch via `window.switchRole()`).
 - Files are not persisted to session storage.
