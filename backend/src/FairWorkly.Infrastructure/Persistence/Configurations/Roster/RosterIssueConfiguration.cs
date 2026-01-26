@@ -1,8 +1,8 @@
-using FairWorkly.Domain.Compliance.Entities;
+using FairWorkly.Domain.Roster.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace FairWorkly.Infrastructure.Persistence.Configurations.Compliance;
+namespace FairWorkly.Infrastructure.Persistence.Configurations.Roster;
 
 /// <summary>
 /// EF Core configuration for RosterIssue entity
@@ -15,51 +15,58 @@ public class RosterIssueConfiguration : IEntityTypeConfiguration<RosterIssue>
         builder.HasKey(ri => ri.Id);
 
         // RosterIssue -> Organization
-        builder.HasOne(ri => ri.Organization)
+        builder
+            .HasOne(ri => ri.Organization)
             .WithMany()
             .HasForeignKey(ri => ri.OrganizationId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // RosterIssue -> RosterValidation (configured in RosterValidationConfiguration)
-        builder.HasOne(ri => ri.RosterValidation)
+        builder
+            .HasOne(ri => ri.RosterValidation)
             .WithMany(rv => rv.Issues)
             .HasForeignKey(ri => ri.RosterValidationId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // RosterIssue -> Roster (configured in RosterConfiguration)
-        builder.HasOne(ri => ri.Roster)
-            .WithMany(r => r.Issues)
-            .HasForeignKey(ri => ri.RosterId)
-            .OnDelete(DeleteBehavior.NoAction);
-
         // RosterIssue -> Shift (optional, configured in ShiftConfiguration)
-        builder.HasOne(ri => ri.Shift)
+        builder
+            .HasOne(ri => ri.Shift)
             .WithMany(s => s.Issues)
             .HasForeignKey(ri => ri.ShiftId)
             .OnDelete(DeleteBehavior.NoAction);
 
         // RosterIssue -> Employee
-        builder.HasOne(ri => ri.Employee)
+        builder
+            .HasOne(ri => ri.Employee)
             .WithMany()
             .HasForeignKey(ri => ri.EmployeeId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // RosterIssue -> ResolvedByUser (optional)
-        builder.HasOne(ri => ri.ResolvedByUser)
+        builder
+            .HasOne(ri => ri.ResolvedByUser)
             .WithMany()
             .HasForeignKey(ri => ri.ResolvedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // RosterIssue -> WaivedByUser (optional)
-        builder.HasOne(ri => ri.WaivedByUser)
+        builder
+            .HasOne(ri => ri.WaivedByUser)
             .WithMany()
             .HasForeignKey(ri => ri.WaivedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Indexes
+        // Indexes - Composite indexes for common queries
         builder.HasIndex(ri => new { ri.RosterValidationId, ri.Severity });
-        builder.HasIndex(ri => new { ri.RosterId, ri.EmployeeId });
+        builder.HasIndex(ri => new { ri.RosterValidationId, ri.EmployeeId });
         builder.HasIndex(ri => ri.CheckType);
+
+        // Indexes - Explicit FK indexes for consistency with ModelSnapshot
+        builder.HasIndex(ri => ri.EmployeeId);
+        builder.HasIndex(ri => ri.OrganizationId);
+        builder.HasIndex(ri => ri.ResolvedByUserId);
+        builder.HasIndex(ri => ri.ShiftId);
+        builder.HasIndex(ri => ri.WaivedByUserId);
 
         // Ignore computed properties
         builder.Ignore(ri => ri.Variance);

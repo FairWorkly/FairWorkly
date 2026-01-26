@@ -4,7 +4,7 @@ using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
 
-namespace FairWorkly.Domain.Compliance.Entities;
+namespace FairWorkly.Domain.Roster.Entities;
 
 /// <summary>
 /// Represents a weekly roster (collection of shifts)
@@ -101,9 +101,4 @@ public class Roster : AuditableEntity
     /// One roster has many shifts
     /// </summary>
     public virtual ICollection<Shift> Shifts { get; set; } = new List<Shift>();
-
-    /// <summary>
-    /// All compliance issues found in this roster
-    /// </summary>
-    public virtual ICollection<RosterIssue> Issues { get; set; } = new List<RosterIssue>();
 }

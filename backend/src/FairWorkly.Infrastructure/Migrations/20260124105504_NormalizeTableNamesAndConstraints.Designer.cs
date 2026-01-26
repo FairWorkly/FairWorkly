@@ -3,6 +3,7 @@ using System;
 using FairWorkly.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FairWorkly.Infrastructure.Migrations
 {
     [DbContext(typeof(FairWorklyDbContext))]
-    partial class FairWorklyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260124105504_NormalizeTableNamesAndConstraints")]
+    partial class NormalizeTableNamesAndConstraints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -748,10 +751,11 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("affected_units");
 
-                    b.Property<string>("CategoryType")
+                    b.Property<string>("CheckType")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("category_type");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("check_type");
 
                     b.Property<string>("ContextLabel")
                         .HasMaxLength(100)
@@ -761,6 +765,12 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
 
                     b.Property<string>("DetailedExplanation")
                         .HasColumnType("text")
@@ -821,11 +831,6 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("unit_type");
-
-                    b.Property<string>("WarningMessage")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("warning_message");
 
                     b.HasKey("Id")
                         .HasName("pk_payroll_issues");
