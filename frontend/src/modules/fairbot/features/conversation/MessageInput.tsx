@@ -46,7 +46,7 @@ export const MessageInput = ({
   upload,
   disabled = false,
 }: MessageInputProps) => {
-  const [value, setValue] = useState(FAIRBOT_TEXT.EMPTY)
+  const [value, setValue] = useState<string>(FAIRBOT_TEXT.EMPTY)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

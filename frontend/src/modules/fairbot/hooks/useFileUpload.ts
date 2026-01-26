@@ -47,11 +47,11 @@ const getFileExtension = (fileName: string): string => {
 
 const isAcceptedFileType = (file: File): boolean => {
   const extension = getFileExtension(file.name)
-  if (FAIRBOT_FILE.ACCEPTED_TYPES.includes(extension)) {
+  if ((FAIRBOT_FILE.ACCEPTED_TYPES as readonly string[]).includes(extension)) {
     return true
   }
 
-  if (FAIRBOT_FILE.ACCEPTED_MIME.includes(file.type)) {
+  if ((FAIRBOT_FILE.ACCEPTED_MIME as readonly string[]).includes(file.type)) {
     return true
   }
 
