@@ -12,16 +12,21 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
+        // Table name (singular to match existing migrations)
+        builder.ToTable("user");
+
         // Configure AuditableEntity navigation properties
         // These must be explicitly configured because EF Core cannot infer
         // the relationship when multiple entities reference the same User entity
 
-        builder.HasOne(u => u.CreatedByUser)
+        builder
+            .HasOne(u => u.CreatedByUser)
             .WithMany()
             .HasForeignKey(u => u.CreatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(u => u.UpdatedByUser)
+        builder
+            .HasOne(u => u.UpdatedByUser)
             .WithMany()
             .HasForeignKey(u => u.UpdatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -29,7 +34,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         // User -> Organization relationship is configured in OrganizationConfiguration
 
         // User -> Employee (optional link for Employee role users)
-        builder.HasOne(u => u.Employee)
+        builder
+            .HasOne(u => u.Employee)
             .WithMany()
             .HasForeignKey(u => u.EmployeeId)
             .OnDelete(DeleteBehavior.SetNull);

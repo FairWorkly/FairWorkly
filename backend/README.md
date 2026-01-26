@@ -182,12 +182,21 @@ This project uses the Adapter Pattern to handle file storage, with the core inte
   - Physical Path: `src/FairWorkly.API/wwwroot/uploads/`.
   - **Note**: This directory is ignored in `.gitignore`.
 
+### 5. Entity Configuration Standards
+
+Entity configuration (table mapping, relationships, constraints) must be placed in dedicated Configuration classes, **not in DbContext**.
+
+- **Location**: `src/FairWorkly.Infrastructure/Persistence/Configurations/{Module}/`
+- **Pattern**: One Configuration class per Entity, implementing `IEntityTypeConfiguration<T>`
+
+> **⚠️ Forbidden**: Writing `modelBuilder.Entity<T>()` directly in `FairWorklyDbContext.OnModelCreating()`.
+
 ## 📂 Cheatsheet
 
 **Add Migration:**
 
 ```
-dotnet ef migrations add <MigrationName> --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API --output-dir Persistence/Migrations
+dotnet ef migrations add <MigrationName> --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
 ```
 
 **Update Database:**

@@ -1,0 +1,176 @@
+using FairWorkly.Domain.Common.Enums;
+using FairWorkly.Domain.Payroll.Entities;
+
+namespace FairWorkly.Application.Payroll.Services.ComplianceEngine;
+
+/// <summary>
+/// Validates that penalty rates (Saturday, Sunday, Public Holiday) are paid correctly
+/// IMPORTANT: ALL employee types use Permanent Rate as the base for penalty calculations
+/// Only the multiplier differs between Permanent and Casual employees
+/// </summary>
+public class PenaltyRateRule : IComplianceRule
+{
+    public string RuleName => "Penalty Rate Check";
+
+    public List<PayrollIssue> Evaluate(Payslip payslip, Guid validationId)
+    {
+        var issues = new List<PayrollIssue>();
+
+        var level = RateTableProvider.ParseLevel(payslip.Classification);
+        var baseRate = RateTableProvider.GetPermanentRate(level);
+
+        if (baseRate <= 0)
+        {
+            // Invalid level - should have been caught by pre-validation
+            return issues;
+        }
+
+        var isCasual = payslip.EmploymentType == EmploymentType.Casual;
+
+        // Check Saturday
+        if (payslip.SaturdayPay < 0)
+        {
+            issues.Add(
+                CreateNegativePayWarning(payslip, validationId, "Saturday", payslip.SaturdayPay)
+            );
+        }
+        else if (payslip.SaturdayHours > 0)
+        {
+            var multiplier = isCasual
+                ? RateTableProvider.CasualMultipliers.Saturday
+                : RateTableProvider.PermanentMultipliers.Saturday;
+
+            var expectedPay = baseRate * multiplier * payslip.SaturdayHours;
+
+            if (payslip.SaturdayPay < expectedPay - RateTableProvider.PayTolerance)
+            {
+                issues.Add(
+                    CreateIssue(
+                        payslip,
+                        validationId,
+                        "Saturday",
+                        expectedPay,
+                        payslip.SaturdayPay,
+                        payslip.SaturdayHours,
+                        multiplier
+                    )
+                );
+            }
+        }
+
+        // Check Sunday
+        if (payslip.SundayPay < 0)
+        {
+            issues.Add(
+                CreateNegativePayWarning(payslip, validationId, "Sunday", payslip.SundayPay)
+            );
+        }
+        else if (payslip.SundayHours > 0)
+        {
+            var multiplier = isCasual
+                ? RateTableProvider.CasualMultipliers.Sunday
+                : RateTableProvider.PermanentMultipliers.Sunday;
+
+            var expectedPay = baseRate * multiplier * payslip.SundayHours;
+
+            if (payslip.SundayPay < expectedPay - RateTableProvider.PayTolerance)
+            {
+                issues.Add(
+                    CreateIssue(
+                        payslip,
+                        validationId,
+                        "Sunday",
+                        expectedPay,
+                        payslip.SundayPay,
+                        payslip.SundayHours,
+                        multiplier
+                    )
+                );
+            }
+        }
+
+        // Check Public Holiday
+        if (payslip.PublicHolidayPay < 0)
+        {
+            issues.Add(
+                CreateNegativePayWarning(
+                    payslip,
+                    validationId,
+                    "Public Holiday",
+                    payslip.PublicHolidayPay
+                )
+            );
+        }
+        else if (payslip.PublicHolidayHours > 0)
+        {
+            var multiplier = isCasual
+                ? RateTableProvider.CasualMultipliers.PublicHoliday
+                : RateTableProvider.PermanentMultipliers.PublicHoliday;
+
+            var expectedPay = baseRate * multiplier * payslip.PublicHolidayHours;
+
+            if (payslip.PublicHolidayPay < expectedPay - RateTableProvider.PayTolerance)
+            {
+                issues.Add(
+                    CreateIssue(
+                        payslip,
+                        validationId,
+                        "Public Holiday",
+                        expectedPay,
+                        payslip.PublicHolidayPay,
+                        payslip.PublicHolidayHours,
+                        multiplier
+                    )
+                );
+            }
+        }
+
+        return issues;
+    }
+
+    private PayrollIssue CreateIssue(
+        Payslip payslip,
+        Guid validationId,
+        string dayType,
+        decimal expectedPay,
+        decimal actualPay,
+        decimal hours,
+        decimal multiplier
+    )
+    {
+        return new PayrollIssue
+        {
+            OrganizationId = payslip.OrganizationId,
+            PayrollValidationId = validationId,
+            PayslipId = payslip.Id,
+            EmployeeId = payslip.EmployeeId,
+            CategoryType = IssueCategory.PenaltyRate,
+            Severity = IssueSeverity.Error,
+            ExpectedValue = expectedPay / hours,
+            ActualValue = actualPay / hours,
+            AffectedUnits = hours,
+            UnitType = "Hour",
+            ContextLabel = $"{dayType} ({multiplier:P0} rate)",
+        };
+    }
+
+    private PayrollIssue CreateNegativePayWarning(
+        Payslip payslip,
+        Guid validationId,
+        string payType,
+        decimal amount
+    )
+    {
+        return new PayrollIssue
+        {
+            OrganizationId = payslip.OrganizationId,
+            PayrollValidationId = validationId,
+            PayslipId = payslip.Id,
+            EmployeeId = payslip.EmployeeId,
+            CategoryType = IssueCategory.PenaltyRate,
+            Severity = IssueSeverity.Warning,
+            WarningMessage =
+                $"Negative {payType} Pay detected (${Math.Abs(amount):F2}). Possible correction/reversal entry. Skipping compliance check.",
+        };
+    }
+}

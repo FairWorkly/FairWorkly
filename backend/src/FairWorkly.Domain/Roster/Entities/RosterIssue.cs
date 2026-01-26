@@ -5,7 +5,7 @@ using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Employees.Entities;
 
-namespace FairWorkly.Domain.Compliance.Entities;
+namespace FairWorkly.Domain.Roster.Entities;
 
 /// <summary>
 /// RosterIssue entity
@@ -36,17 +36,6 @@ public class RosterIssue : BaseEntity
     /// Navigation property to validation
     /// </summary>
     public virtual RosterValidation RosterValidation { get; set; } = null!;
-
-    /// <summary>
-    /// Which roster this issue belongs to
-    /// </summary>
-    [Required]
-    public Guid RosterId { get; set; }
-
-    /// <summary>
-    /// Navigation property to roster
-    /// </summary>
-    public virtual Roster Roster { get; set; } = null!;
 
     /// <summary>
     /// Which shift has the issue (if issue is shift-specific)

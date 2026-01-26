@@ -1,8 +1,8 @@
-using FairWorkly.Domain.Compliance.Entities;
+using FairWorkly.Domain.Roster.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace FairWorkly.Infrastructure.Persistence.Configurations.Compliance;
+namespace FairWorkly.Infrastructure.Persistence.Configurations.Roster;
 
 /// <summary>
 /// EF Core configuration for Shift entity
@@ -15,31 +15,40 @@ public class ShiftConfiguration : IEntityTypeConfiguration<Shift>
         builder.HasKey(s => s.Id);
 
         // Shift -> Organization
-        builder.HasOne(s => s.Organization)
+        builder
+            .HasOne(s => s.Organization)
             .WithMany()
             .HasForeignKey(s => s.OrganizationId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Shift -> Roster (configured in RosterConfiguration as well)
-        builder.HasOne(s => s.Roster)
+        builder
+            .HasOne(s => s.Roster)
             .WithMany(r => r.Shifts)
             .HasForeignKey(s => s.RosterId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Shift -> Employee
-        builder.HasOne(s => s.Employee)
+        builder
+            .HasOne(s => s.Employee)
             .WithMany(e => e.Shifts)
             .HasForeignKey(s => s.EmployeeId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Shift -> RosterIssues (One-to-Many, optional relationship)
-        builder.HasMany(s => s.Issues)
+        builder
+            .HasMany(s => s.Issues)
             .WithOne(i => i.Shift)
             .HasForeignKey(i => i.ShiftId)
             .OnDelete(DeleteBehavior.NoAction);
 
         // Indexes
-        builder.HasIndex(s => new { s.RosterId, s.EmployeeId, s.Date });
+        builder.HasIndex(s => new
+        {
+            s.RosterId,
+            s.EmployeeId,
+            s.Date,
+        });
         builder.HasIndex(s => new { s.OrganizationId, s.Date });
         builder.HasIndex(s => new { s.EmployeeId, s.Date });
 
