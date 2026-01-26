@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { useMessageStream } from '@/shared/chat'
-import type { ChatMessage } from '@/shared/chat'
+import { useMessageStream } from '@/modules/fairbot/features/conversation'
+import type { ChatMessage } from '@/modules/fairbot/features/conversation'
 import { useFairBot } from './useFairBot'
 
 // View-model hook that combines conversation state with typing indicator timing.

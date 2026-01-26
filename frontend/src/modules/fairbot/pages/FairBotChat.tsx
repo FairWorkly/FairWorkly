@@ -5,7 +5,7 @@ import {
   MessageInput,
   FileUploadZone,
   useFileUpload,
-} from '@/shared/chat'
+} from '@/modules/fairbot/features/conversation'
 import {
   FAIRBOT_ARIA,
   FAIRBOT_LABELS,

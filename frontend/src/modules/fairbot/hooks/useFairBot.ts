@@ -7,7 +7,7 @@ import {
   type ChatFileMeta,
   type ChatError,
   type ChatConversationState,
-} from '@/shared/chat'
+} from '@/modules/fairbot/features/conversation'
 import {
   FAIRBOT_KEYWORDS,
   FAIRBOT_LABELS,
