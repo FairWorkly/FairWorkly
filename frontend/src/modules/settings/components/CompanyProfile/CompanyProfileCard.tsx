@@ -1,5 +1,3 @@
-// modules/settings/components/CompanyProfile/CompanyProfileCard.tsx
-
 import { Edit as EditIcon } from '@mui/icons-material'
 import {
   ProfileCard,

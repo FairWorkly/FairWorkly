@@ -1,10 +1,10 @@
-import { Box, Button, Paper, Typography } from '@mui/material'
+import { Box, Button, DialogActions, Paper, Typography } from '@mui/material'
 import { styled } from '@/styles/styled'
 
-
+// Card部分
 export const ProfileCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
-  borderRadius: `${theme.fairworkly.radius.lg}px`,
+  borderRadius: theme.fairworkly.radius.lg,
   border: `1px solid ${theme.palette.divider}`,
   transition: theme.transitions.create(['box-shadow', 'border-color'], {
     duration: theme.transitions.duration.short,
@@ -25,15 +25,16 @@ export const CardHeader = styled(Box)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,
 }))
 
-export const CardHeaderContent = styled(Box)(() => ({
+const Column = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
 }))
 
+export const CardHeaderContent = styled(Column)(() => ({}))
+
 export const CardTitle = styled(Typography)(({ theme }) => ({
   ...theme.typography.h6,
   color: theme.palette.text.primary,
-  fontWeight: theme.typography.fontWeightBold,
 }))
 
 export const CardDescription = styled(Typography)(({ theme }) => ({
@@ -43,13 +44,13 @@ export const CardDescription = styled(Typography)(({ theme }) => ({
 }))
 
 
-export const CardContent = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
+export const CardContent = styled(Column)(({ theme }) => ({
   gap: theme.spacing(2.5),
 }))
 
 
+
+// Form部分
 export const FormRow = styled(Box)(({ theme }) => ({
   display: 'grid',
   gridTemplateColumns: '180px 1fr',
@@ -70,8 +71,7 @@ export const FormField = styled(Box)(() => ({
 
 
 export const FieldLabel = styled(Box)(({ theme }) => ({
-  fontSize: theme.typography.body2.fontSize,
-  fontWeight: theme.typography.fontWeightBold,
+  ...theme.typography.uiLabel,
   color: theme.palette.text.secondary,
   lineHeight: 1.6,
   paddingTop: theme.spacing(1.5),
@@ -79,19 +79,15 @@ export const FieldLabel = styled(Box)(({ theme }) => ({
 
 
 export const FieldValue = styled(Box)(({ theme }) => ({
-  fontSize: theme.typography.body1.fontSize,
+  ...theme.typography.body1,
   color: theme.palette.text.primary,
-  lineHeight: 1.6,
   paddingTop: theme.spacing(1.5),
   minHeight: theme.spacing(5),
-
-  // 空值显示占位符
   '&:empty::before': {
     content: '"—"',
     color: theme.palette.text.disabled,
   },
 }))
-
 
 export const LogoPlaceholder = styled(Box)(({ theme }) => ({
   width: 120,
@@ -116,7 +112,7 @@ export const LogoPlaceholder = styled(Box)(({ theme }) => ({
   },
 }))
 
-
+// Button部分
 export const ButtonContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(1.5),
@@ -124,27 +120,23 @@ export const ButtonContainer = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(1),
 }))
 
-export const EditButton = styled(Button)(({ theme }) => ({
+const BaseActionButton = styled(Button)(({ theme }) => ({
   minWidth: theme.spacing(10),
   fontWeight: theme.typography.fontWeightMedium,
 }))
 
-export const CancelButton = styled(Button)(({ theme }) => ({
-  minWidth: theme.spacing(10),
+export const EditButton = styled(BaseActionButton)(() => ({}))
+
+export const CancelButton = styled(BaseActionButton)(({ theme }) => ({
   color: theme.palette.text.secondary,
   borderColor: theme.palette.divider,
-  fontWeight: theme.typography.fontWeightMedium,
-
   '&:hover': {
     borderColor: theme.palette.text.secondary,
     backgroundColor: theme.palette.action.hover,
   },
 }))
 
-export const SaveButton = styled(Button)(({ theme }) => ({
-  minWidth: theme.spacing(10),
-  fontWeight: theme.typography.fontWeightMedium,
-
+export const SaveButton = styled(BaseActionButton)(({ theme }) => ({
   '&.Mui-disabled': {
     backgroundColor: theme.palette.action.disabledBackground,
     color: theme.palette.action.disabled,
@@ -155,7 +147,7 @@ export const BadgeContainer = styled(Box)(({ theme }) => ({
   display: 'inline-flex',
   alignItems: 'center',
   padding: theme.spacing(0.5, 1.5),
-  borderRadius: `${theme.fairworkly.radius.pill}px`,
+  borderRadius: theme.fairworkly.radius.lg,
   backgroundColor: theme.palette.primary.main,
   color: theme.palette.primary.contrastText,
   fontSize: theme.typography.caption.fontSize,
@@ -164,7 +156,7 @@ export const BadgeContainer = styled(Box)(({ theme }) => ({
   letterSpacing: '0.05em',
 }))
 
-
+// Award部分
 export const AwardItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
@@ -200,6 +192,31 @@ export const AwardMeta = styled(Box)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
+export const EmptyStateText = styled(Typography)(({ theme }) => ({
+  ...theme.typography.body2,
+  color: theme.palette.text.secondary,
+  paddingTop: theme.spacing(2),
+  paddingBottom: theme.spacing(2),
+}))
+
+export const AwardTitleText = styled(Typography)(({ theme }) => ({
+  ...theme.typography.subtitle2,
+  color: theme.palette.text.primary,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+}))
+
+export const AwardMetaText = styled(Typography)(({ theme }) => ({
+  ...theme.typography.body2,
+  color: theme.palette.text.primary,
+}))
+
+export const AwardDateText = styled(Typography)(({ theme }) => ({
+  ...theme.typography.caption,
+  color: theme.palette.text.secondary,
+}))
+
 
 export const AddAwardButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(1),
@@ -220,4 +237,26 @@ export const ErrorText = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(0.5),
+}))
+
+
+// Dialog部分
+export const DialogHeader = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(3, 3, 0),
+}))
+
+export const DialogBody = styled(Column)(({ theme }) => ({
+  gap: theme.spacing(3),
+  paddingTop: theme.spacing(2),
+  paddingBottom: theme.spacing(2),
+}))
+
+export const FieldBlock = styled(Column)(({ theme }) => ({
+  gap: theme.spacing(1),
+}))
+
+export const DialogFooter = styled(DialogActions)(({ theme }) => ({
+  paddingLeft: theme.spacing(3),
+  paddingRight: theme.spacing(3),
+  paddingBottom: theme.spacing(3),
 }))

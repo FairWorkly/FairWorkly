@@ -1,5 +1,3 @@
-// modules/settings/components/CompanyProfile/CompanyProfile.tsx
-
 import { useState } from 'react'
 import { BusinessInfoCard } from './BusinessInfoCard'
 import { ContactCard } from './ContactCard'
@@ -13,7 +11,6 @@ import type { AwardType } from '@/shared/compliance-check'
 export function CompanyProfile() {
 
   const [profile, setProfile] = useState(mockCompanyProfile)
-
 
   const handleSaveBusinessInfo = (data: BusinessInfo) => {
     setProfile(prev => ({
@@ -43,7 +40,7 @@ export function CompanyProfile() {
 
   const handleAddAward = (awardType: AwardType, employeeCount: number) => {
     const newAward: Award = {
-      id: `temp-${Date.now()}`, // 临时ID
+      id: `temp-${Date.now()}`,
       awardType: awardType,
       isPrimary: profile.awards.length === 0, // 第一个设为Primary
       employeeCount: employeeCount,
@@ -54,11 +51,7 @@ export function CompanyProfile() {
       ...prev,
       awards: [...prev.awards, newAward],
     }))
-
-    console.log('Award added:', newAward)
     // TODO: 调用API
-    // const response = await organizationApi.addAward({ awardType, employeeCount })
-    // setProfile(prev => ({ ...prev, awards: [...prev.awards, response.data] }))
   }
 
   const handleDeleteAward = (awardId: string) => {
@@ -67,9 +60,7 @@ export function CompanyProfile() {
       awards: prev.awards.filter(award => award.id !== awardId),
     }))
 
-    console.log('Award deleted:', awardId)
     // TODO: 调用API
-    // await organizationApi.deleteAward(awardId)
   }
   return (
     <>
