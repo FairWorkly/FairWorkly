@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - zoe-devops-week3-workflow
     paths:
       - 'frontend/**'
       - '.github/workflows/deploy-frontend.yml'
