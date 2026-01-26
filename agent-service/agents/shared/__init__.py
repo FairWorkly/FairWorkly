@@ -4,16 +4,16 @@ Shared Services for FairWorkly Agents
 This package contains reusable code for all agents:
 - LLM providers (Claude, OpenAI)
 - RAG retrieval (vector database)
-- File handling (Excel, CSV)
+- Roster Excel parsing
 - Prompt building
 
 Usage:
     from agents.shared.llm import LLMProvider
-    from agents.shared import RAGRetriever, FileHandler
+    from agents.shared import RAGRetriever, RosterExcelParser
 """
 
 # Make imports easier
-from .file_handler import FileHandler
+from .roster_excel_parser import RosterExcelParser
 from .prompt_builder_base import PromptBuilderBase
 
 # RAG-related (if using vector database)
