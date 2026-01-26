@@ -1,5 +1,3 @@
-// modules/settings/components/CompanyProfile/BusinessInfoCard.tsx
-
 import { useState } from 'react'
 import { TextField, MenuItem } from '@mui/material'
 import { Business as BusinessIcon } from '@mui/icons-material'

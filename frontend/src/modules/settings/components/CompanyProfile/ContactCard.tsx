@@ -1,5 +1,3 @@
-// modules/settings/components/CompanyProfile/ContactCard.tsx
-
 import { useState } from 'react'
 import { TextField } from '@mui/material'
 import { CompanyProfileCard } from './CompanyProfileCard'
