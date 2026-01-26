@@ -103,6 +103,10 @@ public class CsvParserService : ICsvParserService
 
         if (string.IsNullOrWhiteSpace(row.EmploymentType))
             errors.Add($"Row {rowNumber}: Employment Type is required");
+        else if (!IsValidEmploymentType(row.EmploymentType))
+            errors.Add(
+                $"Row {rowNumber}: Invalid Employment Type '{row.EmploymentType}'. Valid values: FullTime, PartTime, Casual, FixedTerm"
+            );
 
         if (row.HourlyRate <= 0)
             errors.Add($"Row {rowNumber}: Hourly Rate must be greater than 0");
@@ -110,16 +114,20 @@ public class CsvParserService : ICsvParserService
         if (row.OrdinaryHours < 0)
             errors.Add($"Row {rowNumber}: Ordinary Hours cannot be negative");
 
-        if (row.OrdinaryPay < 0)
-            errors.Add($"Row {rowNumber}: Ordinary Pay cannot be negative");
-
-        if (row.GrossPay < 0)
-            errors.Add($"Row {rowNumber}: Gross Pay cannot be negative");
-
         if (row.SuperannuationPaid < 0)
             errors.Add($"Row {rowNumber}: Superannuation Paid cannot be negative");
 
         return errors;
+    }
+
+    /// <summary>
+    /// Validates if the employment type is a valid value
+    /// </summary>
+    private static bool IsValidEmploymentType(string employmentType)
+    {
+        var normalized = employmentType.Trim().ToLowerInvariant().Replace("-", "").Replace(" ", "");
+        var validTypes = new[] { "fulltime", "parttime", "casual", "fixedterm" };
+        return validTypes.Contains(normalized);
     }
 }
 

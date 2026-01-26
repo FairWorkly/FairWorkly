@@ -18,6 +18,10 @@ import type {
   FairBotMessage,
   FairBotResult,
   FairBotResultType,
+  PayrollSummaryData,
+  RosterSummaryData,
+  EmployeeSummaryData,
+  DocumentSummaryData,
 } from '../types/fairbot.types'
 import { useResultsPanel } from './useResultsPanel'
 
@@ -140,25 +144,25 @@ const buildQuickSummary = (resultType: FairBotResultType): FairBotResult => {
     case FAIRBOT_RESULTS.TYPES.PAYROLL:
       return {
         type: FAIRBOT_RESULTS.TYPES.PAYROLL,
-        data: FAIRBOT_MOCK_DATA.PAYROLL,
+        data: FAIRBOT_MOCK_DATA.PAYROLL as unknown as PayrollSummaryData,
         detailsUrl: FAIRBOT_ROUTES.PAYROLL,
       }
     case FAIRBOT_RESULTS.TYPES.ROSTER:
       return {
         type: FAIRBOT_RESULTS.TYPES.ROSTER,
-        data: FAIRBOT_MOCK_DATA.ROSTER,
+        data: FAIRBOT_MOCK_DATA.ROSTER as unknown as RosterSummaryData,
         detailsUrl: FAIRBOT_ROUTES.ROSTER,
       }
     case FAIRBOT_RESULTS.TYPES.EMPLOYEE:
       return {
         type: FAIRBOT_RESULTS.TYPES.EMPLOYEE,
-        data: FAIRBOT_MOCK_DATA.EMPLOYEE,
+        data: FAIRBOT_MOCK_DATA.EMPLOYEE as unknown as EmployeeSummaryData,
         detailsUrl: FAIRBOT_ROUTES.EMPLOYEE,
       }
     case FAIRBOT_RESULTS.TYPES.DOCUMENT:
       return {
         type: FAIRBOT_RESULTS.TYPES.DOCUMENT,
-        data: FAIRBOT_MOCK_DATA.DOCUMENT,
+        data: FAIRBOT_MOCK_DATA.DOCUMENT as unknown as DocumentSummaryData,
         detailsUrl: FAIRBOT_ROUTES.DOCUMENT,
       }
   }

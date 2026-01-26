@@ -36,7 +36,8 @@ namespace FairWorkly.Infrastructure.Migrations
                 table: "roster_issues",
                 column: "roster_id",
                 principalTable: "rosters",
-                principalColumn: "id");
+                principalColumn: "id",
+                onDelete: ReferentialAction.NoAction);
 
             migrationBuilder.AddForeignKey(
                 name: "fk_rosters_users_created_by_user_id",

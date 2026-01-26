@@ -4,7 +4,7 @@ using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
 
-namespace FairWorkly.Domain.Compliance.Entities;
+namespace FairWorkly.Domain.Roster.Entities;
 
 /// <summary>
 /// Represents a single roster compliance validation run
@@ -153,5 +153,5 @@ public class RosterValidation : AuditableEntity
     /// <summary>
     /// All compliance issues found during this validation
     /// </summary>
-    public virtual ICollection<RosterIssue> Issues { get; set; } = new List<RosterIssue>();
+    public virtual ICollection<RosterIssue> Issues { get; set; } = [];
 }

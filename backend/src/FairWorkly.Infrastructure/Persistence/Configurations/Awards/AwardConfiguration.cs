@@ -15,7 +15,8 @@ public class AwardConfiguration : IEntityTypeConfiguration<Award>
         builder.HasKey(a => a.Id);
 
         // Award -> AwardLevels (One-to-Many)
-        builder.HasMany(a => a.Levels)
+        builder
+            .HasMany(a => a.Levels)
             .WithOne(l => l.Award)
             .HasForeignKey(l => l.AwardId)
             .OnDelete(DeleteBehavior.Cascade);

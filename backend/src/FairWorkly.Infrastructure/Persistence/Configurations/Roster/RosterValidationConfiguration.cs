@@ -1,8 +1,8 @@
-using FairWorkly.Domain.Compliance.Entities;
+using FairWorkly.Domain.Roster.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace FairWorkly.Infrastructure.Persistence.Configurations.Compliance;
+namespace FairWorkly.Infrastructure.Persistence.Configurations.Roster;
 
 /// <summary>
 /// EF Core configuration for RosterValidation entity
@@ -15,18 +15,21 @@ public class RosterValidationConfiguration : IEntityTypeConfiguration<RosterVali
         builder.HasKey(rv => rv.Id);
 
         // Configure AuditableEntity navigation properties
-        builder.HasOne(rv => rv.CreatedByUser)
+        builder
+            .HasOne(rv => rv.CreatedByUser)
             .WithMany()
             .HasForeignKey(rv => rv.CreatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(rv => rv.UpdatedByUser)
+        builder
+            .HasOne(rv => rv.UpdatedByUser)
             .WithMany()
             .HasForeignKey(rv => rv.UpdatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // RosterValidation -> Organization
-        builder.HasOne(rv => rv.Organization)
+        builder
+            .HasOne(rv => rv.Organization)
             .WithMany()
             .HasForeignKey(rv => rv.OrganizationId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -35,7 +38,8 @@ public class RosterValidationConfiguration : IEntityTypeConfiguration<RosterVali
         // Configured in RosterConfiguration as the principal side
 
         // RosterValidation -> RosterIssues (One-to-Many)
-        builder.HasMany(rv => rv.Issues)
+        builder
+            .HasMany(rv => rv.Issues)
             .WithOne(i => i.RosterValidation)
             .HasForeignKey(i => i.RosterValidationId)
             .OnDelete(DeleteBehavior.Cascade);

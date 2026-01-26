@@ -1,10 +1,15 @@
 using System.Reflection;
 using FairWorkly.Domain.Auth.Entities;
+using FairWorkly.Domain.Awards.Entities;
 using FairWorkly.Domain.Common;
-using FairWorkly.Domain.Compliance.Entities;
+using FairWorkly.Domain.Documents.Entities;
 using FairWorkly.Domain.Employees.Entities;
 using FairWorkly.Domain.Payroll.Entities;
+using FairWorkly.Domain.Roster.Entities;
 using Microsoft.EntityFrameworkCore;
+
+// All entity relationship configurations are in:
+// Infrastructure/Persistence/Configurations/{Module}/*Configuration.cs
 
 namespace FairWorkly.Infrastructure.Persistence
 {
@@ -15,8 +20,14 @@ namespace FairWorkly.Infrastructure.Persistence
 
         public DbSet<User> Users { get; set; }
         public DbSet<Organization> Organizations { get; set; }
+        public DbSet<OrganizationAward> OrganizationAwards { get; set; }
 
         public DbSet<Employee> Employees { get; set; }
+
+        public DbSet<Award> Awards { get; set; }
+        public DbSet<AwardLevel> AwardLevels { get; set; }
+
+        public DbSet<Document> Documents { get; set; }
 
         public DbSet<Payslip> Payslips { get; set; }
         public DbSet<PayrollValidation> PayrollValidations { get; set; }
@@ -30,131 +41,9 @@ namespace FairWorkly.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
-            // Automatically load all configurations under the current assembly
+            // Automatically load all configurations from *Configuration.cs files
+            // All entity relationships, indexes, and property configurations are defined there
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-            // Align with singular table names in migrations
-            modelBuilder.Entity<User>().ToTable("user");
-            modelBuilder.Entity<Organization>().ToTable("organization");
-
-            modelBuilder
-                .Entity<Organization>()
-                .HasOne(organization => organization.CreatedByUser)
-                .WithMany()
-                .HasForeignKey(organization => organization.CreatedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<Organization>()
-                .HasOne(organization => organization.UpdatedByUser)
-                .WithMany()
-                .HasForeignKey(organization => organization.UpdatedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<Employee>()
-                .HasOne(employee => employee.CreatedByUser)
-                .WithMany()
-                .HasForeignKey(employee => employee.CreatedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<Employee>()
-                .HasOne(employee => employee.UpdatedByUser)
-                .WithMany()
-                .HasForeignKey(employee => employee.UpdatedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<User>()
-                .HasOne(user => user.CreatedByUser)
-                .WithMany()
-                .HasForeignKey(user => user.CreatedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<User>()
-                .HasOne(user => user.UpdatedByUser)
-                .WithMany()
-                .HasForeignKey(user => user.UpdatedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<User>()
-                .HasOne(user => user.Employee)
-                .WithMany()
-                .HasForeignKey(user => user.EmployeeId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<Shift>()
-                .HasOne(shift => shift.Organization)
-                .WithMany()
-                .HasForeignKey(shift => shift.OrganizationId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<Shift>()
-                .HasOne(shift => shift.Employee)
-                .WithMany(e => e.Shifts)
-                .HasForeignKey(shift => shift.EmployeeId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<RosterValidation>()
-                .HasOne(rv => rv.CreatedByUser)
-                .WithMany()
-                .HasForeignKey(rv => rv.CreatedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<RosterValidation>()
-                .HasOne(rv => rv.UpdatedByUser)
-                .WithMany()
-                .HasForeignKey(rv => rv.UpdatedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<RosterIssue>()
-                .HasOne(ri => ri.Organization)
-                .WithMany()
-                .HasForeignKey(ri => ri.OrganizationId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<RosterIssue>()
-                .HasOne(ri => ri.RosterValidation)
-                .WithMany(rv => rv.Issues)
-                .HasForeignKey(ri => ri.RosterValidationId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder
-                .Entity<RosterIssue>()
-                .HasOne(ri => ri.Shift)
-                .WithMany(s => s.Issues)
-                .HasForeignKey(ri => ri.ShiftId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<RosterIssue>()
-                .HasOne(ri => ri.Employee)
-                .WithMany()
-                .HasForeignKey(ri => ri.EmployeeId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<RosterIssue>()
-                .HasOne(ri => ri.ResolvedByUser)
-                .WithMany()
-                .HasForeignKey(ri => ri.ResolvedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder
-                .Entity<RosterIssue>()
-                .HasOne(ri => ri.WaivedByUser)
-                .WithMany()
-                .HasForeignKey(ri => ri.WaivedByUserId)
-                .OnDelete(DeleteBehavior.NoAction);
         }
 
         public override async Task<int> SaveChangesAsync(
@@ -173,6 +62,7 @@ namespace FairWorkly.Infrastructure.Persistence
 
             foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
             {
+
                 if (entry.State == EntityState.Modified)
                 {
                     entry.Entity.UpdatedAt = now;

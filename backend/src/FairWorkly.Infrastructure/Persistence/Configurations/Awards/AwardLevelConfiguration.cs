@@ -15,16 +15,27 @@ public class AwardLevelConfiguration : IEntityTypeConfiguration<AwardLevel>
         builder.HasKey(al => al.Id);
 
         // AwardLevel -> Award (configured in AwardConfiguration as well)
-        builder.HasOne(al => al.Award)
+        builder
+            .HasOne(al => al.Award)
             .WithMany(a => a.Levels)
             .HasForeignKey(al => al.AwardId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
         // Active rate lookup: Award + Level + IsActive
-        builder.HasIndex(al => new { al.AwardId, al.LevelNumber, al.IsActive });
+        builder.HasIndex(al => new
+        {
+            al.AwardId,
+            al.LevelNumber,
+            al.IsActive,
+        });
         // Historical rate lookup: Award + Level + EffectiveFrom
-        builder.HasIndex(al => new { al.AwardId, al.LevelNumber, al.EffectiveFrom });
+        builder.HasIndex(al => new
+        {
+            al.AwardId,
+            al.LevelNumber,
+            al.EffectiveFrom,
+        });
 
         // Property configurations
         builder.Property(al => al.LevelName).HasMaxLength(100).IsRequired();

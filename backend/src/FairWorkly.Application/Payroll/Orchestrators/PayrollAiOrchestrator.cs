@@ -1,13 +1,9 @@
-﻿using FairWorkly.Application.Common.Interfaces;
+using FairWorkly.Application.Common.Interfaces;
 
-namespace FairWorkly.Application.Payroll.Orchestrators;
-
-public class PayrollAiOrchestrator
+namespace FairWorkly.Application.Payroll.Orchestrators
 {
-    private readonly IAiClient _aiClient;
-
-    public PayrollAiOrchestrator(IAiClient aiClient)
+    public class PayrollAiOrchestrator(IAiClient aiClient)
     {
-        _aiClient = aiClient;
+        private readonly IAiClient _aiClient = aiClient;
     }
 }
