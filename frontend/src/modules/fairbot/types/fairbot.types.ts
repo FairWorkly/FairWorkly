@@ -1,51 +1,5 @@
-// Chat participant roles used to render message styling and labels.
-export type FairBotMessageRole = 'user' | 'assistant'
-
-// Serializable metadata for uploaded files (stored alongside messages).
-export interface FairBotFileMeta {
-  name: string
-  size: number
-  type: string
-}
-
-// Chat message model used across UI and session storage.
-export interface FairBotMessage {
-  id: string
-  role: FairBotMessageRole
-  text: string
-  timestamp: string
-  // Raw file object (not persisted to session storage).
-  file?: File
-  // Persisted metadata for file display in the chat.
-  fileMeta?: FairBotFileMeta
-}
-
-// Payload for sending a message with an optional file.
-export interface FairBotSendMessagePayload {
-  text: string
-  file?: File
-}
-
-// Standard error shape used by FairBot hooks.
-export interface FairBotError {
-  message: string
-  code?: string
-}
-
-// Conversation state owned by the main FairBot hook.
-export interface FairBotConversationState {
-  messages: FairBotMessage[]
-  isLoading: boolean
-  error: FairBotError | null
-}
-
-// Upload state used by the file drop zone and controls.
-export interface FairBotUploadState {
-  isDragging: boolean
-  isUploading: boolean
-  error: FairBotError | null
-  acceptedFileTypes: string[]
-}
+// FairBot-specific types that extend the shared chat types.
+// For base chat types, see @/shared/chat
 
 // Payroll issue row surfaced in summaries.
 export interface PayrollIssue {
@@ -94,7 +48,6 @@ export type FairBotResultType = 'payroll' | 'roster' | 'employee' | 'document'
 export interface FairBotPayrollResult {
   type: 'payroll'
   data: PayrollSummaryData
-  // Route to the detailed report page.
   detailsUrl: string
 }
 
@@ -102,7 +55,6 @@ export interface FairBotPayrollResult {
 export interface FairBotRosterResult {
   type: 'roster'
   data: RosterSummaryData
-  // Route to the detailed report page.
   detailsUrl: string
 }
 
@@ -110,7 +62,6 @@ export interface FairBotRosterResult {
 export interface FairBotEmployeeResult {
   type: 'employee'
   data: EmployeeSummaryData
-  // Route to the detailed report page.
   detailsUrl: string
 }
 
@@ -118,7 +69,6 @@ export interface FairBotEmployeeResult {
 export interface FairBotDocumentResult {
   type: 'document'
   data: DocumentSummaryData
-  // Route to the detailed report page.
   detailsUrl: string
 }
 
@@ -132,7 +82,6 @@ export type FairBotResult =
 // Response payload expected from the FairBot agent service.
 export interface FairBotAgentResponse {
   textResponse: string
-  // Optional summary shown in the results panel.
   quickSummary?: FairBotResult
 }
 
@@ -147,20 +96,12 @@ export interface FairBotQuickAction {
   icon: string
   color: string
   requiresFile: boolean
-  // Optional override for accepted file types on this action.
   acceptedFileTypes?: string[]
   initialMessage: string
-  // Permission required to display the action (null = always visible).
   requiredPermission: FairBotPermission | null
 }
 
 // State for the results panel summary card.
 export interface FairBotResultsPanelState {
-  currentResult: FairBotResult | null
-}
-
-// Persisted session snapshot for conversation + results.
-export interface FairBotSessionState {
-  messages: FairBotMessage[]
   currentResult: FairBotResult | null
 }

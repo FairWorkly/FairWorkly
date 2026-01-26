@@ -2,12 +2,13 @@ import { styled } from '@/styles/styled'
 import { keyframes } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import {
-  FAIRBOT_LABELS,
-  FAIRBOT_TYPING_UI,
-} from '../constants/fairbot.constants'
+  CHAT_DEFAULT_LABELS,
+  CHAT_TYPING_UI,
+} from '../constants/chat.constants'
 
-interface TypingIndicatorProps {
+export interface TypingIndicatorProps {
   isVisible: boolean
+  loadingMessage?: string
 }
 
 const bounce = keyframes`
@@ -23,32 +24,35 @@ const TypingContainer = styled('div')(({ theme }) => ({
 
 const Dots = styled('div')({
   display: 'flex',
-  gap: `${FAIRBOT_TYPING_UI.DOT_GAP}px`,
+  gap: `${CHAT_TYPING_UI.DOT_GAP}px`,
 })
 
 const Dot = styled('span')<{
   delay: number
 }>(({ theme, delay }) => ({
-  width: `${FAIRBOT_TYPING_UI.DOT_SIZE}px`,
-  height: `${FAIRBOT_TYPING_UI.DOT_SIZE}px`,
+  width: `${CHAT_TYPING_UI.DOT_SIZE}px`,
+  height: `${CHAT_TYPING_UI.DOT_SIZE}px`,
   borderRadius: '50%',
   backgroundColor: theme.palette.text.secondary,
-  animation: `${bounce} ${FAIRBOT_TYPING_UI.DOT_ANIMATION_MS}ms infinite`,
+  animation: `${bounce} ${CHAT_TYPING_UI.DOT_ANIMATION_MS}ms infinite`,
   animationDelay: `${delay}ms`,
 }))
 
-export const TypingIndicator = ({ isVisible }: TypingIndicatorProps) => {
+export const TypingIndicator = ({
+  isVisible,
+  loadingMessage = CHAT_DEFAULT_LABELS.LOADING_MESSAGE,
+}: TypingIndicatorProps) => {
   if (!isVisible) {
     return null
   }
 
   return (
     <TypingContainer aria-live="polite">
-      <Typography variant="caption">{FAIRBOT_LABELS.LOADING_MESSAGE}</Typography>
+      <Typography variant="caption">{loadingMessage}</Typography>
       <Dots>
         <Dot delay={0} />
-        <Dot delay={FAIRBOT_TYPING_UI.DELAY_SHORT_MS} />
-        <Dot delay={FAIRBOT_TYPING_UI.DELAY_LONG_MS} />
+        <Dot delay={CHAT_TYPING_UI.DELAY_SHORT_MS} />
+        <Dot delay={CHAT_TYPING_UI.DELAY_LONG_MS} />
       </Dots>
     </TypingContainer>
   )
