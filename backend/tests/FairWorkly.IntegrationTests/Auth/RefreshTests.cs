@@ -93,14 +93,10 @@ public class RefreshTests : AuthTestsBase
         var disabledUser = db.Set<FairWorkly.Domain.Auth.Entities.User>()
             .FirstOrDefault(u => u.Email == "disabled@example.com");
 
-        if (disabledUser == null)
-        {
-            // Skip test if user doesn't exist
-            return;
-        }
+        disabledUser.Should().NotBeNull("seed user disabled@example.com must exist for this test");
 
         // Temporarily enable, set a refresh token, then disable again
-        disabledUser.IsActive = true;
+        disabledUser!.IsActive = true;
         var refreshTokenPlain = "testRefreshTokenForDisabledUser";
         disabledUser.RefreshToken = secretHasher.Hash(refreshTokenPlain);
         disabledUser.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(7);
