@@ -1,0 +1,86 @@
+// FairWorkly.Application/Settings/Commands/UpdateOrganization/UpdateOrganizationCommandHandler.cs
+
+using MediatR;
+using FairWorkly.Domain.Auth.Interfaces;
+using FairWorkly.Domain.Common.Enums;
+
+namespace FairWorkly.Application.Settings.Commands.UpdateOrganization;
+
+/// <summary>
+/// Handler for UpdateOrganizationCommand
+/// Updates organization profile in database
+/// </summary>
+public class UpdateOrganizationCommandHandler 
+    : IRequestHandler<UpdateOrganizationCommand, OrganizationDto>
+{
+    private readonly IOrganizationRepository _organizationRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public UpdateOrganizationCommandHandler(
+        IOrganizationRepository organizationRepository,
+        IUnitOfWork unitOfWork)
+    {
+        _organizationRepository = organizationRepository;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<OrganizationDto> Handle(
+        UpdateOrganizationCommand command, 
+        CancellationToken cancellationToken)
+    {
+        var request = command.Request;
+
+        // Step 1: Fetch organization from repository
+        var organization = await _organizationRepository.GetByIdAsync(
+            command.OrganizationId, 
+            cancellationToken);
+
+        // Step 2: Validate organization exists
+        if (organization == null)
+        {
+            throw new NotFoundException(
+                $"Organization with ID {command.OrganizationId} not found");
+        }
+
+        // Step 3: Update organization fields
+        organization.CompanyName = request.CompanyName;
+        organization.ABN = request.ABN;
+        organization.IndustryType = request.IndustryType;
+        organization.ContactEmail = request.ContactEmail;
+        organization.PhoneNumber = request.PhoneNumber;
+        organization.AddressLine1 = request.AddressLine1;
+        organization.AddressLine2 = request.AddressLine2;
+        organization.Suburb = request.Suburb;
+        
+        // Convert State string to enum
+        if (!Enum.TryParse<AustralianState>(request.State, out var stateEnum))
+        {
+            throw new ValidationException($"Invalid state: {request.State}");
+        }
+        organization.State = stateEnum;
+        
+        organization.Postcode = request.Postcode;
+        organization.LogoUrl = request.LogoUrl;
+
+        // Step 4: Persist changes
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Step 5: Map updated entity to DTO and return
+        var dto = new OrganizationDto
+        {
+            CompanyName = organization.CompanyName,
+            ABN = organization.ABN,
+            IndustryType = organization.IndustryType,
+            ContactEmail = organization.ContactEmail,
+            PhoneNumber = organization.PhoneNumber,
+            AddressLine1 = organization.AddressLine1,
+            AddressLine2 = organization.AddressLine2,
+            Suburb = organization.Suburb,
+            State = organization.State.ToString(),
+            Postcode = organization.Postcode,
+            LogoUrl = organization.LogoUrl,
+        };
+
+        return dto;
+    }
+}
