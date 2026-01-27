@@ -191,6 +191,24 @@ Entity configuration (table mapping, relationships, constraints) must be placed 
 
 > **⚠️ Forbidden**: Writing `modelBuilder.Entity<T>()` directly in `FairWorklyDbContext.OnModelCreating()`.
 
+### 6. Result<T> Pattern
+
+MediatR Handlers return `Result<T>` instead of throwing exceptions. Controllers check `result.Type` to determine HTTP responses.
+
+```csharp
+// Handler
+return Result<MyDto>.Success(dto);
+return Result<MyDto>.ValidationFailure(errors);
+return Result<MyDto>.NotFound("Resource not found");
+
+// Controller
+if (result.Type == ResultType.ValidationFailure) return BadRequest(...);
+if (result.Type == ResultType.NotFound) return NotFound();
+return Ok(result.Value);
+```
+
+Location: `src/FairWorkly.Domain/Common/Result.cs`
+
 ## 📂 Cheatsheet
 
 **Add Migration:**
