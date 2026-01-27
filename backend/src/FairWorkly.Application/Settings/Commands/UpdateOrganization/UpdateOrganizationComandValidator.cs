@@ -1,0 +1,122 @@
+// FairWorkly.Application/Settings/Commands/UpdateOrganization/UpdateOrganizationCommandValidator.cs
+
+using FluentValidation;
+using FairWorkly.Domain.Common.Enums;
+
+namespace FairWorkly.Application.Settings.Commands.UpdateOrganization;
+
+/// <summary>
+/// Validator for UpdateOrganizationCommand
+/// Validates business rules before updating organization
+/// </summary>
+public class UpdateOrganizationCommandValidator 
+    : AbstractValidator<UpdateOrganizationCommand>
+{
+    public UpdateOrganizationCommandValidator()
+    {
+        // Validate OrganizationId
+        RuleFor(x => x.OrganizationId)
+            .NotEmpty()
+            .WithMessage("Organization ID is required");
+
+        // Validate Request object
+        RuleFor(x => x.Request)
+            .NotNull()
+            .WithMessage("Request data is required")
+            .SetValidator(new UpdateOrganizationRequestValidator());
+    }
+}
+
+/// <summary>
+/// Validator for UpdateOrganizationRequest DTO
+/// </summary>
+public class UpdateOrganizationRequestValidator 
+    : AbstractValidator<UpdateOrganizationRequest>
+{
+    public UpdateOrganizationRequestValidator()
+    {
+        // Company Name
+        RuleFor(x => x.CompanyName)
+            .NotEmpty()
+            .WithMessage("Company name is required")
+            .MaximumLength(200)
+            .WithMessage("Company name must not exceed 200 characters");
+
+        // ABN - must be exactly 11 digits
+        RuleFor(x => x.ABN)
+            .NotEmpty()
+            .WithMessage("ABN is required")
+            .Matches(@"^\d{11}$")
+            .WithMessage("ABN must be exactly 11 digits");
+
+        // Industry Type
+        RuleFor(x => x.IndustryType)
+            .NotEmpty()
+            .WithMessage("Industry type is required")
+            .MaximumLength(100)
+            .WithMessage("Industry type must not exceed 100 characters");
+
+        // Contact Email
+        RuleFor(x => x.ContactEmail)
+            .NotEmpty()
+            .WithMessage("Contact email is required")
+            .EmailAddress()
+            .WithMessage("Contact email must be a valid email address")
+            .MaximumLength(255)
+            .WithMessage("Contact email must not exceed 255 characters");
+
+        // Phone Number - optional
+        RuleFor(x => x.PhoneNumber)
+            .MaximumLength(20)
+            .WithMessage("Phone number must not exceed 20 characters")
+            .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
+
+        // Address Line 1
+        RuleFor(x => x.AddressLine1)
+            .NotEmpty()
+            .WithMessage("Address line 1 is required")
+            .MaximumLength(200)
+            .WithMessage("Address line 1 must not exceed 200 characters");
+
+        // Address Line 2 - optional
+        RuleFor(x => x.AddressLine2)
+            .MaximumLength(200)
+            .WithMessage("Address line 2 must not exceed 200 characters")
+            .When(x => !string.IsNullOrEmpty(x.AddressLine2));
+
+        // Suburb
+        RuleFor(x => x.Suburb)
+            .NotEmpty()
+            .WithMessage("Suburb is required")
+            .MaximumLength(100)
+            .WithMessage("Suburb must not exceed 100 characters");
+
+        // State - must be valid Australian state
+        RuleFor(x => x.State)
+            .NotEmpty()
+            .WithMessage("State is required")
+            .Must(BeValidAustralianState)
+            .WithMessage("State must be a valid Australian state/territory (VIC, NSW, QLD, SA, WA, TAS, ACT, NT)");
+
+        // Postcode - must be exactly 4 digits
+        RuleFor(x => x.Postcode)
+            .NotEmpty()
+            .WithMessage("Postcode is required")
+            .Matches(@"^\d{4}$")
+            .WithMessage("Postcode must be exactly 4 digits");
+
+        // LogoUrl - optional
+        RuleFor(x => x.LogoUrl)
+            .MaximumLength(500)
+            .WithMessage("Logo URL must not exceed 500 characters")
+            .When(x => !string.IsNullOrEmpty(x.LogoUrl));
+    }
+
+    /// <summary>
+    /// Validates that the state string can be parsed to AustralianState enum
+    /// </summary>
+    private bool BeValidAustralianState(string state)
+    {
+        return Enum.TryParse<AustralianState>(state, ignoreCase: true, out _);
+    }
+}
