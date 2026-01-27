@@ -33,6 +33,12 @@ public class Result<T> : IResultBase
 
     public static Result<T> NotFound(string message)
         => new(false, default, message, null, ResultType.NotFound);
+
+    public static Result<T> Unauthorized(string message)
+        => new(false, default, message, null, ResultType.Unauthorized);
+
+    public static Result<T> Forbidden(string message)
+        => new(false, default, message, null, ResultType.Forbidden);
 }
 
 public enum ResultType
@@ -40,5 +46,7 @@ public enum ResultType
     Success,
     ValidationFailure,
     BusinessFailure,
-    NotFound
+    NotFound,
+    Unauthorized,
+    Forbidden
 }
