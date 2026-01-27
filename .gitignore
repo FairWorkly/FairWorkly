@@ -27,6 +27,9 @@ AGENTS.md
 # Backend AI Files
 .raw_materials/
 .claude/
+.doc/
+**/AI_GUIDE.md
+CLAUDE.md
 
 # Backend Scripts
 backend/scripts/
@@ -78,7 +81,14 @@ __pycache__/
 
 # Environment variables
 .env
+agent-service/.env
+
+# Backend sensitive config (use .example files as templates)
+backend/src/FairWorkly.API/appsettings.json
 backend/src/FairWorkly.API/appsettings.Development.json
+
+# Generated SQL schema (can be regenerated with: dotnet ef migrations script --idempotent)
+backend/schema.sql
 
 ## FAISS indexes
 document_faiss/
