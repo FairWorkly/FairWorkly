@@ -1,7 +1,8 @@
-﻿using FairWorkly.Application.Auth.Features.Login;
+using FairWorkly.Application.Auth.Features.Login;
 using FairWorkly.Application.Auth.Features.Refresh;
 using FairWorkly.Application.Auth.Features.Me;
 using FairWorkly.Application.Auth.Features.Logout;
+using FairWorkly.Domain.Common;
 
 using MediatR;
 using Swashbuckle.AspNetCore.Filters;
@@ -23,21 +24,27 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
     {
         var result = await mediator.Send(command);
 
-        if (result == null || result.Response == null)
+        // Handle validation failures (from ValidationBehavior)
+        if (result.Type == ResultType.ValidationFailure)
         {
-            if (result?.FailureReason == LoginFailureReason.AccountDisabled)
+            return await HandleValidationFailureAsync(result);
+        }
+
+        if (result.IsFailure)
+        {
+            if (result.Type == ResultType.Forbidden)
             {
-                return StatusCode(403, new { message = "Account is disabled." });
+                return StatusCode(403, new { message = result.ErrorMessage });
             }
 
-            return Unauthorized(new { message = "Invalid email or password." });
+            return Unauthorized(new { message = result.ErrorMessage });
         }
 
         // Put the RefreshToken into an HttpOnly cookie
-        SetRefreshTokenCookie(result.Response.RefreshToken, result.Response.RefreshTokenExpiration);
+        SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
 
         // Return the AccessToken and user info (excluding the RefreshToken)
-        return Ok(result.Response);
+        return Ok(result.Value);
     }
 
     [HttpPost("refresh")]
@@ -51,27 +58,23 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         }
 
         var cmd = new RefreshCommand { RefreshTokenPlain = refreshTokenPlain };
-        var res = await mediator.Send(cmd);
-        if (res == null || res.Response == null)
+        var result = await mediator.Send(cmd);
+
+        if (result.IsFailure)
         {
-            if (res?.FailureReason == RefreshFailureReason.AccountDisabled)
+            if (result.Type == ResultType.Forbidden)
             {
-                return StatusCode(403, new { message = "Account is disabled." });
+                return StatusCode(403, new { message = result.ErrorMessage });
             }
 
-            if (res?.FailureReason == RefreshFailureReason.ExpiredToken)
-            {
-                return Unauthorized(new { message = "Refresh token expired." });
-            }
-
-            return Unauthorized(new { message = "Invalid refresh token." });
+            return Unauthorized(new { message = result.ErrorMessage });
         }
 
         // Update cookie with new refresh token
-        SetRefreshTokenCookie(res.Response.RefreshToken, res.Response.RefreshTokenExpiration);
+        SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
 
         // Return new access token
-        return Ok(new { accessToken = res.Response.AccessToken });
+        return Ok(new { accessToken = result.Value.AccessToken });
     }
 
     [HttpGet("me")]
@@ -83,10 +86,18 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         if (!Guid.TryParse(sub, out var userId) || userId == Guid.Empty) return Unauthorized();
 
         var query = new GetCurrentUserQuery { UserId = userId };
-        var user = await mediator.Send(query);
-        if (user == null) return NotFound();
+        var result = await mediator.Send(query);
 
-        return Ok(user);
+        if (result.IsFailure)
+        {
+            if (result.Type == ResultType.NotFound)
+            {
+                return NotFound();
+            }
+            return BadRequest(new { message = result.ErrorMessage });
+        }
+
+        return Ok(result.Value);
     }
 
     [HttpPost("logout")]
@@ -112,9 +123,9 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         // Remove cookie from client regardless of DB result (options must match original cookie)
         Response.Cookies.Delete("refreshToken", GetRefreshTokenCookieOptions(DateTime.UtcNow));
 
-        if (!result)
+        if (result.IsFailure)
         {
-            return BadRequest(new { message = "Logout failed." });
+            return BadRequest(new { message = result.ErrorMessage });
         }
 
         return NoContent();
@@ -142,4 +153,28 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         };
     }
 
+    /// <summary>
+    /// Handle validation failures from ValidationBehavior - return ProblemDetails format
+    /// matching the original GlobalExceptionHandler response format exactly
+    /// </summary>
+    private async Task<ActionResult> HandleValidationFailureAsync<T>(Result<T> result)
+    {
+        var errors = result.ValidationErrors?
+            .GroupBy(e => e.Field)
+            .ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray())
+            ?? new Dictionary<string, string[]>();
+
+        var problemDetails = new ProblemDetails
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "Validation Failed",
+            Detail = "One or more validation errors occurred.",
+            Instance = HttpContext.Request.Path
+        };
+        problemDetails.Extensions.Add("errors", errors);
+
+        Response.StatusCode = StatusCodes.Status400BadRequest;
+        await Response.WriteAsJsonAsync(problemDetails);
+        return new EmptyResult();
+    }
 }
