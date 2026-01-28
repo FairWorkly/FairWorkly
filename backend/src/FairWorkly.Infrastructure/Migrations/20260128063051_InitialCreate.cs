@@ -132,7 +132,25 @@ namespace FairWorkly.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "organization",
+                name: "organization_awards",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    organization_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    award_type = table.Column<int>(type: "integer", nullable: false),
+                    added_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    is_primary = table.Column<bool>(type: "boolean", nullable: false),
+                    employee_count = table.Column<int>(type: "integer", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_organization_awards", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "organizations",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -160,35 +178,11 @@ namespace FairWorkly.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_organization", x => x.id);
+                    table.PrimaryKey("pk_organizations", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "organization_awards",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    organization_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    award_type = table.Column<int>(type: "integer", nullable: false),
-                    added_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    is_primary = table.Column<bool>(type: "boolean", nullable: false),
-                    employee_count = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_organization_awards", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_organization_awards_organizations_organization_id",
-                        column: x => x.organization_id,
-                        principalTable: "organization",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "user",
+                name: "users",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -215,29 +209,29 @@ namespace FairWorkly.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_user", x => x.id);
+                    table.PrimaryKey("pk_users", x => x.id);
                     table.ForeignKey(
-                        name: "fk_user_employees_employee_id",
+                        name: "fk_users_employees_employee_id",
                         column: x => x.employee_id,
                         principalTable: "employees",
                         principalColumn: "id",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "fk_user_organization_organization_id",
+                        name: "fk_users_organizations_organization_id",
                         column: x => x.organization_id,
-                        principalTable: "organization",
+                        principalTable: "organizations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_user_user_created_by_user_id",
+                        name: "fk_users_users_created_by_user_id",
                         column: x => x.created_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_user_user_updated_by_user_id",
+                        name: "fk_users_users_updated_by_user_id",
                         column: x => x.updated_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -278,18 +272,18 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_payroll_validations_organizations_organization_id",
                         column: x => x.organization_id,
-                        principalTable: "organization",
+                        principalTable: "organizations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_payroll_validations_users_created_by_user_id",
                         column: x => x.created_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id");
                     table.ForeignKey(
                         name: "fk_payroll_validations_users_updated_by_user_id",
                         column: x => x.updated_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id");
                 });
 
@@ -321,19 +315,19 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_rosters_organizations_organization_id",
                         column: x => x.organization_id,
-                        principalTable: "organization",
+                        principalTable: "organizations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_rosters_users_created_by_user_id",
                         column: x => x.created_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_rosters_users_updated_by_user_id",
                         column: x => x.updated_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -392,7 +386,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_payslips_organizations_organization_id",
                         column: x => x.organization_id,
-                        principalTable: "organization",
+                        principalTable: "organizations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -404,12 +398,12 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_payslips_users_created_by_user_id",
                         column: x => x.created_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id");
                     table.ForeignKey(
                         name: "fk_payslips_users_updated_by_user_id",
                         column: x => x.updated_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id");
                 });
 
@@ -449,7 +443,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_roster_validations_organizations_organization_id",
                         column: x => x.organization_id,
-                        principalTable: "organization",
+                        principalTable: "organizations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -461,13 +455,13 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_roster_validations_users_created_by_user_id",
                         column: x => x.created_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_roster_validations_users_updated_by_user_id",
                         column: x => x.updated_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -507,7 +501,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_shifts_organizations_organization_id",
                         column: x => x.organization_id,
-                        principalTable: "organization",
+                        principalTable: "organizations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -556,7 +550,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_payroll_issues_organizations_organization_id",
                         column: x => x.organization_id,
-                        principalTable: "organization",
+                        principalTable: "organizations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -573,7 +567,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_payroll_issues_users_resolved_by_user_id",
                         column: x => x.resolved_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -619,7 +613,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_roster_issues_organizations_organization_id",
                         column: x => x.organization_id,
-                        principalTable: "organization",
+                        principalTable: "organizations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -636,13 +630,13 @@ namespace FairWorkly.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_roster_issues_users_resolved_by_user_id",
                         column: x => x.resolved_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_roster_issues_users_waived_by_user_id",
                         column: x => x.waived_by_user_id,
-                        principalTable: "user",
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -718,27 +712,6 @@ namespace FairWorkly.Infrastructure.Migrations
                 column: "updated_by_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_organization_abn",
-                table: "organization",
-                column: "abn",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_organization_contact_email",
-                table: "organization",
-                column: "contact_email");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_organization_created_by_user_id",
-                table: "organization",
-                column: "created_by_user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_organization_updated_by_user_id",
-                table: "organization",
-                column: "updated_by_user_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_organization_awards_organization_id_award_type",
                 table: "organization_awards",
                 columns: new[] { "organization_id", "award_type" },
@@ -748,6 +721,27 @@ namespace FairWorkly.Infrastructure.Migrations
                 name: "ix_organization_awards_organization_id_is_primary",
                 table: "organization_awards",
                 columns: new[] { "organization_id", "is_primary" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_organizations_abn",
+                table: "organizations",
+                column: "abn",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_organizations_contact_email",
+                table: "organizations",
+                column: "contact_email");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_organizations_created_by_user_id",
+                table: "organizations",
+                column: "created_by_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_organizations_updated_by_user_id",
+                table: "organizations",
+                column: "updated_by_user_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_payroll_issues_employee_id",
@@ -911,31 +905,31 @@ namespace FairWorkly.Infrastructure.Migrations
                 columns: new[] { "roster_id", "employee_id", "date" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_user_created_by_user_id",
-                table: "user",
+                name: "ix_users_created_by_user_id",
+                table: "users",
                 column: "created_by_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_user_employee_id",
-                table: "user",
+                name: "ix_users_employee_id",
+                table: "users",
                 column: "employee_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_user_google_id",
-                table: "user",
+                name: "ix_users_google_id",
+                table: "users",
                 column: "google_id",
                 unique: true,
                 filter: "google_id IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "ix_user_organization_id_email",
-                table: "user",
+                name: "ix_users_organization_id_email",
+                table: "users",
                 columns: new[] { "organization_id", "email" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_user_updated_by_user_id",
-                table: "user",
+                name: "ix_users_updated_by_user_id",
+                table: "users",
                 column: "updated_by_user_id");
 
             migrationBuilder.AddForeignKey(
@@ -950,7 +944,7 @@ namespace FairWorkly.Infrastructure.Migrations
                 name: "fk_documents_organizations_organization_id",
                 table: "documents",
                 column: "organization_id",
-                principalTable: "organization",
+                principalTable: "organizations",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
 
@@ -958,7 +952,7 @@ namespace FairWorkly.Infrastructure.Migrations
                 name: "fk_documents_users_created_by_user_id",
                 table: "documents",
                 column: "created_by_user_id",
-                principalTable: "user",
+                principalTable: "users",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
 
@@ -966,7 +960,7 @@ namespace FairWorkly.Infrastructure.Migrations
                 name: "fk_documents_users_updated_by_user_id",
                 table: "documents",
                 column: "updated_by_user_id",
-                principalTable: "user",
+                principalTable: "users",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
 
@@ -974,39 +968,47 @@ namespace FairWorkly.Infrastructure.Migrations
                 name: "fk_employees_organizations_organization_id",
                 table: "employees",
                 column: "organization_id",
-                principalTable: "organization",
+                principalTable: "organizations",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_employees_user_created_by_user_id",
+                name: "fk_employees_users_created_by_user_id",
                 table: "employees",
                 column: "created_by_user_id",
-                principalTable: "user",
+                principalTable: "users",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_employees_user_updated_by_user_id",
+                name: "fk_employees_users_updated_by_user_id",
                 table: "employees",
                 column: "updated_by_user_id",
-                principalTable: "user",
+                principalTable: "users",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_organization_users_created_by_user_id",
-                table: "organization",
+                name: "fk_organization_awards_organizations_organization_id",
+                table: "organization_awards",
+                column: "organization_id",
+                principalTable: "organizations",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "fk_organizations_users_created_by_user_id",
+                table: "organizations",
                 column: "created_by_user_id",
-                principalTable: "user",
+                principalTable: "users",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_organization_users_updated_by_user_id",
-                table: "organization",
+                name: "fk_organizations_users_updated_by_user_id",
+                table: "organizations",
                 column: "updated_by_user_id",
-                principalTable: "user",
+                principalTable: "users",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
         }
@@ -1015,12 +1017,12 @@ namespace FairWorkly.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "fk_user_employees_employee_id",
-                table: "user");
+                name: "fk_users_employees_employee_id",
+                table: "users");
 
             migrationBuilder.DropForeignKey(
-                name: "fk_user_organization_organization_id",
-                table: "user");
+                name: "fk_users_organizations_organization_id",
+                table: "users");
 
             migrationBuilder.DropTable(
                 name: "award_levels");
@@ -1059,10 +1061,10 @@ namespace FairWorkly.Infrastructure.Migrations
                 name: "employees");
 
             migrationBuilder.DropTable(
-                name: "organization");
+                name: "organizations");
 
             migrationBuilder.DropTable(
-                name: "user");
+                name: "users");
         }
     }
 }
