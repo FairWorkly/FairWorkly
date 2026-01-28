@@ -14,24 +14,28 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
         builder.HasKey(d => d.Id);
 
         // Configure AuditableEntity navigation properties
-        builder.HasOne(d => d.CreatedByUser)
+        builder
+            .HasOne(d => d.CreatedByUser)
             .WithMany()
             .HasForeignKey(d => d.CreatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(d => d.UpdatedByUser)
+        builder
+            .HasOne(d => d.UpdatedByUser)
             .WithMany()
             .HasForeignKey(d => d.UpdatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Document -> Organization
-        builder.HasOne(d => d.Organization)
+        builder
+            .HasOne(d => d.Organization)
             .WithMany()
             .HasForeignKey(d => d.OrganizationId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Document -> Employee (optional)
-        builder.HasOne(d => d.Employee)
+        builder
+            .HasOne(d => d.Employee)
             .WithMany(e => e.Documents)
             .HasForeignKey(d => d.EmployeeId)
             .OnDelete(DeleteBehavior.Cascade);

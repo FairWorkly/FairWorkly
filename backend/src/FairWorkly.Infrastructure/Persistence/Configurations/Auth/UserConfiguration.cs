@@ -12,8 +12,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        // Table name (singular to match existing migrations)
-        builder.ToTable("user");
+        // Table name (snake_case + plural)
+        builder.ToTable("users");
 
         // Configure AuditableEntity navigation properties
         // These must be explicitly configured because EF Core cannot infer

@@ -1,7 +1,6 @@
 using FairWorkly.Application.Common.Interfaces;
-using System.Security.Cryptography;
-using System.Text;
 using FairWorkly.Domain.Auth.Interfaces;
+using FairWorkly.Domain.Common;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
@@ -14,9 +13,9 @@ public class LoginCommandHandler(
     ISecretHasher secretHasher,
     IUnitOfWork unitOfWork,
     IConfiguration configuration
-) : IRequestHandler<LoginCommand, LoginResult>
+) : IRequestHandler<LoginCommand, Result<LoginResponse>>
 {
-    public async Task<LoginResult> Handle(
+    public async Task<Result<LoginResponse>> Handle(
         LoginCommand request,
         CancellationToken cancellationToken
     )
@@ -25,19 +24,13 @@ public class LoginCommandHandler(
 
         if (user == null || !passwordHasher.Verify(request.Password, user.PasswordHash))
         {
-            return new LoginResult
-            {
-                FailureReason = LoginFailureReason.InvalidCredentials
-            };
+            return Result<LoginResponse>.Unauthorized("Invalid email or password.");
         }
 
         // Check account status (if account is disabled)
         if (!user.IsActive)
         {
-            return new LoginResult
-            {
-                FailureReason = LoginFailureReason.AccountDisabled
-            };
+            return Result<LoginResponse>.Forbidden("Account is disabled.");
         }
 
         var accessToken = tokenService.GenerateAccessToken(user);
@@ -59,9 +52,8 @@ public class LoginCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         // return
-        return new LoginResult
-        {
-            Response = new LoginResponse
+        return Result<LoginResponse>.Success(
+            new LoginResponse
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken, // to Controller
@@ -76,6 +68,6 @@ public class LoginCommandHandler(
                     OrganizationId = user.OrganizationId,
                 },
             }
-        };
+        );
     }
 }

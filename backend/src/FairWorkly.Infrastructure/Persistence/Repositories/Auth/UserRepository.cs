@@ -26,9 +26,15 @@ public class UserRepository : IUserRepository
     }
 
     // Retrieve a user by the stored refresh token hash
-    public async Task<User?> GetByRefreshTokenHashAsync(string refreshTokenHash, CancellationToken ct = default)
+    public async Task<User?> GetByRefreshTokenHashAsync(
+        string refreshTokenHash,
+        CancellationToken ct = default
+    )
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshTokenHash, ct);
+        return await _context.Users.FirstOrDefaultAsync(
+            u => u.RefreshToken == refreshTokenHash,
+            ct
+        );
     }
 
     // Checks if the email is already taken by another user.

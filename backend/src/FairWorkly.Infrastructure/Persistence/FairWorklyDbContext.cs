@@ -62,7 +62,6 @@ namespace FairWorkly.Infrastructure.Persistence
 
             foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
             {
-
                 if (entry.State == EntityState.Modified)
                 {
                     entry.Entity.UpdatedAt = now;

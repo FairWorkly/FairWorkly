@@ -31,9 +31,6 @@ AGENTS.md
 **/AI_GUIDE.md
 CLAUDE.md
 
-# Backend Scripts
-backend/scripts/
-
 # Serilog log files
 logs/
 
