@@ -8,14 +8,12 @@ namespace FairWorkly.Infrastructure.Persistence;
 /// Factory for creating DbContext at design time (for EF Core migrations).
 /// Reads connection string from multiple sources in priority order:
 /// 1. User Secrets (highest priority)
-/// 2. appsettings.Development.json
+/// 2. appsettings.{ENV}.json (e.g., Development)
 /// 3. appsettings.json
 /// 4. Environment variable FAIRWORKLY_CONNECTION_STRING (fallback)
 /// </summary>
 public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<FairWorklyDbContext>
 {
-    private const string UserSecretsId = "19188c8f-cabf-4ba8-ac6d-6c7f6d1db700";
-
     public FairWorklyDbContext CreateDbContext(string[] args)
     {
         var configuration = BuildConfiguration();
@@ -24,10 +22,10 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<FairWorkly
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new InvalidOperationException(
-                "Connection string not found. Provide it via:\n" +
-                "  1. User Secrets (ConnectionStrings:DefaultConnection)\n" +
-                "  2. appsettings.json (ConnectionStrings:DefaultConnection)\n" +
-                "  3. Environment variable FAIRWORKLY_CONNECTION_STRING"
+                "Connection string not found. Provide it via:\n"
+                    + "  1. User Secrets (ConnectionStrings:DefaultConnection)\n"
+                    + "  2. appsettings.json (ConnectionStrings:DefaultConnection)\n"
+                    + "  3. Environment variable FAIRWORKLY_CONNECTION_STRING"
             );
         }
 
@@ -54,7 +52,8 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<FairWorkly
         }
 
         // Environment-specific appsettings
-        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+        var environment =
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
         var envSettingsPath = Path.Combine(apiProjectPath, $"appsettings.{environment}.json");
         if (File.Exists(envSettingsPath))
         {
@@ -62,7 +61,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<FairWorkly
         }
 
         // User Secrets (highest priority, added last)
-        builder.AddUserSecrets(userSecretsId: UserSecretsId, reloadOnChange: false);
+        builder.AddUserSecrets(typeof(DesignTimeDbContextFactory).Assembly, optional: true, reloadOnChange: false);
 
         return builder.Build();
     }
@@ -73,17 +72,13 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<FairWorkly
         var currentDir = Directory.GetCurrentDirectory();
 
         // Navigate to sibling FairWorkly.API project
-        var apiProjectPath = Path.GetFullPath(
-            Path.Combine(currentDir, "..", "FairWorkly.API")
-        );
+        var apiProjectPath = Path.GetFullPath(Path.Combine(currentDir, "..", "FairWorkly.API"));
 
         // Validate path exists (helpful for debugging)
         if (!Directory.Exists(apiProjectPath))
         {
             // Try alternate: maybe running from solution root
-            var alternatePath = Path.GetFullPath(
-                Path.Combine(currentDir, "src", "FairWorkly.API")
-            );
+            var alternatePath = Path.GetFullPath(Path.Combine(currentDir, "src", "FairWorkly.API"));
             if (Directory.Exists(alternatePath))
             {
                 return alternatePath;
