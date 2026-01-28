@@ -127,9 +127,9 @@ In VS2022, right-click `FairWorkly.API` project -> **Manage User Secrets**:
 Edit `src/FairWorkly.API/appsettings.json` -> `DefaultConnection`.
 
 **Apply Migrations**:
-
 ```bash
-dotnet ef database update --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
+cd backend
+.\scripts\update-database.ps1
 ```
 
 ### 6. Start the Project
@@ -209,19 +209,26 @@ return Ok(result.Value);
 
 Location: `src/FairWorkly.Domain/Common/Result.cs`
 
-## 📂 Cheatsheet
+## 📂 Database Scripts
 
-**Add Migration:**
+All scripts are located in `backend/scripts/`. Run them in terminal:
+```bash
+cd backend
+.\scripts\add-migration.ps1
+```
 
-```
-dotnet ef migrations add <MigrationName> --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
-```
+| Script                             | Purpose                                           | Data Loss        |
+| ---------------------------------- | ------------------------------------------------- | ---------------- |
+| `add-migration.ps1`                | Create a new migration                            | None             |
+| `update-database.ps1`              | Apply pending migrations (preserves data)         | None             |
+| `reset-database.ps1`               | Drop and recreate database with all migrations    | ⚠️ Data           |
+| `init-migrations-and-database.ps1` | Delete all migrations and regenerate from scratch | 🔴 Data + History |
 
-**Update Database:**
+### ⚠️ Before Committing Migrations
 
-```
-dotnet ef database update --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
-```
+**Always verify your migration can be applied successfully before committing.**
+
+Test with `reset-database.ps1` or `update-database.ps1` depending on your situation.
 
 ## 📚 Advanced Development Guide
 
