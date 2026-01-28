@@ -127,9 +127,9 @@ In VS2022, right-click `FairWorkly.API` project -> **Manage User Secrets**:
 Edit `src/FairWorkly.API/appsettings.json` -> `DefaultConnection`.
 
 **Apply Migrations**:
-
 ```bash
-dotnet ef database update --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
+cd backend
+.\scripts\update-database.ps1
 ```
 
 ### 6. Start the Project
@@ -191,19 +191,44 @@ Entity configuration (table mapping, relationships, constraints) must be placed 
 
 > **⚠️ Forbidden**: Writing `modelBuilder.Entity<T>()` directly in `FairWorklyDbContext.OnModelCreating()`.
 
-## 📂 Cheatsheet
+### 6. Result<T> Pattern
 
-**Add Migration:**
+MediatR Handlers return `Result<T>` instead of throwing exceptions. Controllers check `result.Type` to determine HTTP responses.
 
-```
-dotnet ef migrations add <MigrationName> --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
+```csharp
+// Handler
+return Result<MyDto>.Success(dto);
+return Result<MyDto>.ValidationFailure(errors);
+return Result<MyDto>.NotFound("Resource not found");
+
+// Controller
+if (result.Type == ResultType.ValidationFailure) return BadRequest(...);
+if (result.Type == ResultType.NotFound) return NotFound();
+return Ok(result.Value);
 ```
 
-**Update Database:**
+Location: `src/FairWorkly.Domain/Common/Result.cs`
 
+## 📂 Database Scripts
+
+All scripts are located in `backend/scripts/`. Run them in terminal:
+```bash
+cd backend
+.\scripts\add-migration.ps1
 ```
-dotnet ef database update --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
-```
+
+| Script                             | Purpose                                           | Data Loss        |
+| ---------------------------------- | ------------------------------------------------- | ---------------- |
+| `add-migration.ps1`                | Create a new migration                            | None             |
+| `update-database.ps1`              | Apply pending migrations (preserves data)         | None             |
+| `reset-database.ps1`               | Drop and recreate database with all migrations    | ⚠️ Data           |
+| `init-migrations-and-database.ps1` | Delete all migrations and regenerate from scratch | 🔴 Data + History |
+
+### ⚠️ Before Committing Migrations
+
+**Always verify your migration can be applied successfully before committing.**
+
+Test with `reset-database.ps1` or `update-database.ps1` depending on your situation.
 
 ## 📚 Advanced Development Guide
 
