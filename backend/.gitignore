@@ -21,9 +21,6 @@
 .doc/
 **/AI_GUIDE.md
 
-# Scripts
-scripts/
-
 # Logs
 logs/
 *.log

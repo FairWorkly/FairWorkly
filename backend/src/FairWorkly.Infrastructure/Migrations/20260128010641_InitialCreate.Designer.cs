@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FairWorkly.Infrastructure.Migrations
 {
     [DbContext(typeof(FairWorklyDbContext))]
-    [Migration("20260124105504_NormalizeTableNamesAndConstraints")]
-    partial class NormalizeTableNamesAndConstraints
+    [Migration("20260128010641_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -751,11 +751,10 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("affected_units");
 
-                    b.Property<string>("CheckType")
+                    b.Property<string>("CategoryType")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("check_type");
+                        .HasColumnType("text")
+                        .HasColumnName("category_type");
 
                     b.Property<string>("ContextLabel")
                         .HasMaxLength(100)
@@ -765,12 +764,6 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("description");
 
                     b.Property<string>("DetailedExplanation")
                         .HasColumnType("text")
@@ -831,6 +824,11 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("unit_type");
+
+                    b.Property<string>("WarningMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("warning_message");
 
                     b.HasKey("Id")
                         .HasName("pk_payroll_issues");

@@ -12,7 +12,7 @@ namespace FairWorkly.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "award",
+                name: "awards",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -35,11 +35,11 @@ namespace FairWorkly.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_award", x => x.id);
+                    table.PrimaryKey("pk_awards", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "award_level",
+                name: "award_levels",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -58,17 +58,17 @@ namespace FairWorkly.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_award_level", x => x.id);
+                    table.PrimaryKey("pk_award_levels", x => x.id);
                     table.ForeignKey(
-                        name: "fk_award_level_award_award_id",
+                        name: "fk_award_levels_awards_award_id",
                         column: x => x.award_id,
-                        principalTable: "award",
+                        principalTable: "awards",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "document",
+                name: "documents",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -92,7 +92,7 @@ namespace FairWorkly.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_document", x => x.id);
+                    table.PrimaryKey("pk_documents", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -164,7 +164,7 @@ namespace FairWorkly.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "organization_award",
+                name: "organization_awards",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -178,9 +178,9 @@ namespace FairWorkly.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_organization_award", x => x.id);
+                    table.PrimaryKey("pk_organization_awards", x => x.id);
                     table.ForeignKey(
-                        name: "fk_organization_award_organization_organization_id",
+                        name: "fk_organization_awards_organizations_organization_id",
                         column: x => x.organization_id,
                         principalTable: "organization",
                         principalColumn: "id",
@@ -276,25 +276,25 @@ namespace FairWorkly.Infrastructure.Migrations
                 {
                     table.PrimaryKey("pk_payroll_validations", x => x.id);
                     table.ForeignKey(
-                        name: "fk_payroll_validations_organization_organization_id",
+                        name: "fk_payroll_validations_organizations_organization_id",
                         column: x => x.organization_id,
                         principalTable: "organization",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_payroll_validations_user_created_by_user_id",
+                        name: "fk_payroll_validations_users_created_by_user_id",
                         column: x => x.created_by_user_id,
                         principalTable: "user",
                         principalColumn: "id");
                     table.ForeignKey(
-                        name: "fk_payroll_validations_user_updated_by_user_id",
+                        name: "fk_payroll_validations_users_updated_by_user_id",
                         column: x => x.updated_by_user_id,
                         principalTable: "user",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "roster",
+                name: "rosters",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -308,7 +308,6 @@ namespace FairWorkly.Infrastructure.Migrations
                     total_shifts = table.Column<int>(type: "integer", nullable: false),
                     total_hours = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: false),
                     total_employees = table.Column<int>(type: "integer", nullable: false),
-                    roster_validation_id = table.Column<Guid>(type: "uuid", nullable: true),
                     notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -318,21 +317,21 @@ namespace FairWorkly.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_roster", x => x.id);
+                    table.PrimaryKey("pk_rosters", x => x.id);
                     table.ForeignKey(
-                        name: "fk_roster_organization_organization_id",
+                        name: "fk_rosters_organizations_organization_id",
                         column: x => x.organization_id,
                         principalTable: "organization",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_roster_user_created_by_user_id",
+                        name: "fk_rosters_users_created_by_user_id",
                         column: x => x.created_by_user_id,
                         principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_roster_user_updated_by_user_id",
+                        name: "fk_rosters_users_updated_by_user_id",
                         column: x => x.updated_by_user_id,
                         principalTable: "user",
                         principalColumn: "id",
@@ -391,7 +390,7 @@ namespace FairWorkly.Infrastructure.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_payslips_organization_organization_id",
+                        name: "fk_payslips_organizations_organization_id",
                         column: x => x.organization_id,
                         principalTable: "organization",
                         principalColumn: "id",
@@ -403,19 +402,19 @@ namespace FairWorkly.Infrastructure.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_payslips_user_created_by_user_id",
+                        name: "fk_payslips_users_created_by_user_id",
                         column: x => x.created_by_user_id,
                         principalTable: "user",
                         principalColumn: "id");
                     table.ForeignKey(
-                        name: "fk_payslips_user_updated_by_user_id",
+                        name: "fk_payslips_users_updated_by_user_id",
                         column: x => x.updated_by_user_id,
                         principalTable: "user",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "roster_validation",
+                name: "roster_validations",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -446,27 +445,27 @@ namespace FairWorkly.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_roster_validation", x => x.id);
+                    table.PrimaryKey("pk_roster_validations", x => x.id);
                     table.ForeignKey(
-                        name: "fk_roster_validation_organization_organization_id",
+                        name: "fk_roster_validations_organizations_organization_id",
                         column: x => x.organization_id,
                         principalTable: "organization",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_roster_validation_roster_roster_id",
+                        name: "fk_roster_validations_rosters_roster_id",
                         column: x => x.roster_id,
-                        principalTable: "roster",
+                        principalTable: "rosters",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_roster_validation_user_created_by_user_id",
+                        name: "fk_roster_validations_users_created_by_user_id",
                         column: x => x.created_by_user_id,
                         principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_roster_validation_user_updated_by_user_id",
+                        name: "fk_roster_validations_users_updated_by_user_id",
                         column: x => x.updated_by_user_id,
                         principalTable: "user",
                         principalColumn: "id",
@@ -474,7 +473,7 @@ namespace FairWorkly.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "shift",
+                name: "shifts",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -498,23 +497,23 @@ namespace FairWorkly.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_shift", x => x.id);
+                    table.PrimaryKey("pk_shifts", x => x.id);
                     table.ForeignKey(
-                        name: "fk_shift_employees_employee_id",
+                        name: "fk_shifts_employees_employee_id",
                         column: x => x.employee_id,
                         principalTable: "employees",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_shift_organization_organization_id",
+                        name: "fk_shifts_organizations_organization_id",
                         column: x => x.organization_id,
                         principalTable: "organization",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_shift_roster_roster_id",
+                        name: "fk_shifts_rosters_roster_id",
                         column: x => x.roster_id,
-                        principalTable: "roster",
+                        principalTable: "rosters",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -538,7 +537,6 @@ namespace FairWorkly.Infrastructure.Migrations
                     affected_units = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
                     unit_type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     context_label = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    impact_amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
                     is_resolved = table.Column<bool>(type: "boolean", nullable: false),
                     resolved_by_user_id = table.Column<Guid>(type: "uuid", nullable: true),
                     resolved_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
@@ -556,7 +554,7 @@ namespace FairWorkly.Infrastructure.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_payroll_issues_organization_organization_id",
+                        name: "fk_payroll_issues_organizations_organization_id",
                         column: x => x.organization_id,
                         principalTable: "organization",
                         principalColumn: "id",
@@ -573,7 +571,7 @@ namespace FairWorkly.Infrastructure.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_payroll_issues_user_resolved_by_user_id",
+                        name: "fk_payroll_issues_users_resolved_by_user_id",
                         column: x => x.resolved_by_user_id,
                         principalTable: "user",
                         principalColumn: "id",
@@ -581,13 +579,12 @@ namespace FairWorkly.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "roster_issue",
+                name: "roster_issues",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     organization_id = table.Column<Guid>(type: "uuid", nullable: false),
                     roster_validation_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    roster_id = table.Column<Guid>(type: "uuid", nullable: false),
                     shift_id = table.Column<Guid>(type: "uuid", nullable: true),
                     employee_id = table.Column<Guid>(type: "uuid", nullable: false),
                     check_type = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
@@ -612,43 +609,38 @@ namespace FairWorkly.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_roster_issue", x => x.id);
+                    table.PrimaryKey("pk_roster_issues", x => x.id);
                     table.ForeignKey(
-                        name: "fk_roster_issue_employees_employee_id",
+                        name: "fk_roster_issues_employees_employee_id",
                         column: x => x.employee_id,
                         principalTable: "employees",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_roster_issue_organization_organization_id",
+                        name: "fk_roster_issues_organizations_organization_id",
                         column: x => x.organization_id,
                         principalTable: "organization",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_roster_issue_roster_roster_id",
-                        column: x => x.roster_id,
-                        principalTable: "roster",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "fk_roster_issue_roster_validation_roster_validation_id",
+                        name: "fk_roster_issues_roster_validations_roster_validation_id",
                         column: x => x.roster_validation_id,
-                        principalTable: "roster_validation",
+                        principalTable: "roster_validations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_roster_issue_shift_shift_id",
+                        name: "fk_roster_issues_shifts_shift_id",
                         column: x => x.shift_id,
-                        principalTable: "shift",
+                        principalTable: "shifts",
                         principalColumn: "id");
                     table.ForeignKey(
-                        name: "fk_roster_issue_user_resolved_by_user_id",
+                        name: "fk_roster_issues_users_resolved_by_user_id",
                         column: x => x.resolved_by_user_id,
                         principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_roster_issue_user_waived_by_user_id",
+                        name: "fk_roster_issues_users_waived_by_user_id",
                         column: x => x.waived_by_user_id,
                         principalTable: "user",
                         principalColumn: "id",
@@ -656,50 +648,50 @@ namespace FairWorkly.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "ix_award_award_code",
-                table: "award",
+                name: "ix_award_levels_award_id_level_number_effective_from",
+                table: "award_levels",
+                columns: new[] { "award_id", "level_number", "effective_from" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_award_levels_award_id_level_number_is_active",
+                table: "award_levels",
+                columns: new[] { "award_id", "level_number", "is_active" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_awards_award_code",
+                table: "awards",
                 column: "award_code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_award_award_type",
-                table: "award",
+                name: "ix_awards_award_type",
+                table: "awards",
                 column: "award_type",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_award_level_award_id_level_number_effective_from",
-                table: "award_level",
-                columns: new[] { "award_id", "level_number", "effective_from" });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_award_level_award_id_level_number_is_active",
-                table: "award_level",
-                columns: new[] { "award_id", "level_number", "is_active" });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_document_created_by_user_id",
-                table: "document",
+                name: "ix_documents_created_by_user_id",
+                table: "documents",
                 column: "created_by_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_document_employee_id_document_type",
-                table: "document",
+                name: "ix_documents_employee_id_document_type",
+                table: "documents",
                 columns: new[] { "employee_id", "document_type" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_document_is_provided",
-                table: "document",
+                name: "ix_documents_is_provided",
+                table: "documents",
                 column: "is_provided");
 
             migrationBuilder.CreateIndex(
-                name: "ix_document_organization_id_document_type",
-                table: "document",
+                name: "ix_documents_organization_id_document_type",
+                table: "documents",
                 columns: new[] { "organization_id", "document_type" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_document_updated_by_user_id",
-                table: "document",
+                name: "ix_documents_updated_by_user_id",
+                table: "documents",
                 column: "updated_by_user_id");
 
             migrationBuilder.CreateIndex(
@@ -747,14 +739,14 @@ namespace FairWorkly.Infrastructure.Migrations
                 column: "updated_by_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_organization_award_organization_id_award_type",
-                table: "organization_award",
+                name: "ix_organization_awards_organization_id_award_type",
+                table: "organization_awards",
                 columns: new[] { "organization_id", "award_type" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_organization_award_organization_id_is_primary",
-                table: "organization_award",
+                name: "ix_organization_awards_organization_id_is_primary",
+                table: "organization_awards",
                 columns: new[] { "organization_id", "is_primary" });
 
             migrationBuilder.CreateIndex(
@@ -823,100 +815,99 @@ namespace FairWorkly.Infrastructure.Migrations
                 column: "updated_by_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_created_by_user_id",
-                table: "roster",
-                column: "created_by_user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_roster_organization_id_week_start_date",
-                table: "roster",
-                columns: new[] { "organization_id", "week_start_date" });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_roster_organization_id_year_week_number",
-                table: "roster",
-                columns: new[] { "organization_id", "year", "week_number" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_roster_updated_by_user_id",
-                table: "roster",
-                column: "updated_by_user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_roster_issue_check_type",
-                table: "roster_issue",
+                name: "ix_roster_issues_check_type",
+                table: "roster_issues",
                 column: "check_type");
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_issue_employee_id",
-                table: "roster_issue",
+                name: "ix_roster_issues_employee_id",
+                table: "roster_issues",
                 column: "employee_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_issue_organization_id",
-                table: "roster_issue",
+                name: "ix_roster_issues_organization_id",
+                table: "roster_issues",
                 column: "organization_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_issue_resolved_by_user_id",
-                table: "roster_issue",
+                name: "ix_roster_issues_resolved_by_user_id",
+                table: "roster_issues",
                 column: "resolved_by_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_issue_roster_id_employee_id",
-                table: "roster_issue",
-                columns: new[] { "roster_id", "employee_id" });
+                name: "ix_roster_issues_roster_validation_id_employee_id",
+                table: "roster_issues",
+                columns: new[] { "roster_validation_id", "employee_id" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_issue_roster_validation_id_severity",
-                table: "roster_issue",
+                name: "ix_roster_issues_roster_validation_id_severity",
+                table: "roster_issues",
                 columns: new[] { "roster_validation_id", "severity" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_issue_shift_id",
-                table: "roster_issue",
+                name: "ix_roster_issues_shift_id",
+                table: "roster_issues",
                 column: "shift_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_issue_waived_by_user_id",
-                table: "roster_issue",
+                name: "ix_roster_issues_waived_by_user_id",
+                table: "roster_issues",
                 column: "waived_by_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_validation_created_by_user_id",
-                table: "roster_validation",
+                name: "ix_roster_validations_created_by_user_id",
+                table: "roster_validations",
                 column: "created_by_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_validation_organization_id_status",
-                table: "roster_validation",
+                name: "ix_roster_validations_organization_id_status",
+                table: "roster_validations",
                 columns: new[] { "organization_id", "status" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_validation_roster_id",
-                table: "roster_validation",
+                name: "ix_roster_validations_roster_id",
+                table: "roster_validations",
                 column: "roster_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_roster_validation_updated_by_user_id",
-                table: "roster_validation",
+                name: "ix_roster_validations_updated_by_user_id",
+                table: "roster_validations",
                 column: "updated_by_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_shift_employee_id_date",
-                table: "shift",
+                name: "ix_rosters_created_by_user_id",
+                table: "rosters",
+                column: "created_by_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_rosters_organization_id_week_start_date",
+                table: "rosters",
+                columns: new[] { "organization_id", "week_start_date" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_rosters_organization_id_year_week_number",
+                table: "rosters",
+                columns: new[] { "organization_id", "year", "week_number" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_rosters_updated_by_user_id",
+                table: "rosters",
+                column: "updated_by_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_shifts_employee_id_date",
+                table: "shifts",
                 columns: new[] { "employee_id", "date" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_shift_organization_id_date",
-                table: "shift",
+                name: "ix_shifts_organization_id_date",
+                table: "shifts",
                 columns: new[] { "organization_id", "date" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_shift_roster_id_employee_id_date",
-                table: "shift",
+                name: "ix_shifts_roster_id_employee_id_date",
+                table: "shifts",
                 columns: new[] { "roster_id", "employee_id", "date" });
 
             migrationBuilder.CreateIndex(
@@ -948,39 +939,39 @@ namespace FairWorkly.Infrastructure.Migrations
                 column: "updated_by_user_id");
 
             migrationBuilder.AddForeignKey(
-                name: "fk_document_employees_employee_id",
-                table: "document",
+                name: "fk_documents_employees_employee_id",
+                table: "documents",
                 column: "employee_id",
                 principalTable: "employees",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_document_organization_organization_id",
-                table: "document",
+                name: "fk_documents_organizations_organization_id",
+                table: "documents",
                 column: "organization_id",
                 principalTable: "organization",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_document_user_created_by_user_id",
-                table: "document",
+                name: "fk_documents_users_created_by_user_id",
+                table: "documents",
                 column: "created_by_user_id",
                 principalTable: "user",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_document_user_updated_by_user_id",
-                table: "document",
+                name: "fk_documents_users_updated_by_user_id",
+                table: "documents",
                 column: "updated_by_user_id",
                 principalTable: "user",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_employees_organization_organization_id",
+                name: "fk_employees_organizations_organization_id",
                 table: "employees",
                 column: "organization_id",
                 principalTable: "organization",
@@ -1004,7 +995,7 @@ namespace FairWorkly.Infrastructure.Migrations
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_organization_user_created_by_user_id",
+                name: "fk_organization_users_created_by_user_id",
                 table: "organization",
                 column: "created_by_user_id",
                 principalTable: "user",
@@ -1012,7 +1003,7 @@ namespace FairWorkly.Infrastructure.Migrations
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_organization_user_updated_by_user_id",
+                name: "fk_organization_users_updated_by_user_id",
                 table: "organization",
                 column: "updated_by_user_id",
                 principalTable: "user",
@@ -1032,37 +1023,37 @@ namespace FairWorkly.Infrastructure.Migrations
                 table: "user");
 
             migrationBuilder.DropTable(
-                name: "award_level");
+                name: "award_levels");
 
             migrationBuilder.DropTable(
-                name: "document");
+                name: "documents");
 
             migrationBuilder.DropTable(
-                name: "organization_award");
+                name: "organization_awards");
 
             migrationBuilder.DropTable(
                 name: "payroll_issues");
 
             migrationBuilder.DropTable(
-                name: "roster_issue");
+                name: "roster_issues");
 
             migrationBuilder.DropTable(
-                name: "award");
+                name: "awards");
 
             migrationBuilder.DropTable(
                 name: "payslips");
 
             migrationBuilder.DropTable(
-                name: "roster_validation");
+                name: "roster_validations");
 
             migrationBuilder.DropTable(
-                name: "shift");
+                name: "shifts");
 
             migrationBuilder.DropTable(
                 name: "payroll_validations");
 
             migrationBuilder.DropTable(
-                name: "roster");
+                name: "rosters");
 
             migrationBuilder.DropTable(
                 name: "employees");
