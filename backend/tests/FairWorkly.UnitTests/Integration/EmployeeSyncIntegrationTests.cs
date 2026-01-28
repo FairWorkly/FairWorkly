@@ -9,6 +9,7 @@ using FairWorkly.Infrastructure.Persistence;
 using FairWorkly.Infrastructure.Persistence.Repositories.Employees;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 
@@ -21,8 +22,18 @@ namespace FairWorkly.UnitTests.Integration;
 [Collection("IntegrationTests")]
 public class EmployeeSyncIntegrationTests : IAsyncLifetime
 {
-    private readonly string _connectionString =
-        "Host=localhost;Port=5433;Database=FairWorklyDb;Username=postgres;Password=fairworkly123";
+    private readonly string _connectionString = GetConnectionString();
+
+    private static string GetConnectionString()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddUserSecrets<EmployeeSyncIntegrationTests>(optional: true)
+            .Build();
+
+        return configuration.GetConnectionString("DefaultConnection")
+            ?? "Host=localhost;Port=5432;Database=FairWorklyDb;Username=postgres;Password=fairworkly123";
+    }
 
     private FairWorklyDbContext _dbContext = null!;
     private EmployeeRepository _employeeRepository = null!;
