@@ -56,7 +56,10 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
         _mockDateTimeProvider.Setup(x => x.UtcNow).Returns(_testDateTime);
 
         _employeeRepository = new EmployeeRepository(_dbContext);
-        _employeeSyncService = new EmployeeSyncService(_employeeRepository, _mockDateTimeProvider.Object);
+        _employeeSyncService = new EmployeeSyncService(
+            _employeeRepository,
+            _mockDateTimeProvider.Object
+        );
         _csvParserService = new CsvParserService();
 
         // Create test organization
@@ -91,7 +94,7 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
             ContactEmail = $"test{_testOrganizationId:N}@testcompany.com.au",
             SubscriptionTier = SubscriptionTier.Tier1,
             SubscriptionStartDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            IsSubscriptionActive = true
+            IsSubscriptionActive = true,
         };
 
         _dbContext.Set<Organization>().Add(organization);
@@ -103,11 +106,12 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
         try
         {
             // Use ExecuteDeleteAsync to avoid entity tracking issues
-            await _dbContext.Employees
-                .Where(e => e.OrganizationId == _testOrganizationId)
+            await _dbContext
+                .Employees.Where(e => e.OrganizationId == _testOrganizationId)
                 .ExecuteDeleteAsync();
 
-            await _dbContext.Set<Organization>()
+            await _dbContext
+                .Set<Organization>()
                 .Where(o => o.Id == _testOrganizationId)
                 .ExecuteDeleteAsync();
         }
@@ -123,7 +127,11 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
         // Arrange
         var csvPath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
-            "TestData", "Csv", "EmployeeSync", "TEST_01_NewEmployees.csv");
+            "TestData",
+            "Csv",
+            "EmployeeSync",
+            "TEST_01_NewEmployees.csv"
+        );
 
         using var stream = File.OpenRead(csvPath);
 
@@ -143,8 +151,8 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
         result.Should().ContainKey("NEW005");
 
         // Assert - verify database records
-        var dbEmployees = await _dbContext.Employees
-            .Where(e => e.OrganizationId == _testOrganizationId)
+        var dbEmployees = await _dbContext
+            .Employees.Where(e => e.OrganizationId == _testOrganizationId)
             .OrderBy(e => e.EmployeeNumber)
             .ToListAsync();
 
@@ -183,7 +191,7 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
             AwardLevelNumber = 1,
             EmploymentType = EmploymentType.FullTime,
             StartDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            IsActive = true
+            IsActive = true,
         };
 
         var existingEmployee2 = new Employee
@@ -199,7 +207,7 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
             AwardLevelNumber = 1,
             EmploymentType = EmploymentType.FullTime,
             StartDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            IsActive = true
+            IsActive = true,
         };
 
         _dbContext.Employees.AddRange(existingEmployee1, existingEmployee2);
@@ -208,7 +216,11 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
 
         var csvPath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
-            "TestData", "Csv", "EmployeeSync", "TEST_02_UpdateEmployees.csv");
+            "TestData",
+            "Csv",
+            "EmployeeSync",
+            "TEST_02_UpdateEmployees.csv"
+        );
 
         using var stream = File.OpenRead(csvPath);
 
@@ -224,8 +236,9 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
 
         // Verify database update
         _dbContext.ChangeTracker.Clear();
-        var updatedEmployee = await _dbContext.Employees
-            .FirstOrDefaultAsync(e => e.EmployeeNumber == "EMP001" && e.OrganizationId == _testOrganizationId);
+        var updatedEmployee = await _dbContext.Employees.FirstOrDefaultAsync(e =>
+            e.EmployeeNumber == "EMP001" && e.OrganizationId == _testOrganizationId
+        );
 
         updatedEmployee.Should().NotBeNull();
         updatedEmployee!.FirstName.Should().Be("John");
@@ -250,7 +263,7 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
             AwardLevelNumber = 1,
             EmploymentType = EmploymentType.FullTime,
             StartDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            IsActive = true
+            IsActive = true,
         };
 
         _dbContext.Employees.Add(existingEmployee);
@@ -259,7 +272,11 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
 
         var csvPath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
-            "TestData", "Csv", "EmployeeSync", "TEST_03_MixedEmployees.csv");
+            "TestData",
+            "Csv",
+            "EmployeeSync",
+            "TEST_03_MixedEmployees.csv"
+        );
 
         using var stream = File.OpenRead(csvPath);
 
@@ -274,13 +291,15 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
 
         // Verify existing employee was updated (not duplicated)
         _dbContext.ChangeTracker.Clear();
-        var mix001Count = await _dbContext.Employees
-            .CountAsync(e => e.EmployeeNumber == "MIX001" && e.OrganizationId == _testOrganizationId);
+        var mix001Count = await _dbContext.Employees.CountAsync(e =>
+            e.EmployeeNumber == "MIX001" && e.OrganizationId == _testOrganizationId
+        );
         mix001Count.Should().Be(1);
 
         // Verify new employees were created
-        var totalEmployees = await _dbContext.Employees
-            .CountAsync(e => e.OrganizationId == _testOrganizationId);
+        var totalEmployees = await _dbContext.Employees.CountAsync(e =>
+            e.OrganizationId == _testOrganizationId
+        );
         totalEmployees.Should().BeGreaterThan(1);
     }
 }

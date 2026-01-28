@@ -1,8 +1,8 @@
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Domain.Common;
-using Microsoft.Extensions.Configuration;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 
 namespace FairWorkly.Application.Auth.Features.Refresh;
 
@@ -14,7 +14,10 @@ public class RefreshCommandHandler(
     IConfiguration configuration
 ) : IRequestHandler<RefreshCommand, Result<RefreshResponse>>
 {
-    public async Task<Result<RefreshResponse>> Handle(RefreshCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RefreshResponse>> Handle(
+        RefreshCommand request,
+        CancellationToken cancellationToken
+    )
     {
         // Hash incoming plain token and lookup user
         var incomingHash = secretHasher.Hash(request.RefreshTokenPlain);
@@ -30,7 +33,10 @@ public class RefreshCommandHandler(
         }
 
         // Check expiry
-        if (!user.RefreshTokenExpiresAt.HasValue || user.RefreshTokenExpiresAt.Value < DateTime.UtcNow)
+        if (
+            !user.RefreshTokenExpiresAt.HasValue
+            || user.RefreshTokenExpiresAt.Value < DateTime.UtcNow
+        )
         {
             return Result<RefreshResponse>.Unauthorized("Refresh token expired.");
         }
@@ -49,11 +55,13 @@ public class RefreshCommandHandler(
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<RefreshResponse>.Success(new RefreshResponse
-        {
-            AccessToken = newAccessToken,
-            RefreshToken = newRefreshPlain,
-            RefreshTokenExpiration = newExpires
-        });
+        return Result<RefreshResponse>.Success(
+            new RefreshResponse
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshPlain,
+                RefreshTokenExpiration = newExpires,
+            }
+        );
     }
 }

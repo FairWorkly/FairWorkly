@@ -7,7 +7,8 @@ namespace FairWorkly.IntegrationTests.Auth;
 
 public class MeTests : AuthTestsBase
 {
-    public MeTests(CustomWebApplicationFactory factory) : base(factory) { }
+    public MeTests(CustomWebApplicationFactory factory)
+        : base(factory) { }
 
     #region 3.1 No Token (401)
 

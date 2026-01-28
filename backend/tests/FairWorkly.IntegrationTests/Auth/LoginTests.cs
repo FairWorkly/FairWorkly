@@ -8,7 +8,8 @@ namespace FairWorkly.IntegrationTests.Auth;
 
 public class LoginTests : AuthTestsBase
 {
-    public LoginTests(CustomWebApplicationFactory factory) : base(factory) { }
+    public LoginTests(CustomWebApplicationFactory factory)
+        : base(factory) { }
 
     #region 1.1 FluentValidation Failures (400)
 
@@ -35,18 +36,29 @@ public class LoginTests : AuthTestsBase
         // Note: GlobalExceptionHandler doesn't set "type" property
         root.GetProperty("title").GetString().Should().Be("Validation Failed");
         root.GetProperty("status").GetInt32().Should().Be(400);
-        root.GetProperty("detail").GetString().Should().Be("One or more validation errors occurred.");
+        root.GetProperty("detail")
+            .GetString()
+            .Should()
+            .Be("One or more validation errors occurred.");
         root.GetProperty("instance").GetString().Should().Be("/api/auth/login");
 
         // Assert - Exact errors structure (in ProblemDetails extensions)
         var errors = root.GetProperty("errors");
 
         // Email error
-        var emailErrors = errors.GetProperty("Email").EnumerateArray().Select(e => e.GetString()).ToList();
+        var emailErrors = errors
+            .GetProperty("Email")
+            .EnumerateArray()
+            .Select(e => e.GetString())
+            .ToList();
         emailErrors.Should().Contain("Email is required.");
 
         // Password error
-        var passwordErrors = errors.GetProperty("Password").EnumerateArray().Select(e => e.GetString()).ToList();
+        var passwordErrors = errors
+            .GetProperty("Password")
+            .EnumerateArray()
+            .Select(e => e.GetString())
+            .ToList();
         passwordErrors.Should().Contain("Password is required.");
     }
 
@@ -69,7 +81,11 @@ public class LoginTests : AuthTestsBase
         root.GetProperty("title").GetString().Should().Be("Validation Failed");
 
         var errors = root.GetProperty("errors");
-        var emailErrors = errors.GetProperty("Email").EnumerateArray().Select(e => e.GetString()).ToList();
+        var emailErrors = errors
+            .GetProperty("Email")
+            .EnumerateArray()
+            .Select(e => e.GetString())
+            .ToList();
         emailErrors.Should().Contain("A valid email is required.");
     }
 
@@ -92,7 +108,11 @@ public class LoginTests : AuthTestsBase
         root.GetProperty("title").GetString().Should().Be("Validation Failed");
 
         var errors = root.GetProperty("errors");
-        var passwordErrors = errors.GetProperty("Password").EnumerateArray().Select(e => e.GetString()).ToList();
+        var passwordErrors = errors
+            .GetProperty("Password")
+            .EnumerateArray()
+            .Select(e => e.GetString())
+            .ToList();
         passwordErrors.Should().Contain("Password must be at least 8 characters.");
     }
 

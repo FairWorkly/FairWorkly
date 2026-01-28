@@ -61,7 +61,11 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<FairWorkly
         }
 
         // User Secrets (highest priority, added last)
-        builder.AddUserSecrets(typeof(DesignTimeDbContextFactory).Assembly, optional: true, reloadOnChange: false);
+        builder.AddUserSecrets(
+            typeof(DesignTimeDbContextFactory).Assembly,
+            optional: true,
+            reloadOnChange: false
+        );
 
         return builder.Build();
     }
