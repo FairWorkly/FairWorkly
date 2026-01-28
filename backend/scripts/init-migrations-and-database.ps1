@@ -1,5 +1,5 @@
-# Reset database and migrations script
-# Drops the existing database, removes all migrations, recreates InitialCreate
+# Initialize migrations and database script
+# WARNING: Drops existing database, DELETES all migrations, recreates InitialCreate
 
 $ErrorActionPreference = "Stop"
 
@@ -11,6 +11,13 @@ Write-Host "Working directory: $BackendDir" -ForegroundColor Cyan
 Push-Location $BackendDir
 
 try {
+    # Confirmation prompt - this is a dangerous operation
+    $confirm = Read-Host "WARNING: This will DELETE all migrations and reset database. Type 'yes' to continue"
+    if ($confirm -ne 'yes') {
+        Write-Host "Cancelled." -ForegroundColor Yellow
+        exit 0
+    }
+
     # Step 1: Drop database
     Write-Host "Dropping database..." -ForegroundColor Yellow
     dotnet ef database drop --force --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
