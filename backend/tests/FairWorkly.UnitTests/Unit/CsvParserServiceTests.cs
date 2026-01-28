@@ -21,7 +21,8 @@ public class CsvParserServiceTests
     public async Task ParseAsync_ValidCsv_ReturnsRows()
     {
         // Arrange
-        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+        var csvContent =
+            @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
 NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07
 NEW002,Bob Williams,2025-12-15,2025-12-21,Retail,Level 2,PartTime,27.16,20.00,543.20,0.00,0.00,0.00,0.00,0.00,0.00,543.20,65.18";
 
@@ -63,7 +64,8 @@ NEW002,Bob Williams,2025-12-15,2025-12-21,Retail,Level 2,PartTime,27.16,20.00,54
     public async Task ParseAsync_MissingRequiredField_ReturnsError()
     {
         // Arrange - Missing Employee ID in second row
-        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+        var csvContent =
+            @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
 NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07
 ,Bob Williams,2025-12-15,2025-12-21,Retail,Level 2,PartTime,27.16,20.00,543.20,0.00,0.00,0.00,0.00,0.00,0.00,543.20,65.18";
 
@@ -86,7 +88,8 @@ NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1
     public async Task ParseAsync_OptionalFieldsMissing_UsesDefaultValues()
     {
         // Arrange - CSV without optional weekend/holiday fields
-        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Gross Pay,Superannuation Paid
+        var csvContent =
+            @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Gross Pay,Superannuation Paid
 NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,1008.90,121.07";
 
         using var stream = new MemoryStream();
@@ -129,7 +132,8 @@ NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1
     public async Task ParseAsync_InvalidDateFormat_ReturnsError()
     {
         // Arrange - Invalid date format
-        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+        var csvContent =
+            @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
 NEW001,Alice Johnson,15/12/2025,21/12/2025,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07";
 
         using var stream = new MemoryStream();
@@ -150,7 +154,8 @@ NEW001,Alice Johnson,15/12/2025,21/12/2025,Retail,Level 1,FullTime,26.55,38.00,1
     public async Task ParseAsync_NegativeHourlyRate_ReturnsError()
     {
         // Arrange - Negative hourly rate
-        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+        var csvContent =
+            @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
 NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,-26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07";
 
         using var stream = new MemoryStream();
@@ -172,7 +177,8 @@ NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,-26.55,38.00,
     public async Task ParseAsync_MissingEmployeeId_ReturnsError()
     {
         // Arrange - First row has empty Employee ID
-        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+        var csvContent =
+            @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
 ,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07";
 
         using var stream = new MemoryStream();
@@ -193,7 +199,8 @@ NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,-26.55,38.00,
     public async Task ParseAsync_InvalidEmploymentType_ReturnsError()
     {
         // Arrange - Invalid employment type "Contract"
-        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+        var csvContent =
+            @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
 NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,Contract,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07";
 
         using var stream = new MemoryStream();
@@ -228,7 +235,8 @@ NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,Contract,26.55,38.00,1
     public async Task ParseAsync_HeaderOnly_ReturnsEmptyRows()
     {
         // Arrange - Only header row, no data rows
-        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid";
+        var csvContent =
+            @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid";
 
         using var stream = new MemoryStream();
         using var writer = new StreamWriter(stream);
@@ -248,7 +256,8 @@ NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,Contract,26.55,38.00,1
     public async Task ParseAsync_WhenOrdinaryPayNegative_ShouldParseSuccessfully()
     {
         // Arrange - Negative OrdinaryPay (correction/reversal entry)
-        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+        var csvContent =
+            @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
 NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,-500.00,0.00,0.00,0.00,0.00,0.00,0.00,508.90,61.07";
 
         using var stream = new MemoryStream();
@@ -270,7 +279,8 @@ NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,-
     public async Task ParseAsync_WhenGrossPayNegative_ShouldParseSuccessfully()
     {
         // Arrange - Negative GrossPay (correction/reversal entry)
-        var csvContent = @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+        var csvContent =
+            @"Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
 NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,-1008.90,121.07";
 
         using var stream = new MemoryStream();
@@ -294,7 +304,11 @@ NEW001,Alice Johnson,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1
         // Arrange
         var testFilePath = Path.Combine(
             Directory.GetCurrentDirectory(),
-            "TestData", "Csv", "EmployeeSync", "TEST_01_NewEmployees.csv");
+            "TestData",
+            "Csv",
+            "EmployeeSync",
+            "TEST_01_NewEmployees.csv"
+        );
 
         if (!File.Exists(testFilePath))
         {

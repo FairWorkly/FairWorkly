@@ -1,7 +1,7 @@
-using FluentAssertions;
 using FairWorkly.Application.Payroll.Services.ComplianceEngine;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Payroll.Entities;
+using FluentAssertions;
 
 namespace FairWorkly.UnitTests.Unit;
 
@@ -30,7 +30,11 @@ public class PenaltyRateRuleTests
     public void Evaluate_SaturdayFullTime_WhenPaidCorrectly_ShouldReturnNoIssues()
     {
         // Level 2 FullTime Saturday: $27.16 × 1.25 × 8 = $271.60
-        var payslip = CreatePayslip(EmploymentType.FullTime, saturdayHours: 8m, saturdayPay: 271.60m);
+        var payslip = CreatePayslip(
+            EmploymentType.FullTime,
+            saturdayHours: 8m,
+            saturdayPay: 271.60m
+        );
 
         var issues = _rule.Evaluate(payslip, _validationId);
 
@@ -41,7 +45,11 @@ public class PenaltyRateRuleTests
     public void Evaluate_SaturdayFullTime_WhenUnderpaid_ShouldReturnError()
     {
         // Expected: $27.16 × 1.25 × 8 = $271.60, Actual: $217.28 (20% short)
-        var payslip = CreatePayslip(EmploymentType.FullTime, saturdayHours: 8m, saturdayPay: 217.28m);
+        var payslip = CreatePayslip(
+            EmploymentType.FullTime,
+            saturdayHours: 8m,
+            saturdayPay: 217.28m
+        );
 
         var issues = _rule.Evaluate(payslip, _validationId);
 
@@ -143,7 +151,11 @@ public class PenaltyRateRuleTests
     public void Evaluate_WhenWithinTolerance_ShouldReturnNoIssues()
     {
         // Expected: $271.60, Actual: $271.56 (only $0.04 under, within $0.05 tolerance)
-        var payslip = CreatePayslip(EmploymentType.FullTime, saturdayHours: 8m, saturdayPay: 271.56m);
+        var payslip = CreatePayslip(
+            EmploymentType.FullTime,
+            saturdayHours: 8m,
+            saturdayPay: 271.56m
+        );
 
         var issues = _rule.Evaluate(payslip, _validationId);
 
@@ -154,7 +166,11 @@ public class PenaltyRateRuleTests
     public void Evaluate_WhenJustOverTolerance_ShouldReturnError()
     {
         // Expected: $271.60, Actual: $271.54 ($0.06 under, over $0.05 tolerance)
-        var payslip = CreatePayslip(EmploymentType.FullTime, saturdayHours: 8m, saturdayPay: 271.54m);
+        var payslip = CreatePayslip(
+            EmploymentType.FullTime,
+            saturdayHours: 8m,
+            saturdayPay: 271.54m
+        );
 
         var issues = _rule.Evaluate(payslip, _validationId);
 
@@ -167,9 +183,12 @@ public class PenaltyRateRuleTests
         // All three penalty types underpaid
         var payslip = CreatePayslip(
             EmploymentType.FullTime,
-            saturdayHours: 8m, saturdayPay: 200m,  // Under
-            sundayHours: 6m, sundayPay: 200m,      // Under
-            phHours: 4m, phPay: 200m               // Under
+            saturdayHours: 8m,
+            saturdayPay: 200m, // Under
+            sundayHours: 6m,
+            sundayPay: 200m, // Under
+            phHours: 4m,
+            phPay: 200m // Under
         );
 
         var issues = _rule.Evaluate(payslip, _validationId);
@@ -201,7 +220,11 @@ public class PenaltyRateRuleTests
     public void Evaluate_WhenSaturdayPayNegative_ShouldReturnWarning()
     {
         // Arrange: Negative Saturday pay indicates correction/reversal entry
-        var payslip = CreatePayslip(EmploymentType.FullTime, saturdayHours: 8m, saturdayPay: -271.60m);
+        var payslip = CreatePayslip(
+            EmploymentType.FullTime,
+            saturdayHours: 8m,
+            saturdayPay: -271.60m
+        );
 
         // Act
         var issues = _rule.Evaluate(payslip, _validationId);
@@ -259,8 +282,10 @@ public class PenaltyRateRuleTests
         // Sunday: Negative pay (reversal - should return Warning)
         var payslip = CreatePayslip(
             EmploymentType.FullTime,
-            saturdayHours: 8m, saturdayPay: 200m,
-            sundayHours: 6m, sundayPay: -244.44m
+            saturdayHours: 8m,
+            saturdayPay: 200m,
+            sundayHours: 6m,
+            sundayPay: -244.44m
         );
 
         // Act
@@ -268,8 +293,18 @@ public class PenaltyRateRuleTests
 
         // Assert: Should have 2 issues - one Error for Saturday, one Warning for Sunday
         issues.Should().HaveCount(2);
-        issues.Should().Contain(i => i.Severity == IssueSeverity.Error && i.ContextLabel!.Contains("Saturday"));
-        issues.Should().Contain(i => i.Severity == IssueSeverity.Warning && i.WarningMessage!.Contains("Negative") && i.WarningMessage.Contains("Sunday Pay"));
+        issues
+            .Should()
+            .Contain(i =>
+                i.Severity == IssueSeverity.Error && i.ContextLabel!.Contains("Saturday")
+            );
+        issues
+            .Should()
+            .Contain(i =>
+                i.Severity == IssueSeverity.Warning
+                && i.WarningMessage!.Contains("Negative")
+                && i.WarningMessage.Contains("Sunday Pay")
+            );
     }
 
     #endregion
@@ -281,7 +316,8 @@ public class PenaltyRateRuleTests
         decimal sundayHours = 0,
         decimal sundayPay = 0,
         decimal phHours = 0,
-        decimal phPay = 0)
+        decimal phPay = 0
+    )
     {
         return new Payslip
         {
@@ -306,7 +342,7 @@ public class PenaltyRateRuleTests
             AwardType = AwardType.GeneralRetailIndustryAward2020,
             PayPeriodStart = DateTimeOffset.Now.AddDays(-7),
             PayPeriodEnd = DateTimeOffset.Now,
-            PayDate = DateTimeOffset.Now
+            PayDate = DateTimeOffset.Now,
         };
     }
 }
