@@ -12,8 +12,8 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
 {
     public void Configure(EntityTypeBuilder<Organization> builder)
     {
-        // Table name (singular to match existing migrations)
-        builder.ToTable("organization");
+        // Table name (snake_case + plural)
+        builder.ToTable("organizations");
 
         // Configure AuditableEntity navigation properties
         // These must be explicitly configured because EF Core cannot infer

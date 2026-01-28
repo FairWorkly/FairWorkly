@@ -1,5 +1,6 @@
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
+using FairWorkly.Domain.Common;
 using MediatR;
 
 namespace FairWorkly.Application.Auth.Features.Logout;
@@ -8,9 +9,12 @@ public class LogoutCommandHandler(
     IUserRepository userRepository,
     ISecretHasher secretHasher,
     IUnitOfWork unitOfWork
-) : IRequestHandler<LogoutCommand, bool>
+) : IRequestHandler<LogoutCommand, Result<bool>>
 {
-    public async Task<bool> Handle(LogoutCommand request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(
+        LogoutCommand request,
+        CancellationToken cancellationToken
+    )
     {
         // Try to resolve user by id first
         Domain.Auth.Entities.User? user = null;
@@ -29,8 +33,8 @@ public class LogoutCommandHandler(
 
         if (user == null)
         {
-            // Nothing to do
-            return false;
+            // Nothing to do - return failure
+            return Result<bool>.Failure("Logout failed.");
         }
 
         // Clear persisted refresh token and expiry
@@ -39,6 +43,6 @@ public class LogoutCommandHandler(
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Result<bool>.Success(true);
     }
 }

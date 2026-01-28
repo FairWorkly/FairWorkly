@@ -19,16 +19,19 @@ public class BaseRateRule : IComplianceRule
         // Check for negative pay (possible correction/reversal entry)
         if (payslip.OrdinaryPay < 0)
         {
-            issues.Add(new PayrollIssue
-            {
-                OrganizationId = payslip.OrganizationId,
-                PayrollValidationId = validationId,
-                PayslipId = payslip.Id,
-                EmployeeId = payslip.EmployeeId,
-                CategoryType = IssueCategory.BaseRate,
-                Severity = IssueSeverity.Warning,
-                WarningMessage = $"Negative Ordinary Pay detected (${Math.Abs(payslip.OrdinaryPay):F2}). Possible correction/reversal entry. Skipping compliance check."
-            });
+            issues.Add(
+                new PayrollIssue
+                {
+                    OrganizationId = payslip.OrganizationId,
+                    PayrollValidationId = validationId,
+                    PayslipId = payslip.Id,
+                    EmployeeId = payslip.EmployeeId,
+                    CategoryType = IssueCategory.BaseRate,
+                    Severity = IssueSeverity.Warning,
+                    WarningMessage =
+                        $"Negative Ordinary Pay detected (${Math.Abs(payslip.OrdinaryPay):F2}). Possible correction/reversal entry. Skipping compliance check.",
+                }
+            );
             return issues;
         }
 
@@ -54,16 +57,18 @@ public class BaseRateRule : IComplianceRule
         // Check 1: Is the actual paid rate below minimum?
         if (actualRate < minimumRate - RateTableProvider.RateTolerance)
         {
-            issues.Add(CreateIssue(
-                payslip,
-                validationId,
-                IssueSeverity.Critical,
-                null, // No warning message for underpayment - evidence fields are used
-                minimumRate,
-                actualRate,
-                payslip.OrdinaryHours,
-                $"Retail Award {payslip.Classification}"
-            ));
+            issues.Add(
+                CreateIssue(
+                    payslip,
+                    validationId,
+                    IssueSeverity.Critical,
+                    null, // No warning message for underpayment - evidence fields are used
+                    minimumRate,
+                    actualRate,
+                    payslip.OrdinaryHours,
+                    $"Retail Award {payslip.Classification}"
+                )
+            );
 
             // Don't check system rate if already underpaying
             return issues;
@@ -73,16 +78,18 @@ public class BaseRateRule : IComplianceRule
         // (Actual pay is OK, but the configured rate is wrong - data risk)
         if (payslip.HourlyRate < minimumRate - RateTableProvider.RateTolerance)
         {
-            issues.Add(CreateIssue(
-                payslip,
-                validationId,
-                IssueSeverity.Warning,
-                $"System rate ${payslip.HourlyRate:F2}/hr is below legal minimum ${minimumRate:F2}/hr",
-                minimumRate,
-                payslip.HourlyRate,
-                payslip.OrdinaryHours,
-                $"Retail Award {payslip.Classification}"
-            ));
+            issues.Add(
+                CreateIssue(
+                    payslip,
+                    validationId,
+                    IssueSeverity.Warning,
+                    $"System rate ${payslip.HourlyRate:F2}/hr is below legal minimum ${minimumRate:F2}/hr",
+                    minimumRate,
+                    payslip.HourlyRate,
+                    payslip.OrdinaryHours,
+                    $"Retail Award {payslip.Classification}"
+                )
+            );
         }
 
         return issues;
@@ -96,7 +103,8 @@ public class BaseRateRule : IComplianceRule
         decimal expectedValue,
         decimal actualValue,
         decimal affectedUnits,
-        string contextLabel)
+        string contextLabel
+    )
     {
         return new PayrollIssue
         {
@@ -111,7 +119,7 @@ public class BaseRateRule : IComplianceRule
             ActualValue = actualValue,
             AffectedUnits = affectedUnits,
             UnitType = "Hour",
-            ContextLabel = contextLabel
+            ContextLabel = contextLabel,
         };
     }
 }
