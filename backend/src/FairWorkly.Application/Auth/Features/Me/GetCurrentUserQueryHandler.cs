@@ -1,4 +1,5 @@
 using FairWorkly.Domain.Auth.Interfaces;
+using FairWorkly.Domain.Common;
 using FairWorkly.Application.Auth.Features.Login;
 using MediatR;
 
@@ -6,14 +7,17 @@ namespace FairWorkly.Application.Auth.Features.Me;
 
 public class GetCurrentUserQueryHandler(
     IUserRepository userRepository
-) : IRequestHandler<GetCurrentUserQuery, UserDto?>
+) : IRequestHandler<GetCurrentUserQuery, Result<UserDto>>
 {
-    public async Task<UserDto?> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserDto>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
-        if (user == null) return null;
+        if (user == null)
+        {
+            return Result<UserDto>.NotFound("User not found.");
+        }
 
-        return new UserDto
+        return Result<UserDto>.Success(new UserDto
         {
             Id = user.Id,
             Email = user.Email,
@@ -21,6 +25,6 @@ public class GetCurrentUserQueryHandler(
             LastName = user.LastName,
             Role = user.Role.ToString(),
             OrganizationId = user.OrganizationId
-        };
+        });
     }
 }

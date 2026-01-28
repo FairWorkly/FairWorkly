@@ -1,14 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-
-    <!-- Share User Secrets with API project for integration tests -->
-    <UserSecretsId>19188c8f-cabf-4ba8-ac6d-6c7f6d1db700</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,12 +14,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="FluentAssertions" Version="8.8.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.22" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
@@ -32,12 +26,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\FairWorkly.Domain\FairWorkly.Domain.csproj" />
-    <ProjectReference Include="..\..\src\FairWorkly.Application\FairWorkly.Application.csproj" />
-    <ProjectReference Include="..\..\src\FairWorkly.Infrastructure\FairWorkly.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\FairWorkly.API\FairWorkly.API.csproj" />
   </ItemGroup>
 
+  <!-- Test-specific appsettings for integration tests -->
   <ItemGroup>
-    <None Include="TestData\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
 </Project>

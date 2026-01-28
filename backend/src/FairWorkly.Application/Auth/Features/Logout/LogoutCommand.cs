@@ -1,8 +1,9 @@
 using MediatR;
+using FairWorkly.Domain.Common;
 
 namespace FairWorkly.Application.Auth.Features.Logout;
 
-public class LogoutCommand : IRequest<bool>
+public class LogoutCommand : IRequest<Result<bool>>
 {
     // Optionally provided: user id from access token
     public Guid? UserId { get; set; }
