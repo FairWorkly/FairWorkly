@@ -10,7 +10,10 @@
 
 # Claude Code CLI local configuration
 .claude/
+.codex/
+.gemini/
 CLAUDE.md
+GEMINI.md
 AGENTS.md
 
 # Visual Studio (Backend)
