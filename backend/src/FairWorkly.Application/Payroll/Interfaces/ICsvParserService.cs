@@ -28,5 +28,6 @@ public interface ICsvParserService
     /// </remarks>
     Task<(List<PayrollCsvRow> Rows, List<string> Errors)> ParseAsync(
         Stream csvStream,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

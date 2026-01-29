@@ -8,7 +8,8 @@ namespace FairWorkly.IntegrationTests.Auth;
 
 public class RefreshTests : AuthTestsBase
 {
-    public RefreshTests(CustomWebApplicationFactory factory) : base(factory) { }
+    public RefreshTests(CustomWebApplicationFactory factory)
+        : base(factory) { }
 
     #region 2.1 No Cookie (401)
 
@@ -85,9 +86,12 @@ public class RefreshTests : AuthTestsBase
 
         // Get fresh factory scope to manipulate the database
         using var scope = Factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<FairWorkly.Infrastructure.Persistence.FairWorklyDbContext>();
-        var passwordHasher = scope.ServiceProvider.GetRequiredService<FairWorkly.Application.Common.Interfaces.IPasswordHasher>();
-        var secretHasher = scope.ServiceProvider.GetRequiredService<FairWorkly.Application.Common.Interfaces.ISecretHasher>();
+        var db =
+            scope.ServiceProvider.GetRequiredService<FairWorkly.Infrastructure.Persistence.FairWorklyDbContext>();
+        var passwordHasher =
+            scope.ServiceProvider.GetRequiredService<FairWorkly.Application.Common.Interfaces.IPasswordHasher>();
+        var secretHasher =
+            scope.ServiceProvider.GetRequiredService<FairWorkly.Application.Common.Interfaces.ISecretHasher>();
 
         // Find the disabled user and temporarily enable them
         var disabledUser = db.Set<FairWorkly.Domain.Auth.Entities.User>()

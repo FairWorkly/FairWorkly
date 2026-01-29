@@ -52,20 +52,22 @@ public class LoginCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         // return
-        return Result<LoginResponse>.Success(new LoginResponse
-        {
-            AccessToken = accessToken,
-            RefreshToken = refreshToken, // to Controller
-            RefreshTokenExpiration = expiresAt,
-            User = new UserDto
+        return Result<LoginResponse>.Success(
+            new LoginResponse
             {
-                Id = user.Id,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Role = user.Role.ToString(),
-                OrganizationId = user.OrganizationId,
-            },
-        });
+                AccessToken = accessToken,
+                RefreshToken = refreshToken, // to Controller
+                RefreshTokenExpiration = expiresAt,
+                User = new UserDto
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Role = user.Role.ToString(),
+                    OrganizationId = user.OrganizationId,
+                },
+            }
+        );
     }
 }

@@ -17,7 +17,8 @@ public interface IEmployeeRepository
     Task<List<Employee>> GetByEmployeeNumbersAsync(
         Guid organizationId,
         List<string> employeeNumbers,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Creates a new employee
@@ -25,16 +26,12 @@ public interface IEmployeeRepository
     /// <param name="employee">Employee entity to create</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Created employee with generated Id</returns>
-    Task<Employee> CreateAsync(
-        Employee employee,
-        CancellationToken cancellationToken = default);
+    Task<Employee> CreateAsync(Employee employee, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates an existing employee
     /// </summary>
     /// <param name="employee">Employee entity with updated values</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task UpdateAsync(
-        Employee employee,
-        CancellationToken cancellationToken = default);
+    Task UpdateAsync(Employee employee, CancellationToken cancellationToken = default);
 }

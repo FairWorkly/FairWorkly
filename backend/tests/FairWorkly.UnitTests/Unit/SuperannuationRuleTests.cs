@@ -1,7 +1,7 @@
-using FluentAssertions;
 using FairWorkly.Application.Payroll.Services.ComplianceEngine;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Payroll.Entities;
+using FluentAssertions;
 
 namespace FairWorkly.UnitTests.Unit;
 
@@ -46,12 +46,14 @@ public class SuperannuationRuleTests
     }
 
     [Theory]
-    [InlineData(1000, 120)]     // Exact 12%
-    [InlineData(2500, 300)]     // Exact 12%
-    [InlineData(500, 60)]       // Exact 12%
-    [InlineData(1500, 200)]     // Above 12% (13.33%)
+    [InlineData(1000, 120)] // Exact 12%
+    [InlineData(2500, 300)] // Exact 12%
+    [InlineData(500, 60)] // Exact 12%
+    [InlineData(1500, 200)] // Above 12% (13.33%)
     public void Evaluate_WhenSuperannuationAtOrAbove12Percent_ShouldReturnNoIssues(
-        decimal grossPay, decimal superannuation)
+        decimal grossPay,
+        decimal superannuation
+    )
     {
         var payslip = CreatePayslip(grossPay: grossPay, superannuation: superannuation);
 
@@ -98,11 +100,13 @@ public class SuperannuationRuleTests
     }
 
     [Theory]
-    [InlineData(1000, 100)]  // Underpaid by $20
-    [InlineData(2000, 180)]  // Underpaid by $60
-    [InlineData(5000, 500)]  // Underpaid by $100
+    [InlineData(1000, 100)] // Underpaid by $20
+    [InlineData(2000, 180)] // Underpaid by $60
+    [InlineData(5000, 500)] // Underpaid by $100
     public void Evaluate_WhenSignificantlyUnderpaid_ShouldReturnError(
-        decimal grossPay, decimal superannuation)
+        decimal grossPay,
+        decimal superannuation
+    )
     {
         var payslip = CreatePayslip(grossPay: grossPay, superannuation: superannuation);
         var expectedSuper = grossPay * 0.12m;
@@ -121,11 +125,7 @@ public class SuperannuationRuleTests
     public void Evaluate_WhenGrossPayZeroWithWorkHours_ShouldReturnWarning()
     {
         // Has work hours but zero gross pay - data anomaly
-        var payslip = CreatePayslip(
-            grossPay: 0m,
-            superannuation: 0m,
-            ordinaryHours: 38m
-        );
+        var payslip = CreatePayslip(grossPay: 0m, superannuation: 0m, ordinaryHours: 38m);
 
         var issues = _rule.Evaluate(payslip, _validationId);
 
@@ -138,11 +138,15 @@ public class SuperannuationRuleTests
     }
 
     [Theory]
-    [InlineData(0, 8, 0, 0)]   // Only Saturday hours
-    [InlineData(0, 0, 5, 0)]   // Only Sunday hours
-    [InlineData(0, 0, 0, 8)]   // Only Public Holiday hours
+    [InlineData(0, 8, 0, 0)] // Only Saturday hours
+    [InlineData(0, 0, 5, 0)] // Only Sunday hours
+    [InlineData(0, 0, 0, 8)] // Only Public Holiday hours
     public void Evaluate_WhenGrossPayZeroWithAnyWorkHours_ShouldReturnWarning(
-        decimal ordinaryHours, decimal saturdayHours, decimal sundayHours, decimal phHours)
+        decimal ordinaryHours,
+        decimal saturdayHours,
+        decimal sundayHours,
+        decimal phHours
+    )
     {
         var payslip = CreatePayslip(
             grossPay: 0m,
@@ -166,11 +170,7 @@ public class SuperannuationRuleTests
     public void Evaluate_WhenGrossPayZeroWithNoWorkHours_ShouldReturnNoIssues()
     {
         // No hours and no pay - unpaid period (e.g. unpaid leave), skip
-        var payslip = CreatePayslip(
-            grossPay: 0m,
-            superannuation: 0m,
-            ordinaryHours: 0m
-        );
+        var payslip = CreatePayslip(grossPay: 0m, superannuation: 0m, ordinaryHours: 0m);
 
         var issues = _rule.Evaluate(payslip, _validationId);
 
@@ -181,11 +181,7 @@ public class SuperannuationRuleTests
     public void Evaluate_WhenGrossPayNegative_ShouldReturnWarning()
     {
         // Negative gross pay indicates correction/reversal entry
-        var payslip = CreatePayslip(
-            grossPay: -500m,
-            superannuation: -60m,
-            ordinaryHours: 0m
-        );
+        var payslip = CreatePayslip(grossPay: -500m, superannuation: -60m, ordinaryHours: 0m);
 
         var issues = _rule.Evaluate(payslip, _validationId);
 
@@ -284,7 +280,8 @@ public class SuperannuationRuleTests
         decimal saturdayHours = 0m,
         decimal sundayHours = 0m,
         decimal phHours = 0m,
-        EmploymentType employmentType = EmploymentType.FullTime)
+        EmploymentType employmentType = EmploymentType.FullTime
+    )
     {
         return new Payslip
         {
@@ -309,7 +306,7 @@ public class SuperannuationRuleTests
             AwardType = AwardType.GeneralRetailIndustryAward2020,
             PayPeriodStart = DateTimeOffset.Now.AddDays(-7),
             PayPeriodEnd = DateTimeOffset.Now,
-            PayDate = DateTimeOffset.Now
+            PayDate = DateTimeOffset.Now,
         };
     }
 }
