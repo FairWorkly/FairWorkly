@@ -3,7 +3,7 @@ import type {
   TeamMember,
   TeamMemberRole,
   InviteTeamMemberFormData,
-} from '../types/settings.types'
+} from '@/modules/settings/types'
 
 const MOCK_TEAM_MEMBERS: TeamMember[] = [
   {

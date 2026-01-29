@@ -1,6 +1,6 @@
 import React from 'react'
 import { MenuItem, Select, type SelectChangeEvent, FormControl } from '@mui/material'
-import type { TeamMemberRole } from '../types/settings.types'
+import type { TeamMemberRole } from '@/modules/settings/types'
 
 interface RoleDropdownProps {
   value: TeamMemberRole

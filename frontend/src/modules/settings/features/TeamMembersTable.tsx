@@ -7,7 +7,7 @@ import {
   Tooltip,
 } from '@mui/material'
 import { PersonOff } from '@mui/icons-material'
-import type { TeamMember, TeamMemberRole } from '../types/settings.types'
+import type { TeamMember, TeamMemberRole } from '@/modules/settings/types'
 import { StatusBadge } from './StatusBadge'
 import { RoleDropdown } from './RoleDropdown'
 import {
@@ -15,7 +15,7 @@ import {
   HeaderCell,
   StyledTableRow,
   ActionButton,
-} from './TeamMembersTable.styles'
+} from '@/modules/settings/ui'
 
 interface TeamMembersTableProps {
   members: TeamMember[]

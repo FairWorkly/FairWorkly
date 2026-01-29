@@ -8,12 +8,12 @@ import {
 import type {
   InviteTeamMemberFormData,
   TeamMemberRole,
-} from '../types/settings.types'
+} from '@/modules/settings/types'
 import {
   StyledDialog,
   StyledDialogContent,
   StyledDialogActions,
-} from './InviteModal.styles'
+} from '@/modules/settings/ui'
 
 interface InviteModalProps {
   open: boolean

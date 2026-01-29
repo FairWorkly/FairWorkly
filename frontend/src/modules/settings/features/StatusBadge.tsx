@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { styled } from '@/styles/styled'
-import type { TeamMemberStatus } from '../types/settings.types'
+import type { TeamMemberStatus } from '@/modules/settings/types'
 
 interface StatusBadgeProps {
   status: TeamMemberStatus

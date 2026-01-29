@@ -7,7 +7,7 @@ import {
   DialogActions,
   Button,
 } from '@mui/material'
-import type { TeamMember } from '../types/settings.types'
+import type { TeamMember } from '@/modules/settings/types'
 
 interface DeactivateDialogProps {
   open: boolean

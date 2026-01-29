@@ -15,9 +15,9 @@ import {
   SettingsContent,
   PageHeader,
   SectionContent,
-} from '../ui'
+} from '@/modules/settings/ui'
 
-import { TeamMembersSection } from '../ui/TeamMembersSection'
+import { TeamMembersSection } from '@/modules/settings/features'
 
 type SettingsSection = 'company' | 'team' | 'billing' | 'security'
 
