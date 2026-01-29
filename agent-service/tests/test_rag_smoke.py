@@ -46,7 +46,11 @@ def test_llm_unavailable_returns_placeholder(monkeypatch):
     def _llm_unavailable():
         raise RuntimeError("LLM unavailable")
 
+    def _missing_vectorstore(*_args, **_kwargs):
+        raise FileNotFoundError("Vector store missing")
+
     monkeypatch.setattr(rag_client, "LLMProvider", _llm_unavailable)
+    monkeypatch.setattr(rag_client, "ensure_retriever", _missing_vectorstore)
 
     result = asyncio.run(
         rag_client.run(
