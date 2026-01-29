@@ -8,7 +8,6 @@ import {
   Button,
 } from '@mui/material'
 import type { TeamMember } from '../types/settings.types'
-import { SETTINGS_LABELS } from '../constants/settings.constants'
 
 interface DeactivateDialogProps {
   open: boolean
@@ -16,6 +15,49 @@ interface DeactivateDialogProps {
   onClose: () => void
   onConfirm: () => void
 }
+
+const SETTINGS_LABELS = {
+  TEAM_MEMBERS: {
+    TITLE: 'Team Members',
+    DESCRIPTION: 'Manage your team members and their access levels',
+    INVITE_BUTTON: 'Invite Member',
+    EMPTY_STATE: 'No team members yet. Invite your first team member.',
+  },
+  TABLE_HEADERS: {
+    NAME: 'Name',
+    EMAIL: 'Email',
+    ROLE: 'Role',
+    STATUS: 'Status',
+    LAST_LOGIN: 'Last Login',
+    ACTIONS: 'Actions',
+  },
+  MODALS: {
+    INVITE_TITLE: 'Invite Team Member',
+    DEACTIVATE_TITLE: 'Deactivate Member',
+    DEACTIVATE_CONFIRM: 'Are you sure you want to deactivate this team member?',
+  },
+  FORM: {
+    NAME_LABEL: 'Full Name',
+    NAME_PLACEHOLDER: 'Enter full name',
+    EMAIL_LABEL: 'Email Address',
+    EMAIL_PLACEHOLDER: 'Enter email address',
+    ROLE_LABEL: 'Role',
+  },
+  ACTIONS: {
+    CANCEL: 'Cancel',
+    INVITE: 'Send Invite',
+    DEACTIVATE: 'Deactivate',
+    CONFIRM: 'Confirm',
+  },
+  ROLES: {
+    ADMIN: 'Admin',
+    MANAGER: 'Manager',
+  },
+  STATUS: {
+    ACTIVE: 'Active',
+    INACTIVE: 'Inactive',
+  },
+} as const
 
 export const DeactivateDialog: React.FC<DeactivateDialogProps> = ({
   open,

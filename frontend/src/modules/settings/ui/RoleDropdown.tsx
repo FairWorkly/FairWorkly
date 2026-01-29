@@ -1,13 +1,14 @@
 import React from 'react'
 import { MenuItem, Select, type SelectChangeEvent, FormControl } from '@mui/material'
 import type { TeamMemberRole } from '../types/settings.types'
-import { TEAM_MEMBER_ROLES } from '../constants/settings.constants'
 
 interface RoleDropdownProps {
   value: TeamMemberRole
   onChange: (role: TeamMemberRole) => void
   disabled?: boolean
 }
+
+const TEAM_MEMBER_ROLES: TeamMemberRole[] = ['Admin', 'Manager']
 
 export const RoleDropdown: React.FC<RoleDropdownProps> = ({
   value,

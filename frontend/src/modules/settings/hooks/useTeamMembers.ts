@@ -4,7 +4,25 @@ import type {
   TeamMemberRole,
   InviteTeamMemberFormData,
 } from '../types/settings.types'
-import { MOCK_TEAM_MEMBERS } from '../constants/settings.constants'
+
+const MOCK_TEAM_MEMBERS: TeamMember[] = [
+  {
+    id: '1',
+    name: 'Alice Chen',
+    email: 'alice@demo.com',
+    role: 'Admin',
+    status: 'Active',
+    lastLogin: '2024-02-01 09:12',
+  },
+  {
+    id: '2',
+    name: 'Ben Lee',
+    email: 'ben@demo.com',
+    role: 'Manager',
+    status: 'Inactive',
+    lastLogin: '2024-01-28 17:40',
+  },
+]
 
 export const useTeamMembers = () => {
   const [members, setMembers] = useState<TeamMember[]>(MOCK_TEAM_MEMBERS)
@@ -14,8 +32,19 @@ export const useTeamMembers = () => {
     useState<TeamMember | null>(null)
 
   const handleInvite = (data: InviteTeamMemberFormData) => {
+  // Check for duplicate email
+  const emailExists = members.some(
+    (m) => m.email.toLowerCase() === data.email.toLowerCase()
+  )
+
+  if (emailExists) {
+    // Consider returning an error or throwing
+    console.warn('Email already exists')
+    return
+  }
+
     const newMember: TeamMember = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: data.name,
       email: data.email,
       role: data.role,

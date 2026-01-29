@@ -10,10 +10,6 @@ import type {
   TeamMemberRole,
 } from '../types/settings.types'
 import {
-  SETTINGS_LABELS,
-  TEAM_MEMBER_ROLES,
-} from '../constants/settings.constants'
-import {
   StyledDialog,
   StyledDialogContent,
   StyledDialogActions,
@@ -24,6 +20,51 @@ interface InviteModalProps {
   onClose: () => void
   onSubmit: (data: InviteTeamMemberFormData) => void
 }
+
+const TEAM_MEMBER_ROLES: TeamMemberRole[] = ['Admin', 'Manager']
+
+const SETTINGS_LABELS = {
+  TEAM_MEMBERS: {
+    TITLE: 'Team Members',
+    DESCRIPTION: 'Manage your team members and their access levels',
+    INVITE_BUTTON: 'Invite Member',
+    EMPTY_STATE: 'No team members yet. Invite your first team member.',
+  },
+  TABLE_HEADERS: {
+    NAME: 'Name',
+    EMAIL: 'Email',
+    ROLE: 'Role',
+    STATUS: 'Status',
+    LAST_LOGIN: 'Last Login',
+    ACTIONS: 'Actions',
+  },
+  MODALS: {
+    INVITE_TITLE: 'Invite Team Member',
+    DEACTIVATE_TITLE: 'Deactivate Member',
+    DEACTIVATE_CONFIRM: 'Are you sure you want to deactivate this team member?',
+  },
+  FORM: {
+    NAME_LABEL: 'Full Name',
+    NAME_PLACEHOLDER: 'Enter full name',
+    EMAIL_LABEL: 'Email Address',
+    EMAIL_PLACEHOLDER: 'Enter email address',
+    ROLE_LABEL: 'Role',
+  },
+  ACTIONS: {
+    CANCEL: 'Cancel',
+    INVITE: 'Send Invite',
+    DEACTIVATE: 'Deactivate',
+    CONFIRM: 'Confirm',
+  },
+  ROLES: {
+    ADMIN: 'Admin',
+    MANAGER: 'Manager',
+  },
+  STATUS: {
+    ACTIVE: 'Active',
+    INACTIVE: 'Inactive',
+  },
+} as const
 
 const INITIAL_FORM_STATE: InviteTeamMemberFormData = {
   name: '',
@@ -70,11 +111,16 @@ export const InviteModal: React.FC<InviteModalProps> = ({
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (validate()) {
-      onSubmit(formData)
-      onClose()
+      try {
+        await onSubmit(formData)
+        onClose()
+      } catch (error) {
+        // Handle submission error (e.g., show toast)
+        console.error('Failed to invite member:', error)
+      }
     }
   }
 
