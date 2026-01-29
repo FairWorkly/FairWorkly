@@ -8,47 +8,11 @@ import { TeamMembersTable } from './TeamMembersTable'
 import { InviteModal } from './InviteModal'
 import { DeactivateDialog } from './DeactivateDialog'
 
-const SETTINGS_LABELS = {
-  TEAM_MEMBERS: {
-    TITLE: 'Team Members',
-    DESCRIPTION: 'Manage your team members and their access levels',
-    INVITE_BUTTON: 'Invite Member',
-    EMPTY_STATE: 'No team members yet. Invite your first team member.',
-  },
-  TABLE_HEADERS: {
-    NAME: 'Name',
-    EMAIL: 'Email',
-    ROLE: 'Role',
-    STATUS: 'Status',
-    LAST_LOGIN: 'Last Login',
-    ACTIONS: 'Actions',
-  },
-  MODALS: {
-    INVITE_TITLE: 'Invite Team Member',
-    DEACTIVATE_TITLE: 'Deactivate Member',
-    DEACTIVATE_CONFIRM: 'Are you sure you want to deactivate this team member?',
-  },
-  FORM: {
-    NAME_LABEL: 'Full Name',
-    NAME_PLACEHOLDER: 'Enter full name',
-    EMAIL_LABEL: 'Email Address',
-    EMAIL_PLACEHOLDER: 'Enter email address',
-    ROLE_LABEL: 'Role',
-  },
-  ACTIONS: {
-    CANCEL: 'Cancel',
-    INVITE: 'Send Invite',
-    DEACTIVATE: 'Deactivate',
-    CONFIRM: 'Confirm',
-  },
-  ROLES: {
-    ADMIN: 'Admin',
-    MANAGER: 'Manager',
-  },
-  STATUS: {
-    ACTIVE: 'Active',
-    INACTIVE: 'Inactive',
-  },
+const TEAM_MEMBERS_SECTION_LABELS = {
+  TITLE: 'Team Members',
+  DESCRIPTION: 'Manage your team members and their access levels',
+  INVITE_BUTTON: 'Invite Member',
+  EMPTY_STATE: 'No team members yet. Invite your first team member.',
 } as const
 
 const SectionHeader = styled(Box)(({ theme }) => ({
@@ -90,10 +54,10 @@ export const TeamMembersSection: React.FC = () => {
       <SectionHeader>
         <Box>
           <Typography variant="h5">
-            {SETTINGS_LABELS.TEAM_MEMBERS.TITLE}
+            {TEAM_MEMBERS_SECTION_LABELS.TITLE}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {SETTINGS_LABELS.TEAM_MEMBERS.DESCRIPTION}
+            {TEAM_MEMBERS_SECTION_LABELS.DESCRIPTION}
           </Typography>
         </Box>
         <Button
@@ -101,13 +65,13 @@ export const TeamMembersSection: React.FC = () => {
           startIcon={<AddIcon />}
           onClick={openInviteModal}
         >
-          {SETTINGS_LABELS.TEAM_MEMBERS.INVITE_BUTTON}
+          {TEAM_MEMBERS_SECTION_LABELS.INVITE_BUTTON}
         </Button>
       </SectionHeader>
 
       {members.length === 0 ? (
         <EmptyStateContainer>
-          <Typography>{SETTINGS_LABELS.TEAM_MEMBERS.EMPTY_STATE}</Typography>
+          <Typography>{TEAM_MEMBERS_SECTION_LABELS.EMPTY_STATE}</Typography>
         </EmptyStateContainer>
       ) : (
         <TeamMembersTable

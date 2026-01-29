@@ -23,14 +23,8 @@ interface TeamMembersTableProps {
   onDeactivate: (member: TeamMember) => void
 }
 
-const SETTINGS_LABELS = {
-  TEAM_MEMBERS: {
-    TITLE: 'Team Members',
-    DESCRIPTION: 'Manage your team members and their access levels',
-    INVITE_BUTTON: 'Invite Member',
-    EMPTY_STATE: 'No team members yet. Invite your first team member.',
-  },
-  TABLE_HEADERS: {
+const TABLE_LABELS = {
+  HEADERS: {
     NAME: 'Name',
     EMAIL: 'Email',
     ROLE: 'Role',
@@ -38,32 +32,7 @@ const SETTINGS_LABELS = {
     LAST_LOGIN: 'Last Login',
     ACTIONS: 'Actions',
   },
-  MODALS: {
-    INVITE_TITLE: 'Invite Team Member',
-    DEACTIVATE_TITLE: 'Deactivate Member',
-    DEACTIVATE_CONFIRM: 'Are you sure you want to deactivate this team member?',
-  },
-  FORM: {
-    NAME_LABEL: 'Full Name',
-    NAME_PLACEHOLDER: 'Enter full name',
-    EMAIL_LABEL: 'Email Address',
-    EMAIL_PLACEHOLDER: 'Enter email address',
-    ROLE_LABEL: 'Role',
-  },
-  ACTIONS: {
-    CANCEL: 'Cancel',
-    INVITE: 'Send Invite',
-    DEACTIVATE: 'Deactivate',
-    CONFIRM: 'Confirm',
-  },
-  ROLES: {
-    ADMIN: 'Admin',
-    MANAGER: 'Manager',
-  },
-  STATUS: {
-    ACTIVE: 'Active',
-    INACTIVE: 'Inactive',
-  },
+  DEACTIVATE: 'Deactivate',
 } as const
 
 export const TeamMembersTable: React.FC<TeamMembersTableProps> = ({
@@ -76,13 +45,13 @@ export const TeamMembersTable: React.FC<TeamMembersTableProps> = ({
       <Table>
         <TableHead>
           <StyledTableRow>
-            <HeaderCell>{SETTINGS_LABELS.TABLE_HEADERS.NAME}</HeaderCell>
-            <HeaderCell>{SETTINGS_LABELS.TABLE_HEADERS.EMAIL}</HeaderCell>
-            <HeaderCell>{SETTINGS_LABELS.TABLE_HEADERS.ROLE}</HeaderCell>
-            <HeaderCell>{SETTINGS_LABELS.TABLE_HEADERS.STATUS}</HeaderCell>
-            <HeaderCell>{SETTINGS_LABELS.TABLE_HEADERS.LAST_LOGIN}</HeaderCell>
+            <HeaderCell>{TABLE_LABELS.HEADERS.NAME}</HeaderCell>
+            <HeaderCell>{TABLE_LABELS.HEADERS.EMAIL}</HeaderCell>
+            <HeaderCell>{TABLE_LABELS.HEADERS.ROLE}</HeaderCell>
+            <HeaderCell>{TABLE_LABELS.HEADERS.STATUS}</HeaderCell>
+            <HeaderCell>{TABLE_LABELS.HEADERS.LAST_LOGIN}</HeaderCell>
             <HeaderCell align="right">
-              {SETTINGS_LABELS.TABLE_HEADERS.ACTIONS}
+              {TABLE_LABELS.HEADERS.ACTIONS}
             </HeaderCell>
           </StyledTableRow>
         </TableHead>
@@ -103,9 +72,9 @@ export const TeamMembersTable: React.FC<TeamMembersTableProps> = ({
               </TableCell>
               <TableCell>{member.lastLogin}</TableCell>
               <TableCell align="right">
-                <Tooltip title={SETTINGS_LABELS.ACTIONS.DEACTIVATE}>
+                <Tooltip title={TABLE_LABELS.DEACTIVATE}>
                   <span>
-                    <ActionButton aria-label={SETTINGS_LABELS.ACTIONS.DEACTIVATE}
+                    <ActionButton aria-label={TABLE_LABELS.DEACTIVATE}
                       onClick={() => onDeactivate(member)}
                       disabled={member.status === 'Inactive'}
                       size="small"

@@ -23,26 +23,8 @@ interface InviteModalProps {
 
 const TEAM_MEMBER_ROLES: TeamMemberRole[] = ['Admin', 'Manager']
 
-const SETTINGS_LABELS = {
-  TEAM_MEMBERS: {
-    TITLE: 'Team Members',
-    DESCRIPTION: 'Manage your team members and their access levels',
-    INVITE_BUTTON: 'Invite Member',
-    EMPTY_STATE: 'No team members yet. Invite your first team member.',
-  },
-  TABLE_HEADERS: {
-    NAME: 'Name',
-    EMAIL: 'Email',
-    ROLE: 'Role',
-    STATUS: 'Status',
-    LAST_LOGIN: 'Last Login',
-    ACTIONS: 'Actions',
-  },
-  MODALS: {
-    INVITE_TITLE: 'Invite Team Member',
-    DEACTIVATE_TITLE: 'Deactivate Member',
-    DEACTIVATE_CONFIRM: 'Are you sure you want to deactivate this team member?',
-  },
+const INVITE_MODAL_LABELS = {
+  TITLE: 'Invite Team Member',
   FORM: {
     NAME_LABEL: 'Full Name',
     NAME_PLACEHOLDER: 'Enter full name',
@@ -53,16 +35,6 @@ const SETTINGS_LABELS = {
   ACTIONS: {
     CANCEL: 'Cancel',
     INVITE: 'Send Invite',
-    DEACTIVATE: 'Deactivate',
-    CONFIRM: 'Confirm',
-  },
-  ROLES: {
-    ADMIN: 'Admin',
-    MANAGER: 'Manager',
-  },
-  STATUS: {
-    ACTIVE: 'Active',
-    INACTIVE: 'Inactive',
   },
 } as const
 
@@ -122,12 +94,12 @@ const InviteModalForm: React.FC<InviteModalFormProps> = ({
 
   return (
     <>
-      <DialogTitle>{SETTINGS_LABELS.MODALS.INVITE_TITLE}</DialogTitle>
+      <DialogTitle>{INVITE_MODAL_LABELS.TITLE}</DialogTitle>
       <form onSubmit={handleSubmit}>
         <StyledDialogContent>
           <TextField
-            label={SETTINGS_LABELS.FORM.NAME_LABEL}
-            placeholder={SETTINGS_LABELS.FORM.NAME_PLACEHOLDER}
+            label={INVITE_MODAL_LABELS.FORM.NAME_LABEL}
+            placeholder={INVITE_MODAL_LABELS.FORM.NAME_PLACEHOLDER}
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
             error={!!errors.name}
@@ -136,8 +108,8 @@ const InviteModalForm: React.FC<InviteModalFormProps> = ({
             autoFocus
           />
           <TextField
-            label={SETTINGS_LABELS.FORM.EMAIL_LABEL}
-            placeholder={SETTINGS_LABELS.FORM.EMAIL_PLACEHOLDER}
+            label={INVITE_MODAL_LABELS.FORM.EMAIL_LABEL}
+            placeholder={INVITE_MODAL_LABELS.FORM.EMAIL_PLACEHOLDER}
             value={formData.email}
             onChange={(e) => handleChange('email', e.target.value)}
             error={!!errors.email}
@@ -146,7 +118,7 @@ const InviteModalForm: React.FC<InviteModalFormProps> = ({
           />
           <TextField
             select
-            label={SETTINGS_LABELS.FORM.ROLE_LABEL}
+            label={INVITE_MODAL_LABELS.FORM.ROLE_LABEL}
             value={formData.role}
             onChange={(e) =>
               handleChange('role', e.target.value as TeamMemberRole)
@@ -161,9 +133,9 @@ const InviteModalForm: React.FC<InviteModalFormProps> = ({
           </TextField>
         </StyledDialogContent>
         <StyledDialogActions>
-          <Button onClick={onClose}>{SETTINGS_LABELS.ACTIONS.CANCEL}</Button>
+          <Button onClick={onClose}>{INVITE_MODAL_LABELS.ACTIONS.CANCEL}</Button>
           <Button type="submit" variant="contained" color="primary">
-            {SETTINGS_LABELS.ACTIONS.INVITE}
+            {INVITE_MODAL_LABELS.ACTIONS.INVITE}
           </Button>
         </StyledDialogActions>
       </form>
