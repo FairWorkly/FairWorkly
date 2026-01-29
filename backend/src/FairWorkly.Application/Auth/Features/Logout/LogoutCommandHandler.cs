@@ -11,7 +11,10 @@ public class LogoutCommandHandler(
     IUnitOfWork unitOfWork
 ) : IRequestHandler<LogoutCommand, Result<bool>>
 {
-    public async Task<Result<bool>> Handle(LogoutCommand request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(
+        LogoutCommand request,
+        CancellationToken cancellationToken
+    )
     {
         // Try to resolve user by id first
         Domain.Auth.Entities.User? user = null;

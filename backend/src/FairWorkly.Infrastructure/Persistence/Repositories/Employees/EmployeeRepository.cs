@@ -19,26 +19,27 @@ public class EmployeeRepository : IEmployeeRepository
     public async Task<List<Employee>> GetByEmployeeNumbersAsync(
         Guid organizationId,
         List<string> employeeNumbers,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        return await _context.Employees
-            .Where(e => e.OrganizationId == organizationId
-                     && employeeNumbers.Contains(e.EmployeeNumber!))
+        return await _context
+            .Employees.Where(e =>
+                e.OrganizationId == organizationId && employeeNumbers.Contains(e.EmployeeNumber!)
+            )
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Employee> CreateAsync(
         Employee employee,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         _context.Employees.Add(employee);
         await _context.SaveChangesAsync(cancellationToken);
         return employee;
     }
 
-    public async Task UpdateAsync(
-        Employee employee,
-        CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(Employee employee, CancellationToken cancellationToken = default)
     {
         _context.Employees.Update(employee);
         await _context.SaveChangesAsync(cancellationToken);

@@ -26,7 +26,10 @@ public abstract class AuthTestsBase : IClassFixture<CustomWebApplicationFactory>
     /// <summary>
     /// Login and get access token
     /// </summary>
-    protected async Task<string> GetAccessTokenAsync(string email = "test@example.com", string password = "TestPassword123")
+    protected async Task<string> GetAccessTokenAsync(
+        string email = "test@example.com",
+        string password = "TestPassword123"
+    )
     {
         var response = await Client.PostAsJsonAsync("/api/auth/login", new { email, password });
         response.EnsureSuccessStatusCode();
@@ -39,7 +42,10 @@ public abstract class AuthTestsBase : IClassFixture<CustomWebApplicationFactory>
     /// <summary>
     /// Login and get refresh token from cookie
     /// </summary>
-    protected async Task<string> GetRefreshTokenFromCookieAsync(string email = "test@example.com", string password = "TestPassword123")
+    protected async Task<string> GetRefreshTokenFromCookieAsync(
+        string email = "test@example.com",
+        string password = "TestPassword123"
+    )
     {
         var response = await Client.PostAsJsonAsync("/api/auth/login", new { email, password });
         response.EnsureSuccessStatusCode();
@@ -80,7 +86,10 @@ public abstract class AuthTestsBase : IClassFixture<CustomWebApplicationFactory>
 
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, testUser?.Id.ToString() ?? Guid.NewGuid().ToString()),
+            new Claim(
+                JwtRegisteredClaimNames.Sub,
+                testUser?.Id.ToString() ?? Guid.NewGuid().ToString()
+            ),
             new Claim(JwtRegisteredClaimNames.Email, "test@example.com"),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim("orgId", testUser?.OrganizationId.ToString() ?? Guid.NewGuid().ToString()),
@@ -146,11 +155,10 @@ public abstract class AuthTestsBase : IClassFixture<CustomWebApplicationFactory>
     protected async Task<string> SetupExpiredRefreshTokenAsync()
     {
         // First login to get a valid refresh token
-        var response = await Client.PostAsJsonAsync("/api/auth/login", new
-        {
-            email = "test@example.com",
-            password = "TestPassword123"
-        });
+        var response = await Client.PostAsJsonAsync(
+            "/api/auth/login",
+            new { email = "test@example.com", password = "TestPassword123" }
+        );
         response.EnsureSuccessStatusCode();
 
         // Get the refresh token

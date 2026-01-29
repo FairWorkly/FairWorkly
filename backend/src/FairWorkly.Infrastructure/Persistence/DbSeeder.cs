@@ -48,7 +48,7 @@ public static class DbSeeder
             IsSubscriptionActive = true,
             CurrentEmployeeCount = 0,
             CreatedAt = now,
-            IsDeleted = false
+            IsDeleted = false,
         };
 
         var adminUser = new User
@@ -62,7 +62,7 @@ public static class DbSeeder
             OrganizationId = organizationId,
             PasswordHash = passwordHasher.Hash("fairworkly123"),
             CreatedAt = now,
-            IsDeleted = false
+            IsDeleted = false,
         };
 
         organizations.Add(demoOrg);

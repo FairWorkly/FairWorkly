@@ -7,7 +7,8 @@ namespace FairWorkly.IntegrationTests.Auth;
 
 public class LogoutTests : AuthTestsBase
 {
-    public LogoutTests(CustomWebApplicationFactory factory) : base(factory) { }
+    public LogoutTests(CustomWebApplicationFactory factory)
+        : base(factory) { }
 
     #region 4.1 Unauthorized (401)
 

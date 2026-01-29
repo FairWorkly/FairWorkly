@@ -1,7 +1,7 @@
-using FluentAssertions;
 using FairWorkly.Application.Payroll.Services.ComplianceEngine;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Payroll.Entities;
+using FluentAssertions;
 
 namespace FairWorkly.UnitTests.Unit;
 
@@ -22,12 +22,16 @@ public class BaseRateRuleTests
     }
 
     [Theory]
-    [InlineData(1, 26.55, 38.00, 1008.90)]  // Level 1 at exact minimum
-    [InlineData(2, 27.16, 20.00, 543.20)]   // Level 2 at exact minimum
-    [InlineData(3, 28.00, 25.00, 700.00)]   // Level 3 above minimum (27.58)
-    [InlineData(5, 30.00, 38.00, 1140.00)]  // Level 5 above minimum (29.27)
+    [InlineData(1, 26.55, 38.00, 1008.90)] // Level 1 at exact minimum
+    [InlineData(2, 27.16, 20.00, 543.20)] // Level 2 at exact minimum
+    [InlineData(3, 28.00, 25.00, 700.00)] // Level 3 above minimum (27.58)
+    [InlineData(5, 30.00, 38.00, 1140.00)] // Level 5 above minimum (29.27)
     public void Evaluate_WhenRateAtOrAboveMinimum_ShouldReturnNoIssues(
-        int level, decimal hourlyRate, decimal hours, decimal pay)
+        int level,
+        decimal hourlyRate,
+        decimal hours,
+        decimal pay
+    )
     {
         // Arrange
         var payslip = CreatePayslip($"Level {level}", hourlyRate, hours, pay);
@@ -40,11 +44,16 @@ public class BaseRateRuleTests
     }
 
     [Theory]
-    [InlineData(1, 25.00, 40.00, 1000.00, 26.55)]  // Level 1: $25/hr < $26.55
-    [InlineData(2, 26.00, 30.00, 780.00, 27.16)]   // Level 2: $26/hr < $27.16
-    [InlineData(5, 20.00, 38.00, 760.00, 29.27)]   // Level 5: $20/hr < $29.27
+    [InlineData(1, 25.00, 40.00, 1000.00, 26.55)] // Level 1: $25/hr < $26.55
+    [InlineData(2, 26.00, 30.00, 780.00, 27.16)] // Level 2: $26/hr < $27.16
+    [InlineData(5, 20.00, 38.00, 760.00, 29.27)] // Level 5: $20/hr < $29.27
     public void Evaluate_WhenActualRateBelowMinimum_ShouldReturnCriticalIssue(
-        int level, decimal hourlyRate, decimal hours, decimal pay, decimal minimumRate)
+        int level,
+        decimal hourlyRate,
+        decimal hours,
+        decimal pay,
+        decimal minimumRate
+    )
     {
         // Arrange
         var payslip = CreatePayslip($"Level {level}", hourlyRate, hours, pay);
@@ -238,7 +247,8 @@ public class BaseRateRuleTests
         decimal hourlyRate,
         decimal hours,
         decimal pay,
-        EmploymentType employmentType = EmploymentType.FullTime)
+        EmploymentType employmentType = EmploymentType.FullTime
+    )
     {
         return new Payslip
         {
@@ -255,7 +265,7 @@ public class BaseRateRuleTests
             AwardType = AwardType.GeneralRetailIndustryAward2020,
             PayPeriodStart = DateTimeOffset.Now.AddDays(-7),
             PayPeriodEnd = DateTimeOffset.Now,
-            PayDate = DateTimeOffset.Now
+            PayDate = DateTimeOffset.Now,
         };
     }
 }

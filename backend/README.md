@@ -2,7 +2,7 @@
 
 The core backend service for FairWorkly, built on .NET 8. The backend adopts a **Hybrid Architecture** to balance the needs of complex business logic with simple data management.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Framework**: .NET 8 (Web API)
 - **Database**: PostgreSQL
@@ -12,7 +12,7 @@ The core backend service for FairWorkly, built on .NET 8. The backend adopts a *
 - **Task Orchestration**: MediatR (CQRS)
 - **Code Formatting**: CSharpier (Enforced)
 
-## 🏗 Project Architecture (Hybrid Architecture)
+## Project Architecture (Hybrid Architecture)
 
 ### 1. Core Business: Vertical Slicing
 
@@ -32,7 +32,7 @@ For management modules that are primarily CRUD-based with relatively linear logi
   - `src/FairWorkly.Application/Employees/` (Employee Profiles)
 - **Code Structure**: `Controller` -> `Service` (Business Logic) -> `Repository` (Data Access).
 
-## 🚀 Prerequisites
+## Prerequisites
 
 Before you begin, please ensure you have installed:
 
@@ -40,7 +40,7 @@ Before you begin, please ensure you have installed:
 2. PostgreSQL (Ensure the local service is running)
 3. IDE: Visual Studio 2022 (Recommended) or Visual Studio Code
 
-## ⚡ Getting Started
+## Getting Started
 
 ### 1. Set Working Directory
 
@@ -140,7 +140,7 @@ dotnet run --project src/FairWorkly.API --launch-profile https
 
 Access Swagger: `https://localhost:7075/swagger`
 
-## 🔧 Development Patterns & Tools
+## Development Patterns & Tools
 
 ### 1. Dependency Injection Standards
 
@@ -151,7 +151,7 @@ This project follows Clean Architecture, and dependency injection registration l
 - **Infrastructure Layer Services**:
   - **Location**: `src/FairWorkly.Infrastructure/DependencyInjection.cs`
 
-> **⚠️ Note**: `Program.cs` in the API layer is only responsible for calling these two extension methods. **It is strictly forbidden to register business services directly in `Program.cs`**.
+> **Note**: `Program.cs` in the API layer is only responsible for calling these two extension methods. **It is strictly forbidden to register business services directly in `Program.cs`**.
 
 ### 2. AI Service Configuration (Mock vs Real)
 
@@ -189,27 +189,40 @@ Entity configuration (table mapping, relationships, constraints) must be placed 
 - **Location**: `src/FairWorkly.Infrastructure/Persistence/Configurations/{Module}/`
 - **Pattern**: One Configuration class per Entity, implementing `IEntityTypeConfiguration<T>`
 
-> **⚠️ Forbidden**: Writing `modelBuilder.Entity<T>()` directly in `FairWorklyDbContext.OnModelCreating()`.
+> **Forbidden**: Writing `modelBuilder.Entity<T>()` directly in `FairWorklyDbContext.OnModelCreating()`.
 
 ### 6. Result<T> Pattern
 
-MediatR Handlers return `Result<T>` instead of throwing exceptions. Controllers check `result.Type` to determine HTTP responses.
+MediatR Handlers return `Result<T>` instead of throwing exceptions for better control flow and explicit error handling.
+
+**Available factory methods:**
+
+| Method | When to use | HTTP Response |
+|--------|-------------|---------------|
+| `Success(value)` | Operation succeeded | 200 OK |
+| `ValidationFailure(errors)` | Input validation failed | 400 Bad Request |
+| `NotFound(message)` | Resource not found | 404 Not Found |
+| `Forbidden(message)` | No permission | 403 Forbidden |
+
+**Example:**
 
 ```csharp
 // Handler
+if (entity == null)
+    return Result<MyDto>.NotFound("Resource not found");
 return Result<MyDto>.Success(dto);
-return Result<MyDto>.ValidationFailure(errors);
-return Result<MyDto>.NotFound("Resource not found");
 
 // Controller
-if (result.Type == ResultType.ValidationFailure) return BadRequest(...);
-if (result.Type == ResultType.NotFound) return NotFound();
+if (result.Type == ResultType.NotFound)
+    return NotFound(new { message = result.ErrorMessage });
 return Ok(result.Value);
 ```
 
+> 📖 For detailed usage, see [Result<T> Pattern Guide](docs/Result_Pattern_Guide.md)
+
 Location: `src/FairWorkly.Domain/Common/Result.cs`
 
-## 📂 Database Scripts
+## Database Scripts
 
 All scripts are located in `backend/scripts/`. Run them in terminal:
 ```bash
@@ -221,15 +234,20 @@ cd backend
 | ---------------------------------- | ------------------------------------------------- | ---------------- |
 | `add-migration.ps1`                | Create a new migration                            | None             |
 | `update-database.ps1`              | Apply pending migrations (preserves data)         | None             |
-| `reset-database.ps1`               | Drop and recreate database with all migrations    | ⚠️ Data           |
-| `init-migrations-and-database.ps1` | Delete all migrations and regenerate from scratch | 🔴 Data + History |
+| `reset-database.ps1`               | Drop and recreate database with all migrations    | Data             |
+| `init-migrations-and-database.ps1` | Delete all migrations and regenerate from scratch | Data + History   |
 
-### ⚠️ Before Committing Migrations
+### Before Committing Migrations
 
 **Always verify your migration can be applied successfully before committing.**
 
 Test with `reset-database.ps1` or `update-database.ps1` depending on your situation.
 
-## 📚 Advanced Development Guide
+## Advanced Development Guide
 
-For details on how to develop new Features, write AI Orchestrators, and interface with the Python Agent, please be sure to read the detailed internal tutorial.
+For details on how to develop new Features, write AI Orchestrators, and interface with the Python Agent, please refer to:
+
+- [Backend Development Guide](docs/Backend_Development_Guide.md) - Comprehensive guide with code examples
+- [Result<T> Pattern Guide](docs/Result_Pattern_Guide.md) - How to use Result pattern in Handlers
+
+> These documents are also available on the team's Google Drive.

@@ -1,15 +1,14 @@
-using FairWorkly.Application.Auth.Features.Login;
-using FairWorkly.Application.Auth.Features.Refresh;
-using FairWorkly.Application.Auth.Features.Me;
-using FairWorkly.Application.Auth.Features.Logout;
-using FairWorkly.Domain.Common;
-
-using MediatR;
-using Swashbuckle.AspNetCore.Filters;
-using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using FairWorkly.Application.Auth.Features.Login;
+using FairWorkly.Application.Auth.Features.Logout;
+using FairWorkly.Application.Auth.Features.Me;
+using FairWorkly.Application.Auth.Features.Refresh;
+using FairWorkly.Domain.Common;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace FairWorkly.API.Controllers.Auth;
 
@@ -17,7 +16,10 @@ namespace FairWorkly.API.Controllers.Auth;
 [Route("api/[controller]")]
 public class AuthController(IMediator mediator, IWebHostEnvironment env) : ControllerBase
 {
-    [SwaggerRequestExample(typeof(LoginCommand), typeof(FairWorkly.API.SwaggerExamples.LoginCommandExample))]
+    [SwaggerRequestExample(
+        typeof(LoginCommand),
+        typeof(FairWorkly.API.SwaggerExamples.LoginCommandExample)
+    )]
     [HttpPost("login")]
     [AllowAnonymous] // Allow anonymous access for the login endpoint
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginCommand command)
@@ -52,7 +54,10 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
     public async Task<ActionResult> Refresh()
     {
         // Read refresh token from HttpOnly cookie
-        if (!Request.Cookies.TryGetValue("refreshToken", out var refreshTokenPlain) || string.IsNullOrWhiteSpace(refreshTokenPlain))
+        if (
+            !Request.Cookies.TryGetValue("refreshToken", out var refreshTokenPlain)
+            || string.IsNullOrWhiteSpace(refreshTokenPlain)
+        )
         {
             return Unauthorized();
         }
@@ -82,8 +87,11 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
     public async Task<ActionResult> Me()
     {
         // Extract user id from claims (sub)
-        var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(sub, out var userId) || userId == Guid.Empty) return Unauthorized();
+        var sub =
+            User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(sub, out var userId) || userId == Guid.Empty)
+            return Unauthorized();
 
         var query = new GetCurrentUserQuery { UserId = userId };
         var result = await mediator.Send(query);
@@ -108,15 +116,14 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         Request.Cookies.TryGetValue("refreshToken", out var refreshTokenPlain);
 
         // Try get user id from access token (if present)
-        var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var sub =
+            User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
         Guid? userId = null;
-        if (Guid.TryParse(sub, out var parsed)) userId = parsed;
+        if (Guid.TryParse(sub, out var parsed))
+            userId = parsed;
 
-        var cmd = new LogoutCommand
-        {
-            UserId = userId,
-            RefreshTokenPlain = refreshTokenPlain
-        };
+        var cmd = new LogoutCommand { UserId = userId, RefreshTokenPlain = refreshTokenPlain };
 
         var result = await mediator.Send(cmd);
 
@@ -134,7 +141,11 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
     // --- Private helper: centralize cookie policy ---
     private void SetRefreshTokenCookie(string refreshToken, DateTime expires)
     {
-        Response.Cookies.Append("refreshToken", refreshToken, GetRefreshTokenCookieOptions(expires));
+        Response.Cookies.Append(
+            "refreshToken",
+            refreshToken,
+            GetRefreshTokenCookieOptions(expires)
+        );
     }
 
     private CookieOptions GetRefreshTokenCookieOptions(DateTime expires)
@@ -159,9 +170,10 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
     /// </summary>
     private async Task<ActionResult> HandleValidationFailureAsync<T>(Result<T> result)
     {
-        var errors = result.ValidationErrors?
-            .GroupBy(e => e.Field)
-            .ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray())
+        var errors =
+            result
+                .ValidationErrors?.GroupBy(e => e.Field)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray())
             ?? new Dictionary<string, string[]>();
 
         var problemDetails = new ProblemDetails
@@ -169,7 +181,7 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
             Status = StatusCodes.Status400BadRequest,
             Title = "Validation Failed",
             Detail = "One or more validation errors occurred.",
-            Instance = HttpContext.Request.Path
+            Instance = HttpContext.Request.Path,
         };
         problemDetails.Extensions.Add("errors", errors);
 

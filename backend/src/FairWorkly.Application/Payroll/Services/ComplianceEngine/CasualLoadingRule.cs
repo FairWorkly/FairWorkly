@@ -25,16 +25,19 @@ public class CasualLoadingRule : IComplianceRule
         // Check for negative pay (possible correction/reversal entry)
         if (payslip.OrdinaryPay < 0)
         {
-            issues.Add(new PayrollIssue
-            {
-                OrganizationId = payslip.OrganizationId,
-                PayrollValidationId = validationId,
-                PayslipId = payslip.Id,
-                EmployeeId = payslip.EmployeeId,
-                CategoryType = IssueCategory.CasualLoading,
-                Severity = IssueSeverity.Warning,
-                WarningMessage = $"Negative Ordinary Pay detected (${Math.Abs(payslip.OrdinaryPay):F2}). Possible correction/reversal entry. Skipping compliance check."
-            });
+            issues.Add(
+                new PayrollIssue
+                {
+                    OrganizationId = payslip.OrganizationId,
+                    PayrollValidationId = validationId,
+                    PayslipId = payslip.Id,
+                    EmployeeId = payslip.EmployeeId,
+                    CategoryType = IssueCategory.CasualLoading,
+                    Severity = IssueSeverity.Warning,
+                    WarningMessage =
+                        $"Negative Ordinary Pay detected (${Math.Abs(payslip.OrdinaryPay):F2}). Possible correction/reversal entry. Skipping compliance check.",
+                }
+            );
             return issues;
         }
 
@@ -60,16 +63,18 @@ public class CasualLoadingRule : IComplianceRule
         // Check 1: Is the actual paid rate below minimum Casual rate?
         if (actualRate < casualRate - RateTableProvider.RateTolerance)
         {
-            issues.Add(CreateIssue(
-                payslip,
-                validationId,
-                IssueSeverity.Critical,
-                null, // No warning message for underpayment - evidence fields are used
-                casualRate,
-                actualRate,
-                payslip.OrdinaryHours,
-                $"Casual Rate {payslip.Classification}"
-            ));
+            issues.Add(
+                CreateIssue(
+                    payslip,
+                    validationId,
+                    IssueSeverity.Critical,
+                    null, // No warning message for underpayment - evidence fields are used
+                    casualRate,
+                    actualRate,
+                    payslip.OrdinaryHours,
+                    $"Casual Rate {payslip.Classification}"
+                )
+            );
 
             // Don't check system rate if already underpaying
             return issues;
@@ -79,16 +84,18 @@ public class CasualLoadingRule : IComplianceRule
         // (Actual pay is OK, but the configured rate is wrong - data risk)
         if (payslip.HourlyRate < casualRate - RateTableProvider.RateTolerance)
         {
-            issues.Add(CreateIssue(
-                payslip,
-                validationId,
-                IssueSeverity.Warning,
-                $"System Casual rate ${payslip.HourlyRate:F2}/hr is below legal minimum ${casualRate:F2}/hr",
-                casualRate,
-                payslip.HourlyRate,
-                payslip.OrdinaryHours,
-                $"Casual Rate {payslip.Classification}"
-            ));
+            issues.Add(
+                CreateIssue(
+                    payslip,
+                    validationId,
+                    IssueSeverity.Warning,
+                    $"System Casual rate ${payslip.HourlyRate:F2}/hr is below legal minimum ${casualRate:F2}/hr",
+                    casualRate,
+                    payslip.HourlyRate,
+                    payslip.OrdinaryHours,
+                    $"Casual Rate {payslip.Classification}"
+                )
+            );
         }
 
         return issues;
@@ -102,7 +109,8 @@ public class CasualLoadingRule : IComplianceRule
         decimal expectedValue,
         decimal actualValue,
         decimal affectedUnits,
-        string contextLabel)
+        string contextLabel
+    )
     {
         return new PayrollIssue
         {
@@ -117,7 +125,7 @@ public class CasualLoadingRule : IComplianceRule
             ActualValue = actualValue,
             AffectedUnits = affectedUnits,
             UnitType = "Hour",
-            ContextLabel = contextLabel
+            ContextLabel = contextLabel,
         };
     }
 }

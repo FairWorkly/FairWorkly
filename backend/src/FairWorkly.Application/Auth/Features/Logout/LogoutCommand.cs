@@ -1,5 +1,5 @@
-using MediatR;
 using FairWorkly.Domain.Common;
+using MediatR;
 
 namespace FairWorkly.Application.Auth.Features.Logout;
 

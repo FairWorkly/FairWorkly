@@ -36,8 +36,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         builder.ConfigureServices(services =>
         {
             // Remove the existing DbContext registration
-            var descriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(DbContextOptions<FairWorklyDbContext>));
+            var descriptor = services.SingleOrDefault(d =>
+                d.ServiceType == typeof(DbContextOptions<FairWorklyDbContext>)
+            );
 
             if (descriptor != null)
             {
@@ -94,7 +95,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             IsSubscriptionActive = true,
             CurrentEmployeeCount = 0,
             CreatedAt = now,
-            IsDeleted = false
+            IsDeleted = false,
         };
 
         // Normal active user
@@ -109,7 +110,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             OrganizationId = organizationId,
             PasswordHash = passwordHasher.Hash("TestPassword123"),
             CreatedAt = now,
-            IsDeleted = false
+            IsDeleted = false,
         };
 
         // Disabled user
@@ -124,7 +125,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             OrganizationId = organizationId,
             PasswordHash = passwordHasher.Hash("TestPassword123"),
             CreatedAt = now,
-            IsDeleted = false
+            IsDeleted = false,
         };
 
         // User to be deleted (for testing user not found scenario)
@@ -139,7 +140,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             OrganizationId = organizationId,
             PasswordHash = passwordHasher.Hash("TestPassword123"),
             CreatedAt = now,
-            IsDeleted = false
+            IsDeleted = false,
         };
 
         db.Set<Organization>().Add(testOrg);
