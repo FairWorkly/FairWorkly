@@ -1,7 +1,7 @@
 // FairWorkly.Application/Settings/Commands/UpdateOrganization/UpdateOrganizationCommandValidator.cs
 
-using FluentValidation;
 using FairWorkly.Domain.Common.Enums;
+using FluentValidation;
 
 namespace FairWorkly.Application.Settings.Commands.UpdateOrganization;
 
@@ -9,15 +9,12 @@ namespace FairWorkly.Application.Settings.Commands.UpdateOrganization;
 /// Validator for UpdateOrganizationCommand
 /// Validates business rules before updating organization
 /// </summary>
-public class UpdateOrganizationCommandValidator 
-    : AbstractValidator<UpdateOrganizationCommand>
+public class UpdateOrganizationCommandValidator : AbstractValidator<UpdateOrganizationCommand>
 {
     public UpdateOrganizationCommandValidator()
     {
         // Validate OrganizationId
-        RuleFor(x => x.OrganizationId)
-            .NotEmpty()
-            .WithMessage("Organization ID is required");
+        RuleFor(x => x.OrganizationId).NotEmpty().WithMessage("Organization ID is required");
 
         // Validate Request object
         RuleFor(x => x.Request)
@@ -30,8 +27,7 @@ public class UpdateOrganizationCommandValidator
 /// <summary>
 /// Validator for UpdateOrganizationRequest DTO
 /// </summary>
-public class UpdateOrganizationRequestValidator 
-    : AbstractValidator<UpdateOrganizationRequest>
+public class UpdateOrganizationRequestValidator : AbstractValidator<UpdateOrganizationRequest>
 {
     public UpdateOrganizationRequestValidator()
     {
@@ -96,7 +92,9 @@ public class UpdateOrganizationRequestValidator
             .NotEmpty()
             .WithMessage("State is required")
             .Must(BeValidAustralianState)
-            .WithMessage("State must be a valid Australian state/territory (VIC, NSW, QLD, SA, WA, TAS, ACT, NT)");
+            .WithMessage(
+                "State must be a valid Australian state/territory (VIC, NSW, QLD, SA, WA, TAS, ACT, NT)"
+            );
 
         // Postcode - must be exactly 4 digits
         RuleFor(x => x.Postcode)

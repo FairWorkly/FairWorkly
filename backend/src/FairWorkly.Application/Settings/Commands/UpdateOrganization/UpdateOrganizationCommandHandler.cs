@@ -1,8 +1,8 @@
 // FairWorkly.Application/Settings/Commands/UpdateOrganization/UpdateOrganizationCommandHandler.cs
 
-using MediatR;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Domain.Common.Enums;
+using MediatR;
 
 namespace FairWorkly.Application.Settings.Commands.UpdateOrganization;
 
@@ -10,7 +10,7 @@ namespace FairWorkly.Application.Settings.Commands.UpdateOrganization;
 /// Handler for UpdateOrganizationCommand
 /// Updates organization profile in database
 /// </summary>
-public class UpdateOrganizationCommandHandler 
+public class UpdateOrganizationCommandHandler
     : IRequestHandler<UpdateOrganizationCommand, OrganizationDto>
 {
     private readonly IOrganizationRepository _organizationRepository;
@@ -18,28 +18,30 @@ public class UpdateOrganizationCommandHandler
 
     public UpdateOrganizationCommandHandler(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork
+    )
     {
         _organizationRepository = organizationRepository;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<OrganizationDto> Handle(
-        UpdateOrganizationCommand command, 
-        CancellationToken cancellationToken)
+        UpdateOrganizationCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var request = command.Request;
 
         // Step 1: Fetch organization from repository
         var organization = await _organizationRepository.GetByIdAsync(
-            command.OrganizationId, 
-            cancellationToken);
+            command.OrganizationId,
+            cancellationToken
+        );
 
         // Step 2: Validate organization exists
         if (organization == null)
         {
-            throw new NotFoundException(
-                $"Organization with ID {command.OrganizationId} not found");
+            throw new NotFoundException($"Organization with ID {command.OrganizationId} not found");
         }
 
         // Step 3: Update organization fields
@@ -51,14 +53,14 @@ public class UpdateOrganizationCommandHandler
         organization.AddressLine1 = request.AddressLine1;
         organization.AddressLine2 = request.AddressLine2;
         organization.Suburb = request.Suburb;
-        
+
         // Convert State string to enum
         if (!Enum.TryParse<AustralianState>(request.State, out var stateEnum))
         {
             throw new ValidationException($"Invalid state: {request.State}");
         }
         organization.State = stateEnum;
-        
+
         organization.Postcode = request.Postcode;
         organization.LogoUrl = request.LogoUrl;
 

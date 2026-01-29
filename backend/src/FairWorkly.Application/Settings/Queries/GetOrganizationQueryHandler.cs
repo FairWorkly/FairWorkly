@@ -1,16 +1,11 @@
-// FairWorkly.Application/Settings/Queries/GetOrganization/GetOrganizationQueryHandler.cs
-
-using MediatR;
 using FairWorkly.Domain.Auth.Interfaces;
+using FairWorkly.Domain.Common;
+using MediatR;
 
 namespace FairWorkly.Application.Settings.Queries.GetOrganization;
 
-/// <summary>
-/// Handler for GetOrganizationQuery
-/// Retrieves organization profile from database and maps to DTO
-/// </summary>
-public class GetOrganizationQueryHandler 
-    : IRequestHandler<GetOrganizationQuery, OrganizationDto>
+public class GetOrganizationQueryHandler
+    : IRequestHandler<GetOrganizationQuery, Result<OrganizationDto>>
 {
     private readonly IOrganizationRepository _organizationRepository;
 
@@ -19,20 +14,23 @@ public class GetOrganizationQueryHandler
         _organizationRepository = organizationRepository;
     }
 
-    public async Task<OrganizationDto> Handle(
-        GetOrganizationQuery request, 
-        CancellationToken cancellationToken)
+    public async Task<Result<OrganizationDto>> Handle(
+        GetOrganizationQuery request,
+        CancellationToken cancellationToken
+    )
     {
         // Step 1: Fetch organization from repository
         var organization = await _organizationRepository.GetByIdAsync(
-            request.OrganizationId, 
-            cancellationToken);
+            request.OrganizationId,
+            cancellationToken
+        );
 
         // Step 2: Validate organization exists
         if (organization == null)
         {
-            throw new NotFoundException(
-                $"Organization with ID {request.OrganizationId} not found");
+            return Result<OrganizationDto>.NotFound(
+                $"Organization {request.OrganizationId} not found"
+            );
         }
 
         // Step 3: Map entity to DTO
@@ -51,6 +49,6 @@ public class GetOrganizationQueryHandler
             LogoUrl = organization.LogoUrl,
         };
 
-        return dto;
+        return Result<OrganizationDto>.Success(dto);
     }
 }
