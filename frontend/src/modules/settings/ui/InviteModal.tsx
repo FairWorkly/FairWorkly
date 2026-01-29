@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   DialogTitle,
   TextField,
@@ -72,22 +72,18 @@ const INITIAL_FORM_STATE: InviteTeamMemberFormData = {
   role: 'Manager',
 }
 
-export const InviteModal: React.FC<InviteModalProps> = ({
-  open,
+interface InviteModalFormProps {
+  onClose: () => void
+  onSubmit: (data: InviteTeamMemberFormData) => void
+}
+
+const InviteModalForm: React.FC<InviteModalFormProps> = ({
   onClose,
   onSubmit,
 }) => {
   const [formData, setFormData] =
     useState<InviteTeamMemberFormData>(INITIAL_FORM_STATE)
   const [errors, setErrors] = useState<{ name?: string; email?: string }>({})
-
-  // Reset form when modal opens/closes
-  useEffect(() => {
-    if (open) {
-      setFormData(INITIAL_FORM_STATE)
-      setErrors({})
-    }
-  }, [open])
 
   const handleChange = (field: keyof InviteTeamMemberFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -125,7 +121,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
   }
 
   return (
-    <StyledDialog open={open} onClose={onClose}>
+    <>
       <DialogTitle>{SETTINGS_LABELS.MODALS.INVITE_TITLE}</DialogTitle>
       <form onSubmit={handleSubmit}>
         <StyledDialogContent>
@@ -171,6 +167,18 @@ export const InviteModal: React.FC<InviteModalProps> = ({
           </Button>
         </StyledDialogActions>
       </form>
+    </>
+  )
+}
+
+export const InviteModal: React.FC<InviteModalProps> = ({
+  open,
+  onClose,
+  onSubmit,
+}) => {
+  return (
+    <StyledDialog open={open} onClose={onClose}>
+      {open && <InviteModalForm onClose={onClose} onSubmit={onSubmit} />}
     </StyledDialog>
   )
 }
