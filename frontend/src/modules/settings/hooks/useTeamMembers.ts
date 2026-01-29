@@ -31,28 +31,26 @@ export const useTeamMembers = () => {
   const [memberToDeactivate, setMemberToDeactivate] =
     useState<TeamMember | null>(null)
 
-  const handleInvite = (data: InviteTeamMemberFormData) => {
-  // Check for duplicate email
-  const emailExists = members.some(
-    (m) => m.email.toLowerCase() === data.email.toLowerCase()
-  )
-
-  if (emailExists) {
-    // Consider returning an error or throwing
-    console.warn('Email already exists')
-    return
-  }
-
-    const newMember: TeamMember = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      status: 'Active',
-      lastLogin: '-', // Placeholder for new user
+    const handleInvite = (data: InviteTeamMemberFormData) => {
+      // Check for duplicate email
+      const emailExists = members.some(
+        (m) => m.email.toLowerCase() === data.email.toLowerCase()
+      )
+      if (emailExists) {
+        // Consider returning an error or throwing
+        console.warn('Email already exists')
+        return
+      }
+      const newMember: TeamMember = {
+        id: crypto.randomUUID(),
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        status: 'Active',
+        lastLogin: '-', // Placeholder for new user
+      }
+      setMembers((prev) => [...prev, newMember])
     }
-    setMembers((prev) => [...prev, newMember])
-  }
 
   const handleRoleChange = (memberId: string, newRole: TeamMemberRole) => {
     setMembers((prev) =>
