@@ -68,6 +68,17 @@ export function setupInterceptors(store: StoreLike) {
         return Promise.reject(error);
       }
 
+      const requestUrl = (originalConfig.baseURL ?? "") + (originalConfig.url ?? "");
+      const authPaths = [
+        "/auth/login",
+        "/auth/refresh",
+        "/auth/logout",
+        "/auth/register",
+      ];
+      if (authPaths.some((path) => requestUrl.includes(path))) {
+        return Promise.reject(error);
+      }
+
       if (originalConfig._retry) {
         return Promise.reject(error);
       }

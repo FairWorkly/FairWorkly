@@ -1,6 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router-dom'
 import { MainLayout } from '@/shared/components/layout/app/MainLayout'
-import { ProtectedRoute } from '@/shared/components/guards/ProtectedRoute'
+import { RequireAuth } from './RequireAuth'
 
 // Payroll pages
 import { PayrollUpload } from '@/modules/payroll/pages/PayrollUpload'
@@ -22,7 +22,7 @@ import { RoleBasedRoute } from '@/shared/components/guards/RoleBasedRoute'
 
 export const toolRoutes: RouteObject[] = [
   {
-    element: <ProtectedRoute />,
+    element: <RequireAuth />,
     children: [
       {
         element: <MainLayout />,

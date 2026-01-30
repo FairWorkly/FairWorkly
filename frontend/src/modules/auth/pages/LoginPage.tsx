@@ -2,12 +2,16 @@ import { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { LoginForm, SignupForm, ForgotPasswordModal } from '../features'
 import type { LoginFormData, SignupFormData } from '../types'
+import { useLogin } from '../hooks'
+import { useAppDispatch } from '@/store/hooks'
+import { setAuthData } from '@/slices/auth'
 import {
   AuthHeader,
   AuthTitle,
   AuthSubtitle,
   AuthTabList,
   AuthTabButton,
+  AuthErrorText,
 } from '../ui'
 
 type TabType = 'login' | 'signup'
@@ -17,6 +21,8 @@ const AUTH_SIMULATED_DELAY_MS = 900
 export function LoginPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  const { login, isSubmitting: isLoginSubmitting, error: loginError } = useLogin()
   const initialTab = searchParams.get('signup') === 'true' ? 'signup' : 'login'
   const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
@@ -32,15 +38,24 @@ export function LoginPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem(DEV_USER_NAME_STORAGE_KEY, options.name)
       }
+      dispatch(
+        setAuthData({
+          accessToken: 'dev-token',
+          user: {
+            id: 'dev-user',
+            name: options.name,
+            email: `${options.name.toLowerCase().replace(/\s+/g, '')}@fairworkly.dev`,
+            role: 'admin',
+          },
+        })
+      )
       setLoading(false)
       navigate('/fairbot')
     }, AUTH_SIMULATED_DELAY_MS)
   }
 
   const handleLogin = (values: LoginFormData) => {
-    // TODO: Implement actual login logic
-    const name = values.email ? values.email.split('@')[0] : 'Demo User'
-    simulateAuth({ name, provider: 'email' })
+    void login(values)
   }
 
   const handleSignup = (values: SignupFormData) => {
@@ -63,6 +78,11 @@ export function LoginPage() {
             ? 'Sign in to manage your compliance'
             : 'Create your account to get started'}
         </AuthSubtitle>
+        {loginError ? (
+          <AuthErrorText color="error" variant="body2">
+            {loginError}
+          </AuthErrorText>
+        ) : null}
       </AuthHeader>
 
       <AuthTabList role="tablist">
@@ -79,7 +99,7 @@ export function LoginPage() {
           onSubmit={handleLogin}
           onGoogleLogin={handleGoogleLogin}
           onForgotPassword={() => setForgotModalOpen(true)}
-          isSubmitting={isSubmitting}
+          isSubmitting={isLoginSubmitting || isSubmitting}
           isGoogleLoading={isGoogleLoading}
         />
       ) : (

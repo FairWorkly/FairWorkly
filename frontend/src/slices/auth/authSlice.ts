@@ -5,7 +5,7 @@ export interface AuthUser {
   id: string;
   name?: string;
   email?: string;
-  role?: string;
+  role?: "admin" | "manager";
 }
 
 export type AuthStatus =
@@ -54,10 +54,13 @@ const authSlice = createSlice({
       state.status =
         state.user && state.accessToken ? "authenticated" : "unauthenticated";
     },
+    setStatus(state, action: PayloadAction<AuthStatus>) {
+      state.status = action.payload;
+    },
   },
 });
 
-export const { setAuthData, setAccessToken, logout, setInitialized } =
+export const { setAuthData, setAccessToken, logout, setInitialized, setStatus } =
   authSlice.actions;
 
 export default authSlice.reducer;
