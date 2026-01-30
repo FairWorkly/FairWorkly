@@ -1,0 +1,30 @@
+"""
+Shared Services for FairWorkly Agents
+
+This package contains reusable code for all agents:
+- LLM providers (Claude, OpenAI)
+- RAG retrieval (vector database)
+- Roster Excel parsing
+- Prompt building
+
+Usage:
+    from shared.llm import LLMProvider
+    from shared import RAGRetriever, RosterExcelParser
+"""
+
+# Make imports easier
+from .prompt_builder_base import PromptBuilderBase
+
+# RAG-related (if using vector database)
+try:
+    from .rag_retriever import RAGRetriever
+except ImportError:
+    # RAG not implemented yet
+    pass
+
+# LLM providers
+try:
+    from .llm.factory import LLMProvider, LLMProviderFactory
+except ImportError:
+    # LLM not implemented yet
+    pass

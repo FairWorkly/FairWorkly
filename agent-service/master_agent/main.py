@@ -2,13 +2,13 @@ from fastapi import FastAPI, Form, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from typing import Optional, Union
-from .intent_router import IntentRouter
-from .feature_registry import FeatureRegistry
+from master_agent.intent_router import IntentRouter
+from master_agent.feature_registry import FeatureRegistry
 
 
 # ⭐ ComplianceFeature（placeholder）
-from agents.compliance.compliance_feature import ComplianceFeature
-from .demo_feature import DemoPayrollFeature
+from master_agent.features.compliance_feature import ComplianceFeature
+from master_agent.features.demo_feature import DemoPayrollFeature
 
 app = FastAPI(title="FairWorkly Master Agent")
 
