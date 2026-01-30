@@ -37,9 +37,6 @@ logs/
 # Local uploads
 **/wwwroot/uploads/
 
-# Local SDK config
-global.json
-
 # Sensitive config
 src/FairWorkly.API/appsettings.json
 src/FairWorkly.API/appsettings.Development.json

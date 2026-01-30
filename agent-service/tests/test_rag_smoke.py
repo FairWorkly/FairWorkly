@@ -3,7 +3,7 @@ import logging
 
 import pytest
 
-import agents.shared.rag.rag_client as rag_client
+import shared.rag.rag_client as rag_client
 from agents.compliance.compliance_feature import ComplianceFeature
 
 

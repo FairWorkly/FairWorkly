@@ -12,7 +12,7 @@ from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
-from agents.shared.llm.embeddings_factory import create_embeddings
+from shared.llm.embeddings_factory import create_embeddings
 from master_agent.config import load_config, resolve_document_faiss_path
 
 
