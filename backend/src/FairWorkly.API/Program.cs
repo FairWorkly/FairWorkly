@@ -91,19 +91,24 @@ try
     builder.Services.AddCors(options =>
     {
         options.AddPolicy(
-            "AllowAll",
+            "AllowFrontend",
             policy =>
             {
                 if (builder.Environment.IsDevelopment())
                 {
-                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    policy.WithOrigins("http://localhost:5173")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 }
                 else
                 {
                     var allowedOrigins =
                         builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
                         ?? Array.Empty<string>();
-                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
+                    policy.WithOrigins(allowedOrigins)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
                 }
             }
         );
@@ -182,7 +187,7 @@ try
     }
 
     // Must before UseAuthorization
-    app.UseCors("AllowAll");
+    app.UseCors("AllowFrontend");
 
     app.UseHttpsRedirection();
 

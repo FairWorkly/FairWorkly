@@ -132,13 +132,12 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         {
             HttpOnly = true, // prevent JS access (XSS protection)
             Expires = expires,
+            Path = "/",
 
-            // Local development (http) -> Secure=false
-            // Production (https) -> Secure=true
-            Secure = env.IsProduction(),
-
-            // Set cross-domain to None in production environment, and Lax in development environment
-            SameSite = env.IsProduction() ? SameSiteMode.None : SameSiteMode.Lax,
+            // Use Secure cookies and SameSite=None to allow cross-site refresh in dev
+            // (required for 5173 -> 7075 when using HttpOnly refresh cookies)
+            Secure = true,
+            SameSite = SameSiteMode.None,
         };
     }
 
