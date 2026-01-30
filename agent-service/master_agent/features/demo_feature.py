@@ -1,5 +1,5 @@
 from typing import Dict, Any
-from .feature_registry import FeatureBase
+from ..feature_registry import FeatureBase
 
 class DemoComplianceFeature(FeatureBase):
     """
