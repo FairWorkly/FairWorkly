@@ -41,7 +41,6 @@ export function useAuth(): AuthState {
     isAuthenticated,
     isLoading,
     user,
-    switchRole,
     logout,
   }
 }

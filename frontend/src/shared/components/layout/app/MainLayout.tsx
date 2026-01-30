@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { IconButton, useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined'
@@ -18,24 +18,12 @@ export function MainLayout() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const navigate = useNavigate()
-  const { user, switchRole, logout } = useAuth()
+  const { user, logout } = useAuth()
 
   const handleLogout = useCallback(() => {
     logout()
     navigate('/login', { replace: true })
   }, [logout, navigate])
-
-  // DEV ONLY: Expose switchRole to window for easy testing
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      ;(
-        window as typeof window & { switchRole: typeof switchRole }
-      ).switchRole = switchRole
-      console.log(
-        '🔧 DEV: Use window.switchRole("admin") or window.switchRole("manager") to test role switching'
-      )
-    }
-  }, [switchRole])
 
   return (
     <AppShell>
@@ -65,3 +53,4 @@ export function MainLayout() {
     </AppShell>
   )
 }
+

@@ -12,6 +12,7 @@ import {
   AuthSubtitle,
   AuthTabList,
   AuthTabButton,
+  AuthErrorText,
 } from '../ui'
 
 type TabType = 'login' | 'signup'
@@ -81,6 +82,11 @@ export function LoginPage() {
             ? 'Sign in to manage your compliance'
             : 'Create your account to get started'}
         </AuthSubtitle>
+        {loginError ? (
+          <AuthErrorText color="error" variant="body2">
+            {loginError}
+          </AuthErrorText>
+        ) : null}
       </AuthHeader>
 
       <AuthTabList role="tablist">
@@ -103,7 +109,7 @@ export function LoginPage() {
           onSubmit={handleLogin}
           onGoogleLogin={handleGoogleLogin}
           onForgotPassword={() => setForgotModalOpen(true)}
-          isSubmitting={isSubmitting}
+          isSubmitting={isLoginSubmitting || isSubmitting}
           isGoogleLoading={isGoogleLoading}
         />
       ) : (
