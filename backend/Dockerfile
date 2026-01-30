@@ -6,6 +6,9 @@ COPY backend/ ./backend/
 WORKDIR /src/backend/src/FairWorkly.API
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app/publish
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+RUN dotnet ef migrations bundle --runtime linux-x64 -o /app/publish/migrate
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
@@ -13,6 +16,7 @@ WORKDIR /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:5680
 
 COPY --from=build /app/publish .
+COPY --from=build /src/backend/src/FairWorkly.API/appsettings.example.json ./appsettings.json
 
 EXPOSE 5680
 
