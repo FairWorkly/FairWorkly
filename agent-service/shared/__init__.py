@@ -9,7 +9,7 @@ This package contains reusable code for all agents:
 
 Usage:
     from shared.llm import LLMProvider
-    from shared import RAGRetriever, RosterExcelParser
+    from shared import RAGRetriever, PromptBuilderBase
 """
 
 # Make imports easier
