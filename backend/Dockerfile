@@ -3,16 +3,17 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY backend/ ./backend/
 
-WORKDIR /src/backend/src/FairWorkly.API
-RUN dotnet restore
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet restore -r linux-x64
+
+RUN dotnet publish -c Release -o /app/publish --no-restore
 
 RUN /root/.dotnet/tools/dotnet-ef migrations bundle \
     --project . \
     --runtime linux-x64 \
+    --self-contained \
     -o /app/publish/migrate
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
