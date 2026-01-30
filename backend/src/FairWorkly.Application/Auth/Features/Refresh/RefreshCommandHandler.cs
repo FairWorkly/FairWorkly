@@ -1,8 +1,8 @@
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
-using Microsoft.Extensions.Configuration;
-
+using FairWorkly.Domain.Common;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 
 namespace FairWorkly.Application.Auth.Features.Refresh;
 
@@ -12,36 +12,33 @@ public class RefreshCommandHandler(
     ITokenService tokenService,
     IUnitOfWork unitOfWork,
     IConfiguration configuration
-) : IRequestHandler<RefreshCommand, RefreshResult>
+) : IRequestHandler<RefreshCommand, Result<RefreshResponse>>
 {
-    public async Task<RefreshResult> Handle(RefreshCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RefreshResponse>> Handle(
+        RefreshCommand request,
+        CancellationToken cancellationToken
+    )
     {
         // Hash incoming plain token and lookup user
         var incomingHash = secretHasher.Hash(request.RefreshTokenPlain);
         var user = await userRepository.GetByRefreshTokenHashAsync(incomingHash, cancellationToken);
         if (user == null)
         {
-            return new RefreshResult
-            {
-                FailureReason = RefreshFailureReason.InvalidToken
-            };
+            return Result<RefreshResponse>.Unauthorized("Invalid refresh token.");
         }
 
         if (!user.IsActive)
         {
-            return new RefreshResult
-            {
-                FailureReason = RefreshFailureReason.AccountDisabled
-            };
+            return Result<RefreshResponse>.Forbidden("Account is disabled.");
         }
 
         // Check expiry
-        if (!user.RefreshTokenExpiresAt.HasValue || user.RefreshTokenExpiresAt.Value < DateTime.UtcNow)
+        if (
+            !user.RefreshTokenExpiresAt.HasValue
+            || user.RefreshTokenExpiresAt.Value < DateTime.UtcNow
+        )
         {
-            return new RefreshResult
-            {
-                FailureReason = RefreshFailureReason.ExpiredToken
-            };
+            return Result<RefreshResponse>.Unauthorized("Refresh token expired.");
         }
 
         // Passed validation - rotate tokens
@@ -58,14 +55,13 @@ public class RefreshCommandHandler(
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new RefreshResult
-        {
-            Response = new RefreshResponse
+        return Result<RefreshResponse>.Success(
+            new RefreshResponse
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshPlain,
-                RefreshTokenExpiration = newExpires
+                RefreshTokenExpiration = newExpires,
             }
-        };
+        );
     }
 }

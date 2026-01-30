@@ -12,7 +12,7 @@ python = "^3.10"
 fastapi = "^0.115.0"
 uvicorn = {extras = ["standard"], version = "^0.30.0"}
 python-multipart = "^0.0.9"
-pydantic = "^2.8.0"
+pydantic = {extras = ["email"], version = "^2.8.0"}
 requests = "^2.32.0"
 pyyaml = "^6.0.0"
 langchain = "^0.3.0"
@@ -24,6 +24,7 @@ langchain-text-splitters = "^0.3.0"
 faiss-cpu = "^1.8.0.post1"
 pypdf = "^5.1.0"
 transformers = "^4.46.0"
+openpyxl = "^3.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"

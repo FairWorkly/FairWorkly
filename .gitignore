@@ -34,9 +34,6 @@ AGENTS.md
 **/AI_GUIDE.md
 CLAUDE.md
 
-# Backend Scripts
-backend/scripts/
-
 # Serilog log files
 logs/
 
@@ -52,9 +49,6 @@ logs/
 
 # Ignore local file uploads during development
 **/wwwroot/uploads/
-
-# Local .NET SDK config
-global.json
 
 # Node.js and React (Frontend)
 node_modules/
