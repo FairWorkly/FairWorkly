@@ -117,10 +117,10 @@ The parser is flexible with column names. These all work:
 | `start` | start_time |
 | `开始时间` | start_time |
 
-The parser ignores:
+The parser normalizes:
 - Extra spaces
 - UPPERCASE/lowercase
-- Special characters like `*`, `#`, `-`, `_`
+Special characters and full‑width variants are preserved, so include explicit aliases if needed.
 
 ## Overnight Shifts
 
