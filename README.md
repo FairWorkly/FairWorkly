@@ -24,6 +24,10 @@ FairWorkly focuses on **agent-driven HR compliance**, with the following core ag
 
 This section is intentionally minimal. Detailed architecture and workflows are documented separately.
 
+Quick checks:
+- `make lint-deps` (ensures shared RAG doesn't import compliance)
+- RAG init log: look for a single `RAG resources initialized` per process
+
 ### Frontend
 
 cd frontend
