@@ -101,7 +101,7 @@ try
     builder.Services.AddCors(options =>
     {
         options.AddPolicy(
-            "AllowAll",
+            "AllowFrontend",
             policy =>
             {
                 if (builder.Environment.IsDevelopment())
@@ -201,7 +201,7 @@ try
     }
 
     // Must before UseAuthorization
-    app.UseCors("AllowAll");
+    app.UseCors("AllowFrontend");
 
     app.UseHttpsRedirection();
 
