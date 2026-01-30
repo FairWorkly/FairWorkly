@@ -1,17 +1,13 @@
-// FairWorkly.Application/Settings/Commands/UpdateOrganization/UpdateOrganizationCommandHandler.cs
-
+using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
+using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
 using MediatR;
 
 namespace FairWorkly.Application.Settings.Commands.UpdateOrganization;
 
-/// <summary>
-/// Handler for UpdateOrganizationCommand
-/// Updates organization profile in database
-/// </summary>
 public class UpdateOrganizationCommandHandler
-    : IRequestHandler<UpdateOrganizationCommand, OrganizationDto>
+    : IRequestHandler<UpdateOrganizationCommand, Result<OrganizationDto>>
 {
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -25,7 +21,7 @@ public class UpdateOrganizationCommandHandler
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<OrganizationDto> Handle(
+    public async Task<Result<OrganizationDto>> Handle(
         UpdateOrganizationCommand command,
         CancellationToken cancellationToken
     )
@@ -41,7 +37,9 @@ public class UpdateOrganizationCommandHandler
         // Step 2: Validate organization exists
         if (organization == null)
         {
-            throw new NotFoundException($"Organization with ID {command.OrganizationId} not found");
+            return Result<OrganizationDto>.NotFound(
+                $"Organization {command.OrganizationId} not found"
+            );
         }
 
         // Step 3: Update organization fields
@@ -55,9 +53,15 @@ public class UpdateOrganizationCommandHandler
         organization.Suburb = request.Suburb;
 
         // Convert State string to enum
-        if (!Enum.TryParse<AustralianState>(request.State, out var stateEnum))
+        if (!Enum.TryParse<AustralianState>(request.State, ignoreCase: true, out var stateEnum))
         {
-            throw new ValidationException($"Invalid state: {request.State}");
+            return Result<OrganizationDto>.ValidationFailure(
+                "Invalid state code",
+                new List<ValidationError>
+                {
+                    new() { Field = "State", Message = "Invalid Australian state code" },
+                }
+            );
         }
         organization.State = stateEnum;
 
@@ -83,6 +87,6 @@ public class UpdateOrganizationCommandHandler
             LogoUrl = organization.LogoUrl,
         };
 
-        return dto;
+        return Result<OrganizationDto>.Success(dto);
     }
 }
