@@ -4,9 +4,9 @@ import threading
 from typing import Any
 
 from master_agent.config import CONFIG_PATH, resolve_document_faiss_path
-from agents.shared.llm.embeddings_factory import create_embeddings
-from agents.shared.vector_db import load_faiss
-from agents.shared.rag_retriever import RAGRetriever
+from shared.llm.embeddings_factory import create_embeddings
+from shared.vector_db import load_faiss
+from shared.rag_retriever import RAGRetriever
 
 _RESOURCE_LOCK = threading.Lock()
 _EMBEDDINGS = None

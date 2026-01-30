@@ -5,7 +5,7 @@ from typing import Callable
 import pytest
 from fastapi.testclient import TestClient
 
-import agents.shared.rag.rag_client as rag_client
+import shared.rag.rag_client as rag_client
 
 
 @pytest.fixture

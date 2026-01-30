@@ -2,9 +2,9 @@
 
 from typing import Dict, Any
 
-from agents.shared.llm.factory import LLMProvider
-from agents.shared.rag_retriever import RetrievalResult
-from agents.shared.rag.retriever_manager import ensure_retriever
+from shared.llm.factory import LLMProvider
+from shared.rag_retriever import RetrievalResult
+from shared.rag.retriever_manager import ensure_retriever
 
 
 async def run(
