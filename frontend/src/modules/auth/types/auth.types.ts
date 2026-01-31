@@ -8,6 +8,5 @@ export type AuthState = {
   isAuthenticated: boolean
   isLoading: boolean
   user: AuthUser | null
-  switchRole: (role: 'admin' | 'manager') => void
   logout: () => void
 }
