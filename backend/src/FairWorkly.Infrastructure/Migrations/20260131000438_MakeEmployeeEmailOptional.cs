@@ -41,9 +41,14 @@ namespace FairWorkly.Infrastructure.Migrations
 
             migrationBuilder.Sql(
                 """
-                UPDATE employees
-                SET email = CONCAT('unknown+', id::text, '@placeholder.local')
-                WHERE email IS NULL;
+                DO $$
+                BEGIN
+                    IF EXISTS (SELECT 1 FROM employees WHERE email IS NULL) THEN
+                        UPDATE employees
+                        SET email = CONCAT('unknown+', organization_id::text, '+', id::text, '@placeholder.local')
+                        WHERE email IS NULL;
+                    END IF;
+                END $$;
                 """
             );
 
