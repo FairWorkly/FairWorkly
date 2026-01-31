@@ -1,10 +1,9 @@
-using MediatR;
 using FairWorkly.Domain.Auth.Interfaces;
+using MediatR;
 
 namespace FairWorkly.Application.Settings.Features.GetTeamMembers;
 
-public class GetTeamMembersHandler
-    : IRequestHandler<GetTeamMembersQuery, List<TeamMemberDto>>
+public class GetTeamMembersHandler : IRequestHandler<GetTeamMembersQuery, List<TeamMemberDto>>
 {
     private readonly IUserRepository _userRepository;
 
@@ -20,7 +19,8 @@ public class GetTeamMembersHandler
         // 1. Query users by organization (multi-tenancy filter)
         var users = await _userRepository.GetByOrganizationIdAsync(
             request.OrganizationId,
-            cancellationToken);
+            cancellationToken,
+            );
 
         // 2. Map Entity -> DTO
         // Filter out soft-deleted users (IsDeleted == true) - Repository already does this, but keeping it robust
@@ -33,7 +33,7 @@ public class GetTeamMembersHandler
                 Email = u.Email,
                 Role = u.Role.ToString(),
                 IsActive = u.IsActive,
-                LastLoginAt = u.LastLoginAt
+                LastLoginAt = u.LastLoginAt,
             })
             .OrderBy(u => u.Name)
             .ToList();

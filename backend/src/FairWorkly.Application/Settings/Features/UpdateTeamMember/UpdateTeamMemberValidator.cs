@@ -12,21 +12,22 @@ public class UpdateTeamMemberValidator : AbstractValidator<UpdateTeamMemberComma
 
     public UpdateTeamMemberValidator()
     {
-        RuleFor(x => x.UserId)
-            .NotEmpty()
-            .WithMessage("User ID is required");
+        RuleFor(x => x.UserId).NotEmpty().WithMessage("User ID is required");
 
         RuleFor(x => x.RequestingUserOrganizationId)
             .NotEmpty()
             .WithMessage("Organization context is required");
 
         // Role validation (only if provided)
-        When(x => x.Role != null, () =>
-        {
-            RuleFor(x => x.Role)
-                .Must(role => ValidRoles.Contains(role))
-                .WithMessage("Role must be 'Admin' or 'Manager'");
-        });
+        When(
+            x => x.Role != null,
+            () =>
+            {
+                RuleFor(x => x.Role)
+                    .Must(role => ValidRoles.Contains(role))
+                    .WithMessage("Role must be 'Admin' or 'Manager'");
+            }
+        );
 
         // At least one field must be provided for update
         RuleFor(x => x)

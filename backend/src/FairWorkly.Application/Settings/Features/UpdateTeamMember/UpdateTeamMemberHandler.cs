@@ -1,9 +1,9 @@
-using MediatR;
-using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Auth.Enums;
+using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Domain.Exceptions;
+using MediatR;
 
 namespace FairWorkly.Application.Settings.Features.UpdateTeamMember;
 
@@ -13,9 +13,7 @@ public class UpdateTeamMemberHandler
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateTeamMemberHandler(
-        IUserRepository userRepository,
-        IUnitOfWork unitOfWork)
+    public UpdateTeamMemberHandler(IUserRepository userRepository, IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
@@ -23,7 +21,8 @@ public class UpdateTeamMemberHandler
 
     public async Task<UpdateTeamMemberResult> Handle(
         UpdateTeamMemberCommand request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         // 1. Fetch the user to update
         var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
@@ -36,8 +35,7 @@ public class UpdateTeamMemberHandler
         // 2. Security check: Verify user belongs to same organization
         if (user.OrganizationId != request.RequestingUserOrganizationId)
         {
-            throw new ForbiddenAccessException(
-                "Cannot modify users from a different organization");
+            throw new ForbiddenAccessException("Cannot modify users from a different organization");
         }
 
         // 3. Apply updates (only if values provided)
@@ -63,7 +61,7 @@ public class UpdateTeamMemberHandler
             Email = user.Email,
             Role = user.Role.ToString(),
             IsActive = user.IsActive,
-            LastLoginAt = user.LastLoginAt
+            LastLoginAt = user.LastLoginAt,
         };
     }
 }

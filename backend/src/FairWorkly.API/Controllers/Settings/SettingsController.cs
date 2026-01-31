@@ -1,15 +1,15 @@
+using System.Security.Claims;
+using FairWorkly.Application.Settings.Features.GetTeamMembers;
+using FairWorkly.Application.Settings.Features.UpdateTeamMember;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using FairWorkly.Application.Settings.Features.GetTeamMembers;
-using FairWorkly.Application.Settings.Features.UpdateTeamMember;
-using System.Security.Claims;
 
 namespace FairWorkly.API.Controllers.Settings;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]  // All endpoints require authentication
+[Authorize] // All endpoints require authentication
 public class SettingsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -30,10 +30,7 @@ public class SettingsController : ControllerBase
         // Extract organization ID from JWT claims
         var organizationId = GetOrganizationIdFromClaims();
 
-        var query = new GetTeamMembersQuery
-        {
-            OrganizationId = organizationId
-        };
+        var query = new GetTeamMembersQuery { OrganizationId = organizationId };
 
         var result = await _mediator.Send(query);
         return Ok(result);
@@ -47,14 +44,15 @@ public class SettingsController : ControllerBase
     /// <param name="request">Update data</param>
     /// <returns>Updated team member data</returns>
     [HttpPatch("team/{id:guid}")]
-    [Authorize(Policy = "RequireAdmin")]  // Only admins can update
+    [Authorize(Policy = "RequireAdmin")] // Only admins can update
     [ProducesResponseType(typeof(UpdateTeamMemberResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UpdateTeamMemberResult>> UpdateTeamMember(
         Guid id,
-        [FromBody] UpdateTeamMemberRequest request)
+        [FromBody] UpdateTeamMemberRequest request
+    )
     {
         var organizationId = GetOrganizationIdFromClaims();
 
@@ -63,7 +61,7 @@ public class SettingsController : ControllerBase
             UserId = id,
             Role = request.Role,
             IsActive = request.IsActive,
-            RequestingUserOrganizationId = organizationId
+            RequestingUserOrganizationId = organizationId,
         };
 
         var result = await _mediator.Send(command);
@@ -75,8 +73,7 @@ public class SettingsController : ControllerBase
     /// </summary>
     private Guid GetOrganizationIdFromClaims()
     {
-        var claim = User.FindFirst("OrganizationId")
-            ?? User.FindFirst("organization_id");
+        var claim = User.FindFirst("OrganizationId") ?? User.FindFirst("organization_id");
 
         if (claim == null || !Guid.TryParse(claim.Value, out var orgId))
         {
