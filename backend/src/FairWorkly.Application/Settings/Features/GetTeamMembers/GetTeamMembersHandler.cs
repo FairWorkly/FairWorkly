@@ -19,8 +19,8 @@ public class GetTeamMembersHandler : IRequestHandler<GetTeamMembersQuery, List<T
         // 1. Query users by organization (multi-tenancy filter)
         var users = await _userRepository.GetByOrganizationIdAsync(
             request.OrganizationId,
-            cancellationToken,
-            );
+            cancellationToken
+        );
 
         // 2. Map Entity -> DTO
         // Filter out soft-deleted users (IsDeleted == true) - Repository already does this, but keeping it robust
