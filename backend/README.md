@@ -37,8 +37,9 @@ For management modules that are primarily CRUD-based with relatively linear logi
 Before you begin, please ensure you have installed:
 
 1. .NET 8 SDK
-2. PostgreSQL (Ensure the local service is running)
-3. IDE: Visual Studio 2022 (Recommended) or Visual Studio Code
+2. PostgreSQL (or run Postgres via Docker)
+3. PowerShell (`pwsh`) if you want to run the repo's `*.ps1` scripts on macOS/Linux
+4. IDE: Visual Studio 2022 (Recommended) or Visual Studio Code
 
 ## Getting Started
 
@@ -56,7 +57,7 @@ cd backend
 dotnet tool restore
 ```
 
-### 3. Configure Git Blame
+### 3. Configure Git Blame (Optional)
 
 ```bash
 git config blame.ignoreRevsFile .git-blame-ignore-revs
@@ -117,19 +118,32 @@ In VS2022, right-click `FairWorkly.API` project -> **Manage User Secrets**:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=FairWorklyDb;Username=postgres;Password=<YourPassword>"
+    "DefaultConnection": "Host=localhost;Port=5433;Database=FairWorklyDb;Username=postgres;Password=postgres"
   }
 }
 ```
 
-**Method B: Modify Configuration File**
+Notes:
+- Port `5433` matches the local-dev default in `src/FairWorkly.API/appsettings.Development.example.json` (Docker Postgres exposed to host).
+- If you're running Postgres natively, change the port to `5432` and update credentials accordingly.
 
-Edit `src/FairWorkly.API/appsettings.json` -> `DefaultConnection`.
+**Method B: Create a local appsettings file (recommended)**
+
+Create `appsettings.Development.json` from the tracked example, then edit values locally (this file is intentionally ignored by git):
+
+```bash
+cp src/FairWorkly.API/appsettings.Development.example.json src/FairWorkly.API/appsettings.Development.json
+```
+
+Then update:
+- `ConnectionStrings:DefaultConnection`
+- `JwtSettings:Secret` (must be non-empty; 32+ chars recommended)
+- `AiSettings` if you want to point at a real `agent-service`
 
 **Apply Migrations**:
 ```bash
 cd backend
-.\scripts\update-database.ps1
+pwsh ./scripts/update-database.ps1
 ```
 
 ### 6. Start the Project
@@ -138,7 +152,11 @@ cd backend
 dotnet run --project src/FairWorkly.API --launch-profile https
 ```
 
-Access Swagger: `https://localhost:7075/swagger`
+Swagger:
+
+- Local `dotnet run` (https launch profile): `https://localhost:7075/swagger`
+- Local `dotnet run` (http): `http://localhost:5680/swagger`
+- Docker Compose backend: `http://localhost:5680/swagger`
 
 ## Development Patterns & Tools
 
@@ -157,7 +175,7 @@ This project follows Clean Architecture, and dependency injection registration l
 
 The backend depends on a Python AI Service (`agent-service`). During the development phase, **Mock Mode** is enabled by default (does not depend on the real Python service) for easier debugging.
 
-Configuration location: `appsettings.json`
+Configuration location: `src/FairWorkly.API/appsettings.Development.json` (or user secrets), with defaults in `src/FairWorkly.API/appsettings.Development.example.json`.
 
 ```json
 "AiSettings": {
@@ -227,7 +245,7 @@ Location: `src/FairWorkly.Domain/Common/Result.cs`
 All scripts are located in `backend/scripts/`. Run them in terminal:
 ```bash
 cd backend
-.\scripts\add-migration.ps1
+pwsh ./scripts/add-migration.ps1
 ```
 
 | Script                             | Purpose                                           | Data Loss        |
