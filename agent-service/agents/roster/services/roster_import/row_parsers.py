@@ -51,31 +51,34 @@ def parse_roster_row(
             raise ParseIssueError(issue)
         warnings.append(issue)
 
-    raw_email = normalized.get("employee_email")
-    employee_email = get_string(raw_email)
-    if not employee_email:
+    employee_number = get_string(normalized.get("employee_number"))
+    if not employee_number:
         raise ParseIssueError(
             ParseIssue(
                 row=row_num,
                 severity=ParseIssueSeverity.ERROR,
                 code="MISSING_REQUIRED_FIELD",
-                message="Employee Email is required",
-                column="employee_email",
+                message="Employee Number is required for roster import (email is optional)",
+                column="employee_number",
             )
         )
-    try:
-        _email_validator.validate_python(employee_email)
-    except ValidationError as exc:
-        raise ParseIssueError(
-            ParseIssue(
-                row=row_num,
-                severity=ParseIssueSeverity.ERROR,
-                code="INVALID_EMAIL",
-                message=f"Invalid email format: {employee_email}",
-                column="employee_email",
-                value=employee_email,
-            )
-        ) from exc
+
+    raw_email = normalized.get("employee_email")
+    employee_email = get_string(raw_email)
+    if employee_email:
+        try:
+            _email_validator.validate_python(employee_email)
+        except ValidationError as exc:
+            raise ParseIssueError(
+                ParseIssue(
+                    row=row_num,
+                    severity=ParseIssueSeverity.ERROR,
+                    code="INVALID_EMAIL",
+                    message=f"Invalid email format: {employee_email}",
+                    column="employee_email",
+                    value=employee_email,
+                )
+            ) from exc
 
     raw_date = normalized.get("date")
     try:
@@ -285,7 +288,7 @@ def parse_roster_row(
     entry = RosterEntry(
         excel_row=row_num,
         employee_email=employee_email,
-        employee_number=get_string(normalized.get("employee_number")),
+    employee_number=employee_number,
         employee_name=get_string(normalized.get("employee_name")),
         employment_type=employment_type or raw_employment_type,
         date=date_value,
@@ -344,29 +347,20 @@ def parse_employee_row(
         )
 
     email = get_string(normalized.get("email"))
-    if not email:
-        raise ParseIssueError(
-            ParseIssue(
-                row=row_num,
-                severity=ParseIssueSeverity.ERROR,
-                code="MISSING_REQUIRED_FIELD",
-                message="Email is required",
-                column="email",
-            )
-        )
-    try:
-        _email_validator.validate_python(email)
-    except ValidationError as exc:
-        raise ParseIssueError(
-            ParseIssue(
-                row=row_num,
-                severity=ParseIssueSeverity.ERROR,
-                code="INVALID_EMAIL",
-                message=f"Invalid email format: {email}",
-                column="email",
-                value=email,
-            )
-        ) from exc
+    if email:
+        try:
+            _email_validator.validate_python(email)
+        except ValidationError as exc:
+            raise ParseIssueError(
+                ParseIssue(
+                    row=row_num,
+                    severity=ParseIssueSeverity.ERROR,
+                    code="INVALID_EMAIL",
+                    message=f"Invalid email format: {email}",
+                    column="email",
+                    value=email,
+                )
+            ) from exc
 
     role = get_string(normalized.get("role"))
     if not role:

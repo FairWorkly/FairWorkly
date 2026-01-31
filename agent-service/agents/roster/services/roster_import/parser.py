@@ -29,8 +29,8 @@ class RosterExcelParser:
     Parses roster Excel files into typed shift entries.
     """
 
-    ROSTER_REQUIRED_KEYS = ["employee_email", "date", "start_time", "end_time"]
-    EMPLOYEE_REQUIRED_KEYS = ["name", "email", "role"]
+    ROSTER_REQUIRED_KEYS = ["employee_number", "date", "start_time", "end_time"]
+    EMPLOYEE_REQUIRED_KEYS = ["name", "role"]
 
     def __init__(self) -> None:
         self._header_map = HeaderMap()

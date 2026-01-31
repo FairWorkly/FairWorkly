@@ -116,6 +116,7 @@ public class EmployeeSyncServiceTests
         var alice = createdEmployees.First(e => e.EmployeeNumber == "NEW001");
         alice.FirstName.Should().Be("Alice");
         alice.LastName.Should().Be("Johnson");
+        alice.Email.Should().BeNull();
         alice.AwardType.Should().Be(AwardType.GeneralRetailIndustryAward2020);
         alice.AwardLevelNumber.Should().Be(1);
         alice.EmploymentType.Should().Be(EmploymentType.FullTime);
@@ -125,6 +126,7 @@ public class EmployeeSyncServiceTests
         var bob = createdEmployees.First(e => e.EmployeeNumber == "NEW002");
         bob.FirstName.Should().Be("Bob");
         bob.LastName.Should().Be("Williams");
+        bob.Email.Should().BeNull();
         bob.AwardLevelNumber.Should().Be(2);
         bob.EmploymentType.Should().Be(EmploymentType.PartTime);
     }

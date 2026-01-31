@@ -11,16 +11,16 @@ class TestValidateHeaders:
 
     def test_valid_headers(self, handler):
         """Test validation passes with all required headers."""
-        data = [{"employee_email": "john@test.com", "date": "2024-01-15", "start_time": "09:00", "end_time": "17:00"}]
-        is_valid, missing = handler.validate_headers(data, ["employee_email", "date"])
+        data = [{"employee_number": "EMP001", "employee_email": "john@test.com", "date": "2024-01-15", "start_time": "09:00", "end_time": "17:00"}]
+        is_valid, missing = handler.validate_headers(data, ["employee_number", "date"])
 
         assert is_valid is True
         assert missing == []
 
     def test_missing_headers(self, handler):
         """Test validation fails with missing headers."""
-        data = [{"employee_email": "john@test.com"}]
-        is_valid, missing = handler.validate_headers(data, ["employee_email", "date", "start_time"])
+        data = [{"employee_number": "EMP001", "employee_email": "john@test.com"}]
+        is_valid, missing = handler.validate_headers(data, ["employee_number", "date", "start_time"])
 
         assert is_valid is False
         assert "date" in missing
@@ -28,10 +28,10 @@ class TestValidateHeaders:
 
     def test_empty_data(self, handler):
         """Test validation with empty data."""
-        is_valid, missing = handler.validate_headers([], ["employee_email"])
+        is_valid, missing = handler.validate_headers([], ["employee_number"])
 
         assert is_valid is False
-        assert "employee_email" in missing
+        assert "employee_number" in missing
 
 class TestParseRosterExcel:
     """Tests for parse_roster_excel() function."""
@@ -57,9 +57,9 @@ class TestParseRosterExcel:
         assert result.entries[0].location == "Office"
         assert result.entries[0].excel_row == 2  # Real Excel row number
 
-        # Check third entry - no employee number
+        # Check third entry
         assert result.entries[2].employee_email == "bob@example.com"
-        assert result.entries[2].employee_number is None
+        assert result.entries[2].employee_number == "EMP003"
         assert result.entries[2].excel_row == 4
 
         # Summary checks
@@ -73,8 +73,8 @@ class TestParseRosterExcel:
         """Test error when required columns are missing."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["Employee Email", "Date"])  # Missing Start Time, End Time
-        ws.append(["john@example.com", "2024-01-15"])
+        ws.append(["Employee Number", "Employee Email", "Date"])  # Missing Start Time, End Time
+        ws.append(["EMP001", "john@example.com", "2024-01-15"])
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
@@ -88,10 +88,10 @@ class TestParseRosterExcel:
         """Test that row-level errors don't stop processing."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["Employee Email", "Date", "Start Time", "End Time"])
-        ws.append(["john@example.com", "2024-01-15", "09:00", "17:00"])  # Valid
-        ws.append(["jane@example.com", "invalid-date", "09:00", "17:00"])  # Invalid date
-        ws.append(["bob@example.com", "2024-01-16", "08:00", "16:00"])  # Valid
+        ws.append(["Employee Number", "Employee Email", "Date", "Start Time", "End Time"])
+        ws.append(["EMP001", "john@example.com", "2024-01-15", "09:00", "17:00"])  # Valid
+        ws.append(["EMP002", "jane@example.com", "invalid-date", "09:00", "17:00"])  # Invalid date
+        ws.append(["EMP003", "bob@example.com", "2024-01-16", "08:00", "16:00"])  # Valid
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
@@ -108,7 +108,7 @@ class TestParseRosterExcel:
         """Test parsing an empty roster file."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["Employee Email", "Date", "Start Time", "End Time"])
+        ws.append(["Employee Number", "Employee Email", "Date", "Start Time", "End Time"])
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
@@ -124,10 +124,10 @@ class TestParseRosterExcel:
         """Test that invalid email format is caught."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["Employee Email", "Date", "Start Time", "End Time"])
-        ws.append(["john@example.com", "2024-01-15", "09:00", "17:00"])  # Valid
-        ws.append(["not-an-email", "2024-01-15", "09:00", "17:00"])  # Invalid email
-        ws.append(["jane@example.com", "2024-01-16", "08:00", "16:00"])  # Valid
+        ws.append(["Employee Number", "Employee Email", "Date", "Start Time", "End Time"])
+        ws.append(["EMP001", "john@example.com", "2024-01-15", "09:00", "17:00"])  # Valid
+        ws.append(["EMP002", "not-an-email", "2024-01-15", "09:00", "17:00"])  # Invalid email
+        ws.append(["EMP003", "jane@example.com", "2024-01-16", "08:00", "16:00"])  # Valid
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))

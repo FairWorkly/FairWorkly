@@ -26,6 +26,14 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
 
     private static string GetConnectionString()
     {
+        var envConnectionString = Environment.GetEnvironmentVariable(
+            "FAIRWORKLY_TEST_DB_CONNECTION"
+        );
+        if (!string.IsNullOrWhiteSpace(envConnectionString))
+        {
+            return envConnectionString;
+        }
+
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true)
             .AddUserSecrets<EmployeeSyncIntegrationTests>(optional: true)
@@ -161,6 +169,7 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
         var alice = dbEmployees.First(e => e.EmployeeNumber == "NEW001");
         alice.FirstName.Should().Be("Alice");
         alice.LastName.Should().Be("Johnson");
+        alice.Email.Should().BeNull();
         alice.AwardType.Should().Be(AwardType.GeneralRetailIndustryAward2020);
         alice.AwardLevelNumber.Should().Be(1);
         alice.EmploymentType.Should().Be(EmploymentType.FullTime);
@@ -170,6 +179,7 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
         var carol = dbEmployees.First(e => e.EmployeeNumber == "NEW003");
         carol.FirstName.Should().Be("Carol");
         carol.LastName.Should().Be("Davis");
+        carol.Email.Should().BeNull();
         carol.EmploymentType.Should().Be(EmploymentType.Casual);
         carol.AwardLevelNumber.Should().Be(3);
     }
@@ -301,5 +311,11 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
             e.OrganizationId == _testOrganizationId
         );
         totalEmployees.Should().BeGreaterThan(1);
+
+        var mix002 = await _dbContext.Employees.FirstOrDefaultAsync(e =>
+            e.EmployeeNumber == "MIX002" && e.OrganizationId == _testOrganizationId
+        );
+        mix002.Should().NotBeNull();
+        mix002!.Email.Should().BeNull();
     }
 }
