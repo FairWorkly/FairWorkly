@@ -37,6 +37,15 @@ public class UserRepository : IUserRepository
         );
     }
 
+    // Get all users belonging to a specific organization.
+    public async Task<List<User>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken ct = default)
+    {
+        return await _context.Users
+            .Where(u => u.OrganizationId == organizationId)
+            .Where(u => !u.IsDeleted)
+            .ToListAsync(ct);
+    }
+
     // Checks if the email is already taken by another user.
     public async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct = default)
     {
