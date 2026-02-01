@@ -2,7 +2,7 @@
 
 The core backend service for FairWorkly, built on .NET 8. The backend adopts a **Hybrid Architecture** to balance the needs of complex business logic with simple data management.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Framework**: .NET 8 (Web API)
 - **Database**: PostgreSQL
@@ -12,7 +12,7 @@ The core backend service for FairWorkly, built on .NET 8. The backend adopts a *
 - **Task Orchestration**: MediatR (CQRS)
 - **Code Formatting**: CSharpier (Enforced)
 
-## 🏗 Project Architecture (Hybrid Architecture)
+## Project Architecture (Hybrid Architecture)
 
 ### 1. Core Business: Vertical Slicing
 
@@ -32,15 +32,16 @@ For management modules that are primarily CRUD-based with relatively linear logi
   - `src/FairWorkly.Application/Employees/` (Employee Profiles)
 - **Code Structure**: `Controller` -> `Service` (Business Logic) -> `Repository` (Data Access).
 
-## 🚀 Prerequisites
+## Prerequisites
 
 Before you begin, please ensure you have installed:
 
 1. .NET 8 SDK
-2. PostgreSQL (Ensure the local service is running)
-3. IDE: Visual Studio 2022 (Recommended) or Visual Studio Code
+2. PostgreSQL (or run Postgres via Docker)
+3. PowerShell (`pwsh`) if you want to run the repo's `*.ps1` scripts on macOS/Linux
+4. IDE: Visual Studio 2022 (Recommended) or Visual Studio Code
 
-## ⚡ Getting Started
+## Getting Started
 
 ### 1. Set Working Directory
 
@@ -56,7 +57,7 @@ cd backend
 dotnet tool restore
 ```
 
-### 3. Configure Git Blame
+### 3. Configure Git Blame (Optional)
 
 ```bash
 git config blame.ignoreRevsFile .git-blame-ignore-revs
@@ -117,19 +118,32 @@ In VS2022, right-click `FairWorkly.API` project -> **Manage User Secrets**:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=FairWorklyDb;Username=postgres;Password=<YourPassword>"
+    "DefaultConnection": "Host=localhost;Port=5433;Database=FairWorklyDb;Username=postgres;Password=postgres"
   }
 }
 ```
 
-**Method B: Modify Configuration File**
+Notes:
+- Port `5433` matches the local-dev default in `src/FairWorkly.API/appsettings.Development.example.json` (Docker Postgres exposed to host).
+- If you're running Postgres natively, change the port to `5432` and update credentials accordingly.
 
-Edit `src/FairWorkly.API/appsettings.json` -> `DefaultConnection`.
+**Method B: Create a local appsettings file (recommended)**
 
-**Apply Migrations**:
+Create `appsettings.Development.json` from the tracked example, then edit values locally (this file is intentionally ignored by git):
 
 ```bash
-dotnet ef database update --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
+cp src/FairWorkly.API/appsettings.Development.example.json src/FairWorkly.API/appsettings.Development.json
+```
+
+Then update:
+- `ConnectionStrings:DefaultConnection`
+- `JwtSettings:Secret` (must be non-empty; 32+ chars recommended)
+- `AiSettings` if you want to point at a real `agent-service`
+
+**Apply Migrations**:
+```bash
+cd backend
+pwsh ./scripts/update-database.ps1
 ```
 
 ### 6. Start the Project
@@ -138,9 +152,13 @@ dotnet ef database update --project src/FairWorkly.Infrastructure --startup-proj
 dotnet run --project src/FairWorkly.API --launch-profile https
 ```
 
-Access Swagger: `https://localhost:7075/swagger`
+Swagger:
 
-## 🔧 Development Patterns & Tools
+- Local `dotnet run` (https launch profile): `https://localhost:7075/swagger`
+- Local `dotnet run` (http): `http://localhost:5680/swagger`
+- Docker Compose backend: `http://localhost:5680/swagger`
+
+## Development Patterns & Tools
 
 ### 1. Dependency Injection Standards
 
@@ -151,13 +169,13 @@ This project follows Clean Architecture, and dependency injection registration l
 - **Infrastructure Layer Services**:
   - **Location**: `src/FairWorkly.Infrastructure/DependencyInjection.cs`
 
-> **⚠️ Note**: `Program.cs` in the API layer is only responsible for calling these two extension methods. **It is strictly forbidden to register business services directly in `Program.cs`**.
+> **Note**: `Program.cs` in the API layer is only responsible for calling these two extension methods. **It is strictly forbidden to register business services directly in `Program.cs`**.
 
 ### 2. AI Service Configuration (Mock vs Real)
 
 The backend depends on a Python AI Service (`agent-service`). During the development phase, **Mock Mode** is enabled by default (does not depend on the real Python service) for easier debugging.
 
-Configuration location: `appsettings.json`
+Configuration location: `src/FairWorkly.API/appsettings.Development.json` (or user secrets), with defaults in `src/FairWorkly.API/appsettings.Development.example.json`.
 
 ```json
 "AiSettings": {
@@ -189,22 +207,65 @@ Entity configuration (table mapping, relationships, constraints) must be placed 
 - **Location**: `src/FairWorkly.Infrastructure/Persistence/Configurations/{Module}/`
 - **Pattern**: One Configuration class per Entity, implementing `IEntityTypeConfiguration<T>`
 
-> **⚠️ Forbidden**: Writing `modelBuilder.Entity<T>()` directly in `FairWorklyDbContext.OnModelCreating()`.
+> **Forbidden**: Writing `modelBuilder.Entity<T>()` directly in `FairWorklyDbContext.OnModelCreating()`.
 
-## 📂 Cheatsheet
+### 6. Result<T> Pattern
 
-**Add Migration:**
+MediatR Handlers return `Result<T>` instead of throwing exceptions for better control flow and explicit error handling.
 
+**Available factory methods:**
+
+| Method | When to use | HTTP Response |
+|--------|-------------|---------------|
+| `Success(value)` | Operation succeeded | 200 OK |
+| `ValidationFailure(errors)` | Input validation failed | 400 Bad Request |
+| `NotFound(message)` | Resource not found | 404 Not Found |
+| `Forbidden(message)` | No permission | 403 Forbidden |
+
+**Example:**
+
+```csharp
+// Handler
+if (entity == null)
+    return Result<MyDto>.NotFound("Resource not found");
+return Result<MyDto>.Success(dto);
+
+// Controller
+if (result.Type == ResultType.NotFound)
+    return NotFound(new { message = result.ErrorMessage });
+return Ok(result.Value);
 ```
-dotnet ef migrations add <MigrationName> --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
+
+> 📖 For detailed usage, see [Result<T> Pattern Guide](docs/Result_Pattern_Guide.md)
+
+Location: `src/FairWorkly.Domain/Common/Result.cs`
+
+## Database Scripts
+
+All scripts are located in `backend/scripts/`. Run them in terminal:
+```bash
+cd backend
+pwsh ./scripts/add-migration.ps1
 ```
 
-**Update Database:**
+| Script                             | Purpose                                           | Data Loss        |
+| ---------------------------------- | ------------------------------------------------- | ---------------- |
+| `add-migration.ps1`                | Create a new migration                            | None             |
+| `update-database.ps1`              | Apply pending migrations (preserves data)         | None             |
+| `reset-database.ps1`               | Drop and recreate database with all migrations    | Data             |
+| `init-migrations-and-database.ps1` | Delete all migrations and regenerate from scratch | Data + History   |
 
-```
-dotnet ef database update --project src/FairWorkly.Infrastructure --startup-project src/FairWorkly.API
-```
+### Before Committing Migrations
 
-## 📚 Advanced Development Guide
+**Always verify your migration can be applied successfully before committing.**
 
-For details on how to develop new Features, write AI Orchestrators, and interface with the Python Agent, please be sure to read the detailed internal tutorial.
+Test with `reset-database.ps1` or `update-database.ps1` depending on your situation.
+
+## Advanced Development Guide
+
+For details on how to develop new Features, write AI Orchestrators, and interface with the Python Agent, please refer to:
+
+- [Backend Development Guide](docs/Backend_Development_Guide.md) - Comprehensive guide with code examples
+- [Result<T> Pattern Guide](docs/Result_Pattern_Guide.md) - How to use Result pattern in Handlers
+
+> These documents are also available on the team's Google Drive.

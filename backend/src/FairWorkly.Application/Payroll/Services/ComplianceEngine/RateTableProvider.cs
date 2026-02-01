@@ -11,7 +11,10 @@ public static class RateTableProvider
     /// These are the minimum legal rates for non-casual employees
     /// Also used as the base for penalty rate calculations for ALL employee types
     /// </summary>
-    public static readonly IReadOnlyDictionary<int, decimal> PermanentRates = new Dictionary<int, decimal>
+    public static readonly IReadOnlyDictionary<int, decimal> PermanentRates = new Dictionary<
+        int,
+        decimal
+    >
     {
         { 1, 26.55m },
         { 2, 27.16m },
@@ -20,14 +23,17 @@ public static class RateTableProvider
         { 5, 29.27m },
         { 6, 29.70m },
         { 7, 31.19m },
-        { 8, 32.45m }
+        { 8, 32.45m },
     };
 
     /// <summary>
     /// Casual rates ($/hr) by classification level
     /// Includes 25% casual loading
     /// </summary>
-    public static readonly IReadOnlyDictionary<int, decimal> CasualRates = new Dictionary<int, decimal>
+    public static readonly IReadOnlyDictionary<int, decimal> CasualRates = new Dictionary<
+        int,
+        decimal
+    >
     {
         { 1, 33.19m },
         { 2, 33.95m },
@@ -36,7 +42,7 @@ public static class RateTableProvider
         { 5, 36.59m },
         { 6, 37.13m },
         { 7, 38.99m },
-        { 8, 40.56m }
+        { 8, 40.56m },
     };
 
     /// <summary>

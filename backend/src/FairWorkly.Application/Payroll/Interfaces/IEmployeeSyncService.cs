@@ -28,5 +28,6 @@ public interface IEmployeeSyncService
     Task<Dictionary<string, Guid>> SyncEmployeesAsync(
         List<PayrollCsvRow> rows,
         Guid organizationId,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

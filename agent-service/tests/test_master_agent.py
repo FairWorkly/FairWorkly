@@ -5,7 +5,7 @@ from typing import Callable
 import pytest
 from fastapi.testclient import TestClient
 
-import agents.compliance.compliance_feature as compliance_module
+import shared.rag.rag_client as rag_client
 
 
 @pytest.fixture
@@ -28,7 +28,11 @@ def client_factory(monkeypatch) -> Callable[..., TestClient]:
             def count_tokens(self, text: str) -> int:
                 return len(text.split())
 
-        monkeypatch.setattr(compliance_module, "LLMProvider", lambda: _StubLLM())
+        def _missing_vectorstore(*_args, **_kwargs):
+            raise FileNotFoundError("Vector store missing")
+
+        monkeypatch.setattr(rag_client, "LLMProvider", lambda: _StubLLM())
+        monkeypatch.setattr(rag_client, "ensure_retriever", _missing_vectorstore)
 
         module_name = "master_agent.main"
         if module_name in sys.modules:
