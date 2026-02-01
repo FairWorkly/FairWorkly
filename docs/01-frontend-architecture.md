@@ -59,7 +59,7 @@ Each folder under modules/ represents a business domain, not a technical layer.
 
 Examples:
 
-- modules/compliance
+- modules/roster
 - nmodules/payroll
 - modules/fairbot
 - modules/auth

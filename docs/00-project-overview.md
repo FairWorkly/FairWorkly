@@ -49,7 +49,7 @@ An agent is a decision-producing system.
 
 **_ Core Agents in the MVP _**
 
-Compliance Agent:
+Roster Agent:
 
 - Determines whether rosters and working arrangements comply with Award rules.
 
@@ -72,7 +72,7 @@ This is a simplified, non-technical view of how FairWorkly works.
 1. A user interacts with the frontend and submits a request.
 2. The frontend sends the request to the backend.
 3. The backend authenticates and authorizes the request.
-4. The Compliance Agent executes business workflows and rules.
+4. The Roster Agent executes business workflows and rules.
 5. The decision and relevant data are persisted for audit.
 6. The result and explanation are returned to the frontend.
 7. The frontend displays the outcome to the user.
@@ -147,46 +147,9 @@ Frontend does not decide correctness. It requests decisions and renders results.
 
 For the MVP phase, our primary focus is:
 
-- Compliance Agent
+- Roster Agent
 - Payroll Agent
 - FairBot
-
-** Documents Module (Template Generation) **
-
-The Documents module generates standard HR documents based on predefined templates, including:
-
-- Employment Contracts
-- Fair Work Information Statement (FWIS)
-- Position Descriptions
-
-Documents use **code-defined templates** and generate **PDF outputs**.
-
-The module assembles data from:
-
-- Employee records,
-- organisation-level settings,
-- and user-provided inputs at generation time.
-
-Documents **do not perform compliance validation or decision-making**.  
-They support HR workflows by producing consistent, auditable documents.
-
-** Employee Agent (Staff Experience) **
-
-Employee Agent provides a staff-facing experience to understand employment details and entitlements:
-
-- Employee Help via FairBot (Q&A)
-- My Profile (read-only)
-- Managers/Owners can manage employee compliance-related fields
-
-Important:
-
-- Staff data is sourced from Employees records.
-- Award-based calculations (e.g., penalty rates) are computed in backend rule services.
-- The frontend never performs Award rule calculations.
-- Employees (Staff users) can only access their own profile and documents. All enforcement is handled server-side via RBAC and ownership checks.
-- Staff accounts are created by Owners/Managers. Staff sign in via an invite flow (magic link or temporary password), and are mapped 1:1 to an Employee record.
-
-Do not introduce architectural complexity for non-core modules.
 
 9. How to Use This Document
 
@@ -197,12 +160,6 @@ Its purpose is to:
 - align everyone on what FairWorkly is building,
 - explain why certain technical constraints exist,
 - help contributors understand where their work fits.
-
-For implementation details, refer to:
-
-- Frontend Architecture Cheat Sheet
-- Backend Architecture & Rules
-- Agent-specific documentation
 
 If you are unsure where something belongs, do not guess. Ask based on the principles outlined here.
 

@@ -1,0 +1,7 @@
+Employee ID,Employee Name,Pay Period Start,Pay Period End,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+MIX001,Updated One,2025-12-15,2025-12-21,Retail,Level 1,FullTime,26.55,38.00,1008.90,0.00,0.00,0.00,0.00,0.00,0.00,1008.90,121.07
+MIX002,Updated Two,2025-12-15,2025-12-21,Retail,Level 2,PartTime,27.16,25.00,679.00,0.00,0.00,0.00,0.00,0.00,0.00,679.00,81.48
+MIX003,Updated Three,2025-12-15,2025-12-21,Retail,Level 3,Casual,34.48,20.00,689.60,0.00,0.00,0.00,0.00,0.00,0.00,689.60,82.75
+MIX004,Brand New Four,2025-12-15,2025-12-21,Retail,Level 4,FullTime,28.12,38.00,1068.56,0.00,0.00,0.00,0.00,0.00,0.00,1068.56,128.23
+MIX005,Brand New Five,2025-12-15,2025-12-21,Retail,Level 5,Casual,36.59,30.00,1097.70,0.00,0.00,0.00,0.00,0.00,0.00,1097.70,131.72
+MIX006,Brand New Six,2025-12-15,2025-12-21,Retail,Level 6,PartTime,29.70,20.00,594.00,0.00,0.00,0.00,0.00,0.00,0.00,594.00,71.28

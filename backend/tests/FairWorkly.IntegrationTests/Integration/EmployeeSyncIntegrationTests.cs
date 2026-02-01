@@ -1,5 +1,4 @@
 using FairWorkly.Application.Common.Interfaces;
-using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Application.Payroll.Services;
 using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Auth.Enums;
@@ -10,10 +9,9 @@ using FairWorkly.Infrastructure.Persistence.Repositories.Employees;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Moq;
 using Xunit;
 
-namespace FairWorkly.UnitTests.Integration;
+namespace FairWorkly.IntegrationTests.Integration;
 
 /// <summary>
 /// Integration tests for ISSUE_01: CSV Parser + Employee Sync
@@ -26,13 +24,22 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
 
     private static string GetConnectionString()
     {
+        var envConnectionString = Environment.GetEnvironmentVariable(
+            "FAIRWORKLY_TEST_DB_CONNECTION"
+        );
+        if (!string.IsNullOrWhiteSpace(envConnectionString))
+        {
+            return envConnectionString;
+        }
+
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true)
             .AddUserSecrets<EmployeeSyncIntegrationTests>(optional: true)
             .Build();
 
         return configuration.GetConnectionString("DefaultConnection")
-            ?? "Host=localhost;Port=5432;Database=FairWorklyDb;Username=postgres;Password=fairworkly123";
+            ?? throw new InvalidOperationException(
+                "No database connection string configured. Set FAIRWORKLY_TEST_DB_CONNECTION or configure appsettings.json");
     }
 
     private FairWorklyDbContext _dbContext = null!;
@@ -41,8 +48,9 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
     private CsvParserService _csvParserService = null!;
     private Guid _testOrganizationId;
 
-    private readonly Mock<IDateTimeProvider> _mockDateTimeProvider = new();
-    private readonly DateTimeOffset _testDateTime = new(2025, 12, 28, 0, 0, 0, TimeSpan.Zero);
+    private readonly IDateTimeProvider _dateTimeProvider = new FixedDateTimeProvider(
+        new DateTimeOffset(2025, 12, 28, 0, 0, 0, TimeSpan.Zero)
+    );
 
     public async Task InitializeAsync()
     {
@@ -53,12 +61,10 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
 
         _dbContext = new FairWorklyDbContext(options);
 
-        _mockDateTimeProvider.Setup(x => x.UtcNow).Returns(_testDateTime);
-
         _employeeRepository = new EmployeeRepository(_dbContext);
         _employeeSyncService = new EmployeeSyncService(
             _employeeRepository,
-            _mockDateTimeProvider.Object
+            _dateTimeProvider
         );
         _csvParserService = new CsvParserService();
 
@@ -71,6 +77,18 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
         // Clean up test data
         await CleanupTestDataAsync();
         await _dbContext.DisposeAsync();
+    }
+
+    private sealed class FixedDateTimeProvider : IDateTimeProvider
+    {
+        public FixedDateTimeProvider(DateTimeOffset utcNow)
+        {
+            UtcNow = utcNow;
+            Now = utcNow;
+        }
+
+        public DateTimeOffset Now { get; }
+        public DateTimeOffset UtcNow { get; }
     }
 
     private async Task CreateTestOrganizationAsync()
@@ -161,6 +179,7 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
         var alice = dbEmployees.First(e => e.EmployeeNumber == "NEW001");
         alice.FirstName.Should().Be("Alice");
         alice.LastName.Should().Be("Johnson");
+        alice.Email.Should().BeNull();
         alice.AwardType.Should().Be(AwardType.GeneralRetailIndustryAward2020);
         alice.AwardLevelNumber.Should().Be(1);
         alice.EmploymentType.Should().Be(EmploymentType.FullTime);
@@ -170,6 +189,7 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
         var carol = dbEmployees.First(e => e.EmployeeNumber == "NEW003");
         carol.FirstName.Should().Be("Carol");
         carol.LastName.Should().Be("Davis");
+        carol.Email.Should().BeNull();
         carol.EmploymentType.Should().Be(EmploymentType.Casual);
         carol.AwardLevelNumber.Should().Be(3);
     }
@@ -301,5 +321,11 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
             e.OrganizationId == _testOrganizationId
         );
         totalEmployees.Should().BeGreaterThan(1);
+
+        var mix002 = await _dbContext.Employees.FirstOrDefaultAsync(e =>
+            e.EmployeeNumber == "MIX002" && e.OrganizationId == _testOrganizationId
+        );
+        mix002.Should().NotBeNull();
+        mix002!.Email.Should().BeNull();
     }
 }

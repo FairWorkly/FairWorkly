@@ -10,8 +10,8 @@ class TestHeaderAliases:
         """Test that snake_case headers are recognized."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["employee_email", "date", "start_time", "end_time"])
-        ws.append(["john@example.com", "2024-01-15", "09:00", "17:00"])
+        ws.append(["employee_number", "employee_email", "date", "start_time", "end_time"])
+        ws.append(["EMP001", "john@example.com", "2024-01-15", "09:00", "17:00"])
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
@@ -53,8 +53,8 @@ class TestDuplicateCanonicalDetection:
         """Test that mixed case template headers are recognized."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["EMPLOYEE EMAIL", "DATE", "START TIME", "END TIME"])
-        ws.append(["john@example.com", "2024-01-15", "09:00", "17:00"])
+        ws.append(["EMPLOYEE NUMBER", "EMPLOYEE EMAIL", "DATE", "START TIME", "END TIME"])
+        ws.append(["EMP001", "john@example.com", "2024-01-15", "09:00", "17:00"])
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
@@ -67,8 +67,8 @@ class TestDuplicateCanonicalDetection:
         """Test that whitespace variations in template headers are tolerated."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["  Employee Email  ", "Date", " Start Time", "End Time "])
-        ws.append(["john@example.com", "2024-01-15", "09:00", "17:00"])
+        ws.append(["  Employee Number  ", "  Employee Email  ", "Date", " Start Time", "End Time "])
+        ws.append(["EMP001", "john@example.com", "2024-01-15", "09:00", "17:00"])
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))

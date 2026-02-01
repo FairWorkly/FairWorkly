@@ -91,8 +91,7 @@ public class EmployeeSyncService : IEmployeeSyncService
                     EmployeeNumber = employeeNumber,
                     FirstName = firstName,
                     LastName = lastName,
-                    // Use a generated email for MVP (required field)
-                    Email = GeneratePlaceholderEmail(employeeNumber),
+                    Email = null,
                     JobTitle = "Employee", // Default value for MVP
                     AwardType = awardType,
                     AwardLevelNumber = awardLevelNumber,
@@ -197,19 +196,4 @@ public class EmployeeSyncService : IEmployeeSyncService
         };
     }
 
-    /// <summary>
-    /// Generates a placeholder email for MVP
-    /// Sanitizes employee number to ensure valid email format
-    /// </summary>
-    private string GeneratePlaceholderEmail(string employeeNumber)
-    {
-        var sanitized = new string(
-            employeeNumber.Where(c => char.IsLetterOrDigit(c)).ToArray()
-        ).ToLower();
-
-        if (string.IsNullOrEmpty(sanitized))
-            sanitized = Guid.NewGuid().ToString("N")[..8];
-
-        return $"{sanitized}@placeholder.local";
-    }
 }

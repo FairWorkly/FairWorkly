@@ -35,11 +35,10 @@ FairWorkly is built around **decision-making agents** and **supporting modules**
 
   - Compliance Agent
   - Payroll Agent
-  - Employee Agent (Staff experience via FairBot & My Profile)
 
 - **Supporting Modules**
-  - Employees (data provider)
-  - Documents (template-based document generation)
+
+  - Home/ Payroll upload/ Roster upload
   - Auth / Identity / Shared UI
 
 > Rule of thumb:  

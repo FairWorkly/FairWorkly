@@ -28,7 +28,7 @@ def roster_excel(temp_excel_path):
 
     ws.append(["john@example.com", "EMP001", "John Smith", "full-time", "2024-01-15", "09:00", "17:00", "Yes", 30, "Office", "Regular shift"])
     ws.append(["jane@example.com", "EMP002", "Jane Doe", "part-time", "2024-01-15", "14:00", "22:00", "Yes", 30, "Store", None])
-    ws.append(["bob@example.com", None, "Bob Wilson", "casual", "2024-01-16", "06:00", "14:00", "No", None, None, "Early shift"])
+    ws.append(["bob@example.com", "EMP003", "Bob Wilson", "casual", "2024-01-16", "06:00", "14:00", "No", None, None, "Early shift"])
 
     wb.save(temp_excel_path)
     return temp_excel_path

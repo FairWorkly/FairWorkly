@@ -30,7 +30,19 @@
 
   <!-- Test-specific appsettings for integration tests -->
   <ItemGroup>
-    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content
+      Include="appsettings.json"
+      CopyToOutputDirectory="PreserveNewest"
+      Condition="Exists('appsettings.json')"
+    />
+    <Content
+      Include="appsettings.Development.json"
+      CopyToOutputDirectory="PreserveNewest"
+      Condition="Exists('appsettings.Development.json')"
+    />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TestData\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

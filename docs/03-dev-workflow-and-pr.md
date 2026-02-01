@@ -10,7 +10,7 @@ Its goal is not to slow development down, but to **prevent bottlenecks and archi
 
 FairWorkly is an early-stage product with:
 
-- Multiple agents (Compliance, Payroll, FairBot)
+- Multiple agents (Roster, Payroll, FairBot)
 - A small team with mixed experience levels
 - Limited review capacity
 

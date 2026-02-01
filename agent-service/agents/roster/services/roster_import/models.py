@@ -67,7 +67,7 @@ class RosterEntry(BaseModel):
     )
 
     excel_row: int
-    employee_email: EmailStr
+    employee_email: Optional[EmailStr] = None
     employee_number: Optional[str] = None
     employee_name: Optional[str] = None
     employment_type: Optional[str] = None
@@ -117,7 +117,7 @@ class EmployeeEntry(BaseModel):
 
     excel_row: int
     name: str
-    email: EmailStr
+    email: Optional[EmailStr] = None
     role: str
     department: Optional[str] = None
     start_date: Optional[date] = None

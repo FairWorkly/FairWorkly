@@ -1,45 +1,14 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Frontend-specific (not covered by root .gitignore)
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Claude Code CLI local configuration
-.claude/
-.codex/
-CLAUDE.md
-AGENTS.md
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
+# Storybook
 *storybook.log
 storybook-static
 
 # Local documentation and temporary files
-docs/local/           # Personal notes and temporary screenshots
-temp/                 # Temporary files and folders
-scratch/              # Scratch/draft work
-*.tmp
-*.temp
-.cache/
+docs/local/
+temp/
+scratch/
 
-# System screenshots (macOS/Windows auto-generated)
+# System screenshots
 Screenshot*.png
 屏幕截图*.png

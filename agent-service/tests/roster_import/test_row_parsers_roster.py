@@ -11,9 +11,9 @@ class TestOvernightShifts:
         """Test that overnight shifts are detected (end < start)."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["Employee Email", "Date", "Start Time", "End Time"])
-        ws.append(["john@example.com", "2024-01-15", "22:00", "06:00"])  # Overnight
-        ws.append(["jane@example.com", "2024-01-15", "09:00", "17:00"])  # Normal
+        ws.append(["Employee Number", "Employee Email", "Date", "Start Time", "End Time"])
+        ws.append(["EMP001", "john@example.com", "2024-01-15", "22:00", "06:00"])  # Overnight
+        ws.append(["EMP002", "jane@example.com", "2024-01-15", "09:00", "17:00"])  # Normal
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
@@ -28,8 +28,8 @@ class TestOvernightShifts:
         """Test that ending at midnight is not considered overnight."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["Employee Email", "Date", "Start Time", "End Time"])
-        ws.append(["john@example.com", "2024-01-15", "16:00", "00:00"])  # Ends at midnight
+        ws.append(["Employee Number", "Employee Email", "Date", "Start Time", "End Time"])
+        ws.append(["EMP001", "john@example.com", "2024-01-15", "16:00", "00:00"])  # Ends at midnight
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
@@ -46,8 +46,8 @@ class TestBreakWarnings:
         """Test warning when has_meal_break=True but duration is missing."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["Employee Email", "Employment Type", "Date", "Start Time", "End Time", "Has Meal Break", "Meal Break Duration"])
-        ws.append(["john@example.com", "full-time", "2024-01-15", "09:00", "17:00", "Yes", None])
+        ws.append(["Employee Number", "Employee Email", "Employment Type", "Date", "Start Time", "End Time", "Has Meal Break", "Meal Break Duration"])
+        ws.append(["EMP001", "john@example.com", "full-time", "2024-01-15", "09:00", "17:00", "Yes", None])
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
@@ -65,8 +65,8 @@ class TestBreakWarnings:
         """Test warning when has_rest_breaks=True but duration is missing."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["Employee Email", "Employment Type", "Date", "Start Time", "End Time", "Has Rest Breaks", "Rest Breaks Duration"])
-        ws.append(["john@example.com", "full-time", "2024-01-15", "09:00", "17:00", "Yes", None])
+        ws.append(["Employee Number", "Employee Email", "Employment Type", "Date", "Start Time", "End Time", "Has Rest Breaks", "Rest Breaks Duration"])
+        ws.append(["EMP001", "john@example.com", "full-time", "2024-01-15", "09:00", "17:00", "Yes", None])
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
@@ -82,8 +82,8 @@ class TestBreakWarnings:
         """Test no warning when has_meal_break=False and duration is missing."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["Employee Email", "Employment Type", "Date", "Start Time", "End Time", "Has Meal Break", "Meal Break Duration"])
-        ws.append(["john@example.com", "full-time", "2024-01-15", "09:00", "17:00", "No", None])
+        ws.append(["Employee Number", "Employee Email", "Employment Type", "Date", "Start Time", "End Time", "Has Meal Break", "Meal Break Duration"])
+        ws.append(["EMP001", "john@example.com", "full-time", "2024-01-15", "09:00", "17:00", "No", None])
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
@@ -151,8 +151,8 @@ class TestTimeRangeDetection:
         """Test that roster parsing catches time range in cell."""
         wb = Workbook()
         ws = wb.active
-        ws.append(["Employee Email", "Date", "Start Time", "End Time"])
-        ws.append(["john@example.com", "2024-01-15", "9:00-17:00", "17:00"])  # Range in Start Time
+        ws.append(["Employee Number", "Employee Email", "Date", "Start Time", "End Time"])
+        ws.append(["EMP001", "john@example.com", "2024-01-15", "9:00-17:00", "17:00"])  # Range in Start Time
         wb.save(temp_excel_path)
 
         response = handler.parse_roster_excel(str(temp_excel_path))
