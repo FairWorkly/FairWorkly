@@ -1,0 +1,21 @@
+{
+    "family": "fairworkly-backend",
+    "networkMode": "bridge",
+    "requiresCompatibilities": ["EC2"],
+    "cpu": "256",
+    "memory": "512",
+    "executionRoleArn": "arn:aws:iam::515048895669:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+      {
+        "name": "backend",
+        "image": "REPLACE_ME",
+        "essential": true,
+        "portMappings": [
+          { "containerPort": 5680, "hostPort": 5680, "protocol": "tcp" }
+        ],
+        "environment": [
+          { "name": "ASPNETCORE_URLS", "value": "http://+:5680" }
+        ]
+      }
+    ]
+  }
