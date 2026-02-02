@@ -71,6 +71,11 @@ public class Employee : AuditableEntity
     public bool IsActive { get; set; } = true;
 
     /// <summary>
+    /// Reserved: Future use for student rule exceptions (e.g. some Awards have different minimum engagement rules).
+    /// </summary>
+    public bool IsStudent { get; set; } = false;
+
+    /// <summary>
     /// Guaranteed hours per week (for Part-time only)
     /// </summary>
     public int? GuaranteedHours { get; set; }
