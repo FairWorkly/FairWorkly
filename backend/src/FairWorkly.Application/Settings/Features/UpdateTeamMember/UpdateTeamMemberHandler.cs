@@ -1,22 +1,24 @@
-using MediatR;
-using FairWorkly.Domain.Common;
-using FairWorkly.Domain.Auth.Interfaces;
-using FairWorkly.Domain.Auth.Enums;
 using FairWorkly.Application.Common.Interfaces;
+using FairWorkly.Domain.Auth.Enums;
+using FairWorkly.Domain.Auth.Interfaces;
+using FairWorkly.Domain.Common;
+using MediatR;
 
 namespace FairWorkly.Application.Settings.Features.UpdateTeamMember;
 
-public class UpdateTeamMemberHandler(
-    IUserRepository userRepository,
-    IUnitOfWork unitOfWork
-) : IRequestHandler<UpdateTeamMemberCommand, Result<TeamMemberUpdatedDto>>
+public class UpdateTeamMemberHandler(IUserRepository userRepository, IUnitOfWork unitOfWork)
+    : IRequestHandler<UpdateTeamMemberCommand, Result<TeamMemberUpdatedDto>>
 {
     public async Task<Result<TeamMemberUpdatedDto>> Handle(
         UpdateTeamMemberCommand request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         // 1. Get current user (the admin making the request)
-        var currentUser = await userRepository.GetByIdAsync(request.CurrentUserId, cancellationToken);
+        var currentUser = await userRepository.GetByIdAsync(
+            request.CurrentUserId,
+            cancellationToken
+        );
         if (currentUser == null)
             return Result<TeamMemberUpdatedDto>.Unauthorized("Current user not found");
 
@@ -27,7 +29,9 @@ public class UpdateTeamMemberHandler(
 
         // 3. Verify same organization (multi-tenancy security)
         if (targetUser.OrganizationId != currentUser.OrganizationId)
-            return Result<TeamMemberUpdatedDto>.Forbidden("Cannot modify users from other organizations");
+            return Result<TeamMemberUpdatedDto>.Forbidden(
+                "Cannot modify users from other organizations"
+            );
 
         // 4. Prevent self-demotion (Admin can't remove their own admin role)
         if (request.CurrentUserId == request.TargetUserId && request.Role == "Manager")
@@ -36,7 +40,10 @@ public class UpdateTeamMemberHandler(
         // 5. Update fields if provided
         if (request.Role != null)
         {
-            targetUser.Role = Enum.Parse<UserRole>(request.Role);
+            if (!Enum.TryParse<UserRole>(request.Role, ignoreCase: true, out var parsedRole))
+                return Result<TeamMemberUpdatedDto>.Failure($"Invalid role: {request.Role}");
+
+            targetUser.Role = parsedRole;
         }
 
         if (request.IsActive.HasValue)
@@ -53,11 +60,13 @@ public class UpdateTeamMemberHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 7. Return success with updated values
-        return Result<TeamMemberUpdatedDto>.Success(new TeamMemberUpdatedDto
-        {
-            Id = targetUser.Id,
-            Role = targetUser.Role.ToString(),
-            IsActive = targetUser.IsActive
-        });
+        return Result<TeamMemberUpdatedDto>.Success(
+            new TeamMemberUpdatedDto
+            {
+                Id = targetUser.Id,
+                Role = targetUser.Role.ToString(),
+                IsActive = targetUser.IsActive,
+            }
+        );
     }
 }
