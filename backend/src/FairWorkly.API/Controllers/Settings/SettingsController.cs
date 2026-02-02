@@ -1,11 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using FairWorkly.Application.Settings.Features.GetTeamMembers;
+using FairWorkly.Application.Settings.Features.UpdateTeamMember;
+using FairWorkly.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using FairWorkly.Domain.Common;
-using FairWorkly.Application.Settings.Features.GetTeamMembers;
-using FairWorkly.Application.Settings.Features.UpdateTeamMember;
 
 namespace FairWorkly.API.Controllers.Settings;
 
@@ -40,7 +40,8 @@ public class SettingsController(IMediator mediator) : ControllerBase
     [Authorize(Policy = "RequireAdmin")]
     public async Task<ActionResult<TeamMemberUpdatedDto>> UpdateTeamMember(
         Guid id,
-        [FromBody] UpdateTeamMemberRequest request)
+        [FromBody] UpdateTeamMemberRequest request
+    )
     {
         var userId = GetCurrentUserId();
         if (userId == null)
@@ -51,7 +52,7 @@ public class SettingsController(IMediator mediator) : ControllerBase
             CurrentUserId = userId.Value,
             TargetUserId = id,
             Role = request.Role,
-            IsActive = request.IsActive
+            IsActive = request.IsActive,
         };
 
         var result = await mediator.Send(command);
@@ -73,7 +74,8 @@ public class SettingsController(IMediator mediator) : ControllerBase
 
     private Guid? GetCurrentUserId()
     {
-        var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+        var sub =
+            User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (Guid.TryParse(sub, out var userId) && userId != Guid.Empty)
