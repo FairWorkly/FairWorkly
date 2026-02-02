@@ -13,6 +13,9 @@ public interface IUserRepository
     // Retrieve a user by the stored refresh token hash
     Task<User?> GetByRefreshTokenHashAsync(string refreshTokenHash, CancellationToken ct = default);
 
+    // Retrieves all users belonging to a specific organization
+    Task<List<User>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken ct = default);
+
     // Checks if the email is already taken by another user.
     Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct = default);
 
