@@ -13,9 +13,9 @@ import {
 } from '@mui/material'
 import { PersonOff, PersonAdd } from '@mui/icons-material'
 import { styled } from '@/styles/styled'
-import { StatusBadge } from './StatusBadge'
-import { RoleDropdown } from './RoleDropdown'
-import type { TeamMember, TeamMemberRole } from '../types'
+import { StatusBadge } from '@/modules/settings/ui/StatusBadge'
+import { RoleDropdown } from '@/modules/settings/ui/RoleDropdown'
+import type { TeamMember, TeamMemberRole } from '@/modules/settings/types'
 
 interface Props {
   members: TeamMember[]

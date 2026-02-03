@@ -9,7 +9,7 @@ import {
   Stack,
 } from '@mui/material'
 import { RoleDropdown } from './RoleDropdown'
-import type { InviteMemberFormData, TeamMemberRole } from '../types'
+import type { InviteMemberFormData, TeamMemberRole } from '@/modules/settings/types'
 
 interface Props {
   open: boolean

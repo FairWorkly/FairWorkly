@@ -1,6 +1,6 @@
 import { Select, MenuItem } from '@mui/material'
 import { styled } from '@/styles/styled'
-import type { TeamMemberRole } from '../types'
+import type { TeamMemberRole } from '@/modules/settings/types'
 
 interface Props {
   value: TeamMemberRole

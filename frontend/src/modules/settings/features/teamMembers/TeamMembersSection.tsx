@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { Box, Button, Typography, Stack } from '@mui/material'
 import { Add } from '@mui/icons-material'
 import { styled } from '@/styles/styled'
-import { useTeamMembers } from '../../hooks'
+import { useTeamMembers } from '@/modules/settings/hooks'
 import {
   TeamMembersTable,
   InviteMemberModal,
   DeactivateDialog,
 } from '../../ui'
-import type { TeamMember } from '../../types'
+import type { TeamMember } from '@/modules/settings/types'
 
 const SectionHeader = styled(Box)(({ theme }) => ({
   display: 'flex',
