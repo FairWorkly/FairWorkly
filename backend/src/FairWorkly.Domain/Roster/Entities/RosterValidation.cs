@@ -93,7 +93,7 @@ public class RosterValidation : AuditableEntity
     /// Example: "MinimumShiftHours,MealBreak,RestPeriodBetweenShifts,WeeklyHoursLimit,MaximumConsecutiveDays"
     /// Use FormatCheckTypes() to generate, ParseCheckTypes() to read back.
     /// </summary>
-    public ExecutedCheckTypeSet ExecutedCheckTypes { get; set; }
+    public ExecutedCheckTypeSet ExecutedCheckTypes { get; set; } = ExecutedCheckTypeSet.Empty;
 
     /// <summary>
     /// Formats a collection of check types into the ExecutedCheckTypes string format.
