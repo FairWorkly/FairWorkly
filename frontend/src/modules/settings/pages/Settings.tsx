@@ -16,6 +16,7 @@ import {
   PageHeader,
   SectionContent,
 } from './Settings.styles'
+import { TeamMembersSection } from '../features/teamMembers'
 
 type SettingsSection = 'company' | 'team' | 'billing' | 'security'
 
@@ -80,14 +81,7 @@ export function Settings() {
             </SectionContent>
           )}
 
-          {activeSection === 'team' && (
-            <SectionContent>
-              <Typography variant="h5">Team Members</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Coming soon...
-              </Typography>
-            </SectionContent>
-          )}
+          {activeSection === 'team' && <TeamMembersSection />}
 
           {activeSection === 'billing' && (
             <SectionContent>
