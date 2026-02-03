@@ -29,13 +29,7 @@ AGENTS.md
 
 # Backend AI Files
 .raw_materials/
-.claude/
 .doc/
-**/AI_GUIDE.md
-CLAUDE.md
-
-# Backend Scripts
-backend/scripts/
 
 # Serilog log files
 logs/
@@ -53,14 +47,10 @@ logs/
 # Ignore local file uploads during development
 **/wwwroot/uploads/
 
-# Local .NET SDK config
-global.json
-
 # Node.js and React (Frontend)
 node_modules/
 build/
 dist/
-.env
 .env.local
 .env.development.local
 .env.test.local
@@ -89,9 +79,18 @@ agent-service/.env
 # Backend sensitive config (use .example files as templates)
 backend/src/FairWorkly.API/appsettings.json
 backend/src/FairWorkly.API/appsettings.Development.json
+backend/tests/FairWorkly.UnitTests/appsettings.json
+backend/tests/FairWorkly.IntegrationTests/appsettings.json
+backend/tests/FairWorkly.IntegrationTests/appsettings.Development.json
 
 # Generated SQL schema (can be regenerated with: dotnet ef migrations script --idempotent)
 backend/schema.sql
 
-## FAISS indexes
+# FAISS indexes
 document_faiss/
+
+# Windows reserved names
+nul
+con
+prn
+aux

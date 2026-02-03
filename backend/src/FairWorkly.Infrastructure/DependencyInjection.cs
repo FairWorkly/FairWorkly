@@ -1,6 +1,6 @@
 using FairWorkly.Application.Common.Interfaces;
-using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Application.Employees.Interfaces;
+using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Infrastructure.AI.Mocks;
 using FairWorkly.Infrastructure.AI.PythonServices;
 using FairWorkly.Infrastructure.Identity;

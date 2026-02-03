@@ -35,10 +35,13 @@ public class Employee : AuditableEntity
     [NotMapped]
     public string FullName => $"{FirstName} {LastName}";
 
-    [Required]
+    /// <summary>
+    /// Employee email address (optional)
+    /// May be null for employees imported from payroll/roster files
+    /// </summary>
     [EmailAddress]
     [MaxLength(255)]
-    public string Email { get; set; } = string.Empty;
+    public string? Email { get; set; }
 
     [Phone]
     [MaxLength(20)]

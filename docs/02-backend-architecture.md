@@ -27,7 +27,7 @@ FairWorkly backend uses a **four-layer architecture**:
 API → Application → Domain → Infrastructure
 ```
 
-For Compliance and Payroll agents, we also use:
+For Roster and Payroll agents, we also use:
 
 - CQRS
 - MediatR
@@ -53,18 +53,13 @@ This reflects real-world organisations: a Manager is also an employee.
 - **Admin**
 
   - Organisation-level administrative permissions
-  - Can manage employees (create/edit), generate staff invites, and generate documents
+  - Can generate staff invites
   - Access to all agents/modules
 
 - **Manager (Roster-focused)**
 
   - Access to Compliance Agent for roster checks and results
-  - Optional: read-only access to minimal employee fields required for rostering
-  - No access to employee management, staff invites, document generation, or pay compliance by default
-
-- **Employee (Staff)**
-  - Read-only access to their own profile and their own documents/files only
-  - Can use FairBot for employee-help Q&A using their employee context
+  - No access to staff invites, or pay compliance by default
 
 ### Ownership Enforcement (Server-Side Only)
 
@@ -72,28 +67,8 @@ The backend must enforce ownership. Frontend UI hiding is not security.
 
 MVP rules:
 
-- If `role == Employee`, only allow access to:
-  - `/me/*` endpoints
-  - documents where `Document.OwnerEmployeeId == User.EmployeeId`
 - Managers can only access data needed for roster/compliance workflows, and must not access unrelated sensitive employee data.
 - Admins can access employees and documents within their organisation scope.
-
-### Staff Onboarding (Invite Flow)
-
-Staff accounts are created by Admins.
-
-MVP flow:
-
-1. Admin creates an Employee record
-2. System generates an invite (magic link or temporary credential)
-3. Staff accepts invite and signs in
-4. Staff is mapped 1:1 to the Employee record
-
-Invite tokens must be:
-
-- time-limited (e.g., 24 hours)
-- single-use
-- stored server-side for auditability
 
 ### Non-Goals (MVP)
 
@@ -163,7 +138,7 @@ The Domain layer contains:
 - Entities
 - Value Objects
 - Domain services
-- Compliance and payroll rules
+- Roster and payroll rules
 - Invariants and validations
 
 Allowed:
@@ -204,16 +179,16 @@ Allowed:
 Forbidden:
 
 - Business decisions
-- Compliance rules
+- Roster rules
 - Payroll rules
 
 Rule: Infrastructure answers how, never whether.
 
-4. CQRS in Compliance & Payroll Agents
+4. CQRS in Roster & Payroll Agents
 
 Why CQRS Exists Here
 
-Compliance and Payroll decisions:
+Roster and Payroll decisions:
 
 - must be auditable,
 - must be explainable,
@@ -268,35 +243,7 @@ Out of scope:
 
 Any code attempting to calculate pay amounts is out of scope for this system.
 
-6. Supporting Domains (Documents)
-
-Documents is a supporting domain responsible for generating standard HR documents using predefined templates.
-
-### Responsibilities
-
-- Generate PDF documents from code-defined templates
-- Assemble document data from multiple sources:
-  - Employee module data
-  - organisation-level configuration
-  - user-provided inputs at generation time
-- Store document metadata and generated outputs
-
-### Out of Scope
-
-Documents does NOT:
-
-- calculate payroll
-- interpret Award rules
-- validate compliance
-- make business decisions
-
-### Architectural Rule
-
-Documents is an output and record-keeping module, not a decision engine.
-
-Any compliance or legality validation must occur in Compliance or Payroll Agents.
-
-7. Auditability Is a First-Class Concern
+6. Auditability Is a First-Class Concern
 
 Every decision produced by an agent should be:
 
@@ -312,7 +259,7 @@ This affects:
 
 If a decision cannot be explained after the fact, the implementation is incomplete.
 
-8. Safe Areas for New Contributors
+7. Safe Areas for New Contributors
 
 New or learning contributors should start with:
 
@@ -323,7 +270,7 @@ New or learning contributors should start with:
 
 These areas reduce risk while improving coverage and confidence.
 
-9. When to Ask Before Coding
+8. When to Ask Before Coding
 
 Ask before implementing if:
 
@@ -335,7 +282,7 @@ Ask before implementing if:
 
 Asking early prevents architectural damage.
 
-10. PR Rejection Rules (Backend)
+9. PR Rejection Rules (Backend)
 
 A PR may be rejected if it:
 
@@ -347,7 +294,7 @@ A PR may be rejected if it:
 
 Rejection is a protection mechanism, not a judgement.
 
-11. Final Principle
+10. Final Principle
 
 Correctness and auditability come before convenience.
 

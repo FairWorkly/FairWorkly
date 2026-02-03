@@ -1,8 +1,8 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 using FairWorkly.Application.Common.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FairWorkly.Infrastructure.Identity;
 
@@ -19,7 +19,10 @@ public class SecretHasher : ISecretHasher
     public bool Verify(string plain, string hash)
     {
         var computed = Hash(plain);
-        return ConstantTimeEquals(Convert.FromBase64String(computed), Convert.FromBase64String(hash));
+        return ConstantTimeEquals(
+            Convert.FromBase64String(computed),
+            Convert.FromBase64String(hash)
+        );
     }
 
     public string GenerateToken(int size = 32)
@@ -32,9 +35,11 @@ public class SecretHasher : ISecretHasher
 
     private static bool ConstantTimeEquals(byte[] a, byte[] b)
     {
-        if (a.Length != b.Length) return false;
+        if (a.Length != b.Length)
+            return false;
         int diff = 0;
-        for (int i = 0; i < a.Length; i++) diff |= a[i] ^ b[i];
+        for (int i = 0; i < a.Length; i++)
+            diff |= a[i] ^ b[i];
         return diff == 0;
     }
 }
