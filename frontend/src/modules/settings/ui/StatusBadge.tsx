@@ -1,6 +1,6 @@
 import { Chip } from '@mui/material'
 import { styled } from '@/styles/styled'
-import type { TeamMemberStatus } from '../types'
+import type { TeamMemberStatus } from '@/modules/settings/types'
 
 interface Props {
   status: TeamMemberStatus

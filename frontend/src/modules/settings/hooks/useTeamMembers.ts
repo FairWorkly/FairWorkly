@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { TeamMember, TeamMemberRole, InviteMemberFormData } from '../types'
+import type { TeamMember, TeamMemberRole, InviteMemberFormData } from '@/modules/settings/types'
 
 // Mock data - local to this hook
 const initialMockData: TeamMember[] = [
