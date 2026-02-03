@@ -15,7 +15,7 @@ import {
   SettingsContent,
   PageHeader,
   SectionContent,
-} from './Settings.styles'
+} from '../ui/Settings.styles'
 import { CompanyProfileSection } from '../features/CompanyProfile/CompanyProfileSection'
 import { TeamMembersSection } from '../features/teamMembers'
 

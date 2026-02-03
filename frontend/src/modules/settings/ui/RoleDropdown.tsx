@@ -1,4 +1,5 @@
-import { Select, MenuItem, FormControl } from '@mui/material'
+import { Select, MenuItem } from '@mui/material'
+import { styled } from '@/styles/styled'
 import type { TeamMemberRole } from '../types'
 
 interface Props {
@@ -7,9 +8,13 @@ interface Props {
   disabled?: boolean
 }
 
+const StyledFormControl = styled('div')(({ theme }) => ({
+  minWidth: theme.spacing(14),
+}))
+
 export function RoleDropdown({ value, onChange, disabled }: Props) {
   return (
-    <FormControl size="small" sx={{ minWidth: 110 }}>
+    <StyledFormControl>
       <Select
         value={value}
         onChange={(e) => onChange(e.target.value as TeamMemberRole)}
@@ -18,6 +23,6 @@ export function RoleDropdown({ value, onChange, disabled }: Props) {
         <MenuItem value="Admin">Admin</MenuItem>
         <MenuItem value="Manager">Manager</MenuItem>
       </Select>
-    </FormControl>
+    </StyledFormControl>
   )
 }
