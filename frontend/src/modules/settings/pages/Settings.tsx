@@ -15,7 +15,7 @@ import {
   SettingsContent,
   PageHeader,
   SectionContent,
-} from './Settings.styles'
+} from '../ui/Settings.styles'
 import { TeamMembersSection } from '../features/teamMembers'
 
 type SettingsSection = 'company' | 'team' | 'billing' | 'security'
