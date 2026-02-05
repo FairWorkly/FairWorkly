@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using FairWorkly.Application.Common.Interfaces;
 
@@ -13,11 +14,13 @@ public class CurrentUserService : ICurrentUserService
     }
 
     public string? UserId =>
-        _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+        ?? _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
     public string? OrganizationId =>
         _httpContextAccessor.HttpContext?.User.FindFirst("orgId")?.Value;
 
     public string? Email =>
-        _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value;
+        _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value
+        ?? _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
 }
