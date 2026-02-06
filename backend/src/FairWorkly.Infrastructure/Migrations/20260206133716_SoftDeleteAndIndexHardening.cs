@@ -190,6 +190,9 @@ namespace FairWorkly.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: 0);
 
+            migrationBuilder.Sql(
+                "ALTER TABLE organizations ADD CONSTRAINT chk_organization_current_employee_count_non_negative CHECK (current_employee_count >= 0);");
+
             migrationBuilder.CreateIndex(
                 name: "ix_users_google_id",
                 table: "users",
