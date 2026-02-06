@@ -19,13 +19,13 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder
             .HasIndex(e => new { e.OrganizationId, e.EmployeeNumber })
             .IsUnique()
-            .HasFilter("employee_number IS NOT NULL");
+            .HasFilter("employee_number IS NOT NULL AND is_deleted = false");
 
         // Email is unique when provided (null emails allowed for imported employees)
         builder
             .HasIndex(e => new { e.OrganizationId, e.Email })
             .IsUnique()
-            .HasFilter("email IS NOT NULL");
+            .HasFilter("email IS NOT NULL AND is_deleted = false");
 
         // Relationship configuration
         builder

@@ -46,7 +46,7 @@ public class RosterValidationConfiguration : IEntityTypeConfiguration<RosterVali
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
-        builder.HasIndex(rv => rv.RosterId).IsUnique();
+        builder.HasIndex(rv => rv.RosterId).IsUnique().HasFilter("is_deleted = false");
         builder.HasIndex(rv => new { rv.OrganizationId, rv.Status });
 
         // Ignore computed properties

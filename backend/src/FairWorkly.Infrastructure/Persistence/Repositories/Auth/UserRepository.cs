@@ -59,9 +59,10 @@ public class UserRepository : IUserRepository
         _context.Users.Update(user);
     }
 
-    // Removes a user from the system.
+    // Soft-deletes a user (marks as deleted, preserving audit trail).
     public void Remove(User user)
     {
-        _context.Users.Remove(user);
+        user.IsDeleted = true;
+        _context.Users.Update(user);
     }
 }
