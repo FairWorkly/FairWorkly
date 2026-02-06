@@ -38,7 +38,7 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
             .HasOne(d => d.Employee)
             .WithMany(e => e.Documents)
             .HasForeignKey(d => d.EmployeeId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
         builder.HasIndex(d => new { d.OrganizationId, d.DocumentType });

@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Reflection;
 using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Awards.Entities;
@@ -44,6 +45,26 @@ namespace FairWorkly.Infrastructure.Persistence
             // Automatically load all configurations from *Configuration.cs files
             // All entity relationships, indexes, and property configurations are defined there
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Global query filter for soft-deleted entities
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (!typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+                {
+                    continue;
+                }
+
+                var parameter = Expression.Parameter(entityType.ClrType, "e");
+                var property = Expression.Call(
+                    typeof(EF),
+                    nameof(EF.Property),
+                    new[] { typeof(bool) },
+                    parameter,
+                    Expression.Constant(nameof(BaseEntity.IsDeleted))
+                );
+                var filter = Expression.Lambda(Expression.Equal(property, Expression.Constant(false)), parameter);
+                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filter);
+            }
         }
 
         public override async Task<int> SaveChangesAsync(

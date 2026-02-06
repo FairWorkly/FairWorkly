@@ -41,8 +41,15 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .OnDelete(DeleteBehavior.SetNull);
 
         // Indexes
-        builder.HasIndex(u => new { u.OrganizationId, u.Email }).IsUnique();
-        builder.HasIndex(u => u.GoogleId).IsUnique().HasFilter("google_id IS NOT NULL");
+        builder
+            .HasIndex(u => new { u.OrganizationId, u.Email })
+            .IsUnique()
+            .HasFilter("is_deleted = false");
+        builder
+            .HasIndex(u => u.GoogleId)
+            .IsUnique()
+            .HasFilter("google_id IS NOT NULL AND is_deleted = false");
+        builder.HasIndex(u => u.RefreshToken).HasFilter("refresh_token IS NOT NULL");
 
         // Property configurations
         builder.Property(u => u.Email).HasMaxLength(255).IsRequired();
