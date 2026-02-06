@@ -63,6 +63,9 @@ public class SettingsController(IMediator mediator) : ControllerBase
         if (result.Type == ResultType.NotFound)
             return NotFound(new { message = result.ErrorMessage });
 
+        if (result.Type == ResultType.Unauthorized)
+            return Unauthorized(new { message = result.ErrorMessage });
+
         if (result.Type == ResultType.Forbidden)
             return StatusCode(403, new { message = result.ErrorMessage });
 
