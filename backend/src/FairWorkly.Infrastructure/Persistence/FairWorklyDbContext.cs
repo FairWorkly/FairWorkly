@@ -73,7 +73,10 @@ namespace FairWorkly.Infrastructure.Persistence
             {
                 if (entry.State is EntityState.Added or EntityState.Modified)
                 {
-                    entry.Entity.Email = entry.Entity.Email.Trim().ToLowerInvariant();
+                    if (!string.IsNullOrWhiteSpace(entry.Entity.Email))
+                    {
+                        entry.Entity.Email = entry.Entity.Email.Trim().ToLowerInvariant();
+                    }
                 }
             }
 

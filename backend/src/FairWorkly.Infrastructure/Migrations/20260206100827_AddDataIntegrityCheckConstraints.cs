@@ -611,6 +611,9 @@ namespace FairWorkly.Infrastructure.Migrations
             // Revert schema changes
             // ═══════════════════════════════════════════════════════════════
 
+            // Convert NULL to empty string BEFORE changing to NOT NULL
+            migrationBuilder.Sql("UPDATE users SET password_hash = '' WHERE password_hash IS NULL;");
+
             migrationBuilder.AlterColumn<string>(
                 name: "password_hash",
                 table: "users",

@@ -17,7 +17,6 @@ public class User : AuditableEntity, IValidatableDomain
     public required string LastName { get; set; }
     public string? PhoneNumber { get; set; }
 
-    // Role-based access control (must be explicitly set - no default)
     public UserRole Role { get; set; }
 
     // Multi-tenancy
