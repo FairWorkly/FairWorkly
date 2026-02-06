@@ -68,6 +68,28 @@ namespace FairWorkly.Infrastructure.Persistence
                 }
             }
 
+            // Normalize User.Email on create/update (trim + lowercase for consistent lookups)
+            foreach (var entry in ChangeTracker.Entries<User>())
+            {
+                if (entry.State is EntityState.Added or EntityState.Modified)
+                {
+                    if (!string.IsNullOrWhiteSpace(entry.Entity.Email))
+                    {
+                        entry.Entity.Email = entry.Entity.Email.Trim().ToLowerInvariant();
+                    }
+                }
+            }
+
+            // Domain validation fallback - catches any invalid entities before they hit the database
+            // This is a safety net; Application layer validators should catch errors first for friendly messages
+            foreach (var entry in ChangeTracker.Entries<IValidatableDomain>())
+            {
+                if (entry.State is EntityState.Added or EntityState.Modified)
+                {
+                    entry.Entity.ValidateDomainRules();
+                }
+            }
+
             // TODO: Add CreatedByUserId/UpdatedByUserId after JWT auth is implemented
 
             return await base.SaveChangesAsync(cancellationToken);

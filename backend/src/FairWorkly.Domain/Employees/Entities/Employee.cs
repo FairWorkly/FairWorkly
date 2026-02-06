@@ -23,11 +23,11 @@ public class Employee : AuditableEntity
     // Basic Info
     [Required]
     [MaxLength(100)]
-    public string FirstName { get; set; } = string.Empty;
+    public required string FirstName { get; set; }
 
     [Required]
     [MaxLength(100)]
-    public string LastName { get; set; } = string.Empty;
+    public required string LastName { get; set; }
 
     /// <summary>
     /// Full name (computed)
@@ -55,7 +55,7 @@ public class Employee : AuditableEntity
     // Employment Details
     [Required]
     [MaxLength(100)]
-    public string JobTitle { get; set; } = string.Empty;
+    public required string JobTitle { get; set; }
 
     [MaxLength(100)]
     public string? Department { get; set; }

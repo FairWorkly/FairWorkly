@@ -46,12 +46,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         // Property configurations
         builder.Property(u => u.Email).HasMaxLength(255).IsRequired();
-        builder.Property(u => u.PasswordHash).HasMaxLength(500).IsRequired();
         builder.Property(u => u.FirstName).HasMaxLength(100).IsRequired();
         builder.Property(u => u.LastName).HasMaxLength(100).IsRequired();
         builder.Property(u => u.PhoneNumber).HasMaxLength(20);
+        // Authentication credentials - at least one must be set (enforced by DB CHECK constraint)
+        builder.Property(u => u.PasswordHash).HasMaxLength(500);  // Optional for OAuth users
+        builder.Property(u => u.GoogleId).HasMaxLength(100);       // Optional for password users
         builder.Property(u => u.RefreshToken).HasMaxLength(500);
         builder.Property(u => u.PasswordResetToken).HasMaxLength(500);
-        builder.Property(u => u.GoogleId).HasMaxLength(100);
     }
 }

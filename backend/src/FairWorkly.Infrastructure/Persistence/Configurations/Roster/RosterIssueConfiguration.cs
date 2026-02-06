@@ -73,6 +73,12 @@ public class RosterIssueConfiguration : IEntityTypeConfiguration<RosterIssue>
         builder.Ignore(ri => ri.Variance);
 
         // Property configurations
+        // Enum to string conversion for SQL readability and consistency
+        builder
+            .Property(ri => ri.Severity)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
         builder
             .Property(ri => ri.CheckType)
             .HasConversion<string>()
