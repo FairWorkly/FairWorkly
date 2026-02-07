@@ -24,9 +24,10 @@ public class OrganizationRepository : IOrganizationRepository
         _context.Organizations.Add(organization);
     }
 
-    // Removes an organisation from the system.
+    // Soft-deletes an organisation (marks as deleted, preserving audit trail).
     public void Remove(Organization organization)
     {
-        _context.Organizations.Remove(organization);
+        organization.IsDeleted = true;
+        _context.Organizations.Update(organization);
     }
 }

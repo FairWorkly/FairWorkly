@@ -185,7 +185,16 @@ class RosterParseResult(BaseModel):
         """Number of unique employees in the roster."""
         if not self.entries:
             return 0
-        return len({str(entry.employee_email).lower() for entry in self.entries})
+        keys: set[str] = set()
+        for entry in self.entries:
+            if entry.employee_number:
+                keys.add(f"num:{entry.employee_number.strip().lower()}")
+                continue
+            if entry.employee_email:
+                keys.add(f"email:{str(entry.employee_email).strip().lower()}")
+                continue
+            keys.add("unknown")
+        return len(keys)
 
 
 class IssueGroupSummary(BaseModel):

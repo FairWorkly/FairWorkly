@@ -19,12 +19,12 @@ public class Organization : AuditableEntity
 
     [Required]
     [MaxLength(200)]
-    public string CompanyName { get; set; } = string.Empty;
+    public required string CompanyName { get; set; }
 
     [Required]
     [StringLength(11, MinimumLength = 11)]
     [RegularExpression(@"^\d{11}$", ErrorMessage = "ABN must be 11 digits")]
-    public string ABN { get; set; } = string.Empty;
+    public required string ABN { get; set; }
 
     /// <summary>
     /// Primary industry type
@@ -32,19 +32,19 @@ public class Organization : AuditableEntity
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string IndustryType { get; set; } = string.Empty;
+    public required string IndustryType { get; set; }
 
     // Address (Australian format)
     [Required]
     [StringLength(200)]
-    public string AddressLine1 { get; set; } = string.Empty;
+    public required string AddressLine1 { get; set; }
 
     [StringLength(200)]
     public string? AddressLine2 { get; set; }
 
     [Required]
     [StringLength(100)]
-    public string Suburb { get; set; } = string.Empty;
+    public required string Suburb { get; set; }
 
     [Required]
     public AustralianState State { get; set; } = AustralianState.VIC;
@@ -52,7 +52,7 @@ public class Organization : AuditableEntity
     [Required]
     [StringLength(4, MinimumLength = 4)]
     [RegularExpression(@"^\d{4}$")]
-    public string Postcode { get; set; } = string.Empty;
+    public required string Postcode { get; set; }
 
     /// <summary>
     /// Full formatted address (computed property)
@@ -65,7 +65,7 @@ public class Organization : AuditableEntity
     [Required]
     [EmailAddress]
     [MaxLength(255)]
-    public string ContactEmail { get; set; } = string.Empty;
+    public required string ContactEmail { get; set; }
 
     /// <summary>
     /// Business phone number
@@ -113,12 +113,6 @@ public class Organization : AuditableEntity
             SubscriptionTier.Tier3 => 150,
             _ => 50,
         };
-
-    /// <summary>
-    /// Current employee count
-    /// Used for limit checking
-    /// </summary>
-    public int CurrentEmployeeCount { get; set; } = 0;
 
     /// <summary>
     /// Users in this organization

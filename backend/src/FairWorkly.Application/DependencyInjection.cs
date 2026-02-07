@@ -11,6 +11,9 @@ using FairWorkly.Application.Payroll.Orchestrators;
 using FairWorkly.Application.Payroll.Services;
 using FairWorkly.Application.Payroll.Services.ComplianceEngine;
 using FairWorkly.Application.Roster.Orchestrators;
+using FairWorkly.Application.Roster.Services;
+using FairWorkly.Domain.Roster.Parameters;
+using FairWorkly.Domain.Roster.Rules;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -54,6 +57,20 @@ public static class DependencyInjection
         services.AddScoped<PayrollAiOrchestrator>();
         services.AddScoped<DocumentAiOrchestrator>();
         services.AddScoped<EmployeeAiOrchestrator>();
+
+        // Register Roster Compliance Engine + Rules
+        // NOTE: Singleton is appropriate while parameters are static Award rules.
+        // Change to Scoped if parameters need to vary per-tenant or read from DB.
+        services.AddSingleton<IRosterRuleParametersProvider, AwardRosterRuleParametersProvider>();
+        services.AddScoped<IRosterComplianceEngine, RosterComplianceEngine>();
+
+        // DataQualityRule first - detects missing Employee data before other rules run
+        services.AddScoped<IRosterComplianceRule, DataQualityRule>();
+        services.AddScoped<IRosterComplianceRule, MinimumShiftHoursRule>();
+        services.AddScoped<IRosterComplianceRule, MealBreakRule>();
+        services.AddScoped<IRosterComplianceRule, RestPeriodRule>();
+        services.AddScoped<IRosterComplianceRule, WeeklyHoursLimitRule>();
+        services.AddScoped<IRosterComplianceRule, ConsecutiveDaysRule>();
 
         return services;
     }

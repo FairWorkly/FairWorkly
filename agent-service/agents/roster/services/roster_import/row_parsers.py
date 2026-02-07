@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from datetime import datetime, timedelta
 
 from pydantic import EmailStr, TypeAdapter, ValidationError
 
@@ -254,6 +255,31 @@ def parse_roster_row(
                 column="rest_breaks_duration",
             )
         )
+
+    total_break_minutes = (meal_break_duration or 0) + (rest_breaks_duration or 0)
+    if total_break_minutes > 0:
+        start_dt = datetime.combine(date_value, start_time)
+        end_dt = datetime.combine(date_value, end_time)
+        if is_overnight:
+            end_dt += timedelta(days=1)
+        duration_minutes = int(round((end_dt - start_dt).total_seconds() / 60))
+
+        if duration_minutes > 0 and total_break_minutes > duration_minutes:
+            column = "meal_break_duration" if meal_break_duration else "rest_breaks_duration"
+            warnings.append(
+                ParseIssue(
+                    row=row_num,
+                    severity=ParseIssueSeverity.WARNING,
+                    code="BREAK_EXCEEDS_SHIFT_DURATION",
+                    message=(
+                        f"Total break minutes ({total_break_minutes}) exceed shift duration minutes ({duration_minutes}). "
+                        "This will distort net-hours calculations."
+                    ),
+                    column=column,
+                    value=str(total_break_minutes),
+                    hint="Fix break durations or shift times so breaks do not exceed the shift length.",
+                )
+            )
 
     raw_employment_type = get_string(normalized.get("employment_type"))
     employment_type = normalize_employment_type(raw_employment_type)
