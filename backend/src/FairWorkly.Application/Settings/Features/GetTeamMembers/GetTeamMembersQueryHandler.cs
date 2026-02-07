@@ -30,10 +30,10 @@ public class GetTeamMembersQueryHandler(IUserRepository userRepository)
         var dtos = teamMembers
             .Select(u => new TeamMemberDto
             {
-                Id = u.Id,
-                Name = u.FullName,
+                UserId = u.Id,
+                FullName = u.FullName,
                 Email = u.Email,
-                Role = u.Role.ToString(),
+                Role = u.Role,
                 IsActive = u.IsActive,
                 LastLoginAt = u.LastLoginAt,
             })

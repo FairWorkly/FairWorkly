@@ -63,8 +63,8 @@ public class UpdateTeamMemberHandler(IUserRepository userRepository, IUnitOfWork
         return Result<TeamMemberUpdatedDto>.Success(
             new TeamMemberUpdatedDto
             {
-                Id = targetUser.Id,
-                Role = targetUser.Role.ToString(),
+                UserId = targetUser.Id,
+                Role = targetUser.Role,
                 IsActive = targetUser.IsActive,
             }
         );
