@@ -33,15 +33,16 @@ public class UpdateTeamMemberHandler(IUserRepository userRepository, IUnitOfWork
                 "Cannot modify users from other organizations"
             );
 
-        // 4. Prevent self-demotion (Admin can't remove their own admin role)
-        if (request.CurrentUserId == request.TargetUserId && request.Role == "Manager")
-            return Result<TeamMemberUpdatedDto>.Failure("Cannot demote yourself from Admin role");
-
         // 5. Update fields if provided
         if (request.Role != null)
         {
             if (!Enum.TryParse<UserRole>(request.Role, ignoreCase: true, out var parsedRole))
                 return Result<TeamMemberUpdatedDto>.Failure($"Invalid role: {request.Role}");
+            // 4. Prevent self-demotion (Admin can't remove their own admin role)
+            if (request.CurrentUserId == request.TargetUserId && parsedRole != UserRole.Admin)
+                return Result<TeamMemberUpdatedDto>.Failure(
+                    "Cannot demote yourself from Admin role"
+                );
 
             targetUser.Role = parsedRole;
         }
