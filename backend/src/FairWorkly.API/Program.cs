@@ -167,7 +167,7 @@ try
     builder.Services.AddAuthorization(options =>
     {
         options.AddPolicy("RequireAdmin", policy => policy.RequireRole("Admin"));
-        options.AddPolicy("RequireManager", policy => policy.RequireRole("Admin", "HrManager"));
+        options.AddPolicy("RequireManager", policy => policy.RequireRole("Admin", "Manager"));
         options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Employee"));
     });
 

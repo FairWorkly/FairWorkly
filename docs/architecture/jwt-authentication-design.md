@@ -159,7 +159,7 @@ const simulateAuth = (options) => {
 // NEW - Real login
 const response = await authApi.login(values.email, values.password)
 dispatch(setAuthData({ user: ..., accessToken: response.accessToken }))
-navigate('/fairbot')
+navigate(DEFAULT_ROUTES[response.user.role.toLowerCase()] ?? '/403')
 ```
 
 ### Problem: useAuth Read from localStorage Instead of Redux
@@ -264,7 +264,7 @@ role: reduxUser.role?.toLowerCase() as 'admin' | 'manager'
   - Document endpoints → `[Authorize(Policy = "RequireAdmin")]`
   - Settings endpoints → `[Authorize(Policy = "RequireAdmin")]`
   - Roster endpoints → `[Authorize(Policy = "RequireManager")]` (Admin + Manager)
-- [ ] **Backend `RequireManager` policy role name mismatch**: Currently `policy.RequireRole("Admin", "HrManager")` but domain enum is `Manager` not `HrManager`. Fix to: `policy.RequireRole("Admin", "Manager")`
+- [x] ~~**Backend `RequireManager` policy role name mismatch**~~: Fixed `policy.RequireRole("Admin", "HrManager")` to `policy.RequireRole("Admin", "Manager")` to match domain enum.
 - [x] ~~**FairBot route permission**~~: Changed `fairbot.routes.tsx` from `allow={['admin', 'manager']}` to `allow={['admin']}`. Manager cannot access FairBot.
 
 #### Session & User (Medium Priority)
