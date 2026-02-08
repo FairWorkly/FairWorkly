@@ -106,14 +106,22 @@ try
             {
                 if (builder.Environment.IsDevelopment())
                 {
-                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    policy
+                        .WithOrigins("http://localhost:5173")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 }
                 else
                 {
                     var allowedOrigins =
                         builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
                         ?? Array.Empty<string>();
-                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
+                    policy
+                        .WithOrigins(allowedOrigins)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 }
             }
         );
