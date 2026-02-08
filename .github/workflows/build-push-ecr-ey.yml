@@ -18,6 +18,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Debug GitHub context
+        run: |
+          echo "repository=${{ github.repository }}"
+          echo "ref=${{ github.ref }}"
+          echo "ref_name=${{ github.ref_name }}"
+      
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity      
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
