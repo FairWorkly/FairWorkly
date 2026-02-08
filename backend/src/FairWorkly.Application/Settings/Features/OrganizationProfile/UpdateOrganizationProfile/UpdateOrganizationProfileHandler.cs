@@ -27,20 +27,15 @@ public class UpdateOrganizationProfileHandler
         CancellationToken cancellationToken
     )
     {
+        var orgId = Guid.Parse(command.OrganizationId!);
         var request = command.Request;
-
         // Step 1: Fetch organization from repository
-        var organization = await _organizationRepository.GetByIdAsync(
-            command.OrganizationId,
-            cancellationToken
-        );
+        var organization = await _organizationRepository.GetByIdAsync(orgId, cancellationToken);
 
         // Step 2: Validate organization exists
         if (organization == null)
         {
-            return Result<OrganizationProfileDto>.NotFound(
-                $"Organization {command.OrganizationId} not found"
-            );
+            return Result<OrganizationProfileDto>.NotFound($"Organization {orgId} not found");
         }
 
         // Step 3: Update organization fields

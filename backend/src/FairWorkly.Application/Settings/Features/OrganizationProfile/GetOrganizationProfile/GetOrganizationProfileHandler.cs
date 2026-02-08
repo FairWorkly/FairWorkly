@@ -19,18 +19,14 @@ public class GetOrganizationProfileHandler
         CancellationToken cancellationToken
     )
     {
+        var orgId = Guid.Parse(request.OrganizationId!);
         // Step 1: Fetch organization from repository
-        var organization = await _organizationRepository.GetByIdAsync(
-            request.OrganizationId,
-            cancellationToken
-        );
+        var organization = await _organizationRepository.GetByIdAsync(orgId, cancellationToken);
 
         // Step 2: Validate organization exists
         if (organization == null)
         {
-            return Result<OrganizationProfileDto>.NotFound(
-                $"Organization {request.OrganizationId} not found"
-            );
+            return Result<OrganizationProfileDto>.NotFound($"Organization {orgId} not found");
         }
 
         // Step 3: Map entity to DTO
@@ -44,7 +40,7 @@ public class GetOrganizationProfileHandler
             AddressLine1 = organization.AddressLine1,
             AddressLine2 = organization.AddressLine2,
             Suburb = organization.Suburb,
-            State = organization.State.ToString(), // Enum → String
+            State = organization.State.ToString(),
             Postcode = organization.Postcode,
             LogoUrl = organization.LogoUrl,
         };

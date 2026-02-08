@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FairWorkly.API.Controllers.Settings;
 
 [ApiController]
-[Route("api/[controller]")]
-[Authorize]
+[Route("api/settings")]
+[Authorize(Policy = "RequireAdmin")]
 public class OrganizationProfileController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -23,107 +23,39 @@ public class OrganizationProfileController : ControllerBase
     }
 
     [HttpGet("organization")]
-    [Authorize(Policy = "RequireManager")]
     [ProducesResponseType(typeof(OrganizationProfileDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrganization(CancellationToken cancellationToken)
     {
-        var orgIdString = _currentUserService.OrganizationId;
-
-        if (string.IsNullOrEmpty(orgIdString))
+        var query = new GetOrganizationProfileQuery
         {
-            return Unauthorized(
-                new ProblemDetails
-                {
-                    Status = StatusCodes.Status401Unauthorized,
-                    Title = "Missing Organization ID",
-                    Detail = "Organization ID not found in authentication token",
-                    Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-                    Extensions = { ["code"] = "MISSING_ORGANIZATION_ID" },
-                }
-            );
-        }
-
-        if (!Guid.TryParse(orgIdString, out var orgId))
-        {
-            return BadRequest(
-                new ProblemDetails
-                {
-                    Status = StatusCodes.Status400BadRequest,
-                    Title = "Invalid Organization ID",
-                    Detail = "Invalid organization ID format",
-                    Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-                    Extensions = { ["code"] = "INVALID_ORGANIZATION_ID" },
-                }
-            );
-        }
-
-        var query = new GetOrganizationProfileQuery { OrganizationId = orgId };
+            OrganizationId = _currentUserService.OrganizationId,
+        };
 
         var result = await _mediator.Send(query, cancellationToken);
 
-        if (result.Type == ResultType.NotFound)
-        {
-            return NotFound(
-                new ProblemDetails
-                {
-                    Status = StatusCodes.Status404NotFound,
-                    Title = "Organization Not Found",
-                    Detail = result.ErrorMessage,
-                    Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
-                    Extensions = { ["code"] = "RESOURCE_NOT_FOUND" },
-                }
-            );
-        }
-
-        return Ok(result.Value);
+        return MapResultToResponse(result);
     }
 
     [HttpPut("organization")]
-    [Authorize(Policy = "RequireAdmin")]
     [ProducesResponseType(typeof(OrganizationProfileDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateOrganization(
         [FromBody] UpdateOrganizationProfileRequest request,
         CancellationToken cancellationToken
     )
     {
-        var orgIdString = _currentUserService.OrganizationId;
-
-        if (string.IsNullOrEmpty(orgIdString))
-        {
-            return Unauthorized(
-                new ProblemDetails
-                {
-                    Status = StatusCodes.Status401Unauthorized,
-                    Title = "Missing Organization ID",
-                    Detail = "Organization ID not found in authentication token",
-                    Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-                    Extensions = { ["code"] = "MISSING_ORGANIZATION_ID" },
-                }
-            );
-        }
-
-        if (!Guid.TryParse(orgIdString, out var orgId))
-        {
-            return BadRequest(
-                new ProblemDetails
-                {
-                    Status = StatusCodes.Status400BadRequest,
-                    Title = "Invalid Organization ID",
-                    Detail = "Invalid organization ID format",
-                    Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-                    Extensions = { ["code"] = "INVALID_ORGANIZATION_ID" },
-                }
-            );
-        }
-
         var command = new UpdateOrganizationProfileCommand
         {
-            OrganizationId = orgId,
+            OrganizationId = _currentUserService.OrganizationId,
             Request = request,
         };
 
         var result = await _mediator.Send(command, cancellationToken);
 
+        return MapResultToResponse(result);
+    }
+
+    private IActionResult MapResultToResponse(Result<OrganizationProfileDto> result)
+    {
         return result.Type switch
         {
             ResultType.Success => Ok(result.Value),
@@ -144,7 +76,7 @@ public class OrganizationProfileController : ControllerBase
                 {
                     Status = StatusCodes.Status400BadRequest,
                     Title = "Validation Failed",
-                    Detail = "One or more validation errors occurred",
+                    Detail = result.ErrorMessage,
                     Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                     Extensions =
                     {

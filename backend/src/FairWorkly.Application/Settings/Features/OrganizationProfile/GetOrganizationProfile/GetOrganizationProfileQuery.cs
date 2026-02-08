@@ -5,5 +5,5 @@ namespace FairWorkly.Application.Settings.Features.OrganizationProfile.GetOrgani
 
 public record GetOrganizationProfileQuery : IRequest<Result<OrganizationProfileDto>>
 {
-    public Guid OrganizationId { get; init; }
+    public string? OrganizationId { get; init; }
 }

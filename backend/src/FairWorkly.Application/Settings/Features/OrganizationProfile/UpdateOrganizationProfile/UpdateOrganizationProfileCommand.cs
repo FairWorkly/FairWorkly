@@ -6,7 +6,7 @@ namespace FairWorkly.Application.Settings.Features.OrganizationProfile.UpdateOrg
 
 public record UpdateOrganizationProfileCommand : IRequest<Result<OrganizationProfileDto>>
 {
-    public Guid OrganizationId { get; init; }
+    public string? OrganizationId { get; init; }
 
     public UpdateOrganizationProfileRequest Request { get; init; } = null!;
 }

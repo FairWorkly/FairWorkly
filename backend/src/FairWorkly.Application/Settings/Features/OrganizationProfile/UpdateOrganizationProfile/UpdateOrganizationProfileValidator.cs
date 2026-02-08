@@ -8,12 +8,21 @@ public class UpdateOrganizationProfileCommandValidator
 {
     public UpdateOrganizationProfileCommandValidator()
     {
-        RuleFor(x => x.OrganizationId).NotEmpty().WithMessage("Organization ID is required");
+        RuleFor(x => x.OrganizationId)
+            .NotEmpty()
+            .WithMessage("Organization ID is required")
+            .Must(BeValidGuid)
+            .WithMessage("Organization ID must be a valid GUID");
 
         RuleFor(x => x.Request)
             .NotNull()
             .WithMessage("Request data is required")
             .SetValidator(new UpdateOrganizationProfileRequestValidator());
+    }
+
+    private bool BeValidGuid(string? orgId)
+    {
+        return Guid.TryParse(orgId, out _);
     }
 }
 
