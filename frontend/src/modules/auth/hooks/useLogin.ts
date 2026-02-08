@@ -12,6 +12,11 @@ type UseLoginResult = {
   error: string | null
 }
 
+const DEFAULT_ROUTES: Record<'admin' | 'manager', string> = {
+  admin: '/fairbot',
+  manager: '/roster/upload',
+}
+
 function mapUserName(firstName?: string, lastName?: string, email?: string) {
   const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
   if (fullName) return fullName
@@ -26,8 +31,8 @@ function normalizeRole(role?: string): AuthRole | null {
   return null
 }
 
-function mapRoleRedirect() {
-  return '/fairbot'
+function mapRoleRedirect(role: AuthRole) {
+  return DEFAULT_ROUTES[role] ?? '/403'
 }
 
 export function useLogin(): UseLoginResult {
@@ -67,11 +72,15 @@ export function useLogin(): UseLoginResult {
 
         dispatch(setAuthData({ user, accessToken: response.accessToken }))
 
-        navigate(mapRoleRedirect(), { replace: true })
+        navigate(mapRoleRedirect(role), { replace: true })
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Login failed. Please try again.'
-        setError(message)
+        if (err instanceof Error && err.message === 'Unsupported user role') {
+          setError('Login failed: unsupported account role. Please contact support.')
+        } else {
+          setError(
+            err instanceof Error ? err.message : 'Login failed. Please try again.',
+          )
+        }
         dispatch(setStatus('unauthenticated'))
       } finally {
         setIsSubmitting(false)

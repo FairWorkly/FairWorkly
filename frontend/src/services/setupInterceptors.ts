@@ -68,14 +68,27 @@ export function setupInterceptors(store: StoreLike) {
         return Promise.reject(error);
       }
 
-      const requestUrl = (originalConfig.baseURL ?? "") + (originalConfig.url ?? "");
+      console.log("Interceptor refresh triggered");
+
+      const rawUrl = originalConfig.url ?? "";
+      const baseUrl = originalConfig.baseURL ?? "";
+      const fullUrl =
+        rawUrl.startsWith("http") || !baseUrl
+          ? rawUrl
+          : `${baseUrl.replace(/\/+$/, "")}/${rawUrl.replace(/^\/+/, "")}`;
+      const requestPath = fullUrl.split("?")[0].replace(/^https?:\/\/[^/]+/i, "");
+      const normalizedPath = requestPath.replace(/\/+$/, "");
       const authPaths = [
         "/auth/login",
         "/auth/refresh",
         "/auth/logout",
         "/auth/register",
       ];
-      if (authPaths.some((path) => requestUrl.includes(path))) {
+      if (
+        authPaths.some(
+          (path) => normalizedPath === path || normalizedPath.endsWith(path),
+        )
+      ) {
         return Promise.reject(error);
       }
 
