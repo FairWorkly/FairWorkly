@@ -45,7 +45,7 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
             .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
-        builder.HasIndex(o => o.ABN).IsUnique();
+        builder.HasIndex(o => o.ABN).IsUnique().HasFilter("is_deleted = false");
         builder.HasIndex(o => o.ContactEmail);
 
         // Property configurations

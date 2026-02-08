@@ -22,8 +22,8 @@ public class AwardConfiguration : IEntityTypeConfiguration<Award>
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
-        builder.HasIndex(a => a.AwardType).IsUnique();
-        builder.HasIndex(a => a.AwardCode).IsUnique();
+        builder.HasIndex(a => a.AwardType).IsUnique().HasFilter("is_deleted = false");
+        builder.HasIndex(a => a.AwardCode).IsUnique().HasFilter("is_deleted = false");
 
         // Property configurations
         builder.Property(a => a.Name).HasMaxLength(200).IsRequired();
