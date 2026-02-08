@@ -18,47 +18,75 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
+      # Optional debug
       - name: Debug GitHub context
         run: |
-          echo "repository=${{ github.repository }}"
-          echo "ref=${{ github.ref }}"
-          echo "ref_name=${{ github.ref_name }}"
-      
+          echo "repository=$GITHUB_REPOSITORY"
+          echo "ref=$GITHUB_REF"
+          echo "ref_name=$GITHUB_REF_NAME"
+          echo "sha=$GITHUB_SHA"
+
+      # Tag logic:
+      # main  -> prod-<7sha>
+      # other -> uat-<7sha>
+      - name: Set image tags
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            ENV_PREFIX="prod"
+          else
+            ENV_PREFIX="uat"
+          fi
+
+          FULL_TAG="${ENV_PREFIX}-${SHORT_SHA}"
+
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+          echo "env_prefix=$ENV_PREFIX" >> "$GITHUB_OUTPUT"
+          echo "full_tag=$FULL_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-ecs-backend-deploy-oidc
           aws-region: ${{ vars.AWS_REGION }}
-      
-      - name: Verify AWS identity
-        run: aws sts get-caller-identity
+
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, tag, and push image
+      - name: Build Docker image
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ vars.ECR_REPO_BACKEND }}
-          SHA_TAG: ${{ github.sha }}
-          BRANCH: ${{ github.ref_name }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
         run: |
-          SAFE_BRANCH=$(echo "$BRANCH" | tr '/' '-')
-
+          set -euo pipefail
           docker build \
-          -f backend/Dockerfile \
-          -t $REGISTRY/$REPOSITORY:$SHA_TAG \
-          .
+            -f backend/Dockerfile \
+            -t $REGISTRY/$REPOSITORY:$SHORT_SHA \
+            .
 
-          docker push $REGISTRY/$REPOSITORY:$SHA_TAG
+      - name: Tag and push to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_BACKEND }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+          FULL_TAG: ${{ steps.vars.outputs.full_tag }}
+        run: |
+          set -euo pipefail
 
-          if [ "$BRANCH" = "main" ]; then
-            docker tag $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:latest
-            docker push $REGISTRY/$REPOSITORY:latest
-          else
-            docker tag $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:$SAFE_BRANCH
-            docker push $REGISTRY/$REPOSITORY:$SAFE_BRANCH
-          fi
+          IMAGE="$REGISTRY/$REPOSITORY"
+
+          # Push base short SHA tag (optional but useful for traceability)
+          docker push "$IMAGE:$SHORT_SHA"
+
+          # Push env-prefixed tag: prod-<7sha> or uat-<7sha>
+          docker tag  "$IMAGE:$SHORT_SHA" "$IMAGE:$FULL_TAG"
+          docker push "$IMAGE:$FULL_TAG"
