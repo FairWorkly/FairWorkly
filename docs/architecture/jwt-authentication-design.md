@@ -214,6 +214,24 @@ const initializeAuth = async () => {
 policy.WithOrigins("http://localhost:5173").AllowCredentials();
 ```
 
+### Problem: Missing Role Defaulted to Admin (Security)
+
+**Before**: `useAuth()` used `|| 'admin'` fallback when role was missing or undefined, silently granting full admin access:
+
+```typescript
+// OLD - unsafe fallback
+role: (reduxUser.role?.toLowerCase() || 'admin') as 'admin' | 'manager'
+```
+
+**After**: Pass raw role value without fallback. `RoleBasedRoute` handles invalid/missing roles by redirecting to `/403`:
+
+```typescript
+// NEW - no fallback, let RoleBasedRoute enforce
+role: reduxUser.role?.toLowerCase() as 'admin' | 'manager'
+```
+
+`RoleBasedRoute` line 18: `if (!role || !allow.includes(role)) return <Navigate to="/403" replace />`
+
 ## Current Implementation Status
 
 ### Done

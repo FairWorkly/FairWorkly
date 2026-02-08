@@ -17,7 +17,7 @@ export function useAuth(): AuthState {
   const user: AuthUser | null = reduxUser ? {
     id: reduxUser.id,
     name: reduxUser.name || reduxUser.email || 'User',
-    role: (reduxUser.role?.toLowerCase() || 'admin') as 'admin' | 'manager'
+    role: reduxUser.role?.toLowerCase() as 'admin' | 'manager'
   } : null
 
   const isAuthenticated = !!accessToken && !!user && status === 'authenticated'
