@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { AxiosError, AxiosRequestConfig } from "axios";
 import httpClient from "./httpClient";
-import { logout, setAccessToken, setAuthData } from "../slices/auth";
+import { logout, setAuthData } from "../slices/auth";
 import type { RootState } from "../store";
 
 type StoreLike = {
