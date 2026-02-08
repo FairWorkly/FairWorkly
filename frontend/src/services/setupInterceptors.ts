@@ -104,17 +104,23 @@ export function setupInterceptors(store: StoreLike) {
         const refreshResponse = await refreshClient.post("/auth/refresh");
         const accessToken =
           refreshResponse.data?.accessToken ?? refreshResponse.data?.token;
-        const user = refreshResponse.data?.user ?? null;
 
         if (!accessToken) {
           throw new Error("Refresh succeeded without access token");
         }
 
-        if (user) {
-          store.dispatch(setAuthData({ user, accessToken }));
-        } else {
-          store.dispatch(setAccessToken(accessToken));
-        }
+        const meResponse = await refreshClient.get("/auth/me", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const normalizedUser = {
+          ...meResponse.data,
+          role:
+            typeof meResponse.data?.role === "string"
+              ? meResponse.data.role.toLowerCase()
+              : meResponse.data?.role,
+        };
+
+        store.dispatch(setAuthData({ user: normalizedUser, accessToken }));
 
         processQueue(null, accessToken);
 
