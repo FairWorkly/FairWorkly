@@ -23,11 +23,6 @@ export function useAuth(): AuthState {
   const isAuthenticated = !!accessToken && !!user && status === 'authenticated'
   const isLoading = status === 'initializing' || status === 'authenticating'
 
-  const switchRole = useCallback((newRole: 'admin' | 'manager') => {
-    // TODO: Implement role switching if needed
-    console.warn(`Role switching to ${newRole} not yet implemented with JWT auth`)
-  }, [])
-
   const logout = useCallback(async () => {
     try {
       await authApi.logout()
