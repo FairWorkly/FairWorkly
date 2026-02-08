@@ -51,8 +51,8 @@ jobs:
           docker build \
           -f backend/Dockerfile \
           -t $REGISTRY/$REPOSITORY:$SHA_TAG \
-          backend
-          
+          .
+
           docker push $REGISTRY/$REPOSITORY:$SHA_TAG
 
           if [ "$BRANCH" = "main" ]; then
