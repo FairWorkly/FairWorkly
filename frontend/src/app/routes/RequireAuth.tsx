@@ -9,9 +9,5 @@ export function RequireAuth() {
     return <LoadingSpinner />
   }
 
-  if (status === 'unauthenticated') {
-    return <Navigate to="/login" replace />
-  }
-
-  return <Outlet />
+  return status === 'authenticated' ? <Outlet /> : <Navigate to="/login" replace />
 }
