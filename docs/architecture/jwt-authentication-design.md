@@ -6,7 +6,7 @@ FairWorkly uses JWT access tokens + HttpOnly refresh token cookies for stateless
 
 ## Architecture
 
-```
+```text
                            Login Flow
                            ──────────
 
@@ -69,7 +69,7 @@ GET /api/roster/upload
 | `orgId` | `user.OrganizationId` | `"e5f6g7h8-..."`            | Tenant isolation |
 | `role`  | `user.Role`           | `"Admin"`                   | Authorization    |
 | `jti`   | Random GUID           | `"f9a0b1c2-..."`            | Token unique ID  |
-| `exp`   | Now + 15min           | Unix timestamp              | Expiry           |
+| `exp`   | Now + 15 min           | Unix timestamp              | Expiry           |
 
 Generated in: `Infrastructure/Identity/TokenService.cs`
 
@@ -110,7 +110,7 @@ public enum UserRole
 
 ### Frontend Enforcement (Route Guards)
 
-```
+```text
 ProtectedRoute          → checks isAuthenticated (any logged-in user)
   └── RoleBasedRoute    → checks user.role against allow list
 ```
