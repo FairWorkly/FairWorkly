@@ -48,7 +48,11 @@ jobs:
         run: |
           SAFE_BRANCH=$(echo "$BRANCH" | tr '/' '-')
 
-          docker build -t $REGISTRY/$REPOSITORY:$SHA_TAG .
+          docker build \
+          -f backend/Dockerfile \
+          -t $REGISTRY/$REPOSITORY:$SHA_TAG \
+          backend
+          
           docker push $REGISTRY/$REPOSITORY:$SHA_TAG
 
           if [ "$BRANCH" = "main" ]; then
