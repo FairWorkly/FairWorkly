@@ -1,0 +1,50 @@
+name: Build and Push to Amazon ECR by Eric
+
+on:
+  push:
+    branches:
+      - main
+      - devops/eric-ECS-ECR-FARGATE
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/GitHubActionsPushToECR
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_BACKEND }}
+          SHA_TAG: ${{ github.sha }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          SAFE_BRANCH=$(echo "$BRANCH" | tr '/' '-')
+
+          docker build -t $REGISTRY/$REPOSITORY:$SHA_TAG .
+          docker push $REGISTRY/$REPOSITORY:$SHA_TAG
+
+          if [ "$BRANCH" = "main" ]; then
+            docker tag $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:latest
+            docker push $REGISTRY/$REPOSITORY:latest
+          else
+            docker tag $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:$SAFE_BRANCH
+            docker push $REGISTRY/$REPOSITORY:$SAFE_BRANCH
+          fi
