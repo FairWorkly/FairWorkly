@@ -185,22 +185,25 @@ const isAuthenticated = !!accessToken && !!user && status === "authenticated";
 
 **Before**: `ReduxProvider.tsx` did not restore auth state on startup. Page refresh = logged out.
 
-**After**: Calls `/auth/refresh` on app startup to restore session from HttpOnly cookie:
+**After**: Calls `/auth/refresh` on app startup, then `/auth/me` to fetch user data:
 
 ```typescript
 // ReduxProvider.tsx
 const initializeAuth = async () => {
-  const response = await axios.post(`${baseURL}/auth/refresh`, null, {
+  const refreshRes = await axios.post(`${baseURL}/auth/refresh`, null, {
     withCredentials: true,
   });
-  if (response.data?.accessToken) {
-    store.dispatch(
-      setAuthData({
-        user: response.data.user,
-        accessToken: response.data.accessToken,
-      })
-    );
-  }
+  const accessToken = refreshRes.data?.accessToken;
+  if (!accessToken) return;
+
+  const meRes = await axios.get(`${baseURL}/auth/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const u = meRes.data;
+  store.dispatch(setAuthData({
+    user: { id: u.id, email: u.email, name: ..., role: u.role },
+    accessToken,
+  }));
 };
 ```
 
