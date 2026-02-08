@@ -1,8 +1,13 @@
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import SvgIcon from '@mui/material/SvgIcon'
 import { styled } from '@/styles/styled'
+
+export const AuthErrorAlert = styled(Alert)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}))
 
 export const GoogleButton = styled('button')(({ theme }) => ({
   display: 'flex',

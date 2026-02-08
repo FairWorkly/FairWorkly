@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import Alert from '@mui/material/Alert'
 import { LoginForm, SignupForm, ForgotPasswordModal } from '../features'
 import type { LoginFormData, SignupFormData } from '../types'
 import { authApi } from '@/services/authApi'
 import { setAuthData } from '@/slices/auth/authSlice'
 import {
+  AuthErrorAlert,
   AuthHeader,
   AuthTitle,
   AuthSubtitle,
@@ -24,7 +24,7 @@ export function LoginPage() {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const isGoogleLoading = false
   const [error, setError] = useState<string | null>(null)
 
   const handleLogin = async (values: LoginFormData) => {
@@ -88,9 +88,9 @@ export function LoginPage() {
       </AuthTabList>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <AuthErrorAlert severity="error">
           {error}
-        </Alert>
+        </AuthErrorAlert>
       )}
 
       {activeTab === 'login' ? (
