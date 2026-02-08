@@ -21,6 +21,10 @@ const DEFAULT_ROUTES: Record<string, string> = {
   manager: '/roster/upload',
 }
 
+function isValidRole(role: string): role is 'admin' | 'manager' {
+  return role === 'admin' || role === 'manager'
+}
+
 export function LoginPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -39,7 +43,15 @@ export function LoginPage() {
     setError(null)
 
     try {
-      const response = await authApi.login(values.email, values.password)
+      const response = await authApi.login({
+        email: values.email,
+        password: values.password,
+      })
+
+      const normalizedRole = response.user.role?.toLowerCase()
+      if (!normalizedRole || !isValidRole(normalizedRole)) {
+        throw new Error('Unsupported user role')
+      }
 
       // Store auth data in Redux
       dispatch(setAuthData({
@@ -47,13 +59,13 @@ export function LoginPage() {
           id: response.user.id,
           email: response.user.email,
           name: [response.user.firstName, response.user.lastName].filter(Boolean).join(' ') || response.user.email,
-          role: response.user.role,
+          role: normalizedRole,
         },
         accessToken: response.accessToken,
       }))
 
       // Navigate to role-appropriate default route
-      navigate(DEFAULT_ROUTES[response.user.role.toLowerCase()] ?? '/403')
+      navigate(DEFAULT_ROUTES[normalizedRole] ?? '/403')
     } catch (err: unknown) {
       console.error('Login failed:', err)
       setError('Invalid email or password. Please try again.')

@@ -20,8 +20,10 @@ function mapUserName(firstName?: string, lastName?: string, email?: string) {
 
 type AuthRole = NonNullable<AuthUser['role']>
 
-function normalizeRole(role?: string): AuthRole {
-  return (role ?? '').toLowerCase() === 'manager' ? 'manager' : 'admin'
+function normalizeRole(role?: string): AuthRole | null {
+  const normalized = (role ?? '').toLowerCase()
+  if (normalized === 'admin' || normalized === 'manager') return normalized
+  return null
 }
 
 function mapRoleRedirect() {
@@ -47,10 +49,15 @@ export function useLogin(): UseLoginResult {
           password: values.password,
         })
 
+        const role = normalizeRole(response.user.role)
+        if (!role) {
+          throw new Error('Unsupported user role')
+        }
+
         const user = {
           id: response.user.id,
           email: response.user.email,
-          role: normalizeRole(response.user.role),
+          role,
           name: mapUserName(
             response.user.firstName,
             response.user.lastName,
