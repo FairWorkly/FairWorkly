@@ -5,13 +5,22 @@ import {
     Typography,
     IconButton,
     styled,
+    alpha,
 } from '@mui/material';
 import { Close, MailOutline } from '@mui/icons-material';
+
+const content = {
+    title: 'Contact Sales',
+    description: "Interested in Enterprise? Let's talk!",
+    label: 'Email us at:',
+    email: 'support@fairworkly.com',
+    note: 'We typically respond within 24 hours.',
+};
 
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiBackdrop-root': {
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        backgroundColor: alpha(theme.palette.common.black, 0.6),
     },
     '& .MuiDialog-paper': {
         borderRadius: theme.spacing(3),
@@ -90,7 +99,7 @@ const EmailLink = styled('a')(({ theme }) => ({
     }),
     '&:hover': {
         color: theme.palette.primary.dark,
-        transform: 'translateY(-2px)',
+        transform: `translateY(${theme.spacing(-0.25)})`,
     },
 }));
 
@@ -121,23 +130,23 @@ export const ContactModal: React.FC<ContactModalProps> = ({ open, onClose }) => 
 
             <ModalHeader>
                 <MailIcon />
-                <ModalTitle>Contact Sales</ModalTitle>
+                <ModalTitle>{content.title}</ModalTitle>
             </ModalHeader>
 
             <ModalBody>
                 <ModalDescription>
-                    Interested in Enterprise? Let's talk!
+                    {content.description}
                 </ModalDescription>
 
                 <ContactInfoBox>
-                    <ContactLabel>Email us at:</ContactLabel>
-                    <EmailLink href="mailto:support@fairworkly.com">
-                        support@fairworkly.com
+                    <ContactLabel>{content.label}</ContactLabel>
+                    <EmailLink href={`mailto:${content.email}`}>
+                        {content.email}
                     </EmailLink>
                 </ContactInfoBox>
 
                 <ModalNote>
-                    We typically respond within 24 hours.
+                    {content.note}
                 </ModalNote>
             </ModalBody>
         </StyledDialog>

@@ -13,7 +13,7 @@ type CTAAction = 'signup' | 'contact';
 
 const PageSection = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(12, 0),
+    padding: theme.spacing(12, 0, 8),
     borderTop: `1px solid ${theme.palette.divider}`,
     borderBottom: `1px solid ${theme.palette.divider}`,
 }));
@@ -54,13 +54,14 @@ const SectionSubTitle = styled(Typography)(({ theme }) => ({
 
 
 
+const CARDS_WIDTH_RATIO = 0.86;
+
 const CardsLayout = styled(Box)(({ theme }) => ({
     display: 'grid',
     gap: theme.spacing(4),
-    maxWidth: theme.fairworkly.layout.containerMaxWidth * 0.86,
+    maxWidth: theme.fairworkly.layout.containerMaxWidth * CARDS_WIDTH_RATIO,
     margin: '0 auto',
     gridTemplateColumns: `repeat(auto-fit, minmax(${theme.spacing(40)}, 1fr))`,
-
 }));
 
 
@@ -180,7 +181,7 @@ const ActionButton = styled(Button, {
 
 const BottomNoteContainer = styled(Box)(({ theme }) => ({
     textAlign: 'center',
-    marginTop: theme.spacing(6),
+    marginTop: theme.spacing(4),
     paddingTop: theme.spacing(4),
     borderTop: `1px solid ${theme.palette.divider}`,
 }));
@@ -288,7 +289,7 @@ export const PricingSection: React.FC = () => {
             features: [
                 '1 location (same state)',
                 'Up to 50 employees',
-                'Unlimited CSV uploads',
+                'Unlimited file uploads (CSV/XLSX)',
                 'Payroll + Roster + Document',
                 '3 Awards (Hospitality/Retail/Clerks)',
             ],

@@ -144,7 +144,7 @@ const TemplateButton = styled(Button)(({ theme }) => ({
 
     '&:hover': {
         backgroundColor: alpha(theme.palette.primary.main, 0.18),
-        transform: 'translateY(-2px)',
+        transform: `translateY(${theme.spacing(-0.25)})`,
     },
 
     '& .MuiButton-endIcon': {
@@ -182,25 +182,25 @@ interface FaqMessage {
 const FAQ_MESSAGES: Record<string, FaqMessage> = {
     systems: {
         question: 'What systems does FairWorkly work with?',
-        answer: "**FairWorkly doesn't require integration.** We accept standard CSV files, which means you can use any payroll or rostering system that can export CSV — including Xero, MYOB, QuickBooks, Keypay, Deputy, Tanda, and many others.",
-        note: '💡 Simply export your data as CSV and upload. No API keys, no IT setup required.',
+        answer: "**FairWorkly doesn't require integration.** We accept **CSV** for payroll and **XLSX** for rosters, which means you can use any payroll or rostering system that can export these formats — including Xero, MYOB, QuickBooks, Keypay, Deputy, Tanda, and many others.",
+        note: '💡 Simply export your data as CSV or XLSX and upload. No API keys, no IT setup required.',
     },
     rostering: {
         question: 'Do I need rostering software?',
-        answer: "No! While we work great with Deputy and Tanda exports, you can also upload roster data from Excel. We provide a **free template** that makes it easy to convert your existing schedules to CSV format.",
+        answer: "No! While we work great with Deputy and Tanda exports, you can also upload roster data from Excel. We provide a **free template** that makes it easy to convert your existing schedules to XLSX format.",
     },
     awards: {
         question: 'Which Awards do you cover?',
         answer: 'We currently support the three most common Awards:',
         list: [
-            'Hospitality Industry Award 2020',
-            'General Retail Industry Award',
-            'Clerks Private Sector Award',
+            'Hospitality Industry (General) Award 2020',
+            'General Retail Industry Award 2020',
+            'Clerks\u2014Private Sector Award 2020',
         ],
     },
     validationTime: {
         question: 'How long does validation take?',
-        answer: "Most validations complete in **2-3 minutes**. Upload your CSV, grab a coffee, and your compliance report will be ready. Larger files (100+ employees) may take up to 5 minutes.",
+        answer: "Most validations complete in **2-3 minutes**. Upload your file, grab a coffee, and your compliance report will be ready. Larger files (100+ employees) may take up to 5 minutes.",
     },
     contracts: {
         question: 'Do you generate employment contracts?',
@@ -216,8 +216,8 @@ const FAQ_MESSAGES: Record<string, FaqMessage> = {
         answer: '**No.** FairWorkly is a compliance validation tool, not legal advice. We check your payroll and rosters against Fair Work rules and highlight potential issues. For complex situations or disputes, consult the Fair Work Ombudsman or an employment lawyer.',
     },
     templates: {
-        question: 'Do you provide CSV templates?',
-        answer: 'Yes! We provide **CSV templates** for both payslip and roster data to help you get started with FairWorkly.',
+        question: 'Do you provide file templates?',
+        answer: 'Yes! We provide **CSV templates** for payslip data and **XLSX templates** for roster data to help you get started with FairWorkly.',
         hasButton: true,
     },
 };
@@ -302,7 +302,7 @@ export const FaqSection: React.FC = () => {
                                         endIcon={<ArrowForward />}
                                         onClick={handleTemplateClick}
                                     >
-                                        View All CSV Templates
+                                        View All Templates
                                     </TemplateButton>
                                 )}
                             </FaqCard>

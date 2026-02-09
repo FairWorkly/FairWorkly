@@ -53,18 +53,8 @@ export function HomePage() {
           Coming soon...
         </HomePageSectionBody>
       </HomePageSection>
-      <HomePageSection id="pricing">
-        <HomePageSectionHeading variant="h4">Pricing</HomePageSectionHeading>
-        <HomePageSectionBody variant="body1">
-          <PricingSection/>
-        </HomePageSectionBody>
-      </HomePageSection>
-      <HomePageSection id="faq">
-        <HomePageSectionHeading variant="h4">FAQ</HomePageSectionHeading>
-        <HomePageSectionBody variant="body1">
-          <FaqSection/>
-        </HomePageSectionBody>
-      </HomePageSection>
+      <PricingSection />
+      <FaqSection />
     </HomePageRoot>
   )
 }
