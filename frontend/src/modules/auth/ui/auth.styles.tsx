@@ -257,6 +257,10 @@ export const AuthSubtitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
+export const AuthErrorText = styled(Typography)(({ theme }) => ({
+  marginTop: theme.spacing(1),
+}))
+
 export const AuthTabList = styled('nav')(({ theme }) => ({
   display: 'flex',
   background: theme.palette.background.paper,

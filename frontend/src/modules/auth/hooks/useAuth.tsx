@@ -14,19 +14,16 @@ export function useAuth(): AuthState {
   const status = useSelector((state: RootState) => state.auth.status)
 
   // Convert Redux user to AuthUser format
-  const user: AuthUser | null = reduxUser ? {
-    id: reduxUser.id,
-    name: reduxUser.name || reduxUser.email || 'User',
-    role: reduxUser.role?.toLowerCase() as 'admin' | 'manager'
-  } : null
+  const user: AuthUser | null = reduxUser
+    ? {
+        id: reduxUser.id,
+        name: reduxUser.name || reduxUser.email || 'User',
+        role: reduxUser.role,
+      }
+    : null
 
   const isAuthenticated = !!accessToken && !!user && status === 'authenticated'
   const isLoading = status === 'initializing' || status === 'authenticating'
-
-  const switchRole = useCallback((newRole: 'admin' | 'manager') => {
-    // TODO: Implement role switching if needed
-    console.warn(`Role switching to ${newRole} not yet implemented with JWT auth`)
-  }, [])
 
   const logout = useCallback(async () => {
     try {
@@ -41,7 +38,6 @@ export function useAuth(): AuthState {
     isAuthenticated,
     isLoading,
     user,
-    switchRole,
     logout,
   }
 }

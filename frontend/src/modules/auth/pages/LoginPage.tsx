@@ -1,10 +1,8 @@
 import { useState } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
+import { useSearchParams } from 'react-router-dom'
 import { LoginForm, SignupForm, ForgotPasswordModal } from '../features'
-import type { LoginFormData, SignupFormData } from '../types'
-import { authApi } from '@/services/authApi'
-import { setAuthData } from '@/slices/auth/authSlice'
+import type { SignupFormData } from '../types'
+import { useLogin } from '../hooks'
 import {
   AuthErrorAlert,
   AuthHeader,
@@ -16,51 +14,13 @@ import {
 
 type TabType = 'login' | 'signup'
 
-const DEFAULT_ROUTES: Record<string, string> = {
-  admin: '/fairbot',
-  manager: '/roster/upload',
-}
-
 export function LoginPage() {
   const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const { login, isSubmitting, error } = useLogin()
   const initialTab = searchParams.get('signup') === 'true' ? 'signup' : 'login'
   const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const isGoogleLoading = false
-  const [error, setError] = useState<string | null>(null)
-
-  const handleLogin = async (values: LoginFormData) => {
-    if (isSubmitting) return
-
-    setIsSubmitting(true)
-    setError(null)
-
-    try {
-      const response = await authApi.login(values.email, values.password)
-
-      // Store auth data in Redux
-      dispatch(setAuthData({
-        user: {
-          id: response.user.id,
-          email: response.user.email,
-          name: [response.user.firstName, response.user.lastName].filter(Boolean).join(' ') || response.user.email,
-          role: response.user.role,
-        },
-        accessToken: response.accessToken,
-      }))
-
-      // Navigate to role-appropriate default route
-      navigate(DEFAULT_ROUTES[response.user.role.toLowerCase()] ?? '/403')
-    } catch (err: unknown) {
-      console.error('Login failed:', err)
-      setError('Invalid email or password. Please try again.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
   const handleSignup = (values: SignupFormData) => {
     // TODO: Implement actual signup logic
@@ -100,7 +60,7 @@ export function LoginPage() {
 
       {activeTab === 'login' ? (
         <LoginForm
-          onSubmit={handleLogin}
+          onSubmit={login}
           onGoogleLogin={handleGoogleLogin}
           onForgotPassword={() => setForgotModalOpen(true)}
           isSubmitting={isSubmitting}

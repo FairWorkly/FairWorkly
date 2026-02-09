@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using FairWorkly.Application.Auth.Features.ForgotPassword;
 using FairWorkly.Application.Auth.Features.Login;
 using FairWorkly.Application.Auth.Features.Logout;
 using FairWorkly.Application.Auth.Features.Me;
@@ -14,7 +15,7 @@ namespace FairWorkly.API.Controllers.Auth;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IMediator mediator, IWebHostEnvironment env) : ControllerBase
+public class AuthController(IMediator mediator) : ControllerBase
 {
     [SwaggerRequestExample(
         typeof(LoginCommand),
@@ -80,6 +81,25 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
 
         // Return new access token
         return Ok(new { accessToken = result.Value.AccessToken });
+    }
+
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+    {
+        var result = await mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            if (result.Type == ResultType.ValidationFailure)
+            {
+                return await HandleValidationFailureAsync(result);
+            }
+
+            return BadRequest(new { message = result.ErrorMessage });
+        }
+
+        return Ok(new { message = "If that email exists, a reset link has been sent." });
     }
 
     [HttpGet("me")]
@@ -154,13 +174,12 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         {
             HttpOnly = true, // prevent JS access (XSS protection)
             Expires = expires,
+            Path = "/",
 
-            // Local development (http) -> Secure=false
-            // Production (https) -> Secure=true
-            Secure = env.IsProduction(),
-
-            // Set cross-domain to None in production environment, and Lax in development environment
-            SameSite = env.IsProduction() ? SameSiteMode.None : SameSiteMode.Lax,
+            // Use Secure cookies and SameSite=None to allow cross-site refresh in dev
+            // (required for 5173 -> 7075 when using HttpOnly refresh cookies)
+            Secure = true,
+            SameSite = SameSiteMode.None,
         };
     }
 
