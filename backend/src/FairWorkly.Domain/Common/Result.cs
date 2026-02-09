@@ -35,6 +35,9 @@ public class Result<T> : IResultBase
     public static Result<T> Failure(string message) =>
         new(false, default, message, null, ResultType.BusinessFailure);
 
+    public static Result<T> ProcessingFailure(string message, List<ValidationError> errors) =>
+        new(false, default, message, errors, ResultType.ProcessingFailure);
+
     public static Result<T> NotFound(string message) =>
         new(false, default, message, null, ResultType.NotFound);
 
@@ -50,6 +53,7 @@ public enum ResultType
     Success,
     ValidationFailure,
     BusinessFailure,
+    ProcessingFailure,
     NotFound,
     Unauthorized,
     Forbidden,
