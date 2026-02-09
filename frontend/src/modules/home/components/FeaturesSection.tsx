@@ -5,8 +5,9 @@ import { alpha, Box, Card, Stack, styled, Typography, type SvgIconProps, } from 
 type Tone = 'primary' | 'warning' | 'info';
 
 const PageSection = styled(Box)(({ theme }) => ({
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.default,
     borderBottom: `1px solid ${theme.palette.divider}`,
+    padding: theme.spacing(12, 0, 8),
 }));
 
 const ContentContainer = styled(Box)(({ theme }) => ({
@@ -24,7 +25,7 @@ const SectionLabel = styled(Box)(({ theme }) => ({
     alignItems: 'center',
     gap: theme.spacing(1),
     padding: theme.spacing(0.75, 2),
-    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+    backgroundColor: theme.fairworkly.effect.primaryGlow,
     color: theme.palette.primary.main,
     borderRadius: theme.shape.borderRadius,
     marginBottom: theme.spacing(2),
@@ -40,7 +41,7 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
 
 const SectionSubTitle = styled(Typography)(({ theme }) => ({
     margin: '0 auto',
-    maxWidth: theme.spacing(75),
+    maxWidth: theme.spacing(100),
     color: theme.palette.text.secondary,
 }));
 
@@ -51,7 +52,7 @@ const CardsLayout = styled(Box)(({ theme }) => ({
     [theme.breakpoints.up('sm')]: {
         gridTemplateColumns: 'repeat(2, 1fr)',
     },
-    [theme.breakpoints.up('md')]: {
+    [theme.breakpoints.up('lg')]: {
         gridTemplateColumns: 'repeat(3, 1fr)',
     }
 }));
@@ -63,7 +64,10 @@ const CardContainer = styled(Card)(({ theme }) => ({
     padding: theme.spacing(5, 4),
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
-    transition: 'all 0.3s ease',
+    transition: theme.transitions.create(['box-shadow', 'border-color', 'transform'], {
+        duration: theme.transitions.duration.short,
+        easing: theme.transitions.easing.easeInOut,
+    }),
     minHeight: theme.spacing(56),
 
     '&:hover': {
@@ -177,8 +181,8 @@ export const FeaturesSection: React.FC = () => {
             tone: 'primary',
             icon: EventOutlined,
             title: 'Roster Compliance',
-            description: 'Upload roster CSV (from Deputy, Excel, or any system) to check scheduling violations.',
-            features: ['Consecutive working days (max 6)', 'Rest between shifts (min 10h)', 'Weekly hour limits', 'Break requirements'],
+            description: 'Upload roster Excel file (from Deputy, Excel, or any system) to check scheduling violations.',
+            features: ['Minimum shift hours', 'Meal break requirements', 'Rest period between shifts', 'Weekly hours limit', 'Maximum consecutive days'],
         },
         {
             id: 'payroll-compliance',
@@ -186,7 +190,7 @@ export const FeaturesSection: React.FC = () => {
             icon: PaymentsOutlined,
             title: 'Payroll Compliance',
             description: 'Upload payslip CSV and instantly validate against Award requirements.',
-            features: ['Base rates vs Award minimum', 'Penalty rates (Sat/Sun/PH)', 'Casual loading (25%)', 'Superannuation compliance'],
+            features: ['Base rates vs Award minimum', 'Penalty rates (Sat/Sun/PH)', 'Casual loading (25%)', 'Superannuation compliance', 'STP compliance'],
         },
         {
             id: 'document-compliance',
@@ -194,12 +198,12 @@ export const FeaturesSection: React.FC = () => {
             icon: DescriptionOutlined,
             title: 'Document Compliance',
             description: 'Track mandatory employment documents and avoid missing critical deadlines.',
-            features: ['Fair Work Info Statement', 'Separation Certificate (14-day)', 'Casual Conversion Notice', 'Deadline reminders'],
+            features: ['Fair Work Info Statement (day one)', 'Separation Certificate (14-day)', 'Casual Conversion Notice (12-month)', 'Compliance deadline alerts'],
         },
 
     ];
     return (
-        <PageSection>
+        <PageSection id="features">
             <ContentContainer>
                 <HeaderContainer>
                     <SectionLabel>
