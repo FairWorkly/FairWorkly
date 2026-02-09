@@ -2,7 +2,9 @@
 
 public interface ICurrentUserService
 {
-    string? UserId { get; }
-    string? OrganizationId { get; }
+    Guid? UserId { get; }
+    Guid? OrganizationId { get; }
     string? Email { get; }
+    string? Role { get; }
+    Guid? EmployeeId { get; }
 }

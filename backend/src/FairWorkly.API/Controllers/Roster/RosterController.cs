@@ -41,12 +41,12 @@ public class RosterController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UploadRosterResponse>> Upload([FromForm] IFormFile file)
     {
-        if (!Guid.TryParse(_currentUser.UserId, out var userId) || userId == Guid.Empty)
+        if (_currentUser.UserId is not { } userId || userId == Guid.Empty)
         {
             return Unauthorized(new { message = "Invalid user token" });
         }
 
-        if (!Guid.TryParse(_currentUser.OrganizationId, out var organizationId) || organizationId == Guid.Empty)
+        if (_currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
         {
             return Unauthorized(new { message = "Organization context not found in token" });
         }
@@ -88,7 +88,7 @@ public class RosterController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<RosterDetailsResponse>> GetDetails(Guid rosterId)
     {
-        if (!Guid.TryParse(_currentUser.OrganizationId, out var organizationId) || organizationId == Guid.Empty)
+        if (_currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
         {
             return Unauthorized(new { message = "Organization context not found in token" });
         }
@@ -120,7 +120,7 @@ public class RosterController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DownloadOriginalFile(Guid rosterId, CancellationToken ct)
     {
-        if (!Guid.TryParse(_currentUser.OrganizationId, out var organizationId) || organizationId == Guid.Empty)
+        if (_currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
         {
             return Unauthorized(new { message = "Organization context not found in token" });
         }

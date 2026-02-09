@@ -60,6 +60,9 @@ public static class DependencyInjection
         // Register UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+        // Register CurrentUserService
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+
         // Register DateTimeProvider
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
