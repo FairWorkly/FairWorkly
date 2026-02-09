@@ -1,41 +1,45 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState } from '@/store'
+import { logout as logoutAction } from '@/slices/auth/authSlice'
+import { authApi } from '@/services/authApi'
 import type { AuthUser, AuthState } from '../types'
 
-// DEV stub: used to persist role locally until JWT integration.
-const DEV_ROLE_STORAGE_KEY = 'dev:user-role'
-// DEV stub: used to persist a display name locally for UI testing.
-const DEV_USER_NAME_STORAGE_KEY = 'dev:user-name'
-
-function getStoredRole(): 'admin' | 'manager' {
-  if (typeof window === 'undefined') return 'admin'
-  const stored = localStorage.getItem(DEV_ROLE_STORAGE_KEY)
-  return stored === 'manager' ? 'manager' : 'admin'
-}
-
-function getStoredUser(): AuthUser | null {
-  if (typeof window === 'undefined') return null
-  const name = localStorage.getItem(DEV_USER_NAME_STORAGE_KEY)
-  if (!name) return { id: '1', name: 'Lillian', role: getStoredRole() }
-  return { id: '1', name, role: getStoredRole() }
-}
-
 export function useAuth(): AuthState {
-  const [user, setUser] = useState<AuthUser | null>(getStoredUser)
+  const dispatch = useDispatch()
+
+  // Read auth state from Redux
+  const reduxUser = useSelector((state: RootState) => state.auth.user)
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken)
+  const status = useSelector((state: RootState) => state.auth.status)
+
+  // Convert Redux user to AuthUser format
+  const user: AuthUser | null = reduxUser ? {
+    id: reduxUser.id,
+    name: reduxUser.name || reduxUser.email || 'User',
+    role: reduxUser.role?.toLowerCase() as 'admin' | 'manager'
+  } : null
+
+  const isAuthenticated = !!accessToken && !!user && status === 'authenticated'
+  const isLoading = status === 'initializing' || status === 'authenticating'
 
   const switchRole = useCallback((newRole: 'admin' | 'manager') => {
-    localStorage.setItem(DEV_ROLE_STORAGE_KEY, newRole)
-    location.reload()
+    // TODO: Implement role switching if needed
+    console.warn(`Role switching to ${newRole} not yet implemented with JWT auth`)
   }, [])
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(DEV_ROLE_STORAGE_KEY)
-    localStorage.removeItem(DEV_USER_NAME_STORAGE_KEY)
-    setUser(null)
-  }, [])
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout()
+    } catch {
+      // Clear local state even if backend call fails
+    }
+    dispatch(logoutAction())
+  }, [dispatch])
 
   return {
-    isAuthenticated: user !== null,
-    isLoading: false,
+    isAuthenticated,
+    isLoading,
     user,
     switchRole,
     logout,

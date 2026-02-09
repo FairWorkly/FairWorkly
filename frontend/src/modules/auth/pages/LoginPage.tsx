@@ -1,8 +1,12 @@
 import { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import { LoginForm, SignupForm, ForgotPasswordModal } from '../features'
 import type { LoginFormData, SignupFormData } from '../types'
+import { authApi } from '@/services/authApi'
+import { setAuthData } from '@/slices/auth/authSlice'
 import {
+  AuthErrorAlert,
   AuthHeader,
   AuthTitle,
   AuthSubtitle,
@@ -11,47 +15,61 @@ import {
 } from '../ui'
 
 type TabType = 'login' | 'signup'
-const DEV_USER_NAME_STORAGE_KEY = 'dev:user-name'
-const AUTH_SIMULATED_DELAY_MS = 900
+
+const DEFAULT_ROUTES: Record<string, string> = {
+  admin: '/fairbot',
+  manager: '/roster/upload',
+}
 
 export function LoginPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const initialTab = searchParams.get('signup') === 'true' ? 'signup' : 'login'
   const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const isGoogleLoading = false
+  const [error, setError] = useState<string | null>(null)
 
-  const simulateAuth = (options: { name: string; provider: 'email' | 'google' }) => {
-    if (isSubmitting || isGoogleLoading) return
-    const setLoading = options.provider === 'google' ? setIsGoogleLoading : setIsSubmitting
-    setLoading(true)
+  const handleLogin = async (values: LoginFormData) => {
+    if (isSubmitting) return
 
-    setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(DEV_USER_NAME_STORAGE_KEY, options.name)
-      }
-      setLoading(false)
-      navigate('/fairbot')
-    }, AUTH_SIMULATED_DELAY_MS)
-  }
+    setIsSubmitting(true)
+    setError(null)
 
-  const handleLogin = (values: LoginFormData) => {
-    // TODO: Implement actual login logic
-    const name = values.email ? values.email.split('@')[0] : 'Demo User'
-    simulateAuth({ name, provider: 'email' })
+    try {
+      const response = await authApi.login(values.email, values.password)
+
+      // Store auth data in Redux
+      dispatch(setAuthData({
+        user: {
+          id: response.user.id,
+          email: response.user.email,
+          name: [response.user.firstName, response.user.lastName].filter(Boolean).join(' ') || response.user.email,
+          role: response.user.role,
+        },
+        accessToken: response.accessToken,
+      }))
+
+      // Navigate to role-appropriate default route
+      navigate(DEFAULT_ROUTES[response.user.role.toLowerCase()] ?? '/403')
+    } catch (err: unknown) {
+      console.error('Login failed:', err)
+      setError('Invalid email or password. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleSignup = (values: SignupFormData) => {
     // TODO: Implement actual signup logic
-    const name = values.firstName || values.email || 'New User'
-    simulateAuth({ name, provider: 'email' })
+    console.log('Signup not yet implemented:', values)
   }
 
   const handleGoogleLogin = () => {
     // TODO: Backend-driven Google OAuth (redirect to server auth endpoint).
-    simulateAuth({ name: 'Google User', provider: 'google' })
+    console.log('Google login not yet implemented')
   }
 
   return (
@@ -73,6 +91,12 @@ export function LoginPage() {
           Create Account
         </AuthTabButton>
       </AuthTabList>
+
+      {error && (
+        <AuthErrorAlert severity="error">
+          {error}
+        </AuthErrorAlert>
+      )}
 
       {activeTab === 'login' ? (
         <LoginForm
