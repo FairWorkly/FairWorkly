@@ -1,26 +1,49 @@
-import { post } from './baseApi'
+import httpClient from './httpClient'
 
-export type LoginRequest = {
+export interface LoginRequest {
   email: string
   password: string
 }
 
-export type LoginUserDto = {
+export interface UserDto {
   id: string
   email: string
   firstName: string
   lastName: string
-  role: 'admin' | 'manager'
+  role: string
   organizationId: string
 }
 
-export type LoginResponse = {
+export interface LoginResponse {
   accessToken: string
-  user: LoginUserDto
+  user: UserDto
 }
 
 export const authApi = {
-  login: (payload: LoginRequest) =>
-    post<LoginResponse, LoginRequest>('/auth/login', payload),
-  logout: () => post<void, void>('/auth/logout'),
+  /**
+   * Login with email and password
+   * Returns access token and user info. Refresh token is set as HttpOnly cookie.
+   */
+  async login(email: string, password: string): Promise<LoginResponse> {
+    const response = await httpClient.post<LoginResponse>('/auth/login', {
+      email,
+      password,
+    })
+    return response.data
+  },
+
+  /**
+   * Logout - clears the refresh token cookie
+   */
+  async logout(): Promise<void> {
+    await httpClient.post('/auth/logout')
+  },
+
+  /**
+   * Get current user info
+   */
+  async me(): Promise<UserDto> {
+    const response = await httpClient.get<UserDto>('/auth/me')
+    return response.data
+  },
 }

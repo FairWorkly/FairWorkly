@@ -6,6 +6,6 @@ namespace FairWorkly.Domain.Common;
 /// </summary>
 public class ValidationError
 {
-    public string Field { get; init; } = string.Empty;
-    public string Message { get; init; } = string.Empty;
+    public required string Field { get; init; }
+    public required string Message { get; init; }
 }

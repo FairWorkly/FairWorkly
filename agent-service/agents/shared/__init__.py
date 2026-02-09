@@ -1,31 +1,11 @@
-"""
-Shared Services for FairWorkly Agents
+"""DEPRECATED: Shim package to re-export shared as agents.shared.
 
-This package contains reusable code for all agents:
-- LLM providers (Claude, OpenAI)
-- RAG retrieval (vector database)
-- File handling (Excel, CSV)
-- Prompt building
-
-Usage:
-    from agents.shared.llm import LLMProvider
-    from agents.shared import RAGRetriever, FileHandler
+Keep for 1–2 iterations to support external scripts/notebooks/older branches.
+Remove once all consumers migrate to `shared.*` imports.
 """
 
-# Make imports easier
-from .file_handler import FileHandler
-from .prompt_builder_base import PromptBuilderBase
+import importlib
+import sys
 
-# RAG-related (if using vector database)
-try:
-    from .rag_retriever import RAGRetriever
-except ImportError:
-    # RAG not implemented yet
-    pass
-
-# LLM providers
-try:
-    from .llm.factory import LLMProvider, LLMProviderFactory
-except ImportError:
-    # LLM not implemented yet
-    pass
+_shared = importlib.import_module("shared")
+sys.modules[__name__] = _shared

@@ -66,10 +66,6 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by_user_id");
 
-                    b.Property<int>("CurrentEmployeeCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("current_employee_count");
-
                     b.Property<string>("IndustryType")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -135,7 +131,8 @@ namespace FairWorkly.Infrastructure.Migrations
 
                     b.HasIndex("ABN")
                         .IsUnique()
-                        .HasDatabaseName("ix_organizations_abn");
+                        .HasDatabaseName("ix_organizations_abn")
+                        .HasFilter("is_deleted = false");
 
                     b.HasIndex("ContactEmail")
                         .HasDatabaseName("ix_organizations_contact_email");
@@ -189,7 +186,8 @@ namespace FairWorkly.Infrastructure.Migrations
 
                     b.HasIndex("OrganizationId", "AwardType")
                         .IsUnique()
-                        .HasDatabaseName("ix_organization_awards_organization_id_award_type");
+                        .HasDatabaseName("ix_organization_awards_organization_id_award_type")
+                        .HasFilter("is_deleted = false");
 
                     b.HasIndex("OrganizationId", "IsPrimary")
                         .HasDatabaseName("ix_organization_awards_organization_id_is_primary");
@@ -256,7 +254,6 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnName("organization_id");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("password_hash");
@@ -308,14 +305,19 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasIndex("GoogleId")
                         .IsUnique()
                         .HasDatabaseName("ix_users_google_id")
-                        .HasFilter("google_id IS NOT NULL");
+                        .HasFilter("google_id IS NOT NULL AND is_deleted = false");
+
+                    b.HasIndex("RefreshToken")
+                        .HasDatabaseName("ix_users_refresh_token")
+                        .HasFilter("refresh_token IS NOT NULL");
 
                     b.HasIndex("UpdatedByUserId")
                         .HasDatabaseName("ix_users_updated_by_user_id");
 
                     b.HasIndex("OrganizationId", "Email")
                         .IsUnique()
-                        .HasDatabaseName("ix_users_organization_id_email");
+                        .HasDatabaseName("ix_users_organization_id_email")
+                        .HasFilter("is_deleted = false");
 
                     b.ToTable("users", (string)null);
                 });
@@ -406,11 +408,13 @@ namespace FairWorkly.Infrastructure.Migrations
 
                     b.HasIndex("AwardCode")
                         .IsUnique()
-                        .HasDatabaseName("ix_awards_award_code");
+                        .HasDatabaseName("ix_awards_award_code")
+                        .HasFilter("is_deleted = false");
 
                     b.HasIndex("AwardType")
                         .IsUnique()
-                        .HasDatabaseName("ix_awards_award_type");
+                        .HasDatabaseName("ix_awards_award_type")
+                        .HasFilter("is_deleted = false");
 
                     b.ToTable("awards", (string)null);
                 });
@@ -626,7 +630,6 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnName("department");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("email");
@@ -661,6 +664,10 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsStudent")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_student");
 
                     b.Property<string>("JobTitle")
                         .IsRequired()
@@ -721,12 +728,13 @@ namespace FairWorkly.Infrastructure.Migrations
 
                     b.HasIndex("OrganizationId", "Email")
                         .IsUnique()
-                        .HasDatabaseName("ix_employees_organization_id_email");
+                        .HasDatabaseName("ix_employees_organization_id_email")
+                        .HasFilter("email IS NOT NULL AND is_deleted = false");
 
                     b.HasIndex("OrganizationId", "EmployeeNumber")
                         .IsUnique()
                         .HasDatabaseName("ix_employees_organization_id_employee_number")
-                        .HasFilter("employee_number IS NOT NULL");
+                        .HasFilter("employee_number IS NOT NULL AND is_deleted = false");
 
                     b.ToTable("employees", (string)null);
                 });
@@ -1271,6 +1279,7 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnName("actual_value");
 
                     b.Property<string>("AffectedDates")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("affected_dates");
@@ -1347,8 +1356,10 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("roster_validation_id");
 
-                    b.Property<int>("Severity")
-                        .HasColumnType("integer")
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("severity");
 
                     b.Property<Guid?>("ShiftId")
@@ -1424,6 +1435,12 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.Property<int>("CriticalIssuesCount")
                         .HasColumnType("integer")
                         .HasColumnName("critical_issues_count");
+
+                    b.Property<string>("ExecutedCheckTypes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("executed_check_types");
 
                     b.Property<int>("FailedShifts")
                         .HasColumnType("integer")
@@ -1510,7 +1527,8 @@ namespace FairWorkly.Infrastructure.Migrations
 
                     b.HasIndex("RosterId")
                         .IsUnique()
-                        .HasDatabaseName("ix_roster_validations_roster_id");
+                        .HasDatabaseName("ix_roster_validations_roster_id")
+                        .HasFilter("is_deleted = false");
 
                     b.HasIndex("UpdatedByUserId")
                         .HasDatabaseName("ix_roster_validations_updated_by_user_id");
@@ -1704,7 +1722,7 @@ namespace FairWorkly.Infrastructure.Migrations
                     b.HasOne("FairWorkly.Domain.Employees.Entities.Employee", "Employee")
                         .WithMany("Documents")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_documents_employees_employee_id");
 
                     b.HasOne("FairWorkly.Domain.Auth.Entities.Organization", "Organization")

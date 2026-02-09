@@ -1,15 +1,31 @@
 # FairWorkly
 
+> **Status:** MVP Development
+
 FairWorkly is a B2B SaaS platform that helps Australian SMEs make compliant, auditable, and explainable HR decisions.
 
-👉 **New here? Start with:**  
-📘 [Project Overview – How FairWorkly Works](docs/00-project-overview.md)
+## Tech Stack
+
+| Layer          | Technology                                                     |
+| -------------- | -------------------------------------------------------------- |
+| Frontend       | React 18, TypeScript, Vite, MUI, TanStack Query, Redux Toolkit |
+| Backend        | .NET 8, EF Core 8, MediatR, PostgreSQL                         |
+| AI Agent       | Python 3.11, FastAPI, LangChain, FAISS                         |
+| Infrastructure | Docker, GitHub Actions                                         |
+
+## Prerequisites
+
+- Node.js 18+
+- .NET 8 SDK
+- Python 3.11+
+- PostgreSQL 15+
+- Docker (optional)
 
 ## What We Are Building
 
 FairWorkly focuses on **agent-driven HR compliance**, with the following core agents in the MVP:
 
-- **Compliance Agent**  
+- **Roster Agent**  
   Checks whether rosters and working arrangements comply with relevant Award rules.
 
 - **Payroll Agent**  
@@ -20,40 +36,56 @@ FairWorkly focuses on **agent-driven HR compliance**, with the following core ag
 - **FairBot**  
   Provides guided interaction and explanations across agents, helping users understand compliance outcomes.
 
-## Getting Started
-
-This section is intentionally minimal. Detailed architecture and workflows are documented separately.
-
-Quick checks:
-- `make lint-deps` (ensures shared RAG doesn't import compliance)
-- RAG init log: look for a single `RAG resources initialized` per process
-
-### Frontend
-
-cd frontend
-npm install
-npm run dev
-
-### Backend
-
-cd backend
-dotnet restore
-dotnet run
-
-### Docker (Dev)
-
-Run the full stack with Docker (frontend dev server + backend + agent-service + Postgres):
+## Project Structure
 
 ```
+fairworkly/
+├── frontend/          # React SPA
+├── backend/           # .NET Web API
+├── agent-service/     # Python AI agents
+└── docs/              # Architecture & guides
+```
+
+## Getting Started
+
+### Option 1: Docker (Recommended)
+
+```bash
+# 1. Copy environment files
+cp frontend/.env.example frontend/.env
+cp agent-service/.env.example agent-service/.env
+
+# 2. Start all services
 docker compose up --build
 ```
 
-Note: copy the example env files (`frontend/.env.example`, `backend/src/FairWorkly.API/appsettings.Development.example.json`, `agent-service/.env.example`) to their real names before running.
+### Option 2: Manual Setup
 
-Ports:
-- Frontend: http://localhost:5173
-- Backend: http://localhost:5680
-- Agent-service: http://localhost:8000
+**Frontend:**
+
+```bash
+cd frontend && npm install && npm run dev
+```
+
+**Backend:**
+
+```bash
+cd backend && dotnet restore && dotnet run --project src/FairWorkly.API
+```
+
+**Agent Service:**
+
+```bash
+cd agent-service && poetry install && poetry run uvicorn main:app --reload
+```
+
+### Ports
+
+| Service       | URL                   |
+| ------------- | --------------------- |
+| Frontend      | http://localhost:5173 |
+| Backend API   | http://localhost:5680 |
+| Agent Service | http://localhost:8000 |
 
 ## 📚 Documentation
 

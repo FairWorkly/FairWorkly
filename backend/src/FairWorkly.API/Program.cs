@@ -106,7 +106,8 @@ try
             {
                 if (builder.Environment.IsDevelopment())
                 {
-                    policy.WithOrigins("http://localhost:5173")
+                    policy
+                        .WithOrigins("http://localhost:5173")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials();
@@ -116,9 +117,11 @@ try
                     var allowedOrigins =
                         builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
                         ?? Array.Empty<string>();
-                    policy.WithOrigins(allowedOrigins)
+                    policy
+                        .WithOrigins(allowedOrigins)
                         .AllowAnyMethod()
-                        .AllowAnyHeader();
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 }
             }
         );
@@ -164,7 +167,7 @@ try
     builder.Services.AddAuthorization(options =>
     {
         options.AddPolicy("RequireAdmin", policy => policy.RequireRole("Admin"));
-        options.AddPolicy("RequireManager", policy => policy.RequireRole("Admin", "HrManager"));
+        options.AddPolicy("RequireManager", policy => policy.RequireRole("Admin", "Manager"));
         options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Employee"));
     });
 

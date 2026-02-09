@@ -11,7 +11,7 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         // Basic field constraints
         builder.Property(e => e.FirstName).HasMaxLength(100).IsRequired();
         builder.Property(e => e.LastName).HasMaxLength(100).IsRequired();
-        builder.Property(e => e.Email).HasMaxLength(255).IsRequired();
+        builder.Property(e => e.Email).HasMaxLength(255);
         builder.Property(e => e.EmployeeNumber).HasMaxLength(50);
 
         // Important: create indexes to speed up CSV lookups
@@ -19,10 +19,13 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder
             .HasIndex(e => new { e.OrganizationId, e.EmployeeNumber })
             .IsUnique()
-            .HasFilter("employee_number IS NOT NULL");
+            .HasFilter("employee_number IS NOT NULL AND is_deleted = false");
 
-        // Email is usually unique as well
-        builder.HasIndex(e => new { e.OrganizationId, e.Email }).IsUnique();
+        // Email is unique when provided (null emails allowed for imported employees)
+        builder
+            .HasIndex(e => new { e.OrganizationId, e.Email })
+            .IsUnique()
+            .HasFilter("email IS NOT NULL AND is_deleted = false");
 
         // Relationship configuration
         builder

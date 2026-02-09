@@ -3,6 +3,11 @@ namespace FairWorkly.Domain.Common.Enums;
 /// <summary>
 /// Severity level of compliance issues
 /// Used by: PayrollIssue, RosterIssue
+///
+/// PERSISTENCE CONTRACT:
+/// - This enum is persisted to the database as a string (enum name) via EF Core HasConversion&lt;string&gt;().
+/// - Once a name is released, DO NOT rename or delete members; only add new members.
+/// - If a rename is unavoidable, a data migration must update existing stored strings accordingly.
 /// </summary>
 public enum IssueSeverity
 {
