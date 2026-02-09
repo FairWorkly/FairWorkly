@@ -1,5 +1,6 @@
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Employees.Interfaces;
+using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Infrastructure.AI.Mocks;
 using FairWorkly.Infrastructure.AI.PythonServices;
@@ -7,6 +8,7 @@ using FairWorkly.Infrastructure.Identity;
 using FairWorkly.Infrastructure.Persistence;
 using FairWorkly.Infrastructure.Persistence.Repositories.Auth;
 using FairWorkly.Infrastructure.Persistence.Repositories.Employees;
+using FairWorkly.Infrastructure.Persistence.Repositories.Roster;
 using FairWorkly.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -50,6 +52,8 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        services.AddScoped<IRosterRepository, RosterRepository>();
+        services.AddScoped<IRosterValidationRepository, RosterValidationRepository>();
 
         // Register UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();

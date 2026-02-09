@@ -42,7 +42,7 @@ public class AwardLevel : BaseEntity
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string LevelName { get; set; } = string.Empty;
+    public required string LevelName { get; set; }
 
     /// <summary>
     /// Optional description of duties/responsibilities at this level

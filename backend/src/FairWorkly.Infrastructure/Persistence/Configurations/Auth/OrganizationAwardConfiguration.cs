@@ -23,7 +23,10 @@ public class OrganizationAwardConfiguration : IEntityTypeConfiguration<Organizat
 
         // Indexes
         // Unique constraint: One organization can have each award type only once
-        builder.HasIndex(oa => new { oa.OrganizationId, oa.AwardType }).IsUnique();
+        builder
+            .HasIndex(oa => new { oa.OrganizationId, oa.AwardType })
+            .IsUnique()
+            .HasFilter("is_deleted = false");
         // Quick lookup for primary awards
         builder.HasIndex(oa => new { oa.OrganizationId, oa.IsPrimary });
     }

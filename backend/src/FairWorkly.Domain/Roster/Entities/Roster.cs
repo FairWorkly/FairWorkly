@@ -9,7 +9,7 @@ namespace FairWorkly.Domain.Roster.Entities;
 /// <summary>
 /// Represents a weekly roster (collection of shifts)
 /// Created by Manager to schedule employees
-/// Used by: Compliance Agent to validate roster compliance
+/// Used by: Roster Agent to validate roster compliance
 /// </summary>
 public class Roster : AuditableEntity
 {
@@ -20,7 +20,11 @@ public class Roster : AuditableEntity
     //  Week Information
 
     /// <summary>
-    /// Week start date (typically Monday)
+    /// Week start date (typically Monday).
+    ///
+    /// TIME SEMANTICS (MVP):
+    /// - These dates are business calendar dates and should align with Shift.Date semantics.
+    /// - Until per-organization time zones are supported, treat roster weeks as Australia/Melbourne local dates.
     /// </summary>
     [Required]
     public DateTime WeekStartDate { get; set; }

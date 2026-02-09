@@ -20,9 +20,15 @@ public class LoginCommandHandler(
         CancellationToken cancellationToken
     )
     {
-        var user = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        var email = request.Email.Trim();
+        var user = await userRepository.GetByEmailAsync(email, cancellationToken);
 
-        if (user == null || !passwordHasher.Verify(request.Password, user.PasswordHash))
+        // User must exist AND have a password hash (OAuth-only users cannot use password login)
+        if (
+            user == null
+            || string.IsNullOrWhiteSpace(user.PasswordHash)
+            || !passwordHasher.Verify(request.Password, user.PasswordHash)
+        )
         {
             return Result<LoginResponse>.Unauthorized("Invalid email or password.");
         }

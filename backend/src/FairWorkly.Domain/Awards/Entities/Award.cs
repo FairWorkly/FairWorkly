@@ -27,7 +27,7 @@ public class Award : BaseEntity
     /// </summary>
     [Required]
     [MaxLength(200)]
-    public string Name { get; set; } = string.Empty;
+    public required string Name { get; set; }
 
     /// <summary>
     /// Fair Work award code
@@ -36,7 +36,7 @@ public class Award : BaseEntity
     /// </summary>
     [Required]
     [MaxLength(20)]
-    public string AwardCode { get; set; } = string.Empty;
+    public required string AwardCode { get; set; }
 
     /// <summary>
     /// Optional description

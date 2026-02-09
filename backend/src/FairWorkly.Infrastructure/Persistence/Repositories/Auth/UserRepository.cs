@@ -20,9 +20,11 @@ public class UserRepository : IUserRepository
     }
 
     // Retrieves a user record by their email address.
+    // Note: Emails are stored normalized (lowercase) via DbContext.SaveChangesAsync
     public async Task<User?> GetByEmailAsync(string email, CancellationToken ct = default)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
+        var normalized = email.Trim().ToLowerInvariant();
+        return await _context.Users.FirstOrDefaultAsync(u => u.Email == normalized, ct);
     }
 
     // Retrieve a user by the stored refresh token hash
@@ -38,10 +40,11 @@ public class UserRepository : IUserRepository
     }
 
     // Checks if the email is already taken by another user.
+    // Note: Emails are stored normalized (lowercase) via DbContext.SaveChangesAsync
     public async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct = default)
     {
-        // Returns true if no matching email is found.
-        return !await _context.Users.AnyAsync(u => u.Email == email, ct);
+        var normalized = email.Trim().ToLowerInvariant();
+        return !await _context.Users.AnyAsync(u => u.Email == normalized, ct);
     }
 
     // Registers a new user in the context.
@@ -56,9 +59,10 @@ public class UserRepository : IUserRepository
         _context.Users.Update(user);
     }
 
-    // Removes a user from the system.
+    // Soft-deletes a user (marks as deleted, preserving audit trail).
     public void Remove(User user)
     {
-        _context.Users.Remove(user);
+        user.IsDeleted = true;
+        _context.Users.Update(user);
     }
 }

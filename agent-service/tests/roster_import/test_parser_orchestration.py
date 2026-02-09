@@ -69,6 +69,58 @@ class TestParseRosterExcel:
         assert result.total_hours == Decimal("24.00")
         assert result.unique_employees == 3
 
+    def test_unique_employees_prefers_employee_number_then_email(self):
+        from agents.roster.services.roster_import.models import RosterEntry, RosterParseResult
+
+        entries = [
+            RosterEntry(
+                excel_row=2,
+                employee_number="EMP001",
+                employee_email=None,
+                date=date(2024, 1, 15),
+                start_time=time(9, 0),
+                end_time=time(17, 0),
+            ),
+            # Same employee number but different/missing email should not increase unique count
+            RosterEntry(
+                excel_row=3,
+                employee_number="EMP001",
+                employee_email=None,
+                date=date(2024, 1, 16),
+                start_time=time(9, 0),
+                end_time=time(17, 0),
+            ),
+            # Missing employee number: fall back to email
+            RosterEntry(
+                excel_row=4,
+                employee_number=None,
+                employee_email="bob@example.com",
+                date=date(2024, 1, 15),
+                start_time=time(9, 0),
+                end_time=time(17, 0),
+            ),
+            # Missing both: count as "unknown" (single bucket)
+            RosterEntry(
+                excel_row=5,
+                employee_number=None,
+                employee_email=None,
+                date=date(2024, 1, 15),
+                start_time=time(9, 0),
+                end_time=time(17, 0),
+            ),
+            RosterEntry(
+                excel_row=6,
+                employee_number=None,
+                employee_email=None,
+                date=date(2024, 1, 16),
+                start_time=time(9, 0),
+                end_time=time(17, 0),
+            ),
+        ]
+
+        result = RosterParseResult(entries=entries, raw_rows=[])
+        assert result.unique_employees == 3
+
     def test_missing_required_columns(self, handler, temp_excel_path):
         """Test error when required columns are missing."""
         wb = Workbook()

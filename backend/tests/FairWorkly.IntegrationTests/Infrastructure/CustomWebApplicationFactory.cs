@@ -93,7 +93,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             SubscriptionTier = SubscriptionTier.Tier1,
             SubscriptionStartDate = now.UtcDateTime,
             IsSubscriptionActive = true,
-            CurrentEmployeeCount = 0,
             CreatedAt = now,
             IsDeleted = false,
         };

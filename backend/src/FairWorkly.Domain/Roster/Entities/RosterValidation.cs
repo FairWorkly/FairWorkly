@@ -3,13 +3,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
+using FairWorkly.Domain.Roster.Enums;
+using FairWorkly.Domain.Roster.ValueObjects;
 
 namespace FairWorkly.Domain.Roster.Entities;
 
 /// <summary>
 /// Represents a single roster compliance validation run
 /// Created when Manager triggers roster validation
-/// Used by: Compliance Agent to track validation results
+/// Used by: Roster Agent to track validation results
 /// </summary>
 public class RosterValidation : AuditableEntity
 {
@@ -69,7 +71,7 @@ public class RosterValidation : AuditableEntity
     public int TotalIssuesCount { get; set; }
 
     /// <summary>
-    /// Number of critical issues
+    /// Number of failing issues (Severity >= Error) that cause validation to fail
     /// </summary>
     public int CriticalIssuesCount { get; set; }
 
@@ -85,36 +87,48 @@ public class RosterValidation : AuditableEntity
     public decimal PassRate => TotalShifts > 0 ? (decimal)PassedShifts / TotalShifts * 100 : 0;
 
     // ==================== Checks Performed ====================
-    // Track which of the 4-5 compliance checks were performed
 
     /// <summary>
-    /// Was minimum shift hours check performed?
-    /// Checks: shift.Duration >= Award.MinimumShiftHours
+    /// Comma-separated list of RosterCheckType values that were executed.
+    /// Example: "MinimumShiftHours,MealBreak,RestPeriodBetweenShifts,WeeklyHoursLimit,MaximumConsecutiveDays"
+    /// Use FormatCheckTypes() to generate, ParseCheckTypes() to read back.
     /// </summary>
+    public ExecutedCheckTypeSet ExecutedCheckTypes { get; set; } = ExecutedCheckTypeSet.Empty;
+
+    /// <summary>
+    /// Formats a collection of check types into the ExecutedCheckTypes string format.
+    /// </summary>
+    public static string FormatCheckTypes(IEnumerable<RosterCheckType> checkTypes)
+    {
+        return ExecutedCheckTypeSet.FromCheckTypes(checkTypes).ToString();
+    }
+
+    /// <summary>
+    /// Parses the ExecutedCheckTypes string back into a list of RosterCheckType values.
+    /// Returns empty list if null or empty.
+    /// </summary>
+    public List<RosterCheckType> ParseCheckTypes()
+    {
+        return ExecutedCheckTypes.CheckTypes.ToList();
+    }
+
+    // ==================== Legacy Check Flags (Deprecated) ====================
+    // These bool properties are kept for backward compatibility.
+    // New code should use ExecutedCheckTypes instead.
+
+    [Obsolete("Use ExecutedCheckTypes instead. Will be removed in future version.")]
     public bool MinimumShiftHoursCheckPerformed { get; set; } = true;
 
-    /// <summary>
-    /// Was maximum consecutive days check performed?
-    /// Checks: employee consecutive work days <= Award.MaxConsecutiveDays
-    /// </summary>
+    [Obsolete("Use ExecutedCheckTypes instead. Will be removed in future version.")]
     public bool MaxConsecutiveDaysCheckPerformed { get; set; } = true;
 
-    /// <summary>
-    /// Was meal break check performed?
-    /// Checks: shifts > threshold have adequate meal breaks
-    /// </summary>
+    [Obsolete("Use ExecutedCheckTypes instead. Will be removed in future version.")]
     public bool MealBreakCheckPerformed { get; set; } = true;
 
-    /// <summary>
-    /// Was rest period check performed?
-    /// Checks: rest between shifts >= Award.MinimumRestPeriodHours
-    /// </summary>
+    [Obsolete("Use ExecutedCheckTypes instead. Will be removed in future version.")]
     public bool RestPeriodCheckPerformed { get; set; } = true;
 
-    /// <summary>
-    /// Was weekly hours limit check performed?
-    /// Checks: full-time employees don't exceed ordinary hours + reasonable overtime
-    /// </summary>
+    [Obsolete("Use ExecutedCheckTypes instead. Will be removed in future version.")]
     public bool WeeklyHoursCheckPerformed { get; set; } = true;
 
     // ==================== Timing ====================

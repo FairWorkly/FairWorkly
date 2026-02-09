@@ -53,7 +53,7 @@ public class Payslip : AuditableEntity
     /// </summary>
     [Required]
     [MaxLength(200)]
-    public string EmployeeName { get; set; } = string.Empty;
+    public required string EmployeeName { get; set; }
 
     /// <summary>
     /// Snapshot of employee number / staff ID from CSV
@@ -61,7 +61,7 @@ public class Payslip : AuditableEntity
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string EmployeeNumber { get; set; } = string.Empty;
+    public required string EmployeeNumber { get; set; }
 
     // Snapshot: Employee status at time of this pay period
     /// <summary>
@@ -85,7 +85,7 @@ public class Payslip : AuditableEntity
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string Classification { get; set; } = string.Empty;
+    public required string Classification { get; set; }
 
     /// <summary>
     /// Base hourly rate at time of this pay period (before penalties/loading)

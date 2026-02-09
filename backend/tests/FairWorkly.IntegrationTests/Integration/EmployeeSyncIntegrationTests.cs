@@ -61,6 +61,9 @@ public class EmployeeSyncIntegrationTests : IAsyncLifetime
 
         _dbContext = new FairWorklyDbContext(options);
 
+        // Ensure schema matches current model (including new columns like employees.is_student)
+        await _dbContext.Database.MigrateAsync();
+
         _employeeRepository = new EmployeeRepository(_dbContext);
         _employeeSyncService = new EmployeeSyncService(
             _employeeRepository,

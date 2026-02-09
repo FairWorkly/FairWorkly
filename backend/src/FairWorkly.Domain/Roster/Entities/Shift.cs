@@ -9,7 +9,7 @@ namespace FairWorkly.Domain.Roster.Entities;
 /// <summary>
 /// Represents a single work shift assigned to an employee
 /// Part of a weekly Roster
-/// Used by: Compliance Agent to check shift compliance rules
+/// Used by: Roster Agent to check shift compliance rules
 /// </summary>
 public class Shift : BaseEntity
 {
@@ -43,7 +43,14 @@ public class Shift : BaseEntity
     // Shift Timing
 
     /// <summary>
-    /// Shift date
+    /// Shift date (business calendar date).
+    ///
+    /// TIME SEMANTICS (MVP):
+    /// - FairWorkly currently targets Australia only and does not support per-organization time zones yet.
+    /// - Treat Date + StartTime/EndTime as local roster times in Australia/Melbourne.
+    /// - Date should be stored as a date-only value (00:00:00) representing the local calendar day.
+    /// - Overnight shifts are represented by EndTime &lt; StartTime (end occurs on the next calendar day).
+    /// - Future: introduce Organization.TimeZoneId and interpret these fields in that time zone (incl. DST).
     /// </summary>
     [Required]
     public DateTime Date { get; set; }
@@ -122,7 +129,7 @@ public class Shift : BaseEntity
     /// Meal break duration in minutes
     /// Example: 30 minutes
     /// Null if HasMealBreak = false
-    /// Compliance Agent checks: duration >= Award.MealBreakMinutes
+    /// Roster Agent checks: duration >= Award.MealBreakMinutes
     /// </summary>
     public int? MealBreakDuration { get; set; }
 
@@ -149,15 +156,16 @@ public class Shift : BaseEntity
         get
         {
             var totalBreakMinutes = (MealBreakDuration ?? 0) + (RestBreaksDuration ?? 0);
-            return Duration - ((decimal)totalBreakMinutes / 60);
+            var net = Duration - ((decimal)totalBreakMinutes / 60);
+            return net < 0 ? 0 : net;
         }
     }
 
     // Shift Type
 
     /// <summary>
-    /// Is this a public holiday shift?
-    /// Affects penalty rates
+    /// Reserved: Future use for public holiday rostering restrictions.
+    /// Currently used by Payroll (PublicHolidayHours/Pay) but not by Roster compliance rules.
     /// </summary>
     public bool IsPublicHoliday { get; set; }
 
@@ -169,8 +177,7 @@ public class Shift : BaseEntity
     public string? PublicHolidayName { get; set; }
 
     /// <summary>
-    /// Is this an on-call shift?
-    /// (employee must be available but not actively working)
+    /// Reserved: Future use for on-call allowance and rostering rule calculations.
     /// </summary>
     public bool IsOnCall { get; set; }
 

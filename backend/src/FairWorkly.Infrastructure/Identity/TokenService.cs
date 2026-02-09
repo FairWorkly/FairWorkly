@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Entities;
+using FairWorkly.Domain.Auth.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -34,6 +35,11 @@ public class TokenService : ITokenService
         // Prepare key and signing algorithm
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        if (!Enum.IsDefined(typeof(UserRole), user.Role))
+        {
+            throw new InvalidOperationException($"Invalid user role value: {(int)user.Role}");
+        }
 
         // Assemble Claims (payload)
         var claims = new List<Claim>
