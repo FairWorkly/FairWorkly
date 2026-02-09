@@ -4,6 +4,8 @@ import { styled } from '@/styles/styled'
 import { Navbar } from '../features/Navbar'
 import { Hero } from '../features/Hero'
 import { TrustBar } from '../features/TrustBar'
+import { PricingSection } from '../components/PricingSection'
+import { FaqSection } from '../components/FaqSection'
 
 const HomePageRoot = styled(Box)({
   minHeight: '100vh',
@@ -51,18 +53,8 @@ export function HomePage() {
           Coming soon...
         </HomePageSectionBody>
       </HomePageSection>
-      <HomePageSection id="pricing">
-        <HomePageSectionHeading variant="h4">Pricing</HomePageSectionHeading>
-        <HomePageSectionBody variant="body1">
-          Coming soon...
-        </HomePageSectionBody>
-      </HomePageSection>
-      <HomePageSection id="faq">
-        <HomePageSectionHeading variant="h4">FAQ</HomePageSectionHeading>
-        <HomePageSectionBody variant="body1">
-          Coming soon...
-        </HomePageSectionBody>
-      </HomePageSection>
+      <PricingSection />
+      <FaqSection />
     </HomePageRoot>
   )
 }
