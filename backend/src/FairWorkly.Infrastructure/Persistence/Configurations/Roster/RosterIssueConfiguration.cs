@@ -1,4 +1,5 @@
 using FairWorkly.Domain.Roster.Entities;
+using FairWorkly.Domain.Roster.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -72,11 +73,24 @@ public class RosterIssueConfiguration : IEntityTypeConfiguration<RosterIssue>
         builder.Ignore(ri => ri.Variance);
 
         // Property configurations
-        builder.Property(ri => ri.CheckType).HasMaxLength(100).IsRequired();
+        // Enum to string conversion for SQL readability and consistency
+        builder
+            .Property(ri => ri.Severity)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
+        builder
+            .Property(ri => ri.CheckType)
+            .HasConversion<string>()
+            .HasMaxLength(100)
+            .IsRequired();
         builder.Property(ri => ri.Description).HasMaxLength(500).IsRequired();
         builder.Property(ri => ri.DetailedExplanation).HasMaxLength(2000);
         builder.Property(ri => ri.Recommendation).HasMaxLength(1000);
-        builder.Property(ri => ri.AffectedDates).HasMaxLength(500);
+        builder
+            .Property(ri => ri.AffectedDates)
+            .HasConversion(v => v.ToStorageString(), v => AffectedDateSet.Parse(v))
+            .HasMaxLength(500);
         builder.Property(ri => ri.ResolutionNotes).HasMaxLength(1000);
         builder.Property(ri => ri.WaiverReason).HasMaxLength(1000);
         builder.Property(ri => ri.ExpectedValue).HasPrecision(18, 4);

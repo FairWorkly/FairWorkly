@@ -67,7 +67,7 @@ class RosterEntry(BaseModel):
     )
 
     excel_row: int
-    employee_email: EmailStr
+    employee_email: Optional[EmailStr] = None
     employee_number: Optional[str] = None
     employee_name: Optional[str] = None
     employment_type: Optional[str] = None
@@ -117,7 +117,7 @@ class EmployeeEntry(BaseModel):
 
     excel_row: int
     name: str
-    email: EmailStr
+    email: Optional[EmailStr] = None
     role: str
     department: Optional[str] = None
     start_date: Optional[date] = None
@@ -185,7 +185,16 @@ class RosterParseResult(BaseModel):
         """Number of unique employees in the roster."""
         if not self.entries:
             return 0
-        return len({str(entry.employee_email).lower() for entry in self.entries})
+        keys: set[str] = set()
+        for entry in self.entries:
+            if entry.employee_number:
+                keys.add(f"num:{entry.employee_number.strip().lower()}")
+                continue
+            if entry.employee_email:
+                keys.add(f"email:{str(entry.employee_email).strip().lower()}")
+                continue
+            keys.add("unknown")
+        return len(keys)
 
 
 class IssueGroupSummary(BaseModel):

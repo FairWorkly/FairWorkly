@@ -25,67 +25,61 @@ npm run storybook        # UI dev server (http://localhost:6006)
 npm run build-storybook  # static Storybook build
 ```
 
-## Project structure
+## Project structure (high level)
 
-- `src/main.tsx` - Vite entry; mounts BrowserRouter, React Query, Redux, and MUI Theme providers.
-- `src/app/App.tsx` - route assembly via `useRoutes`.
-- `src/app/routes/*.routes.tsx` - route arrays; `src/app/routes/index.tsx` includes `MainLayout` if you choose to use `AppRoutes`.
-- `src/app/providers/` - Redux and MUI theme providers.
-- `src/modules/*` - feature modules with `pages/`, `features/`, `hooks/`, `types/`, `ui/`.
-- `src/shared/components/` - reusable UI (`ui/`, `feedback/`, `layout/`, `guards/`, `storybook/`).
-- `src/shared/constants/`, `src/shared/types/`, `src/shared/utils/`, `src/shared/hooks/` - shared contracts and helpers (see `src/shared/README.md`).
-- `src/services/` - axios client and API modules.
-- `src/store/`, `src/slices/` - Redux store and slices (auth/ui/notifications scaffolds).
-- `src/assets/`, `public/` - static assets.
-- `src/index.css`, `src/styles/` - global styling entries.
+- `src/main.tsx` - app bootstrap (Router, Query, Redux, Theme).
+- `src/app/` - app shell and routing.
+- `src/modules/` - feature modules (business domains).
+- `src/shared/` - reusable UI + utilities.
+- `src/services/` - API client layer.
+- `src/store/`, `src/slices/` - global state (used sparingly).
+- `src/assets/`, `public/`, `src/styles/` - assets and styles.
 
-## Routing and navigation
+## Architecture & rules
 
-- Route configs live in `src/app/routes/*.routes.tsx`.
-- Navigation labels and routes are centralized in `src/shared/constants/navigation.constants.ts` and consumed by `Topbar`/`Sidebar`.
-- `ProtectedRoute` is stubbed to unauthenticated, so tool routes redirect to `/login` until auth is wired in `src/shared/components/guards/ProtectedRoute.tsx`.
-- Keep `NAV_ROUTES` aligned with route configs to avoid dead links while modules are scaffolded.
-- `FairBotChat` currently renders the shared `Sidebar` directly for a three-column layout; reconcile with `MainLayout` if you later wrap routes.
-- FairBot layout widths are set in `src/modules/fairbot/constants/fairbot.constants.ts` (`GRID_TEMPLATE_COLUMNS`, `SIDEBAR_COLUMN_WIDTH`).
-- Import alias: `@/` maps to `src/` (see `vite.config.ts` and `tsconfig.app.json`).
+For detailed structure rules and frontend constraints, refer to:
 
-## State, data, and API
-
-- React Query is wired in `src/main.tsx` and available through `useApiQuery`/`useApiMutation` in `src/shared/hooks/`.
-- Redux store is configured in `src/store/` with slices under `src/slices/`.
-- API modules live in `src/services/` and use the shared axios client in `src/services/httpClient.ts`.
-
-## Styling and UI
-
-- MUI v7 + Emotion are used for layout and components.
-- Theme is defined in `src/shared/styles/theme.ts` and applied via `ThemeProvider`.
-- Keep global styles minimal; prefer component-scoped styling with MUI/Emotion.
+- `../docs/01-frontend-architecture.md`
+- `../docs/03-dev-workflow-and-pr.md`
 
 ## Environment variables
 
-Vite exposes env vars prefixed with `VITE_`. Examples:
+Vite exposes env vars prefixed with `VITE_`. Use the backend appsettings as your source of truth for local values.
 
-```env
-VITE_API_BASE_URL=https://api.example.com
-VITE_AUTH_AUDIENCE=...
+Start from:
+
+```bash
+cp .env.example .env
 ```
 
-Create a `.env` or `.env.local` under `FairWorkly/frontend/` as needed; do not commit secrets.
+Recommended local defaults (aligned with `backend/src/FairWorkly.API/appsettings.Development.example.json`):
+
+```env
+VITE_API_BASE_URL=http://localhost:5680
+VITE_APP_ENV=development
+VITE_DEBUG=false
+```
+
+Notes:
+- `VITE_API_BASE_URL` should match the backend base URL you run (local `dotnet run` or Docker).
+- Keep secrets out of git; use `.env.local` if you want local-only overrides.
 
 ## Quality and testing
 
 - ESLint is configured via `eslint.config.js` (`npm run lint`).
-- Storybook is configured under `.storybook/`. Vitest integration is set in `vite.config.ts` for storybook tests.
-- Jest is listed in dev dependencies, but no project-level test scripts/configs exist yet.
+- Storybook lives under `.storybook/`. Vitest integration is configured in `vite.config.ts`, but there is no test script yet.
+- Jest is installed but not wired to any project-level test scripts/configs.
 
 ## Documentation links
 
-- Product/context: `../docs/PRD.md`, `../docs/TDD.md`, `../docs/erd.md`
-- Repo conventions: `../../AGENTS.md`
+- Frontend architecture: `../docs/01-frontend-architecture.md`
+- Dev workflow & PR rules: `../docs/03-dev-workflow-and-pr.md`
 
 ## Contributing workflow
 
+Follow the repo workflow rules in `../docs/03-dev-workflow-and-pr.md`. Quick reminders:
+
 1) Branch from `main`.
-2) Add or adjust routes in `src/app/routes/*.routes.tsx` and update navigation constants if needed.
+2) Update routes in `src/app/routes/*.routes.tsx` and keep sidebar nav config in sync (`src/shared/components/layout/app/Sidebar/config/navigation.config.tsx`).
 3) Keep feature work inside `src/modules/*` and shared elements in `src/shared/`.
 4) Run `npm run lint` before opening a PR; add tests or Storybook stories when introducing new UI behavior.

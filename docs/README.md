@@ -11,19 +11,48 @@ Follow the reading order below.
 
 **Required reading for everyone (in order):**
 
-1. 📘 [Project Overview – How FairWorkly Works](00-project-overview.md)  
+1. 📘 [Project Overview – How FairWorkly Works](00-project-overview.md)
    Understand what FairWorkly is, what it solves, and what it does NOT do.
 
-2. 🧠 [Frontend Architecture Cheat Sheet](01-frontend-architecture.md)  
+2. 🧠 [Frontend Architecture Cheat Sheet](architecture/01-frontend-architecture.md)
    Required for anyone touching frontend code.
 
-3. 🏗️ [Backend Architecture & Rules](02-backend-architecture.md)  
+3. 🏗️ [Backend Architecture & Rules](architecture/02-backend-architecture.md)
    Required for anyone touching backend or APIs.
 
-4. 🔄 [Development Workflow & PR Rules](03-dev-workflow-and-pr.md)  
+4. 🗄️ [Database ER Diagram](architecture/database/er-diagram.md)
+   Visual overview of all entities and relationships.
+
+5. 🔄 [Development Workflow & PR Rules](guides/03-dev-workflow-and-pr.md)
    Required before opening your first PR.
 
 👉 **If you have not read the above, do not start coding.**
+
+---
+
+## 📂 Folder Structure
+
+```
+docs/
+├── 00-project-overview.md      # Start here
+├── architecture/               # System design docs
+│   ├── 01-frontend-architecture.md
+│   ├── 02-backend-architecture.md
+│   ├── 04-error-handling-architecture.md
+│   ├── database/               # Database design & migrations
+│   │   ├── er-diagram.md            # Entity-Relationship diagram
+│   │   ├── db-non-negative-constraints.md
+│   │   └── db-required-fields-contract.md
+│   └── roster/                 # Roster domain architecture
+│       ├── domain-design.md         # Domain layer design
+│       └── application-design.md    # Application layer orchestration
+├── guides/                     # How-to guides
+│   ├── 03-dev-workflow-and-pr.md
+│   └── backend/                # Backend-specific guides
+│       ├── development.md           # Backend development guide
+│       └── result-pattern.md        # Result<T> pattern guide
+└── issues/                     # Feature specs & issues
+```
 
 ---
 
@@ -35,11 +64,10 @@ FairWorkly is built around **decision-making agents** and **supporting modules**
 
   - Compliance Agent
   - Payroll Agent
-  - Employee Agent (Staff experience via FairBot & My Profile)
 
 - **Supporting Modules**
-  - Employees (data provider)
-  - Documents (template-based document generation)
+
+  - Home/ Payroll upload/ Roster upload
   - Auth / Identity / Shared UI
 
 > Rule of thumb:  

@@ -35,7 +35,7 @@ for issue in issues:
 
 # Use the parsed entries
 for entry in result.entries:
-    print(f"{entry.employee_email}: {entry.date} {entry.start_time}-{entry.end_time}")
+    print(f"{entry.employee_number}: {entry.date} {entry.start_time}-{entry.end_time}")
 ```
 
 ## Excel File Format
@@ -46,7 +46,7 @@ Your Excel file **must** have these 4 columns:
 
 | Column         | Example            | Description         |
 | -------------- | ------------------ | ------------------- |
-| Employee Email | `john@example.com` | Valid email address |
+| Employee Number | `EMP001` | Employee ID used for matching |
 | Date           | `2024-01-15`       | Shift date          |
 | Start Time     | `09:00`            | When the shift starts |
 | End Time       | `17:00`            | When the shift ends |
@@ -54,7 +54,7 @@ Your Excel file **must** have these 4 columns:
 
 | Column | Example | Description |
 |--------|---------|-------------|
-| Employee Number | `EMP001` | Employee ID for secondary matching |
+| Employee Email | `john@example.com` | Email address (optional). If provided, must be valid. |
 | Employee Name | `John Smith` | Display name (not used for matching) |
 | Employment Type | `full-time` | full-time / part-time / casual |
 | Is Overnight | `No` | Explicitly mark overnight shifts |
@@ -110,11 +110,10 @@ The parser is flexible with column names. These all work:
 |----------------|------------------------|
 | `Employee Email` | employee_email |
 | `employee_email` | employee_email |
-| `Staff Email` | employee_email |
-| `员工邮箱` | employee_email |
+| `Employee Number` | employee_number |
+| `employee_number` | employee_number |
 | `Start Time` | start_time |
-| `start` | start_time |
-| `开始时间` | start_time |
+| `start_time` | start_time |
 
 The parser normalizes:
 - Extra spaces
@@ -158,6 +157,8 @@ Only `.xlsx` files are supported. Save your file as "Excel Workbook (.xlsx)".
 | john              |   <-- This will fail!
 | john@example.com  |   <-- This works!
 ```
+
+Employee Email is optional, but if provided it must be a valid email.
 
 ## Error Handling
 
