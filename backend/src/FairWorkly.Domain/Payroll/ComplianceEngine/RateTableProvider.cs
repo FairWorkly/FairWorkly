@@ -1,4 +1,4 @@
-namespace FairWorkly.Application.Payroll.Services.ComplianceEngine;
+namespace FairWorkly.Domain.Payroll.ComplianceEngine;
 
 /// <summary>
 /// Static provider for Retail Award (MA000004) rate tables

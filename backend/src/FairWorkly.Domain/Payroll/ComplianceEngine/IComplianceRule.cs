@@ -1,6 +1,6 @@
 using FairWorkly.Domain.Payroll.Entities;
 
-namespace FairWorkly.Application.Payroll.Services.ComplianceEngine;
+namespace FairWorkly.Domain.Payroll.ComplianceEngine;
 
 /// <summary>
 /// Interface for compliance rules that validate payslip data against award requirements

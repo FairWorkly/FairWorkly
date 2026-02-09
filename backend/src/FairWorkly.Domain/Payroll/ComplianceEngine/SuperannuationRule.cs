@@ -1,7 +1,7 @@
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Payroll.Entities;
 
-namespace FairWorkly.Application.Payroll.Services.ComplianceEngine;
+namespace FairWorkly.Domain.Payroll.ComplianceEngine;
 
 /// <summary>
 /// Validates that superannuation is paid at the required 12% rate

@@ -7,7 +7,7 @@ using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Employees.Orchestrators;
 using FairWorkly.Application.Employees.Services;
 using FairWorkly.Application.Payroll.Orchestrators;
-using FairWorkly.Application.Payroll.Services.ComplianceEngine;
+using FairWorkly.Domain.Payroll.ComplianceEngine;
 using FairWorkly.Application.Roster.Orchestrators;
 using FairWorkly.Application.Roster.Services;
 using FairWorkly.Domain.Roster.Parameters;

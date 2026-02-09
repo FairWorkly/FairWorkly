@@ -1,4 +1,4 @@
-using FairWorkly.Application.Payroll.Services.ComplianceEngine;
+using FairWorkly.Domain.Payroll.ComplianceEngine;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Payroll.Entities;
 using FluentAssertions;
