@@ -12,6 +12,7 @@ namespace FairWorkly.Domain.Payroll.ComplianceEngine;
 public class CasualLoadingRule : IComplianceRule
 {
     public string RuleName => "Casual Loading Check";
+    public IssueCategory Category => IssueCategory.CasualLoading;
 
     public List<PayrollIssue> Evaluate(Payslip payslip, Guid validationId)
     {

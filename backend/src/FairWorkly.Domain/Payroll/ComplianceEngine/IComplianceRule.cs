@@ -1,4 +1,5 @@
 using FairWorkly.Domain.Payroll.Entities;
+using FairWorkly.Domain.Payroll.Enums;
 
 namespace FairWorkly.Domain.Payroll.ComplianceEngine;
 
@@ -11,6 +12,11 @@ public interface IComplianceRule
     /// Name of this rule for identification and logging
     /// </summary>
     string RuleName { get; }
+
+    /// <summary>
+    /// Category of this rule, used for enable/disable filtering by Handler
+    /// </summary>
+    IssueCategory Category { get; }
 
     /// <summary>
     /// Evaluates a payslip for compliance issues

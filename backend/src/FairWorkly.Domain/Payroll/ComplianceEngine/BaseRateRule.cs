@@ -12,6 +12,7 @@ namespace FairWorkly.Domain.Payroll.ComplianceEngine;
 public class BaseRateRule : IComplianceRule
 {
     public string RuleName => "Base Rate Check";
+    public IssueCategory Category => IssueCategory.BaseRate;
 
     public List<PayrollIssue> Evaluate(Payslip payslip, Guid validationId)
     {

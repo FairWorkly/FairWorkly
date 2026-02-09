@@ -12,6 +12,7 @@ namespace FairWorkly.Domain.Payroll.ComplianceEngine;
 public class PenaltyRateRule : IComplianceRule
 {
     public string RuleName => "Penalty Rate Check";
+    public IssueCategory Category => IssueCategory.PenaltyRate;
 
     public List<PayrollIssue> Evaluate(Payslip payslip, Guid validationId)
     {

@@ -11,6 +11,7 @@ namespace FairWorkly.Domain.Payroll.ComplianceEngine;
 public class SuperannuationRule : IComplianceRule
 {
     public string RuleName => "Superannuation Check";
+    public IssueCategory Category => IssueCategory.Superannuation;
 
     public List<PayrollIssue> Evaluate(Payslip payslip, Guid validationId)
     {

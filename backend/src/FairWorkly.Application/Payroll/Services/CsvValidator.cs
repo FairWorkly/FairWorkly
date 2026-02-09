@@ -19,7 +19,7 @@ public class CsvValidator : ICsvValidator
         "Gross Pay", "Superannuation Paid",
     };
 
-    public Result<List<ValidatedPayrollRow>> Validate(List<string[]> rows, string awardType)
+    public Result<List<ValidatedPayrollRow>> Validate(List<string[]> rows, AwardType awardType)
     {
         // 阶段 1：表头验证
         var headerErrors = ValidateHeader(rows[0]);
@@ -151,7 +151,7 @@ public class CsvValidator : ICsvValidator
     }
 
     private static (List<ValidatedPayrollRow>?, List<ValidationError>?) ValidateFields(
-        List<string[]> dataRows, string awardType)
+        List<string[]> dataRows, AwardType awardType)
     {
         var errors = new List<ValidationError>();
         var validatedRows = new List<ValidatedPayrollRow>();
@@ -220,10 +220,11 @@ public class CsvValidator : ICsvValidator
 
             // Award Type (col 6)
             var awardTypeValue = row[6].Trim();
-            if (!string.Equals(awardTypeValue, awardType, StringComparison.Ordinal))
+            var expectedShortName = AwardTypeParser.ToShortName(awardType);
+            if (!string.Equals(awardTypeValue, expectedShortName, StringComparison.OrdinalIgnoreCase))
             {
                 errors.Add(CreateError(rowNumber, "Award Type",
-                    $"Award Type is required and must be \"{awardType}\" to match your selected award"));
+                    $"Award Type is required and must be \"{expectedShortName}\" to match your selected award"));
                 rowHasError = true;
             }
             else
