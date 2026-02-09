@@ -129,7 +129,9 @@ export function setupInterceptors(store: StoreLike) {
           throw new Error("/auth/me returned incomplete user data");
         }
         const normalizedUser = {
-          ...u,
+          id: u.id,
+          email: u.email,
+          name: [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email,
           role,
         };
 

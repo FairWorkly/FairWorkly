@@ -64,7 +64,8 @@ export function SignupForm({
   const [confirmPassword, setConfirmPassword] = useState('')
   const passwordStrength = getPasswordStrength(password)
   const passwordsMatch = confirmPassword !== '' && confirmPassword === password
-  const isActionDisabled = isSubmitting || isGoogleLoading || !passwordsMatch
+  const isSubmitDisabled = isSubmitting || isGoogleLoading || !passwordsMatch
+  const isGoogleDisabled = isGoogleLoading
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,7 +81,7 @@ export function SignupForm({
 
   return (
     <AuthFormContainer onSubmit={handleSubmit}>
-      <GoogleButton type="button" onClick={onGoogleLogin} disabled={isActionDisabled}>
+      <GoogleButton type="button" onClick={onGoogleLogin} disabled={isGoogleDisabled}>
         <GoogleIcon />
         {isGoogleLoading ? 'Signing up...' : 'Continue with Google'}
       </GoogleButton>
@@ -164,7 +165,7 @@ export function SignupForm({
       </AuthFieldset>
 
       <FormActions>
-        <SubmitButton type="submit" disabled={isActionDisabled}>
+        <SubmitButton type="submit" disabled={isSubmitDisabled}>
           {isSubmitting ? 'Creating account...' : 'Create Account'}
           <ArrowForwardIcon fontSize="small" />
         </SubmitButton>
