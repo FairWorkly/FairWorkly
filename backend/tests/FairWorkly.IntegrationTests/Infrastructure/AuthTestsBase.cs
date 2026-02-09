@@ -150,45 +150,53 @@ public abstract class AuthTestsBase : IClassFixture<CustomWebApplicationFactory>
     }
 
     /// <summary>
-    /// Set up a user with an expired refresh token for testing
+    /// Set up a user with a valid refresh token for testing.
+    /// Directly sets the token hash in DB to avoid race conditions
+    /// with parallel test classes that may rotate the same user's token.
     /// </summary>
-    protected async Task<string> SetupExpiredRefreshTokenAsync()
+    protected Task<string> SetupValidRefreshTokenAsync()
     {
-        // First login to get a valid refresh token
-        var response = await Client.PostAsJsonAsync(
-            "/api/auth/login",
-            new { email = "test@example.com", password = "TestPassword123" }
-        );
-        response.EnsureSuccessStatusCode();
-
-        // Get the refresh token
-        string? refreshToken = null;
-        if (response.Headers.TryGetValues("Set-Cookie", out var cookies))
-        {
-            var refreshCookie = cookies.FirstOrDefault(c => c.StartsWith("refreshToken="));
-            if (refreshCookie != null)
-            {
-                var tokenPart = refreshCookie.Split(';')[0];
-                refreshToken = tokenPart.Substring("refreshToken=".Length);
-            }
-        }
-
-        if (refreshToken == null)
-        {
-            throw new InvalidOperationException("Failed to get refresh token");
-        }
-
-        // Update the user's refresh token expiry to be in the past
         using var scope = Factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
+        var secretHasher = scope.ServiceProvider.GetRequiredService<ISecretHasher>();
+
         var user = db.Set<User>().FirstOrDefault(u => u.Email == "test@example.com");
-        if (user != null)
+        if (user == null)
         {
-            user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(-1);
-            db.SaveChanges();
+            throw new InvalidOperationException("Seed user test@example.com must exist");
         }
 
-        return refreshToken;
+        var refreshTokenPlain = "testValidRefreshToken";
+        user.RefreshToken = secretHasher.Hash(refreshTokenPlain);
+        user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(7);
+        db.SaveChanges();
+
+        return Task.FromResult(refreshTokenPlain);
+    }
+
+    /// <summary>
+    /// Set up a user with an expired refresh token for testing.
+    /// Directly sets the token hash in DB to avoid race conditions
+    /// with parallel test classes that may rotate the same user's token.
+    /// </summary>
+    protected Task<string> SetupExpiredRefreshTokenAsync()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
+        var secretHasher = scope.ServiceProvider.GetRequiredService<ISecretHasher>();
+
+        var user = db.Set<User>().FirstOrDefault(u => u.Email == "test@example.com");
+        if (user == null)
+        {
+            throw new InvalidOperationException("Seed user test@example.com must exist");
+        }
+
+        var refreshTokenPlain = "testExpiredRefreshToken";
+        user.RefreshToken = secretHasher.Hash(refreshTokenPlain);
+        user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(-1);
+        db.SaveChanges();
+
+        return Task.FromResult(refreshTokenPlain);
     }
 
     /// <summary>
