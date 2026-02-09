@@ -42,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<IEmployeeService, EmployeeService>();
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<ICsvParser, CsvParser>();
+        services.AddScoped<ICsvValidator, CsvValidator>();
 
         // Register Compliance Rules
         services.AddScoped<IComplianceRule, BaseRateRule>();
