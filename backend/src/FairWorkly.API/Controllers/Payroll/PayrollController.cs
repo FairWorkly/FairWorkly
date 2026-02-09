@@ -1,4 +1,7 @@
-﻿using MediatR;
+using FairWorkly.Application.Payroll.Features.ValidatePayroll;
+using FairWorkly.Domain.Common;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FairWorkly.API.Controllers.Payroll;
@@ -12,5 +15,43 @@ public class PayrollController : ControllerBase
     public PayrollController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpPost("validation")]
+    [Authorize(Policy = "RequireManager")]
+    public async Task<IActionResult> Validate(
+        IFormFile file,
+        [FromForm] string awardType,
+        [FromForm] string state,
+        [FromForm] bool enableBaseRateCheck = true,
+        [FromForm] bool enablePenaltyCheck = true,
+        [FromForm] bool enableCasualLoadingCheck = true,
+        [FromForm] bool enableSuperCheck = true)
+    {
+        var command = new ValidatePayrollCommand
+        {
+            FileStream = file.OpenReadStream(),
+            FileName = file.FileName,
+            FileSize = file.Length,
+            AwardType = awardType,
+            State = state,
+            EnableBaseRateCheck = enableBaseRateCheck,
+            EnablePenaltyCheck = enablePenaltyCheck,
+            EnableCasualLoadingCheck = enableCasualLoadingCheck,
+            EnableSuperCheck = enableSuperCheck,
+        };
+
+        var result = await _mediator.Send(command);
+
+        if (result.Type == ResultType.ValidationFailure)
+            return BadRequest(new { code = 400, msg = "Request validation failed", data = new { errors = result.ValidationErrors } });
+
+        if (result.Type == ResultType.ProcessingFailure)
+            return UnprocessableEntity(new { code = 422, msg = result.ErrorMessage, data = new { errors = result.ValidationErrors } });
+
+        if (result.Type == ResultType.Forbidden)
+            return StatusCode(403, new { code = 403, msg = result.ErrorMessage });
+
+        return Ok(new { code = 200, msg = "Audit completed successfully", data = result.Value });
     }
 }
