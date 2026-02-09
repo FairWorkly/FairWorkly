@@ -1,6 +1,7 @@
 using Amazon.S3;
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Employees.Interfaces;
+using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Infrastructure.AI.Mocks;
@@ -9,6 +10,7 @@ using FairWorkly.Infrastructure.Identity;
 using FairWorkly.Infrastructure.Persistence;
 using FairWorkly.Infrastructure.Persistence.Repositories.Auth;
 using FairWorkly.Infrastructure.Persistence.Repositories.Employees;
+using FairWorkly.Infrastructure.Persistence.Repositories.Payroll;
 using FairWorkly.Infrastructure.Persistence.Repositories.Roster;
 using FairWorkly.Infrastructure.Services;
 using FairWorkly.Infrastructure.Storage;
@@ -56,6 +58,9 @@ public static class DependencyInjection
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IRosterRepository, RosterRepository>();
         services.AddScoped<IRosterValidationRepository, RosterValidationRepository>();
+        services.AddScoped<IPayrollValidationRepository, PayrollValidationRepository>();
+        services.AddScoped<IPayslipRepository, PayslipRepository>();
+        services.AddScoped<IPayrollIssueRepository, PayrollIssueRepository>();
 
         // Register UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();
