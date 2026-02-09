@@ -1,4 +1,4 @@
-namespace FairWorkly.Domain.Common.Enums;
+namespace FairWorkly.Domain.Payroll.Enums;
 
 /// <summary>
 /// Category of compliance issue

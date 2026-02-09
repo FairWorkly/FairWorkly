@@ -1,4 +1,5 @@
 using FairWorkly.Domain.Common.Enums;
+using FairWorkly.Domain.Payroll.Enums;
 using FairWorkly.Domain.Payroll.Entities;
 
 namespace FairWorkly.Domain.Payroll.ComplianceEngine;
