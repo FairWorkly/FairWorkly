@@ -1,7 +1,7 @@
 export type AuthUser = {
   id: string
   name: string
-  role: 'admin' | 'manager'
+  role?: string
 }
 
 export type AuthState = {

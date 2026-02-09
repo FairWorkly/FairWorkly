@@ -4,7 +4,6 @@ import { authApi } from '@/services/authApi'
 import { setAuthData, setStatus } from '@/slices/auth'
 import { useAppDispatch } from '@/store/hooks'
 import type { LoginFormData } from '../types'
-import type { AuthUser } from '@/slices/auth'
 
 type UseLoginResult = {
   login: (values: LoginFormData) => Promise<void>
@@ -12,20 +11,20 @@ type UseLoginResult = {
   error: string | null
 }
 
+const DEFAULT_ROUTES = {
+  admin: '/fairbot',
+  manager: '/roster/upload',
+} as const
+
 function mapUserName(firstName?: string, lastName?: string, email?: string) {
   const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
   if (fullName) return fullName
   return email ?? 'User'
 }
 
-type AuthRole = NonNullable<AuthUser['role']>
-
-function normalizeRole(role?: string): AuthRole {
-  return (role ?? '').toLowerCase() === 'manager' ? 'manager' : 'admin'
-}
-
-function mapRoleRedirect() {
-  return '/fairbot'
+function mapRoleRedirect(role: string) {
+  const normalizedRole = role.toLowerCase()
+  return DEFAULT_ROUTES[normalizedRole as keyof typeof DEFAULT_ROUTES] ?? '/403'
 }
 
 export function useLogin(): UseLoginResult {
@@ -47,10 +46,14 @@ export function useLogin(): UseLoginResult {
           password: values.password,
         })
 
+        const role = response.user.role?.toLowerCase()
+        const validRole: 'admin' | 'manager' | undefined =
+          role === 'admin' || role === 'manager' ? role : undefined
+
         const user = {
           id: response.user.id,
           email: response.user.email,
-          role: normalizeRole(response.user.role),
+          role: validRole,
           name: mapUserName(
             response.user.firstName,
             response.user.lastName,
@@ -60,7 +63,7 @@ export function useLogin(): UseLoginResult {
 
         dispatch(setAuthData({ user, accessToken: response.accessToken }))
 
-        navigate(mapRoleRedirect(), { replace: true })
+        navigate(mapRoleRedirect(role ?? ''), { replace: true })
       } catch (err) {
         const message =
           err instanceof Error ? err.message : 'Login failed. Please try again.'
