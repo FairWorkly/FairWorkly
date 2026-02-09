@@ -24,7 +24,7 @@ const StyledDialog = styled(Dialog)(({ theme }) => ({
     },
     '& .MuiDialog-paper': {
         borderRadius: theme.spacing(3),
-        maxWidth: '500px',
+        maxWidth: theme.spacing(62.5),
         boxShadow: theme.fairworkly.shadow.xl,
         overflow: 'visible',
     },
@@ -57,7 +57,7 @@ const MailIcon = styled(MailOutline)(({ theme }) => ({
 
 const ModalTitle = styled(Typography)(({ theme }) => ({
     fontSize: theme.typography.h3.fontSize,
-    fontWeight: 700,
+    fontWeight: theme.typography.fontWeightBold,
     color: theme.palette.text.primary,
 }));
 
@@ -85,13 +85,13 @@ const ContactLabel = styled(Typography)(({ theme }) => ({
     marginBottom: theme.spacing(1.5),
     color: theme.palette.text.primary,
     fontSize: theme.typography.body1.fontSize,
-    fontWeight: 600,
+    fontWeight: theme.typography.fontWeightSemiBold,
 }));
 
 const EmailLink = styled('a')(({ theme }) => ({
     display: 'inline-block',
     fontSize: theme.typography.h5.fontSize,
-    fontWeight: 600,
+    fontWeight: theme.typography.fontWeightSemiBold,
     color: theme.palette.primary.main,
     textDecoration: 'none',
     transition: theme.transitions.create(['color', 'transform'], {

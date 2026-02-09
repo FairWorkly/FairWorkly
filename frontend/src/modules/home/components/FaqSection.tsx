@@ -101,7 +101,7 @@ const QuestionIcon = styled(Box)(({ theme }) => ({
 }));
 
 const QuestionText = styled(Typography)(({ theme }) => ({
-    fontWeight: 600,
+    fontWeight: theme.typography.fontWeightSemiBold,
     color: theme.palette.text.primary,
 }));
 
@@ -113,7 +113,7 @@ const AnswerText = styled(Typography)(({ theme }) => ({
 
 const BoldText = styled('span')(({ theme }) => ({
     color: theme.palette.text.primary,
-    fontWeight: 600,
+    fontWeight: theme.typography.fontWeightSemiBold,
 }));
 
 const NoteBox = styled(Box)(({ theme }) => ({
@@ -135,7 +135,7 @@ const TemplateButton = styled(Button)(({ theme }) => ({
     padding: theme.spacing(1.5, 3),
     backgroundColor: alpha(theme.palette.primary.main, 0.12),
     color: theme.palette.primary.main,
-    fontWeight: 600,
+    fontWeight: theme.typography.fontWeightSemiBold,
     borderRadius: theme.fairworkly.radius.md,
     textTransform: 'none',
     transition: theme.transitions.create(['all'], {
@@ -246,6 +246,7 @@ export const FaqSection: React.FC = () => {
         label: 'FAQ',
         title: 'Frequently Asked Questions',
         subtitle: 'Everything you need to know about FairWorkly',
+        templateButton: 'View All Templates',
     };
 
 
@@ -302,7 +303,7 @@ export const FaqSection: React.FC = () => {
                                         endIcon={<ArrowForward />}
                                         onClick={handleTemplateClick}
                                     >
-                                        View All Templates
+                                        {content.templateButton}
                                     </TemplateButton>
                                 )}
                             </FaqCard>
