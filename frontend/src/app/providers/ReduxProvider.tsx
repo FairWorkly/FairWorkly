@@ -33,7 +33,7 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({ children }) => {
         })
 
         const u = meRes.data
-        const role = typeof u?.role === 'string' ? u.role.toLowerCase() : u?.role
+        const role = typeof u?.role === 'string' ? u.role : undefined
         if (!u?.id || !u?.email || !role) {
           throw new Error('/auth/me returned incomplete user data')
         }

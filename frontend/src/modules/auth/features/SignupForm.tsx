@@ -63,7 +63,7 @@ export function SignupForm({
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const passwordStrength = getPasswordStrength(password)
-  const passwordsMatch = confirmPassword === '' || confirmPassword === password
+  const passwordsMatch = confirmPassword !== '' && confirmPassword === password
   const isActionDisabled = isSubmitting || isGoogleLoading || !passwordsMatch
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -4,7 +4,6 @@ import { authApi } from '@/services/authApi'
 import { setAuthData, setStatus } from '@/slices/auth'
 import { useAppDispatch } from '@/store/hooks'
 import type { LoginFormData } from '../types'
-import type { AuthUser } from '@/slices/auth'
 
 type UseLoginResult = {
   login: (values: LoginFormData) => Promise<void>
@@ -12,10 +11,10 @@ type UseLoginResult = {
   error: string | null
 }
 
-const DEFAULT_ROUTES: Record<'admin' | 'manager', string> = {
+const DEFAULT_ROUTES = {
   admin: '/fairbot',
   manager: '/roster/upload',
-}
+} as const
 
 function mapUserName(firstName?: string, lastName?: string, email?: string) {
   const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
@@ -23,16 +22,9 @@ function mapUserName(firstName?: string, lastName?: string, email?: string) {
   return email ?? 'User'
 }
 
-type AuthRole = NonNullable<AuthUser['role']>
-
-function normalizeRole(role?: string): AuthRole | null {
-  const normalized = (role ?? '').toLowerCase()
-  if (normalized === 'admin' || normalized === 'manager') return normalized
-  return null
-}
-
-function mapRoleRedirect(role: AuthRole) {
-  return DEFAULT_ROUTES[role] ?? '/403'
+function mapRoleRedirect(role: string) {
+  const normalizedRole = role.toLowerCase()
+  return DEFAULT_ROUTES[normalizedRole as keyof typeof DEFAULT_ROUTES] ?? '/403'
 }
 
 export function useLogin(): UseLoginResult {
@@ -54,9 +46,9 @@ export function useLogin(): UseLoginResult {
           password: values.password,
         })
 
-        const role = normalizeRole(response.user.role)
+        const role = response.user.role
         if (!role) {
-          throw new Error('Unsupported user role')
+          throw new Error('Missing user role')
         }
 
         const user = {
@@ -74,8 +66,8 @@ export function useLogin(): UseLoginResult {
 
         navigate(mapRoleRedirect(role), { replace: true })
       } catch (err) {
-        if (err instanceof Error && err.message === 'Unsupported user role') {
-          setError('Login failed: unsupported account role. Please contact support.')
+        if (err instanceof Error && err.message === 'Missing user role') {
+          setError('Login failed: account role missing. Please contact support.')
         } else {
           setError(
             err instanceof Error ? err.message : 'Login failed. Please try again.',

@@ -26,10 +26,7 @@ public class ForgotPasswordCommandHandler(
         // Always return success to avoid leaking which emails exist.
         if (user == null)
         {
-            logger.LogInformation(
-                "Forgot password requested for unknown email: {Email}",
-                email
-            );
+            logger.LogInformation("Forgot password requested for unknown email: {Email}", email);
             return Result<bool>.Success(true);
         }
 
@@ -48,16 +45,29 @@ public class ForgotPasswordCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var baseUrl =
-            configuration.GetValue<string>("Frontend:BaseUrl") ?? "http://localhost:5173";
+        var baseUrl = configuration.GetValue<string>("Frontend:BaseUrl") ?? "http://localhost:5173";
         var normalizedBaseUrl = baseUrl.TrimEnd('/');
         var resetLink = $"{normalizedBaseUrl}/reset-password?token={token}";
 
-        logger.LogInformation(
-            "Password reset link for {Email}: {ResetLink}",
-            email,
-            resetLink
+        var isDevelopment = string.Equals(
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
+            "Development",
+            StringComparison.OrdinalIgnoreCase
         );
+
+        // TODO: Replace with email service integration; avoid logging reset links in production.
+        if (isDevelopment)
+        {
+            logger.LogDebug(
+                "Password reset link for {Email}: {ResetLink}",
+                email,
+                resetLink
+            );
+        }
+        else
+        {
+            logger.LogInformation("Password reset link generated for {Email}", email);
+        }
 
         return Result<bool>.Success(true);
     }

@@ -15,7 +15,7 @@ namespace FairWorkly.API.Controllers.Auth;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IMediator mediator, IWebHostEnvironment env) : ControllerBase
+public class AuthController(IMediator mediator) : ControllerBase
 {
     [SwaggerRequestExample(
         typeof(LoginCommand),
@@ -89,17 +89,17 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
     {
         var result = await mediator.Send(command);
 
-        if (result.Type == ResultType.ValidationFailure)
+        if (result.IsFailure)
         {
-            return await HandleValidationFailureAsync(result);
+            if (result.Type == ResultType.ValidationFailure)
+            {
+                return await HandleValidationFailureAsync(result);
+            }
+
+            return BadRequest(new { message = result.ErrorMessage });
         }
 
-        return Ok(
-            new
-            {
-                message = "If that email exists, a reset link has been sent.",
-            }
-        );
+        return Ok(new { message = "If that email exists, a reset link has been sent." });
     }
 
     [HttpGet("me")]

@@ -68,8 +68,6 @@ export function setupInterceptors(store: StoreLike) {
         return Promise.reject(error);
       }
 
-      console.log("Interceptor refresh triggered");
-
       const rawUrl = originalConfig.url ?? "";
       const baseUrl = originalConfig.baseURL ?? "";
       const fullUrl =
@@ -125,12 +123,14 @@ export function setupInterceptors(store: StoreLike) {
         const meResponse = await refreshClient.get("/auth/me", {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
+        const u = meResponse.data;
+        const role = typeof u?.role === "string" ? u.role : undefined;
+        if (!u?.id || !u?.email || !role) {
+          throw new Error("/auth/me returned incomplete user data");
+        }
         const normalizedUser = {
-          ...meResponse.data,
-          role:
-            typeof meResponse.data?.role === "string"
-              ? meResponse.data.role.toLowerCase()
-              : meResponse.data?.role,
+          ...u,
+          role,
         };
 
         store.dispatch(setAuthData({ user: normalizedUser, accessToken }));
