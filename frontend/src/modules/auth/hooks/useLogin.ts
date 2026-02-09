@@ -11,20 +11,9 @@ type UseLoginResult = {
   error: string | null
 }
 
-const DEFAULT_ROUTES = {
+const DEFAULT_ROUTES: Record<string, string> = {
   admin: '/fairbot',
   manager: '/roster/upload',
-} as const
-
-function mapUserName(firstName?: string, lastName?: string, email?: string) {
-  const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
-  if (fullName) return fullName
-  return email ?? 'User'
-}
-
-function mapRoleRedirect(role: string) {
-  const normalizedRole = role.toLowerCase()
-  return DEFAULT_ROUTES[normalizedRole as keyof typeof DEFAULT_ROUTES] ?? '/403'
 }
 
 export function useLogin(): UseLoginResult {
@@ -46,24 +35,25 @@ export function useLogin(): UseLoginResult {
           password: values.password,
         })
 
+        const name = [response.user.firstName, response.user.lastName]
+          .filter(Boolean)
+          .join(' ') || response.user.email
+
         const role = response.user.role?.toLowerCase()
         const validRole: 'admin' | 'manager' | undefined =
           role === 'admin' || role === 'manager' ? role : undefined
 
-        const user = {
-          id: response.user.id,
-          email: response.user.email,
-          role: validRole,
-          name: mapUserName(
-            response.user.firstName,
-            response.user.lastName,
-            response.user.email,
-          ),
-        }
+        dispatch(setAuthData({
+          user: {
+            id: response.user.id,
+            email: response.user.email,
+            name,
+            role: validRole,
+          },
+          accessToken: response.accessToken,
+        }))
 
-        dispatch(setAuthData({ user, accessToken: response.accessToken }))
-
-        navigate(mapRoleRedirect(role ?? ''), { replace: true })
+        navigate(DEFAULT_ROUTES[role ?? ''] ?? '/403', { replace: true })
       } catch (err) {
         const message =
           err instanceof Error ? err.message : 'Login failed. Please try again.'

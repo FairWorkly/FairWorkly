@@ -9,7 +9,6 @@ export interface AuthUser {
 }
 
 export type AuthStatus =
-  | "idle"
   | "initializing"
   | "authenticating"
   | "authenticated"

@@ -16,7 +16,7 @@ type TabType = 'login' | 'signup'
 
 export function LoginPage() {
   const [searchParams] = useSearchParams()
-  const { login, isSubmitting: isLoginSubmitting, error: loginError } = useLogin()
+  const { login, isSubmitting, error } = useLogin()
   const initialTab = searchParams.get('signup') === 'true' ? 'signup' : 'login'
   const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
@@ -52,9 +52,9 @@ export function LoginPage() {
         </AuthTabButton>
       </AuthTabList>
 
-      {loginError && (
+      {error && (
         <AuthErrorAlert severity="error">
-          {loginError}
+          {error}
         </AuthErrorAlert>
       )}
 
@@ -63,14 +63,14 @@ export function LoginPage() {
           onSubmit={login}
           onGoogleLogin={handleGoogleLogin}
           onForgotPassword={() => setForgotModalOpen(true)}
-          isSubmitting={isLoginSubmitting}
+          isSubmitting={isSubmitting}
           isGoogleLoading={isGoogleLoading}
         />
       ) : (
         <SignupForm
           onSubmit={handleSignup}
           onGoogleLogin={handleGoogleLogin}
-          isSubmitting={isLoginSubmitting}
+          isSubmitting={isSubmitting}
           isGoogleLoading={isGoogleLoading}
         />
       )}
