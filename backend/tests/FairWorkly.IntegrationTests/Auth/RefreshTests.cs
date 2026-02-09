@@ -133,8 +133,8 @@ public class RefreshTests : AuthTestsBase
     [Fact]
     public async Task Refresh_ValidToken_Returns200WithNewAccessToken()
     {
-        // Arrange - Get a valid refresh token by logging in first
-        var refreshToken = await GetRefreshTokenFromCookieAsync();
+        // Arrange - Set up a valid refresh token directly in DB
+        var refreshToken = await SetupValidRefreshTokenAsync();
         var client = CreateClientWithRefreshCookie(refreshToken);
 
         // Act
