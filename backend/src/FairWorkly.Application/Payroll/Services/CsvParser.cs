@@ -1,3 +1,6 @@
+using System.Globalization;
+using CsvHelper;
+using CsvHelper.Configuration;
 using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Domain.Common;
 
@@ -7,6 +10,34 @@ public class CsvParser : ICsvParser
 {
     public Result<List<string[]>> Parse(Stream stream)
     {
-        throw new NotImplementedException();
+        try
+        {
+            using var reader = new StreamReader(stream);
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = false,
+            };
+            using var csv = new CsvReader(reader, config);
+
+            var rows = new List<string[]>();
+            while (csv.Read())
+            {
+                var record = new string[csv.Parser.Count];
+                for (var i = 0; i < csv.Parser.Count; i++)
+                {
+                    record[i] = csv.GetField(i) ?? "";
+                }
+                rows.Add(record);
+            }
+
+            if (rows.Count == 0)
+                return Result<List<string[]>>.Failure("CSV file is corrupted or cannot be parsed");
+
+            return Result<List<string[]>>.Success(rows);
+        }
+        catch (Exception)
+        {
+            return Result<List<string[]>>.Failure("CSV file is corrupted or cannot be parsed");
+        }
     }
 }
