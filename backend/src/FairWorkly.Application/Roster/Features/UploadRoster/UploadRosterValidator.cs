@@ -42,8 +42,9 @@ public class UploadRosterValidator : AbstractValidator<UploadRosterCommand>
             .WithMessage("UserId is required");
     }
 
-    private bool HaveValidExtension(string fileName)
+    private static bool HaveValidExtension(string? fileName)
     {
+        if (string.IsNullOrEmpty(fileName)) return false;
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
         return AllowedExtensions.Contains(extension);
     }
