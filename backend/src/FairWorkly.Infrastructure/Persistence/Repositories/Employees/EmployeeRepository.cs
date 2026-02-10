@@ -29,6 +29,24 @@ public class EmployeeRepository : IEmployeeRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Employee>> GetByEmailsAsync(
+        Guid organizationId,
+        List<string> emails,
+        CancellationToken cancellationToken = default
+    )
+    {
+        // Convert emails to lowercase for case-insensitive comparison
+        var lowerEmails = emails.Select(e => e.ToLowerInvariant()).ToList();
+
+        return await _context
+            .Employees.Where(e =>
+                e.OrganizationId == organizationId
+                && e.Email != null
+                && lowerEmails.Contains(e.Email.ToLower())
+            )
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Employee> CreateAsync(
         Employee employee,
         CancellationToken cancellationToken = default

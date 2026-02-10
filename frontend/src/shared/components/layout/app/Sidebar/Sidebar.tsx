@@ -44,7 +44,7 @@ export function Sidebar({
       <SidebarPaper>
         <SidebarBrand />
 
-        <FairBotCard />
+        {user?.role?.toLowerCase() === 'admin' && <FairBotCard />}
 
         <SidebarNav userRole={user?.role} />
 

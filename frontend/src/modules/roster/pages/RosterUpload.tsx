@@ -1,19 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  ComplianceUpload,
-  ComplianceProcessing,
-  AwardSelector,
-} from '@/shared/compliance-check'
+import { Alert, AlertTitle, Box, Typography } from '@mui/material'
+import { ComplianceUpload } from '@/shared/compliance-check'
 import type {
   ComplianceConfig,
   UploadedFile,
-  AwardType,
 } from '@/shared/compliance-check'
+import { uploadRoster, type ParserWarning } from '@/services/rosterApi'
 
 const mockConfig: ComplianceConfig = {
   title: 'Upload Roster',
-  fileTypes: ['CSV'],
+  fileTypes: ['XLSX'],
   maxFileSize: '50MB',
   coverageAreas: ['Shifts', 'Breaks', 'Hours'],
 }
@@ -30,26 +27,18 @@ export function RosterUpload() {
   const navigate = useNavigate()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
-  const [selectedAward, setSelectedAward] = useState<AwardType>('retail')
-  const processingStartRef = useRef<number | null>(null)
-  const pollingTimerRef = useRef<number | null>(null)
-  const minProcessingMs = 2000
-  const mockProcessingMs = 1200
-  const pollIntervalMs = 300
-
-  useEffect(() => {
-    return () => {
-      if (pollingTimerRef.current !== null) {
-        window.clearInterval(pollingTimerRef.current)
-      }
-    }
-  }, [])
+  const [error, setError] = useState<string | null>(null)
+  const [warnings, setWarnings] = useState<ParserWarning[]>([])
+  const actualFileRef = useRef<File | null>(null)
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) {
       return
     }
+
+    // Store actual File object for upload
+    actualFileRef.current = file
 
     const newFile: UploadedFile = {
       id: Date.now(),
@@ -60,72 +49,85 @@ export function RosterUpload() {
     }
 
     setUploadedFiles([newFile])
+    setError(null)
+    setWarnings([])
   }
 
   const handleRemoveFile = (id: number) => {
     setUploadedFiles(prev => prev.filter(file => file.id !== id))
+    actualFileRef.current = null
+    setError(null)
+    setWarnings([])
   }
 
-  const handleStartAnalysis = () => {
-    setIsProcessing(true)
-    processingStartRef.current = Date.now()
-
-    const pollStatus = () => {
-      if (processingStartRef.current === null) {
-        return
-      }
-
-      const elapsedMs = Date.now() - processingStartRef.current
-      const isComplete = elapsedMs >= mockProcessingMs
-      const minTimeReached = elapsedMs >= minProcessingMs
-
-      if (isComplete && minTimeReached) {
-        if (pollingTimerRef.current !== null) {
-          window.clearInterval(pollingTimerRef.current)
-          pollingTimerRef.current = null
-        }
-        navigate('/roster/results')
-      }
+  const handleStartAnalysis = async () => {
+    if (!actualFileRef.current) {
+      setError('No file selected')
+      return
     }
 
-    pollStatus()
-    pollingTimerRef.current = window.setInterval(pollStatus, pollIntervalMs)
+    setIsProcessing(true)
+    setError(null)
+    setWarnings([])
+
+    try {
+      const response = await uploadRoster(actualFileRef.current)
+
+      // Store warnings if present
+      if (response.warnings && response.warnings.length > 0) {
+        setWarnings(response.warnings)
+        console.warn('Roster uploaded with warnings:', response.warnings)
+      }
+
+      navigate('/roster/results')
+    } catch (err: any) {
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Failed to upload roster. Please try again.'
+      setError(errorMessage)
+      setIsProcessing(false)
+    }
   }
 
   const handleCancel = () => {
-    if (pollingTimerRef.current !== null) {
-      window.clearInterval(pollingTimerRef.current)
-      pollingTimerRef.current = null
-    }
-    processingStartRef.current = null
     setIsProcessing(false)
     setUploadedFiles([])
-  }
-
-  if (isProcessing) {
-    return (
-      <ComplianceProcessing
-        uploadedFiles={uploadedFiles}
-        awardName="General Retail Industry Award"
-      />
-    )
+    actualFileRef.current = null
+    setError(null)
+    setWarnings([])
   }
 
   return (
-    <ComplianceUpload
-      config={mockConfig}
-      uploadedFiles={uploadedFiles}
-      onFileUpload={handleFileUpload}
-      onRemoveFile={handleRemoveFile}
-      onStartAnalysis={handleStartAnalysis}
-      onCancel={handleCancel}
-      validationItems={rosterValidationItems}
-      configSection={
-        <AwardSelector
-          selectedAward={selectedAward}
-          onAwardChange={setSelectedAward}
-        />
-      }
-    />
+    <>
+      {warnings.length > 0 && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          <AlertTitle>Warnings</AlertTitle>
+          <Box component="ul" sx={{ pl: 2, mt: 1, mb: 0 }}>
+            {warnings.map((w, idx) => (
+              <Typography component="li" variant="body2" key={idx}>
+                Row {w.row}: {w.message}
+                {w.hint && (
+                  <Typography component="span" variant="caption" sx={{ ml: 0.5 }}>
+                    ({w.hint})
+                  </Typography>
+                )}
+              </Typography>
+            ))}
+          </Box>
+        </Alert>
+      )}
+
+      <ComplianceUpload
+        config={mockConfig}
+        uploadedFiles={uploadedFiles}
+        onFileUpload={handleFileUpload}
+        onRemoveFile={handleRemoveFile}
+        onStartAnalysis={handleStartAnalysis}
+        onCancel={handleCancel}
+        acceptFileTypes=".xlsx"
+        validationItems={rosterValidationItems}
+        isLoading={isProcessing}
+        error={error}
+      />
+    </>
   )
 }

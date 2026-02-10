@@ -113,7 +113,7 @@ export function setupInterceptors(store: StoreLike) {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         const u = meResponse.data;
-        const role = typeof u?.role === "string" ? u.role : undefined;
+        const role = typeof u?.role === "string" ? u.role.toLowerCase() : undefined;
         if (!u?.id || !u?.email || !role) {
           throw new Error("/auth/me returned incomplete user data");
         }

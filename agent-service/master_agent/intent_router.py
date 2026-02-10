@@ -11,9 +11,9 @@ class IntentRouter:
         if file_name and 'payroll' in file_name.lower():
             return "payroll_verify"
         
-        # Rule 2: If the filename contains roster -> compliance feature
+        # Rule 2: If the filename contains roster -> roster feature
         if file_name and 'roster' in file_name.lower():
-            return "compliance_roster"
+            return "roster"
         
         # Rule 3: If the message contains keywords -> compliance Q&A
         keywords = ['penalty rate', 'overtime', 'award', 'break']

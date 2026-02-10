@@ -1,7 +1,8 @@
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Roster.Entities;
-using FairWorkly.Domain.Roster.Parameters;
 using FairWorkly.Domain.Roster.Enums;
+using FairWorkly.Domain.Roster.Parameters;
+using FairWorkly.Domain.Roster.ValueObjects;
 
 namespace FairWorkly.Domain.Roster.Rules;
 
@@ -43,6 +44,7 @@ public class MealBreakRule(IRosterRuleParametersProvider parametersProvider) : I
                             $"No meal break provided for {shift.Duration:F2} hour shift",
                         ExpectedValue = requiredBreak,
                         ActualValue = 0,
+                        AffectedDates = AffectedDateSet.FromDates([shift.Date]),
                     }
                 );
                 continue;
@@ -64,6 +66,7 @@ public class MealBreakRule(IRosterRuleParametersProvider parametersProvider) : I
                             $"Meal break only {actualBreak} minutes, required {requiredBreak} minutes",
                         ExpectedValue = requiredBreak,
                         ActualValue = actualBreak,
+                        AffectedDates = AffectedDateSet.FromDates([shift.Date]),
                     }
                 );
             }

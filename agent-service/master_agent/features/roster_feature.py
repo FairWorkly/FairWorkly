@@ -2,63 +2,35 @@ from typing import Dict, Any
 import logging
 import tempfile
 from pathlib import Path
-from fastapi import UploadFile
 
 from master_agent.feature_registry import FeatureBase
-from master_agent.config import load_config
-from shared.rag.rag_client import run as run_rag
 from agents.roster.services.roster_import import RosterExcelParser, ParseMode
 
 
-class ComplianceFeature(FeatureBase):
-    """Compliance Feature - Fair Work compliance checks and roster parsing."""
+class RosterFeature(FeatureBase):
+    """Roster Feature - Handle roster file upload and parsing."""
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.config = load_config()
-        self.system_prompt = self.config.get("prompt", {}).get(
-            "system_prompt",
-            "You are FairWorkly's compliance co-pilot. Answer using Fair Work context.",
-        )
         self.roster_parser = RosterExcelParser()
 
     async def process(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """Process Compliance requests - either Q&A or roster file parsing."""
-        message = (payload.get("message") or "").strip()
-        file_name = payload.get("file_name")
+        """Process roster file upload and parsing."""
         file_upload = payload.get("file")
+        file_name = payload.get("file_name")
 
-        # Handle roster file upload
-        if file_upload and isinstance(file_upload, UploadFile):
-            return await self._process_roster_file(file_upload, file_name)
-
-        # Handle compliance Q&A
-        if not message:
+        # Check if file has required attributes (duck typing instead of isinstance)
+        if not file_upload or not hasattr(file_upload, 'read') or not hasattr(file_upload, 'filename'):
             return {
-                "type": "compliance",
-                "message": "Please provide a question for compliance assistance.",
+                "type": "error",
+                "message": "Roster file is required",
                 "file_name": file_name,
-                "note": "MESSAGE_REQUIRED",
             }
 
-        rag_result = await run_rag(
-            message,
-            system_prompt=self.system_prompt,
-            config=self.config,
-            logger=self.logger,
-        )
+        return await self._parse_roster_file(file_upload, file_name)
 
-        return {
-            "type": "compliance",
-            "message": rag_result.get("content", "No answer generated."),
-            "file_name": file_name,
-            "model": rag_result.get("model"),
-            "sources": rag_result.get("sources", []),
-            "note": rag_result.get("note"),
-        }
-
-    async def _process_roster_file(
-        self, file: UploadFile, file_name: str
+    async def _parse_roster_file(
+        self, file: Any, file_name: str
     ) -> Dict[str, Any]:
         """Parse roster Excel file and return structured data."""
         temp_file_path = None
