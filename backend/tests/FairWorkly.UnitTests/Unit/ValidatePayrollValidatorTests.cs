@@ -16,7 +16,7 @@ public class ValidatePayrollValidatorTests
         State = "VIC",
     };
 
-    // ==================== File 验证 ====================
+    // ==================== File validation ====================
 
     [Fact]
     public async Task Validate_NoFile_ReturnsError()
@@ -60,7 +60,7 @@ public class ValidatePayrollValidatorTests
             e.ErrorMessage == "File size must not exceed 50MB");
     }
 
-    // ==================== AwardType 验证 ====================
+    // ==================== AwardType validation ====================
 
     [Fact]
     public async Task Validate_MissingAwardType_ReturnsError()
@@ -90,7 +90,7 @@ public class ValidatePayrollValidatorTests
             e.ErrorMessage.Contains("must be one of"));
     }
 
-    // ==================== State 验证 ====================
+    // ==================== State validation ====================
 
     [Fact]
     public async Task Validate_InvalidState_ReturnsError()

@@ -46,12 +46,12 @@ public class CsvValidatorTests
 
     private static CsvValidationError AsCsvError(ValidationError error) => (CsvValidationError)error;
 
-    // ==================== 阶段 1：表头验证 ====================
+    // ==================== Stage 1: Header validation ====================
 
     [Fact]
     public void Validate_19Columns_ReturnsHeaderError()
     {
-        // Arrange — v1: 少了 Pay Date 列（19 列）
+        // Arrange — v1: missing Pay Date column (19 columns)
         var rows = LoadCsvFile("v1_wrong_header.csv");
 
         // Act
@@ -69,7 +69,7 @@ public class CsvValidatorTests
     [Fact]
     public void Validate_21Columns_ReturnsHeaderError()
     {
-        // Arrange — 21 列（多了 Extra 列）
+        // Arrange — 21 columns (extra column added)
         var header = ValidHeader + ",Extra";
         var dataRow = "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85,extra";
         var rows = ParseInlineCsv(header + "\n" + dataRow);
@@ -89,7 +89,7 @@ public class CsvValidatorTests
     [Fact]
     public void Validate_WrongColumnName_ReturnsHeaderError()
     {
-        // Arrange — 20 列但第 2 列名错（"Employee Name" 而非 "First Name"）
+        // Arrange — 20 columns but column 2 name wrong ("Employee Name" instead of "First Name")
         var wrongHeader = ValidHeader.Replace("First Name", "Employee Name");
         var dataRow = "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
         var rows = ParseInlineCsv(wrongHeader + "\n" + dataRow);
@@ -106,12 +106,12 @@ public class CsvValidatorTests
         error.Message.Should().Be("Column 2: expected \"First Name\", found \"Employee Name\"");
     }
 
-    // ==================== 阶段 2：全局验证 ====================
+    // ==================== Stage 2: Global validation ====================
 
     [Fact]
     public void Validate_PayPeriodInconsistentAndDuplicateId_ReturnsBothErrors()
     {
-        // Arrange — v2: Pay Period 不一致 + Employee ID 重复
+        // Arrange — v2: inconsistent Pay Period + duplicate Employee ID
         var rows = LoadCsvFile("v2_global_errors.csv");
 
         // Act
@@ -137,7 +137,7 @@ public class CsvValidatorTests
     [Fact]
     public void Validate_InvalidPayPeriodFormat_ReturnsFormatError()
     {
-        // Arrange — Pay Period 一致但格式错 "2026-13-01"
+        // Arrange — consistent Pay Period but invalid format "2026-13-01"
         var csv = ValidHeader + "\n" +
             "E001,John,Smith,2026-13-01,2026-13-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
         var rows = ParseInlineCsv(csv);
@@ -175,7 +175,7 @@ public class CsvValidatorTests
     [Fact]
     public void Validate_NoDataRows_ReturnsError()
     {
-        // Arrange — 只有表头行
+        // Arrange — header row only
         var rows = ParseInlineCsv(ValidHeader);
 
         // Act
@@ -190,12 +190,12 @@ public class CsvValidatorTests
         error.Message.Should().Be("CSV file has no data rows");
     }
 
-    // ==================== 阶段 3：字段验证 ====================
+    // ==================== Stage 3: Field-level validation ====================
 
     [Fact]
     public void Validate_FieldErrors_Returns19Errors()
     {
-        // Arrange — v3: 10 行数据，9 行有错（每行 2 个错误），1 行正确
+        // Arrange — v3: 10 data rows, 9 with errors (2 errors each), 1 correct
         var rows = LoadCsvFile("v3_field_errors.csv");
 
         // Act
@@ -205,19 +205,19 @@ public class CsvValidatorTests
         result.IsFailure.Should().BeTrue();
         var errors = result.ValidationErrors!.Cast<CsvValidationError>().ToList();
 
-        // Row 2: Employee ID 为空 + Last Name 为空
+        // Row 2: Employee ID empty + Last Name empty
         errors.Should().Contain(e => e.RowNumber == 2 && e.Message == "Employee ID is required");
         errors.Should().Contain(e => e.RowNumber == 2 && e.Message == "Last Name is required");
 
-        // Row 3: First Name 为空 + Pay Date 格式错
+        // Row 3: First Name empty + Pay Date format error
         errors.Should().Contain(e => e.RowNumber == 3 && e.Message == "First Name is required");
         errors.Should().Contain(e => e.RowNumber == 3 && e.Message.Contains("Invalid Pay Date format"));
 
-        // Row 4: Award Type 不匹配 + Classification 不合法
+        // Row 4: Award Type mismatch + Classification invalid
         errors.Should().Contain(e => e.RowNumber == 4 && e.Message.Contains("Award Type is required"));
         errors.Should().Contain(e => e.RowNumber == 4 && e.Message.Contains("Classification is required"));
 
-        // Row 5: Employment Type 不合法 + Hourly Rate 转换失败
+        // Row 5: Employment Type invalid + Hourly Rate parse failure
         errors.Should().Contain(e => e.RowNumber == 5 && e.Message.Contains("Employment Type is required"));
         errors.Should().Contain(e => e.RowNumber == 5 && e.Message == "Hourly Rate must be a positive number");
 
@@ -225,23 +225,23 @@ public class CsvValidatorTests
         errors.Should().Contain(e => e.RowNumber == 6 && e.Message == "Hourly Rate must be a positive number");
         errors.Should().Contain(e => e.RowNumber == 6 && e.Message == "Ordinary Hours must be a number >= 0");
 
-        // Row 7: Saturday Pay 条件必填 + Sunday Pay 条件必填
+        // Row 7: Saturday Pay conditionally required + Sunday Pay conditionally required
         errors.Should().Contain(e => e.RowNumber == 7 && e.Message == "Saturday Pay is required when Saturday Hours > 0");
         errors.Should().Contain(e => e.RowNumber == 7 && e.Message == "Sunday Pay is required when Sunday Hours > 0");
 
-        // Row 8: Ordinary Pay 转换失败 + Public Holiday Pay 条件必填
+        // Row 8: Ordinary Pay parse failure + Public Holiday Pay conditionally required
         errors.Should().Contain(e => e.RowNumber == 8 && e.Message == "Ordinary Pay must be a number");
         errors.Should().Contain(e => e.RowNumber == 8 && e.Message == "Public Holiday Pay is required when Public Holiday Hours > 0");
 
-        // Row 9: Gross Pay 转换失败 + Super 转换失败
+        // Row 9: Gross Pay parse failure + Super parse failure
         errors.Should().Contain(e => e.RowNumber == 9 && e.Message == "Gross Pay must be a number");
         errors.Should().Contain(e => e.RowNumber == 9 && e.Message == "Superannuation Paid must be a number");
 
-        // Row 10: Saturday Hours 负数 + Sunday Hours 非数字
+        // Row 10: Saturday Hours negative + Sunday Hours non-numeric
         errors.Should().Contain(e => e.RowNumber == 10 && e.Message == "Saturday Hours must be a number >= 0");
         errors.Should().Contain(e => e.RowNumber == 10 && e.Message == "Sunday Hours must be a number >= 0");
 
-        // 共 18 个错误（9 行 × 2 错误/行）
+        // 18 errors total (9 rows × 2 errors/row)
         errors.Should().HaveCount(18);
     }
 
@@ -250,7 +250,7 @@ public class CsvValidatorTests
     [Fact]
     public void Validate_AllValid_ReturnsValidatedRows()
     {
-        // Arrange — v4: 6 行全合法数据
+        // Arrange — v4: 6 rows of valid data
         var rows = LoadCsvFile("v4_happy_path.csv");
 
         // Act
@@ -260,7 +260,7 @@ public class CsvValidatorTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().HaveCount(6);
 
-        // 检查第一行：full-time，无可选字段
+        // Verify row 1: full-time, no optional fields
         var row1 = result.Value![0];
         row1.EmployeeId.Should().Be("H001");
         row1.FirstName.Should().Be("Alice");
@@ -279,7 +279,7 @@ public class CsvValidatorTests
         row1.GrossPay.Should().Be(1008.90m);
         row1.Superannuation.Should().Be(121.07m);
 
-        // 检查第三行：casual，有 Saturday + Sunday
+        // Verify row 3: casual, with Saturday + Sunday
         var row3 = result.Value[2];
         row3.EmploymentType.Should().Be(EmploymentType.Casual);
         row3.SaturdayHours.Should().Be(8m);
@@ -287,7 +287,7 @@ public class CsvValidatorTests
         row3.SundayHours.Should().Be(4m);
         row3.SundayPay.Should().Be(172.40m);
 
-        // 检查第五行：full-time，全有可选字段
+        // Verify row 5: full-time, all optional fields present
         var row5 = result.Value[4];
         row5.SaturdayHours.Should().Be(4m);
         row5.SundayHours.Should().Be(4m);
