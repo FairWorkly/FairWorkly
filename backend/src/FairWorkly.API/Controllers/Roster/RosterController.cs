@@ -32,7 +32,7 @@ public class RosterController(
     /// <summary>
     /// Upload roster file for parsing and storage.
     /// </summary>
-    /// <param name="file">Roster file (Excel format: .xlsx or .xls)</param>
+    /// <param name="file">Roster file (Excel format: .xlsx)</param>
     /// <returns>Roster ID and summary with any warnings</returns>
     [HttpPost("upload")]
     [RequestSizeLimit(52_428_800)] // 50MB
@@ -118,7 +118,7 @@ public class RosterController(
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> DownloadOriginalFile(Guid rosterId)
+    public async Task<IActionResult> DownloadOriginalFile(Guid rosterId, CancellationToken ct)
     {
         if (!Guid.TryParse(_currentUser.OrganizationId, out var organizationId) || organizationId == Guid.Empty)
         {
@@ -128,7 +128,7 @@ public class RosterController(
         var roster = await _rosterRepository.GetByIdWithShiftsAsync(
             rosterId,
             organizationId,
-            CancellationToken.None
+            ct
         );
 
         if (roster == null)
@@ -143,7 +143,7 @@ public class RosterController(
 
         var fileStream = await _fileStorageService.GetFileStreamAsync(
             roster.OriginalFileS3Key,
-            CancellationToken.None
+            ct
         );
 
         if (fileStream == null)
@@ -152,9 +152,21 @@ public class RosterController(
         }
 
         var fileName = roster.OriginalFileName ?? "roster.xlsx";
-        var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        var contentType = GetContentType(fileName);
 
         return File(fileStream, contentType, fileName);
+    }
+
+    private static string GetContentType(string fileName)
+    {
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+        return extension switch
+        {
+            ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ".xls" => "application/vnd.ms-excel",
+            ".csv" => "text/csv",
+            _ => "application/octet-stream",
+        };
     }
 
     private async Task<ActionResult> HandleValidationFailureAsync<T>(Result<T> result)

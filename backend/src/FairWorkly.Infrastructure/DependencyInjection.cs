@@ -68,23 +68,20 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         // Register FileStorageService based on configuration
-        var useLocalStorage = configuration.GetValue<bool>("LocalFileStorage:UseLocalStorage");
+        // Default to local storage when the key is missing so devs don't need AWS credentials
+        var useS3 = configuration.GetValue<bool>("AWS:S3:Enabled");
 
-        if (useLocalStorage)
-        {
-            // Use local file storage for development/testing
-            services.AddScoped<IFileStorageService, Services.LocalFileStorageService>();
-        }
-        else
+        if (useS3)
         {
             // Use AWS S3 for production
-            // Note: Requires AWS SDK NuGet packages:
-            // - AWSSDK.S3
-            // - AWSSDK.Extensions.NETCore.Setup
-            // AWS configuration should be in appsettings.json under "AWS" section
             services.AddDefaultAWSOptions(configuration.GetAWSOptions());
             services.AddAWSService<IAmazonS3>();
             services.AddScoped<IFileStorageService, Storage.S3FileStorageService>();
+        }
+        else
+        {
+            // Use local file storage for development/testing
+            services.AddScoped<IFileStorageService, Services.LocalFileStorageService>();
         }
 
         return services;

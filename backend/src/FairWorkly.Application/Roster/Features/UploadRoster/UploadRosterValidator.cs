@@ -8,7 +8,7 @@ namespace FairWorkly.Application.Roster.Features.UploadRoster;
 /// </summary>
 public class UploadRosterValidator : AbstractValidator<UploadRosterCommand>
 {
-    private static readonly string[] AllowedExtensions = { ".xlsx", ".xls" };
+    private static readonly string[] AllowedExtensions = { ".xlsx" };
     private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50MB
 
     public UploadRosterValidator()

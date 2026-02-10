@@ -10,12 +10,13 @@ namespace FairWorkly.Application.Roster.Features.UploadRoster;
 
 /// <summary>
 /// Handles roster file upload by:
-/// 1. Uploading file to S3 for audit trail
-/// 2. Sending file to Agent Service for parsing
-/// 3. Matching parsed entries to existing employees
-/// 4. Creating Roster and Shift entities
-/// 5. Saving to database in single transaction
-/// 6. Returning response with warnings to frontend
+/// 1. Sending file to Agent Service for parsing
+/// 2. Validating parsed result (blocking errors, dates, entries)
+/// 3. Uploading file to S3 for audit trail (only after successful parse)
+/// 4. Matching parsed entries to existing employees
+/// 5. Creating Roster and Shift entities
+/// 6. Saving to database in single transaction
+/// 7. Returning response with warnings to frontend
 /// </summary>
 public class UploadRosterHandler(
     IAiClient aiClient,
@@ -30,34 +31,11 @@ public class UploadRosterHandler(
         CancellationToken cancellationToken
     )
     {
-        // ========== Step 1: Upload file to S3 ==========
-        string s3Key;
-        try
-        {
-            // Reset stream position in case it was read before
-            if (request.FileStream.CanSeek)
-            {
-                request.FileStream.Position = 0;
-            }
-
-            s3Key = await fileStorageService.UploadAsync(
-                request.FileStream,
-                request.FileName,
-                cancellationToken
-            );
-        }
-        catch (Exception ex)
-        {
-            return Result<UploadRosterResponse>.Failure(
-                $"Failed to upload file to storage: {ex.Message}"
-            );
-        }
-
-        // ========== Step 2: Parse file via Agent Service ==========
+        // ========== Step 1: Parse file via Agent Service ==========
         ParseResponse parseResponse;
         try
         {
-            // Reset stream position for Agent Service to read
+            // Reset stream position in case it was read before
             if (request.FileStream.CanSeek)
             {
                 request.FileStream.Position = 0;
@@ -82,7 +60,7 @@ public class UploadRosterHandler(
             );
         }
 
-        // ========== Step 3: Check for blocking errors ==========
+        // ========== Step 2: Check for blocking errors ==========
         if (parseResponse.Summary.Status == "blocking" || parseResponse.Summary.ErrorCount > 0)
         {
             var errorMessages = parseResponse.Issues
@@ -95,7 +73,7 @@ public class UploadRosterHandler(
             );
         }
 
-        // ========== Step 4: Validate parsed result has data and valid dates ==========
+        // ========== Step 3: Validate parsed result has data and valid dates ==========
         if (parseResponse.Result.Entries.Count == 0)
         {
             return Result<UploadRosterResponse>.Failure(
@@ -122,6 +100,28 @@ public class UploadRosterHandler(
         {
             return Result<UploadRosterResponse>.Failure(
                 "Roster dates are outside acceptable range (must be within 2 years of today)"
+            );
+        }
+
+        // ========== Step 4: Upload file to S3 (only after successful parse + validation) ==========
+        string s3Key;
+        try
+        {
+            if (request.FileStream.CanSeek)
+            {
+                request.FileStream.Position = 0;
+            }
+
+            s3Key = await fileStorageService.UploadAsync(
+                request.FileStream,
+                request.FileName,
+                cancellationToken
+            );
+        }
+        catch (Exception ex)
+        {
+            return Result<UploadRosterResponse>.Failure(
+                $"Failed to upload file to storage: {ex.Message}"
             );
         }
 
@@ -175,7 +175,7 @@ public class UploadRosterHandler(
             }
         }
 
-        // ========== Step 6: Create Roster entity with S3 information ==========
+        // ========== Step 6: Create Roster entity ==========
         var roster = new Domain.Roster.Entities.Roster
         {
             Id = Guid.NewGuid(),
@@ -255,6 +255,7 @@ public class UploadRosterHandler(
         // Update roster stats to reflect actual matched shifts
         roster.TotalShifts = shifts.Count;
         roster.TotalEmployees = shifts.Select(s => s.EmployeeId).Distinct().Count();
+        roster.TotalHours = shifts.Sum(s => (s.EndTime - s.StartTime).TotalHours);
 
         await rosterRepository.CreateShiftsAsync(shifts, cancellationToken);
 

@@ -1,3 +1,8 @@
+// TODO: [Feature] Wire this component into the roster upload flow.
+// Currently built but unused. After upload, show parsed data in this table
+// with cell-level error/warning highlighting before navigating to results.
+// Backend needs to return entries + issues in UploadRosterResponse.
+// See GitHub issue #258.
 import React, { useMemo } from 'react'
 import {
   Box,
@@ -32,6 +37,9 @@ interface RosterImportTableProps {
 
 const EXCEL_ROW_KEYS = new Set(['excelRow', 'excel_row'])
 
+const worstSeverity = (issues: ImportIssue[]): 'error' | 'warning' | undefined =>
+  issues.some(i => i.severity === 'error') ? 'error' : issues[0]?.severity
+
 const humanizeHeader = (key: string) =>
   key
     .replace(/_/g, ' ')
@@ -49,7 +57,7 @@ export const RosterImportTable: React.FC<RosterImportTableProps> = ({
     const issueMap = new Map<string, ImportIssue[]>()
     const rowIssueMap = new Map<string | number, ImportIssue[]>()
     for (const issue of issues) {
-      if (!issue.row) continue
+      if (issue.row == null) continue
       if (!issue.column) {
         const list = rowIssueMap.get(issue.row) ?? []
         list.push(issue)
@@ -109,9 +117,9 @@ export const RosterImportTable: React.FC<RosterImportTableProps> = ({
           </TableHead>
           <TableBody>
             {rawRows.map((row, idx) => {
-              const rowNum = getRowNumber(row) || idx + 2
+              const rowNum = getRowNumber(row) ?? idx + 2
               const rowIssues = getRowIssues(rowNum)
-              const rowSeverity = rowIssues[0]?.severity
+              const rowSeverity = worstSeverity(rowIssues)
               const rowTooltip = rowIssues
                 .map(issue => `[${issue.code}] ${issue.message}`)
                 .join('\n')
@@ -132,7 +140,7 @@ export const RosterImportTable: React.FC<RosterImportTableProps> = ({
                   </TableCell>
                   {columns.map(column => {
                     const issuesForCell = getIssueList(rowNum, column)
-                    const severity = issuesForCell[0]?.severity
+                    const severity = worstSeverity(issuesForCell)
                     const hasIssue = issuesForCell.length > 0
                     const content = row[column] ?? ''
                     const tooltipText = issuesForCell

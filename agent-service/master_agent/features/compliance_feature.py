@@ -1,17 +1,13 @@
 from typing import Dict, Any
 import logging
-import tempfile
-from pathlib import Path
-from fastapi import UploadFile
 
 from master_agent.feature_registry import FeatureBase
 from master_agent.config import load_config
 from shared.rag.rag_client import run as run_rag
-from agents.roster.services.roster_import import RosterExcelParser, ParseMode
 
 
 class ComplianceFeature(FeatureBase):
-    """Compliance Feature - Fair Work compliance checks and roster parsing."""
+    """Compliance Feature - Fair Work compliance Q&A via RAG."""
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -20,19 +16,12 @@ class ComplianceFeature(FeatureBase):
             "system_prompt",
             "You are FairWorkly's compliance co-pilot. Answer using Fair Work context.",
         )
-        self.roster_parser = RosterExcelParser()
 
     async def process(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """Process Compliance requests - either Q&A or roster file parsing."""
+        """Process compliance Q&A requests."""
         message = (payload.get("message") or "").strip()
         file_name = payload.get("file_name")
-        file_upload = payload.get("file")
 
-        # Handle roster file upload
-        if file_upload and isinstance(file_upload, UploadFile):
-            return await self._process_roster_file(file_upload, file_name)
-
-        # Handle compliance Q&A
         if not message:
             return {
                 "type": "compliance",
@@ -56,37 +45,3 @@ class ComplianceFeature(FeatureBase):
             "sources": rag_result.get("sources", []),
             "note": rag_result.get("note"),
         }
-
-    async def _process_roster_file(
-        self, file: UploadFile, file_name: str
-    ) -> Dict[str, Any]:
-        """Parse roster Excel file and return structured data."""
-        temp_file_path = None
-        try:
-            # Save uploaded file to temporary location
-            with tempfile.NamedTemporaryFile(
-                mode="wb", suffix=".xlsx", delete=False
-            ) as temp_file:
-                content = await file.read()
-                temp_file.write(content)
-                temp_file_path = temp_file.name
-
-            # Parse the roster file using LENIENT mode (allow warnings)
-            parse_response = self.roster_parser.parse_roster_excel(
-                file_path=temp_file_path, mode=ParseMode.LENIENT
-            )
-
-            # Convert ParseResponse to dict using model_dump()
-            return parse_response.model_dump()
-
-        except Exception as exc:
-            self.logger.error(f"Failed to parse roster file: {exc}", exc_info=True)
-            return {
-                "type": "error",
-                "message": f"Failed to parse roster file: {str(exc)}",
-                "file_name": file_name,
-            }
-        finally:
-            # Clean up temporary file
-            if temp_file_path and Path(temp_file_path).exists():
-                Path(temp_file_path).unlink()

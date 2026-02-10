@@ -127,7 +127,7 @@ public class S3FileStorageService : IFileStorageService
                 Key = filePath
             };
 
-            var response = await _s3Client.GetObjectAsync(getRequest, ct);
+            using var response = await _s3Client.GetObjectAsync(getRequest, ct);
 
             _logger.LogInformation(
                 "Successfully retrieved file from S3. Bucket: {Bucket}, Key: {Key}, Size: {ContentLength}",
@@ -135,7 +135,6 @@ public class S3FileStorageService : IFileStorageService
                 filePath,
                 response.ContentLength);
 
-            // Return a MemoryStream to avoid disposing the S3 response stream prematurely
             var memoryStream = new MemoryStream();
             await response.ResponseStream.CopyToAsync(memoryStream, ct);
             memoryStream.Position = 0;
