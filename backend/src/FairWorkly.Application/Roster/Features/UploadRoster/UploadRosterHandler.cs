@@ -212,6 +212,7 @@ public class UploadRosterHandler(
         // ========== Step 7: Create Shift entities, matching to employees ==========
         var shifts = new List<Shift>();
         var unmatchedEmployees = new List<string>();
+        var totalNetHours = 0m;
 
         foreach (var entry in parseResponse.Result.Entries)
         {
@@ -262,12 +263,13 @@ public class UploadRosterHandler(
             };
 
             shifts.Add(shift);
+            totalNetHours += entry.NetHours;
         }
 
         // Update roster stats to reflect actual matched shifts
         roster.TotalShifts = shifts.Count;
         roster.TotalEmployees = shifts.Select(s => s.EmployeeId).Distinct().Count();
-        roster.TotalHours = (decimal)shifts.Sum(s => (s.EndTime - s.StartTime).TotalHours);
+        roster.TotalHours = totalNetHours;
 
         await rosterRepository.CreateShiftsAsync(shifts, cancellationToken);
 
