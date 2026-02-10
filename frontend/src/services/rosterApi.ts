@@ -1,4 +1,3 @@
-import type { AxiosRequestConfig } from "axios";
 import { post } from "./baseApi";
 import httpClient from "./httpClient";
 import { normalizeApiError } from "@/shared/types/api.types";
@@ -44,17 +43,16 @@ export async function uploadRoster(file: File): Promise<UploadRosterResponse> {
   formData.append("file", file);
 
   // Use httpClient directly for FormData upload
-  // Browser will automatically set Content-Type with boundary for multipart/form-data
+  // Override default application/json Content-Type; axios will append the boundary automatically
   try {
     const response = await httpClient.post<UploadRosterResponse>(
       "/roster/upload",
       formData,
       {
         headers: {
-          // Remove default Content-Type to let browser set multipart/form-data with boundary
-          'Content-Type': undefined,
+          'Content-Type': 'multipart/form-data',
         },
-      } as AxiosRequestConfig
+      }
     );
 
     return response.data;
