@@ -16,6 +16,9 @@ namespace FairWorkly.IntegrationTests.Infrastructure;
 /// </summary>
 public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFactory>, IAsyncLifetime
 {
+    private static readonly SemaphoreSlim _seedSemaphore = new(1, 1);
+    private static bool _seeded = false;
+
     protected readonly CustomWebApplicationFactory Factory;
     protected readonly HttpClient Client;
     protected Guid TestOrganizationId { get; private set; }
@@ -38,65 +41,105 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
     }
 
     /// <summary>
-    /// Seed test data for non-Auth integration tests (idempotent).
+    /// Seed test data for non-Auth integration tests (idempotent + thread-safe).
+    /// Uses SemaphoreSlim to prevent race conditions when xUnit runs test classes in parallel.
     /// Creates a separate Organization + User from Auth tests to avoid data conflicts.
     /// </summary>
     private async Task SeedTestDataAsync()
     {
-        using var scope = Factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
-
-        // Check if test data already exists (idempotent for real PostgreSQL)
-        var existingOrg = await db.Set<Organization>()
-            .FirstOrDefaultAsync(o => o.CompanyName == "Integration Test Company");
-
-        if (existingOrg != null)
+        // Fast path: already seeded in this test run, just load IDs
+        if (_seeded)
         {
-            TestOrganizationId = existingOrg.Id;
-            var existingUser = await db.Set<User>()
-                .FirstOrDefaultAsync(u => u.OrganizationId == existingOrg.Id);
-            TestUserId = existingUser?.Id ?? Guid.Empty;
+            await LoadTestIdsAsync();
             return;
         }
 
-        // Create test Organization (unique ABN to avoid collision with DbSeeder/Factory)
-        TestOrganizationId = Guid.NewGuid();
-        var organization = new Organization
+        await _seedSemaphore.WaitAsync();
+        try
         {
-            Id = TestOrganizationId,
-            CompanyName = "Integration Test Company",
-            ABN = "99999999902",
-            IndustryType = "Retail",
-            AddressLine1 = "123 Test Street",
-            Suburb = "Melbourne",
-            State = AustralianState.VIC,
-            Postcode = "3000",
-            ContactEmail = "test@integrationtest.com",
-            SubscriptionTier = SubscriptionTier.Tier1,
-            SubscriptionStartDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            IsSubscriptionActive = true,
-        };
+            // Double-check after acquiring the lock
+            if (_seeded)
+            {
+                await LoadTestIdsAsync();
+                return;
+            }
 
-        // Create test User
-        TestUserId = Guid.NewGuid();
-        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
-        var user = new User
+            using var scope = Factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
+
+            // Check if test data already exists (idempotent for real PostgreSQL)
+            var existingOrg = await db.Set<Organization>()
+                .FirstOrDefaultAsync(o => o.CompanyName == "Integration Test Company");
+
+            if (existingOrg != null)
+            {
+                TestOrganizationId = existingOrg.Id;
+                var existingUser = await db.Set<User>()
+                    .FirstOrDefaultAsync(u => u.OrganizationId == existingOrg.Id);
+                TestUserId = existingUser?.Id ?? Guid.Empty;
+                _seeded = true;
+                return;
+            }
+
+            // Create test Organization (unique ABN to avoid collision with DbSeeder/Factory)
+            TestOrganizationId = Guid.NewGuid();
+            var organization = new Organization
+            {
+                Id = TestOrganizationId,
+                CompanyName = "Integration Test Company",
+                ABN = "99999999902",
+                IndustryType = "Retail",
+                AddressLine1 = "123 Test Street",
+                Suburb = "Melbourne",
+                State = AustralianState.VIC,
+                Postcode = "3000",
+                ContactEmail = "test@integrationtest.com",
+                SubscriptionTier = SubscriptionTier.Tier1,
+                SubscriptionStartDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+                IsSubscriptionActive = true,
+            };
+
+            // Create test User
+            TestUserId = Guid.NewGuid();
+            var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+            var user = new User
+            {
+                Id = TestUserId,
+                Email = "testuser@integrationtest.com",
+                FirstName = "Test",
+                LastName = "User",
+                Role = UserRole.Admin,
+                IsActive = true,
+                OrganizationId = TestOrganizationId,
+                PasswordHash = passwordHasher.Hash("TestPassword123"),
+                CreatedAt = DateTimeOffset.UtcNow,
+                IsDeleted = false,
+            };
+
+            db.Set<Organization>().Add(organization);
+            db.Set<User>().Add(user);
+            await db.SaveChangesAsync();
+            _seeded = true;
+        }
+        finally
         {
-            Id = TestUserId,
-            Email = "testuser@integrationtest.com",
-            FirstName = "Test",
-            LastName = "User",
-            Role = UserRole.Admin,
-            IsActive = true,
-            OrganizationId = TestOrganizationId,
-            PasswordHash = passwordHasher.Hash("TestPassword123"),
-            CreatedAt = DateTimeOffset.UtcNow,
-            IsDeleted = false,
-        };
+            _seedSemaphore.Release();
+        }
+    }
 
-        db.Set<Organization>().Add(organization);
-        db.Set<User>().Add(user);
-        await db.SaveChangesAsync();
+    /// <summary>
+    /// Load test data IDs from DB (fast path when seed already completed).
+    /// </summary>
+    private async Task LoadTestIdsAsync()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
+        var org = await db.Set<Organization>()
+            .FirstOrDefaultAsync(o => o.CompanyName == "Integration Test Company");
+        TestOrganizationId = org!.Id;
+        var user = await db.Set<User>()
+            .FirstOrDefaultAsync(u => u.OrganizationId == org.Id);
+        TestUserId = user?.Id ?? Guid.Empty;
     }
 
     /// <summary>
