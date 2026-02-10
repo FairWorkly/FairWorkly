@@ -34,7 +34,7 @@ export interface ParserWarning {
  * File is uploaded to S3 and parsed via Agent Service.
  * Returns roster ID and any warnings (non-fatal issues).
  *
- * @param file - Roster Excel file (.xlsx or .xls)
+ * @param file - Roster Excel file (.xlsx)
  * @returns Promise with roster ID, summary, and warnings
  * @throws ApiError with normalized error structure
  */
