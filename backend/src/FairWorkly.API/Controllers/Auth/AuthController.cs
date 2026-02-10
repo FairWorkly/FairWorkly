@@ -13,6 +13,11 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace FairWorkly.API.Controllers.Auth;
 
+// TODO: [Refactor] Migrate manual JWT claim extraction (User.FindFirstValue) to ICurrentUserService.
+// ICurrentUserService is already registered in DI and used by RosterController.
+// AuthController is special (has AllowAnonymous endpoints), so only migrate Me() and Logout().
+// Other controllers needing userId/orgId should inject ICurrentUserService directly.
+// See: Infrastructure/Services/CurrentUserService.cs, RosterController.cs for reference.
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController(IMediator mediator) : ControllerBase

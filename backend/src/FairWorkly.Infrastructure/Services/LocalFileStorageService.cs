@@ -74,4 +74,17 @@ public class LocalFileStorageService : IFileStorageService
 
         return Task.FromResult<Stream?>(fs);
     }
+
+    public Task DeleteAsync(string filePath, CancellationToken ct = default)
+    {
+        var safeFileName = Path.GetFileName(filePath);
+        var fullPath = Path.Combine(_basePath, safeFileName);
+
+        if (File.Exists(fullPath))
+        {
+            File.Delete(fullPath);
+        }
+
+        return Task.CompletedTask;
+    }
 }

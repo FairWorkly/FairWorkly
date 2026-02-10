@@ -1,14 +1,11 @@
 // Components
 export { ComplianceUpload } from './components/ComplianceUpload'
-export { ComplianceProcessing } from './components/ComplianceProcessing'
 export { ComplianceResults } from './components/ComplianceResults'
 export { IssuesByCategory } from './components/IssuesByCategory'
 export { IssueRow } from './components/IssueRow'
 export { GuidanceModal } from './components/GuidanceModal'
 export { ExportButton } from './components/ExportButton'
 export { ValidationHeader } from './components/ValidationHeader'
-export { AwardSelector } from './components/AwardSelector'
-export type { AwardType } from './components/AwardSelector'
 
 // Hooks
 export { useValidationRun } from './hooks/useValidationRun'

@@ -89,6 +89,24 @@ public class Roster : AuditableEntity
     /// </summary>
     public virtual RosterValidation? RosterValidation { get; set; }
 
+    // File Storage (S3)
+
+    /// <summary>
+    /// S3 key for original uploaded Excel file.
+    /// Example: "rosters/2026/02/07/guid/roster-week3.xlsx"
+    /// Used for audit trail and re-parsing if needed.
+    /// </summary>
+    [MaxLength(500)]
+    public string? OriginalFileS3Key { get; set; }
+
+    /// <summary>
+    /// Original filename as uploaded by user.
+    /// Example: "roster-week3.xlsx"
+    /// Used for download display name.
+    /// </summary>
+    [MaxLength(255)]
+    public string? OriginalFileName { get; set; }
+
     // Notes
 
     /// <summary>

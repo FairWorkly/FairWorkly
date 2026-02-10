@@ -21,6 +21,19 @@ public interface IEmployeeRepository
     );
 
     /// <summary>
+    /// Gets employees by a list of email addresses within an organization
+    /// </summary>
+    /// <param name="organizationId">Organization ID</param>
+    /// <param name="emails">List of email addresses to search for (case-insensitive)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>List of matching employees</returns>
+    Task<List<Employee>> GetByEmailsAsync(
+        Guid organizationId,
+        List<string> emails,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Creates a new employee
     /// </summary>
     /// <param name="employee">Employee entity to create</param>

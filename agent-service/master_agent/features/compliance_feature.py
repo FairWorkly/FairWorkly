@@ -7,7 +7,7 @@ from shared.rag.rag_client import run as run_rag
 
 
 class ComplianceFeature(FeatureBase):
-    """Compliance Feature - Fair Work compliance checks."""
+    """Compliance Feature - Fair Work compliance Q&A via RAG."""
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class ComplianceFeature(FeatureBase):
         )
 
     async def process(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """Process Compliance requests."""
+        """Process compliance Q&A requests."""
         message = (payload.get("message") or "").strip()
         file_name = payload.get("file_name")
 

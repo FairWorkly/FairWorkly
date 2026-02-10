@@ -7,197 +7,142 @@ import type { ComplianceApiResponse } from '@/shared/compliance-check'
 
 // TODO: [Backend Integration] Replace mock data with real API call.
 // When integrating with backend:
-// 1. Get validation ID from route params (e.g., useParams<{ id: string }>())
-// 2. Fetch results from API (e.g., GET /api/roster/results/:id)
+// 1. Get rosterId from route params (useParams<{ rosterId: string }>())
+// 2. Fetch compliance results from API (e.g., GET /api/roster/:rosterId/compliance)
 // 3. Add loading and error states
 // 4. Remove mockBackendPayload after integration
 
 const mockBackendPayload: ComplianceApiResponse = {
   metadata: {
-    award: 'Hospitality Industry Award',
+    award: 'Clerks—Private Sector Award',
     pay_period: {
-      start: '2026-01-13',
-      end: '2026-01-19',
+      start: '2026-02-02',
+      end: '2026-02-08',
     },
-    validated_at: 'Jan 12, 2026',
-    validation_id: 'RST-001',
+    validated_at: 'Feb 10, 2026',
+    validation_id: 'RVAL-001',
   },
   summary: {
-    employees_compliant: 18,
-    total_issues: 14,
+    employees_compliant: 8,
+    total_issues: 7,
     critical_issues_count: 3,
-    total_variance: '14 issues',
-    employees_affected: 9,
+    employees_affected: 5,
   },
   categories: [
     {
       id: 'minimum-hours',
-      title: 'Minimum Hours',
-      icon: 'timer',
+      title: 'Minimum Shift Hours',
+      icon: 'schedule',
       color: '#ef4444',
-      employee_count: 3,
-      total_variance: '3 issues',
+      employee_count: 2,
+      total_underpayment: '2 violations',
       issues: [
         {
           id: 1,
-          name: 'Lisa Chen',
-          emp_id: 'EMP-101',
-          actual_value: '2 hrs',
-          expected_value: '3 hrs',
-          reason: 'shift below minimum',
-          variance: '-1 hr',
+          name: 'Tom Scott',
+          emp_id: 'CLK002',
+          actual_value: '2.0 hrs',
+          expected_value: '3.0 hrs',
+          reason: 'shift below minimum hours',
+          variance: '1.0 hr short',
           breakdown:
-            'Monday shift is 2 hours, below the 3-hour minimum engagement.',
+            'Shift on Mon 2 Feb (10:00–12:00) is 2 hours, below the 3-hour minimum under Clerks Award clause 13.4.',
         },
         {
           id: 2,
-          name: 'Tom Anderson',
-          emp_id: 'EMP-102',
+          name: 'Lisa Park',
+          emp_id: 'CLK005',
           actual_value: '2.5 hrs',
-          expected_value: '3 hrs',
-          reason: 'shift below minimum',
-          variance: '-0.5 hr',
+          expected_value: '3.0 hrs',
+          reason: 'shift below minimum hours',
+          variance: '0.5 hr short',
           breakdown:
-            'Wednesday shift is 2.5 hours, below the 3-hour minimum engagement.',
-        },
-        {
-          id: 3,
-          name: 'Maria Garcia',
-          emp_id: 'EMP-103',
-          actual_value: '2 hrs',
-          expected_value: '3 hrs',
-          reason: 'shift below minimum',
-          variance: '-1 hr',
-          breakdown:
-            'Saturday shift is 2 hours, below the 3-hour minimum engagement.',
+            'Shift on Wed 4 Feb (14:00–16:30) is 2.5 hours, below the 3-hour minimum.',
         },
       ],
     },
     {
-      id: 'break-requirements',
-      title: 'Break Requirements',
-      icon: 'free_breakfast',
+      id: 'meal-breaks',
+      title: 'Meal Break Requirements',
+      icon: 'restaurant',
       color: '#f97316',
       employee_count: 2,
-      total_variance: '2 issues',
+      total_underpayment: '3 violations',
       issues: [
         {
-          id: 4,
-          name: 'James Wilson',
-          emp_id: 'EMP-104',
-          actual_value: '0 min',
-          expected_value: '30 min',
-          reason: 'meal break missing',
-          variance: '-30 min',
+          id: 3,
+          name: 'Rachel Green',
+          emp_id: 'CLK001',
+          actual_value: 'No break',
+          expected_value: '30 min break',
+          reason: 'meal break not scheduled',
+          variance: 'Missing',
           breakdown:
-            'Thursday 7-hour shift has no scheduled meal break (required after 5 hours).',
+            'Shift on Mon 2 Feb (09:00–17:00) is 8 hours with no meal break. Award requires unpaid meal break of 30–60 min for shifts over 5 hours.',
+        },
+        {
+          id: 4,
+          name: 'Rachel Green',
+          emp_id: 'CLK001',
+          actual_value: 'No break',
+          expected_value: '30 min break',
+          reason: 'meal break not scheduled',
+          variance: 'Missing',
+          breakdown:
+            'Shift on Tue 3 Feb (09:00–17:00) is 8 hours with no meal break.',
         },
         {
           id: 5,
-          name: 'Sophie Brown',
-          emp_id: 'EMP-105',
-          actual_value: '0 min',
-          expected_value: '30 min',
-          reason: 'meal break missing',
-          variance: '-30 min',
+          name: 'David Wong',
+          emp_id: 'CLK003',
+          actual_value: 'No break',
+          expected_value: '30 min break',
+          reason: 'meal break not scheduled',
+          variance: 'Missing',
           breakdown:
-            'Sunday 8-hour shift has no scheduled meal break (required after 5 hours).',
+            'Shift on Thu 5 Feb (08:00–16:00) is 8 hours with no meal break.',
         },
       ],
     },
     {
-      id: 'rest-between-shifts',
-      title: 'Rest Between Shifts',
-      icon: 'hotel',
+      id: 'rest-periods',
+      title: 'Rest Period Between Shifts',
+      icon: 'bedtime',
       color: '#eab308',
-      employee_count: 2,
-      total_variance: '2 issues',
+      employee_count: 1,
+      total_underpayment: '1 violation',
       issues: [
         {
           id: 6,
-          name: 'Kevin Lee',
-          emp_id: 'EMP-106',
-          actual_value: '8 hrs',
-          expected_value: '10 hrs',
-          reason: 'insufficient rest period',
-          variance: '-2 hrs',
+          name: 'James Miller',
+          emp_id: 'CLK004',
+          actual_value: '8 hrs gap',
+          expected_value: '10 hrs gap',
+          reason: 'insufficient rest between shifts',
+          variance: '2 hrs short',
           breakdown:
-            'Only 8 hours between Friday close (11pm) and Saturday open (7am). Minimum 10 hours required.',
+            'Shift ended Fri 6 Feb at 22:00, next shift starts Sat 7 Feb at 06:00. Only 8 hours rest; Award requires minimum 10 hours between shifts.',
         },
+      ],
+    },
+    {
+      id: 'weekly-hours',
+      title: 'Weekly Hours Limit',
+      icon: 'timer',
+      color: '#3b82f6',
+      employee_count: 1,
+      total_underpayment: '1 violation',
+      issues: [
         {
           id: 7,
-          name: 'Emma Davis',
-          emp_id: 'EMP-107',
-          actual_value: '9 hrs',
-          expected_value: '10 hrs',
-          reason: 'insufficient rest period',
-          variance: '-1 hr',
-          breakdown:
-            'Only 9 hours between Saturday close (10pm) and Sunday open (7am). Minimum 10 hours required.',
-        },
-      ],
-    },
-    {
-      id: 'maximum-hours',
-      title: 'Maximum Hours',
-      icon: 'warning',
-      color: '#dc2626',
-      employee_count: 2,
-      total_variance: '2 issues',
-      issues: [
-        {
-          id: 8,
-          name: 'Ryan Taylor',
-          emp_id: 'EMP-108',
-          actual_value: '52 hrs',
-          expected_value: '38 hrs max',
+          name: 'Rachel Green',
+          emp_id: 'CLK001',
+          actual_value: '48.0 hrs',
+          expected_value: '38.0 hrs max',
           reason: 'exceeds maximum ordinary hours',
-          variance: '+14 hrs',
+          variance: '10 hrs over',
           breakdown:
-            'Scheduled for 52 hours this week, exceeds 38-hour maximum for full-time employees.',
-        },
-        {
-          id: 9,
-          name: 'Amy Johnson',
-          emp_id: 'EMP-109',
-          actual_value: '45 hrs',
-          expected_value: '38 hrs max',
-          reason: 'exceeds maximum ordinary hours',
-          variance: '+7 hrs',
-          breakdown:
-            'Scheduled for 45 hours this week, exceeds 38-hour maximum for full-time employees.',
-        },
-      ],
-    },
-    {
-      id: 'consecutive-days',
-      title: 'Consecutive Days',
-      icon: 'date_range',
-      color: '#3b82f6',
-      employee_count: 2,
-      total_variance: '2 issues',
-      issues: [
-        {
-          id: 10,
-          name: 'Chris Martin',
-          emp_id: 'EMP-110',
-          actual_value: '8 days',
-          expected_value: '6 days max',
-          reason: 'exceeds consecutive days',
-          variance: '+2 days',
-          breakdown:
-            'Scheduled for 8 consecutive days (Jan 12-19). Maximum 6 consecutive days allowed.',
-        },
-        {
-          id: 11,
-          name: 'Sarah White',
-          emp_id: 'EMP-111',
-          actual_value: '7 days',
-          expected_value: '6 days max',
-          reason: 'exceeds consecutive days',
-          variance: '+1 day',
-          breakdown:
-            'Scheduled for 7 consecutive days (Jan 13-19). Maximum 6 consecutive days allowed.',
+            'Rostered for 48 ordinary hours this week. Maximum ordinary hours under Clerks Award is 38 per week. Excess hours require overtime rates.',
         },
       ],
     },
@@ -217,7 +162,7 @@ export function RosterResults() {
       onNewValidation={() => navigate('/roster/upload')}
       onNavigateBack={() => navigate('/roster/upload')}
       breadcrumbLabel="Roster"
-      periodLabel="Week"
+      periodLabel="Roster period"
       resultType="roster"
     />
   )
