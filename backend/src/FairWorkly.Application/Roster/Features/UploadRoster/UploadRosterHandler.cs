@@ -71,6 +71,9 @@ public class UploadRosterHandler(
             );
         }
 
+        // Normalise Issues to avoid null checks downstream
+        parseResponse.Issues ??= [];
+
         // ========== Step 2: Check for blocking errors ==========
         if (parseResponse.Summary.Status == "blocking" || parseResponse.Summary.ErrorCount > 0)
         {
