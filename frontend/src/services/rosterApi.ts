@@ -1,3 +1,4 @@
+import type { AxiosRequestConfig } from "axios";
 import { post } from "./baseApi";
 import httpClient from "./httpClient";
 import { normalizeApiError } from "@/shared/types/api.types";
@@ -53,7 +54,7 @@ export async function uploadRoster(file: File): Promise<UploadRosterResponse> {
           // Remove default Content-Type to let browser set multipart/form-data with boundary
           'Content-Type': undefined,
         },
-      } as any
+      } as AxiosRequestConfig
     );
 
     return response.data;
