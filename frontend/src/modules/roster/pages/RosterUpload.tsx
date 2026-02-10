@@ -1,12 +1,29 @@
 import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Alert, AlertTitle, Box, Typography } from '@mui/material'
+import { Alert, AlertTitle, Typography } from '@mui/material'
+import { styled } from '@/styles/styled'
 import { ComplianceUpload } from '@/shared/compliance-check'
 import type {
   ComplianceConfig,
   UploadedFile,
 } from '@/shared/compliance-check'
+import { isAxiosError } from '@/shared/types/api.types'
 import { uploadRoster, type ParserWarning } from '@/services/rosterApi'
+
+const WarningAlert = styled(Alert)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+}))
+
+const WarningList = styled('ul')(({ theme }) => ({
+  paddingLeft: theme.spacing(2),
+  marginTop: theme.spacing(1),
+  marginBottom: 0,
+}))
+
+const HintText = styled('span')(({ theme }) => ({
+  marginLeft: theme.spacing(0.5),
+  ...theme.typography.caption,
+}))
 
 const mockConfig: ComplianceConfig = {
   title: 'Upload Roster',
@@ -80,9 +97,10 @@ export function RosterUpload() {
       }
 
       navigate('/roster/results')
-    } catch (err: any) {
-      const errorMessage =
-        err?.response?.data?.message || err?.message || 'Failed to upload roster. Please try again.'
+    } catch (err) {
+      const errorMessage = isAxiosError(err)
+        ? (err.response?.data as { message?: string })?.message ?? err.message
+        : err instanceof Error ? err.message : 'Failed to upload roster. Please try again.'
       setError(errorMessage)
       setIsProcessing(false)
     }
@@ -99,21 +117,21 @@ export function RosterUpload() {
   return (
     <>
       {warnings.length > 0 && (
-        <Alert severity="warning" sx={{ mb: 3 }}>
+        <WarningAlert severity="warning">
           <AlertTitle>Warnings</AlertTitle>
-          <Box component="ul" sx={{ pl: 2, mt: 1, mb: 0 }}>
+          <WarningList>
             {warnings.map((w, idx) => (
               <Typography component="li" variant="body2" key={idx}>
                 Row {w.row}: {w.message}
                 {w.hint && (
-                  <Typography component="span" variant="caption" sx={{ ml: 0.5 }}>
+                  <HintText>
                     ({w.hint})
-                  </Typography>
+                  </HintText>
                 )}
               </Typography>
             ))}
-          </Box>
-        </Alert>
+          </WarningList>
+        </WarningAlert>
       )}
 
       <ComplianceUpload
