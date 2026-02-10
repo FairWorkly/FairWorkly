@@ -90,13 +90,12 @@ export function RosterUpload() {
     try {
       const response = await uploadRoster(actualFileRef.current)
 
-      // Store warnings if present
-      if (response.warnings && response.warnings.length > 0) {
-        setWarnings(response.warnings)
-        console.warn('Roster uploaded with warnings:', response.warnings)
-      }
-
-      navigate('/roster/results')
+      navigate('/roster/results', {
+        state: {
+          rosterId: response.rosterId,
+          warnings: response.warnings ?? [],
+        },
+      })
     } catch (err) {
       const errorMessage = (err as ApiError).message ?? 'Failed to upload roster. Please try again.'
       setError(errorMessage)
