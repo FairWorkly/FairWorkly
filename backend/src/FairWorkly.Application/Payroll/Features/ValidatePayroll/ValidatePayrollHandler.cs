@@ -199,15 +199,14 @@ public class ValidatePayrollHandler(
             validation.Id, allIssues.Count);
 
         // ═══ Build DTO ═══
-        var dto = BuildDto(validation, payslips, allIssues, employeeMap);
+        var dto = BuildDto(validation, payslips, allIssues);
         return Result<ValidatePayrollDto>.Success(dto);
     }
 
     private static ValidatePayrollDto BuildDto(
         PayrollValidation validation,
         List<Payslip> payslips,
-        List<PayrollIssue> allIssues,
-        Dictionary<string, Employee> employeeMap)
+        List<PayrollIssue> allIssues)
     {
         // Build issue DTOs
         var issueDtos = allIssues.Select(issue =>
