@@ -140,6 +140,38 @@ public class UploadRosterHandler(
             );
         }
 
+        // ========== Steps 5–8 wrapped to clean up S3 on failure ==========
+        try
+        {
+            return await CreateRosterAndShifts(parseResponse, request, s3Key, weekStart, weekEnd, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create roster after S3 upload. Cleaning up file: {S3Key}", s3Key);
+            try
+            {
+                await fileStorageService.DeleteAsync(s3Key, cancellationToken);
+            }
+            catch (Exception deleteEx)
+            {
+                logger.LogWarning(deleteEx, "Failed to delete orphaned S3 file: {S3Key}", s3Key);
+            }
+
+            return Result<UploadRosterResponse>.Failure(
+                "Failed to save roster. Please try again or contact support."
+            );
+        }
+    }
+
+    private async Task<Result<UploadRosterResponse>> CreateRosterAndShifts(
+        ParseResponse parseResponse,
+        UploadRosterCommand request,
+        string s3Key,
+        DateTime weekStart,
+        DateTime weekEnd,
+        CancellationToken cancellationToken
+    )
+    {
         // ========== Step 5: Bulk lookup employees by employee_number and email ==========
         var employeeNumbers = parseResponse.Result.Entries
             .Where(e => !string.IsNullOrWhiteSpace(e.EmployeeNumber))
