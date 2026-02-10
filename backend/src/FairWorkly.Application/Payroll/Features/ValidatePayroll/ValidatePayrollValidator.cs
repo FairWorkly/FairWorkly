@@ -38,6 +38,13 @@ public class ValidatePayrollValidator : AbstractValidator<ValidatePayrollCommand
             .WithMessage($"Award type must be one of: {string.Join(", ", ValidAwardTypes)}")
             .OverridePropertyName("awardType");
 
+        // MVP: only General Retail Industry Award is supported
+        RuleFor(x => x.AwardType)
+            .Must(value => value == nameof(AwardType.GeneralRetailIndustryAward2020))
+            .When(x => !string.IsNullOrEmpty(x.AwardType) && ValidAwardTypes.Contains(x.AwardType))
+            .WithMessage("Only General Retail Industry Award is currently supported")
+            .OverridePropertyName("awardType");
+
         RuleFor(x => x.State)
             .Must(value => ValidStates.Contains(value))
             .When(x => !string.IsNullOrEmpty(x.State))

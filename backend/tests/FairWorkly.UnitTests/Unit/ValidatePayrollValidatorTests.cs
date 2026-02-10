@@ -90,6 +90,20 @@ public class ValidatePayrollValidatorTests
             e.ErrorMessage.Contains("must be one of"));
     }
 
+    [Fact]
+    public async Task Validate_UnsupportedAwardType_ReturnsError()
+    {
+        var command = CreateValidCommand();
+        command.AwardType = "HospitalityIndustryAward2020";
+
+        var result = await _validator.ValidateAsync(command);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e =>
+            e.PropertyName == "awardType" &&
+            e.ErrorMessage == "Only General Retail Industry Award is currently supported");
+    }
+
     // ==================== State validation ====================
 
     [Fact]
