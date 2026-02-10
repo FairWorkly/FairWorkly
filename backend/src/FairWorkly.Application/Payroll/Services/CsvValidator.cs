@@ -21,18 +21,18 @@ public class CsvValidator : ICsvValidator
 
     public Result<List<ValidatedPayrollRow>> Validate(List<string[]> rows, AwardType awardType)
     {
-        // 阶段 1：表头验证
+        // Stage 1: Header validation
         var headerErrors = ValidateHeader(rows[0]);
         if (headerErrors != null)
             return Result<List<ValidatedPayrollRow>>.ValidationFailure("CSV format validation failed", headerErrors);
 
-        // 阶段 2：全局验证
+        // Stage 2: Global validation
         var dataRows = rows.Skip(1).ToList();
         var globalErrors = ValidateGlobal(dataRows);
         if (globalErrors != null)
             return Result<List<ValidatedPayrollRow>>.ValidationFailure("CSV format validation failed", globalErrors);
 
-        // 阶段 3：字段验证
+        // Stage 3: Field-level validation
         var (validatedRows, fieldErrors) = ValidateFields(dataRows, awardType);
         if (fieldErrors != null)
             return Result<List<ValidatedPayrollRow>>.ValidationFailure("CSV format validation failed", fieldErrors);
@@ -75,7 +75,7 @@ public class CsvValidator : ICsvValidator
     {
         var errors = new List<ValidationError>();
 
-        // 无数据行
+        // No data rows
         if (dataRows.Count == 0)
         {
             errors.Add(new CsvValidationError
@@ -87,7 +87,7 @@ public class CsvValidator : ICsvValidator
             return errors;
         }
 
-        // Pay Period 一致性（string 比较）
+        // Pay Period consistency (string comparison)
         var firstStart = dataRows[0][3].Trim();
         var firstEnd = dataRows[0][4].Trim();
         var payPeriodInconsistent = dataRows.Any(r => r[3].Trim() != firstStart || r[4].Trim() != firstEnd);
@@ -101,7 +101,7 @@ public class CsvValidator : ICsvValidator
             });
         }
 
-        // Employee ID 重复
+        // Duplicate Employee ID
         var idGroups = dataRows
             .Select((r, i) => new { Id = r[0].Trim(), Row = i + 2 })
             .Where(x => !string.IsNullOrEmpty(x.Id))
@@ -122,7 +122,7 @@ public class CsvValidator : ICsvValidator
         if (errors.Count > 0)
             return errors;
 
-        // Pay Period 格式验证
+        // Pay Period format validation
         if (!DateOnly.TryParseExact(firstStart, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var startDate)
             || !DateOnly.TryParseExact(firstEnd, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var endDate))
         {
@@ -159,7 +159,7 @@ public class CsvValidator : ICsvValidator
         for (var i = 0; i < dataRows.Count; i++)
         {
             var row = dataRows[i];
-            var rowNumber = i + 2; // 行号：1 是表头，2 起是数据
+            var rowNumber = i + 2; // Row 1 is header, data starts from row 2
             var validatedRow = new ValidatedPayrollRow();
             var rowHasError = false;
 
@@ -199,7 +199,7 @@ public class CsvValidator : ICsvValidator
                 validatedRow.LastName = lastName;
             }
 
-            // Pay Period Start (col 3) — 已在全局验证中确认格式和一致性
+            // Pay Period Start (col 3) — format and consistency already verified in global validation
             validatedRow.PayPeriodStart = ParseDateToUtc(row[3].Trim());
 
             // Pay Period End (col 4)
@@ -341,18 +341,18 @@ public class CsvValidator : ICsvValidator
         decimal hours = 0;
         decimal pay = 0;
 
-        // Hours: 可不填默认 0；填了必须是数值且 >= 0
+        // Hours: optional, defaults to 0; if provided, must be numeric and >= 0
         if (!string.IsNullOrEmpty(hoursStr))
         {
             if (!TryParseNonNegativeDecimal(hoursStr, out hours))
             {
                 errors.Add(CreateError(rowNumber, $"{label} Hours", $"{label} Hours must be a number >= 0"));
                 rowHasError = true;
-                return; // Hours 解析失败，不再检查 Pay
+                return; // Hours parsing failed, skip Pay check
             }
         }
 
-        // Pay: Hours > 0 时必填
+        // Pay: required when Hours > 0
         if (hours > 0)
         {
             if (string.IsNullOrEmpty(payStr) ||
@@ -369,7 +369,7 @@ public class CsvValidator : ICsvValidator
             decimal.TryParse(payStr, NumberStyles.Any, CultureInfo.InvariantCulture, out pay);
         }
 
-        // 赋值
+        // Assign values
         switch (label)
         {
             case "Saturday":
