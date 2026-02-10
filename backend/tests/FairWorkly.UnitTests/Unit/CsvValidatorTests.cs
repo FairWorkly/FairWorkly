@@ -245,6 +245,28 @@ public class CsvValidatorTests
         errors.Should().HaveCount(18);
     }
 
+    // ==================== Stage 3 补充：可选 Pay 字段类型检查 ====================
+
+    [Fact]
+    public void Validate_OptionalPayInvalidWhenHoursZero_ReturnsError()
+    {
+        // Arrange — Saturday Hours = 0, Saturday Pay = "abc" (non-numeric)
+        var csv = ValidHeader + "\n" +
+            "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,abc,0,,0,,1032.08,123.85";
+        var rows = ParseInlineCsv(csv);
+
+        // Act
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        var errors = result.ValidationErrors!.Cast<CsvValidationError>().ToList();
+        errors.Should().ContainSingle();
+        errors[0].RowNumber.Should().Be(2);
+        errors[0].Field.Should().Be("Saturday Pay");
+        errors[0].Message.Should().Be("Saturday Pay must be a number");
+    }
+
     // ==================== Happy Path ====================
 
     [Fact]

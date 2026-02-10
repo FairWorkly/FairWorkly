@@ -366,7 +366,12 @@ public class CsvValidator : ICsvValidator
         }
         else if (!string.IsNullOrEmpty(payStr))
         {
-            decimal.TryParse(payStr, NumberStyles.Any, CultureInfo.InvariantCulture, out pay);
+            if (!decimal.TryParse(payStr, NumberStyles.Any, CultureInfo.InvariantCulture, out pay))
+            {
+                errors.Add(CreateError(rowNumber, $"{label} Pay", $"{label} Pay must be a number"));
+                rowHasError = true;
+                return;
+            }
         }
 
         // Assign values
