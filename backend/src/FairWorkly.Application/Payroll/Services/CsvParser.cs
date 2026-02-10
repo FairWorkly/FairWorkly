@@ -3,10 +3,11 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Domain.Common;
+using Microsoft.Extensions.Logging;
 
 namespace FairWorkly.Application.Payroll.Services;
 
-public class CsvParser : ICsvParser
+public class CsvParser(ILogger<CsvParser> logger) : ICsvParser
 {
     public Result<List<string[]>> Parse(Stream stream)
     {
@@ -35,8 +36,9 @@ public class CsvParser : ICsvParser
 
             return Result<List<string[]>>.Success(rows);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logger.LogWarning(ex, "CSV parsing failed with exception");
             return Result<List<string[]>>.Failure("CSV file is corrupted or cannot be parsed");
         }
     }

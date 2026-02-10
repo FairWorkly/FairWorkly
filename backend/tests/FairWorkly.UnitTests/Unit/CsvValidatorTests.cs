@@ -5,6 +5,7 @@ using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Payroll;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FairWorkly.UnitTests.Unit;
 
@@ -30,7 +31,7 @@ public class CsvValidatorTests
     {
         var path = Path.Combine("TestData", "Csv", "CsvValidator", fileName);
         using var stream = File.OpenRead(path);
-        var parser = new CsvParser();
+        var parser = new CsvParser(NullLogger<CsvParser>.Instance);
         var result = parser.Parse(stream);
         return result.Value!;
     }
@@ -38,7 +39,7 @@ public class CsvValidatorTests
     private static List<string[]> ParseInlineCsv(string csv)
     {
         var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
-        var parser = new CsvParser();
+        var parser = new CsvParser(NullLogger<CsvParser>.Instance);
         var result = parser.Parse(stream);
         return result.Value!;
     }

@@ -1,6 +1,7 @@
 using System.Text;
 using FairWorkly.Application.Payroll.Services;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FairWorkly.UnitTests.Unit;
 
@@ -17,7 +18,7 @@ public class CsvParserTests
 
     public CsvParserTests()
     {
-        _parser = new CsvParser();
+        _parser = new CsvParser(NullLogger<CsvParser>.Instance);
     }
 
     [Fact]
