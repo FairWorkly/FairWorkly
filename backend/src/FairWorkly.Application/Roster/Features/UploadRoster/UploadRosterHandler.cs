@@ -5,6 +5,7 @@ using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Roster.Entities;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace FairWorkly.Application.Roster.Features.UploadRoster;
 
@@ -23,7 +24,8 @@ public class UploadRosterHandler(
     IEmployeeRepository employeeRepository,
     IRosterRepository rosterRepository,
     IFileStorageService fileStorageService,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    ILogger<UploadRosterHandler> logger
 ) : IRequestHandler<UploadRosterCommand, Result<UploadRosterResponse>>
 {
     public async Task<Result<UploadRosterResponse>> Handle(
@@ -55,8 +57,9 @@ public class UploadRosterHandler(
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to parse roster file via Agent Service. File: {FileName}", request.FileName);
             return Result<UploadRosterResponse>.Failure(
-                $"Failed to parse roster file: {ex.Message}"
+                "Failed to parse roster file. Please try again or contact support."
             );
         }
 
@@ -128,8 +131,9 @@ public class UploadRosterHandler(
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to upload roster file to storage. File: {FileName}", request.FileName);
             return Result<UploadRosterResponse>.Failure(
-                $"Failed to upload file to storage: {ex.Message}"
+                "Failed to store roster file. Please try again or contact support."
             );
         }
 
