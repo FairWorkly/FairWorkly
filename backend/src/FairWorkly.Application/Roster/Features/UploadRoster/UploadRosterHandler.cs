@@ -255,7 +255,7 @@ public class UploadRosterHandler(
         // Update roster stats to reflect actual matched shifts
         roster.TotalShifts = shifts.Count;
         roster.TotalEmployees = shifts.Select(s => s.EmployeeId).Distinct().Count();
-        roster.TotalHours = shifts.Sum(s => (s.EndTime - s.StartTime).TotalHours);
+        roster.TotalHours = (decimal)shifts.Sum(s => (s.EndTime - s.StartTime).TotalHours);
 
         await rosterRepository.CreateShiftsAsync(shifts, cancellationToken);
 
