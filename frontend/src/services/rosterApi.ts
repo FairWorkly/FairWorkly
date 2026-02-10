@@ -1,5 +1,6 @@
 import { post } from "./baseApi";
 import httpClient from "./httpClient";
+import { normalizeApiError } from "@/shared/types/api.types";
 
 /**
  * Response from roster upload endpoint.
@@ -43,18 +44,22 @@ export async function uploadRoster(file: File): Promise<UploadRosterResponse> {
 
   // Use httpClient directly for FormData upload
   // Browser will automatically set Content-Type with boundary for multipart/form-data
-  const response = await httpClient.post<UploadRosterResponse>(
-    "/roster/upload",
-    formData,
-    {
-      headers: {
-        // Remove default Content-Type to let browser set multipart/form-data with boundary
-        'Content-Type': undefined,
-      },
-    } as any
-  );
+  try {
+    const response = await httpClient.post<UploadRosterResponse>(
+      "/roster/upload",
+      formData,
+      {
+        headers: {
+          // Remove default Content-Type to let browser set multipart/form-data with boundary
+          'Content-Type': undefined,
+        },
+      } as any
+    );
 
-  return response.data;
+    return response.data;
+  } catch (err) {
+    throw normalizeApiError(err);
+  }
 }
 
 // ─── Roster Details (GET) ────────────────────────────────────────────

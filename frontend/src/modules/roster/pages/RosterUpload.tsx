@@ -7,7 +7,7 @@ import type {
   ComplianceConfig,
   UploadedFile,
 } from '@/shared/compliance-check'
-import { isAxiosError } from '@/shared/types/api.types'
+import type { ApiError } from '@/shared/types/api.types'
 import { uploadRoster, type ParserWarning } from '@/services/rosterApi'
 
 const WarningAlert = styled(Alert)(({ theme }) => ({
@@ -98,9 +98,7 @@ export function RosterUpload() {
 
       navigate('/roster/results')
     } catch (err) {
-      const errorMessage = isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? err.message
-        : err instanceof Error ? err.message : 'Failed to upload roster. Please try again.'
+      const errorMessage = (err as ApiError).message ?? 'Failed to upload roster. Please try again.'
       setError(errorMessage)
       setIsProcessing(false)
     }
