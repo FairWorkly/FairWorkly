@@ -60,6 +60,14 @@ public class UploadRosterHandler(
             );
         }
 
+        // Guard against unexpected response shape (e.g. Agent Service routed to wrong feature)
+        if (parseResponse?.Summary == null || parseResponse.Result == null)
+        {
+            return Result<UploadRosterResponse>.Failure(
+                "Agent Service returned an unexpected response format. Ensure the file was routed to the roster parser."
+            );
+        }
+
         // ========== Step 2: Check for blocking errors ==========
         if (parseResponse.Summary.Status == "blocking" || parseResponse.Summary.ErrorCount > 0)
         {
