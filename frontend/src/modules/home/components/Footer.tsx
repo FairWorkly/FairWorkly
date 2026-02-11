@@ -1,24 +1,23 @@
 import {
   Box,
-  Container,
   Typography,
   Link as MuiLink,
-  IconButton,
   styled,
-  alpha
+  alpha,
 } from '@mui/material';
-import { LinkedIn, X as XIcon, Bolt } from '@mui/icons-material';
+import { LinkedIn, Bolt } from '@mui/icons-material';
 
-const FooterContainer = styled('footer')(({ theme }) => ({
-  width: '100vw',  
+const PageSection = styled('footer')(({ theme }) => ({
   position: 'relative',
-  left: '50%',
-  right: '50%',
-  marginLeft: '-50vw',
-  marginRight: '-50vw',
   backgroundColor: theme.fairworkly.surface.navDark,
   color: alpha(theme.palette.common.white, 0.7),
   padding: theme.spacing(8, 0, 4),
+}));
+
+const ContentContainer = styled(Box)(({ theme }) => ({
+  maxWidth: theme.fairworkly.layout.containerMaxWidth,
+  margin: '0 auto',
+  padding: theme.spacing(0, 4),
 }));
 
 const FooterGrid = styled(Box)(({ theme }) => ({
@@ -34,15 +33,9 @@ const FooterGrid = styled(Box)(({ theme }) => ({
   },
 }));
 
-const BrandColumn = styled(Box)(({ theme }) => ({
-  '& p': {
-    fontSize: theme.typography.body2.fontSize,
-    lineHeight: 1.7,
-    color: alpha(theme.palette.common.white, 0.6),
-  },
-}));
+const BrandColumn = styled(Box)({});
 
-const LogoLink = styled(Box)(({ theme }) => ({
+const LogoLink = styled('a')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(1.5),
@@ -71,13 +64,35 @@ const LogoText = styled(Typography)(({ theme }) => ({
   backgroundClip: 'text',
 }));
 
-const ColumnTitle = styled(Typography)(({ theme }) => ({
+const BrandDescription = styled(Typography)(({ theme }) => ({
+  fontSize: theme.typography.body2.fontSize,
+  lineHeight: 1.7,
+  color: alpha(theme.palette.common.white, 0.6),
+  marginBottom: theme.spacing(2),
+}));
+
+const SupportLine = styled(Typography)(({ theme }) => ({
+  fontSize: theme.typography.body2.fontSize,
+  color: alpha(theme.palette.common.white, 0.6),
+}));
+
+const SupportEmail = styled(MuiLink)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  textDecoration: 'none',
+  '&:hover': {
+    textDecoration: 'underline',
+  },
+}));
+
+const ColumnTitle = styled('h4')(({ theme }) => ({
   fontSize: theme.typography.caption.fontSize,
   fontWeight: theme.typography.fontWeightBold,
   color: theme.palette.common.white,
   textTransform: 'uppercase',
   letterSpacing: theme.typography.caption.letterSpacing,
   marginBottom: theme.spacing(3),
+  margin: 0,
+  marginBlockEnd: theme.spacing(3),
 }));
 
 const NavList = styled(Box)(({ theme }) => ({
@@ -95,14 +110,6 @@ const FooterLink = styled(MuiLink)(({ theme }) => ({
   }),
   '&:hover': {
     color: theme.palette.common.white,
-  },
-}));
-
-const SupportEmail = styled(MuiLink)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  textDecoration: 'none',
-  '&:hover': {
-    textDecoration: 'underline',
   },
 }));
 
@@ -126,13 +133,16 @@ const SocialLinks = styled(Box)(({ theme }) => ({
   gap: theme.spacing(2),
 }));
 
-const SocialButton = styled(IconButton)(({ theme }) => ({
+const SocialButton = styled('a')(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   width: theme.spacing(5),
   height: theme.spacing(5),
   borderRadius: theme.fairworkly.radius.sm,
   backgroundColor: alpha(theme.palette.common.white, 0.1),
   color: alpha(theme.palette.common.white, 0.7),
-  transition: theme.transitions.create(['all'], {
+  transition: theme.transitions.create(['background-color', 'color'], {
     duration: theme.transitions.duration.short,
   }),
   '&:hover': {
@@ -141,76 +151,124 @@ const SocialButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
+interface FooterLinkItem {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+interface FooterColumn {
+  title: string;
+  links: FooterLinkItem[];
+}
+
+interface SocialLink {
+  label: string;
+  href: string;
+  icon: React.ComponentType;
+}
+
+const SUPPORT_EMAIL = 'support@fairworkly.com';
+
+const content = {
+  brand: 'FairWorkly',
+  description: 'Fair Work compliance made simple for Australian SMEs.',
+  supportLabel: 'Support:',
+  copyright: '\u00A9 2025 FairWorkly \u00B7 Made in Melbourne, Australia',
+};
+
+const FOOTER_COLUMNS: FooterColumn[] = [
+  {
+    title: 'Product',
+    links: [
+      { label: 'Features', href: '#features' },
+      { label: 'Pricing', href: '#pricing' },
+      { label: 'FAQ', href: '#faq' },
+      { label: 'Contact', href: `mailto:${SUPPORT_EMAIL}` },
+    ],
+  },
+  {
+    title: 'Resources',
+    links: [
+      { label: 'File Templates', href: '/templates' },
+      { label: 'Fair Work Ombudsman', href: 'https://www.fairwork.gov.au', external: true },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Terms of Service', href: '/terms' },
+    ],
+  },
+];
+
+const SOCIAL_LINKS: SocialLink[] = [
+  { label: 'Visit our LinkedIn page', href: 'https://www.linkedin.com/company/fairworkly', icon: LinkedIn },
+];
+
 export function Footer() {
   return (
-    <FooterContainer>
-      <Container maxWidth="lg">
+    <PageSection>
+      <ContentContainer>
         <FooterGrid>
           <BrandColumn>
-            <LogoLink component="a" href="/">
+            <LogoLink href="/">
               <LogoIcon>
                 <Bolt />
               </LogoIcon>
-              <LogoText>FairWorkly</LogoText>
+              <LogoText>{content.brand}</LogoText>
             </LogoLink>
-            <Typography component="p" sx={{ mb: 2 }}>
-              Fair Work compliance made simple for Australian SMEs.
-            </Typography>
-            <Typography component="p" sx={{ fontSize: '0.875rem' }}>
-              <strong>Support:</strong>{' '}
-              <SupportEmail href="mailto:support@fairworkly.com">
-                support@fairworkly.com
+            <BrandDescription>{content.description}</BrandDescription>
+            <SupportLine>
+              <strong>{content.supportLabel}</strong>{' '}
+              <SupportEmail href={`mailto:${SUPPORT_EMAIL}`}>
+                {SUPPORT_EMAIL}
               </SupportEmail>
-            </Typography>
+            </SupportLine>
           </BrandColumn>
 
-          <Box>
-            <ColumnTitle component="h4">Product</ColumnTitle>
-            <NavList>
-              <FooterLink href="#features">Features</FooterLink>
-              <FooterLink href="#pricing">Pricing</FooterLink>
-              <FooterLink href="#faq">FAQ</FooterLink>
-              <FooterLink href="mailto:support@fairworkly.com">Contact</FooterLink>
-            </NavList>
-          </Box>
-
-          <Box>
-            <ColumnTitle component="h4">Resources</ColumnTitle>
-            <NavList>
-              <FooterLink href="/templates">CSV Templates</FooterLink>
-              <FooterLink
-                href="https://www.fairwork.gov.au"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Fair Work Ombudsman
-              </FooterLink>
-            </NavList>
-          </Box>
-
-          <Box>
-            <ColumnTitle component="h4">Legal</ColumnTitle>
-            <NavList>
-              <FooterLink href="/privacy">Privacy Policy</FooterLink>
-              <FooterLink href="/terms">Terms of Service</FooterLink>
-            </NavList>
-          </Box>
+          {FOOTER_COLUMNS.map((column) => (
+            <Box key={column.title}>
+              <ColumnTitle>{column.title}</ColumnTitle>
+              <NavList>
+                {column.links.map((link) => (
+                  <FooterLink
+                    key={link.label}
+                    href={link.href}
+                    {...(link.external && {
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    })}
+                  >
+                    {link.label}
+                  </FooterLink>
+                ))}
+              </NavList>
+            </Box>
+          ))}
         </FooterGrid>
 
         <BottomBar>
-          <Typography component="p">
-            © 2025 FairWorkly · Made in Melbourne, Australia
-          </Typography>
+          <Typography component="p">{content.copyright}</Typography>
           <SocialLinks>
-            <SocialButton aria-label="Visit our LinkedIn page">
-              <LinkedIn />
-            </SocialButton>
-            <SocialButton aria-label="Follow us on X">
-              <XIcon />
-            </SocialButton>
+            {SOCIAL_LINKS.map((social) => {
+              const IconComponent = social.icon;
+              return (
+                <SocialButton
+                  key={social.label}
+                  aria-label={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <IconComponent />
+                </SocialButton>
+              );
+            })}
           </SocialLinks>
         </BottomBar>
-      </Container>
-    </FooterContainer>
+      </ContentContainer>
+    </PageSection>
   );
 }
