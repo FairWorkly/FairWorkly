@@ -13,7 +13,7 @@ public class CsvParser(ILogger<CsvParser> logger) : ICsvParser
     {
         try
         {
-            using var reader = new StreamReader(stream);
+            using var reader = new StreamReader(stream, leaveOpen: true);
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = false,
