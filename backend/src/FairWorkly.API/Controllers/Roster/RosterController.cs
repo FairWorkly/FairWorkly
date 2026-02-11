@@ -39,7 +39,7 @@ public class RosterController(
     [ProducesResponseType(typeof(UploadRosterResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<UploadRosterResponse>> Upload([FromForm] IFormFile file)
+    public async Task<ActionResult<UploadRosterResponse>> Upload(IFormFile file)
     {
         if (_currentUser.UserId is not { } userId || userId == Guid.Empty)
         {
@@ -115,7 +115,7 @@ public class RosterController(
     /// <param name="rosterId">Roster ID</param>
     /// <returns>Original Excel file</returns>
     [HttpGet("{rosterId}/download")]
-    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DownloadOriginalFile(Guid rosterId, CancellationToken ct)
