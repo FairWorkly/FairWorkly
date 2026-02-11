@@ -13,7 +13,14 @@ FairWorkly implements **three layers of error handling**, each serving a distinc
 │   Purpose: Unified return value wrapper for all Application     │
 │            layer Handlers                                        │
 └─────────────────────────────────────────────────────────────────┘
-                              ▲
+                              │
+                    ┌─────────▼──────────┐
+                    │ 1b. ResultMapping  │
+                    │      Filter        │
+                    │ (API IActionFilter)│
+                    │ Auto-maps Result<T>│
+                    │ → HTTP response    │
+                    └─────────┬──────────┘
                               │
                 ┌─────────────┴─────────────┐
                 │                           │
@@ -96,36 +103,24 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
 }
 ```
 
-**Controller:**
+**Controller (uses ResultMappingFilter):**
 ```csharp
 [HttpPost("login")]
-public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginCommand command)
+public async Task<IActionResult> Login([FromBody] LoginCommand command)
 {
     var result = await mediator.Send(command);
 
-    // Handle validation failures (from ValidationBehavior)
-    if (result.Type == ResultType.ValidationFailure)
-    {
-        return await HandleValidationFailureAsync(result);  // 400
-    }
-
-    // Handle forbidden
-    if (result.Type == ResultType.Forbidden)
-    {
-        return StatusCode(403, new { message = result.ErrorMessage });  // 403
-    }
-
-    // Handle authentication failure
+    // Filter auto-maps failures → ProblemDetails (400/401/403/404)
     if (result.IsFailure)
-    {
-        return Unauthorized(new { message = result.ErrorMessage });  // 401
-    }
+        return new ObjectResult(result);
 
-    // Success
+    // Side effect: must set cookie before returning success
     SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
     return Ok(result.Value);  // 200
 }
 ```
+
+> See [ResultMappingFilter](#1b-resultmappingfilter---centralized-result-to-http-mapping) for how `new ObjectResult(result)` is automatically transformed.
 
 ### ValidationBehavior - Automatic Validation
 
@@ -172,8 +167,224 @@ Handler executes business logic
    ↓
 Returns Result<T>
    ↓
-Controller handles based on result.Type
+Controller returns new ObjectResult(result)
+   ↓
+ResultMappingFilter auto-maps → HTTP response
 ```
+
+---
+
+## 1b. ResultMappingFilter - Centralized Result-to-HTTP Mapping
+
+### Purpose
+
+Automatically transform `Result<T>` into the correct HTTP response. This eliminates manual `if/else` chains in controllers and keeps controllers thin (pure dispatchers).
+
+### File Location
+
+`src/FairWorkly.API/Filters/ResultMappingFilter.cs`
+
+### How It Works
+
+The filter is registered globally as an `IAsyncActionFilter`. It runs **after** each controller action:
+
+1. Inspects `executedContext.Result` — if it's an `ObjectResult` whose `Value` implements `IResultBase`, the filter activates
+2. **Success**: extracts `Result<T>.Value` and returns `OkObjectResult(value)` (200 OK)
+3. **Failure**: maps `ResultType` to ProblemDetails with the appropriate HTTP status code
+
+If the result is NOT a `Result<T>` (e.g., `FileResult`, `UnauthorizedResult`, plain `ObjectResult`), the filter does nothing.
+
+### ResultType → HTTP Mapping
+
+| ResultType | HTTP Status | ProblemDetails Title | Response Body |
+|---|---|---|---|
+| `Success` | 200 | — | `result.Value` (unwrapped) |
+| `ValidationFailure` | 400 | "Validation Failed" | ProblemDetails + `errors` extension |
+| `BusinessFailure` | 400 | "Bad Request" | ProblemDetails |
+| `NotFound` | 404 | "Resource Not Found" | ProblemDetails |
+| `Unauthorized` | 401 | "Unauthorized" | ProblemDetails |
+| `Forbidden` | 403 | "Forbidden" | ProblemDetails |
+
+All error responses use **ProblemDetails (RFC 7807)** format, consistent with `GlobalExceptionHandler`.
+
+### Controller Patterns
+
+**Pattern 1: Pure dispatch** — for actions that just send a command/query and return the result.
+
+```csharp
+[HttpGet]
+public async Task<IActionResult> GetOrganizationAwards()
+{
+    // ... pre-checks ...
+    var result = await mediator.Send(query);
+    return new ObjectResult(result);  // Filter handles everything
+}
+```
+
+**Pattern 2: Side effects on success** — for actions that need to do something (e.g., set cookies) before returning the success response.
+
+```csharp
+[HttpPost("login")]
+public async Task<IActionResult> Login([FromBody] LoginCommand command)
+{
+    var result = await mediator.Send(command);
+
+    if (result.IsFailure)
+        return new ObjectResult(result);  // Filter handles error mapping
+
+    SetRefreshTokenCookie(result.Value!.RefreshToken, ...);  // Side effect
+    return Ok(result.Value);  // Manual success response
+}
+```
+
+**Pattern 3: Custom success response** — for actions that return a different shape than `result.Value`.
+
+```csharp
+[HttpPost("forgot-password")]
+public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+{
+    var result = await mediator.Send(command);
+
+    if (result.IsFailure)
+        return new ObjectResult(result);  // Filter handles error mapping
+
+    return Ok(new { message = "If that email exists, a reset link has been sent." });
+}
+```
+
+**Pattern 4: Non-Result flow** — the filter automatically ignores actions that don't return `Result<T>`.
+
+```csharp
+[HttpGet("{rosterId}/download")]
+public async Task<IActionResult> DownloadOriginalFile(Guid rosterId, CancellationToken ct)
+{
+    // ... manual logic, returns FileResult ...
+    return File(fileStream, contentType, fileName);  // Filter ignores this
+}
+```
+
+### Validation Error Response Format
+
+For `ResultType.ValidationFailure`, the ProblemDetails includes an `errors` extension with field-level errors grouped by field name:
+
+```json
+{
+  "status": 400,
+  "title": "Validation Failed",
+  "detail": "One or more validation errors occurred.",
+  "instance": "/api/auth/login",
+  "errors": {
+    "Email": ["Email is required", "Email must be a valid email address"],
+    "Password": ["Password is required"]
+  }
+}
+```
+
+This format is identical to what `GlobalExceptionHandler` produces for `ValidationException`, ensuring consistency.
+
+### Frontend Integration
+
+The frontend `normalizeApiError` function (in `frontend/src/shared/types/api.types.ts`) reads the error message from `data.detail` (ProblemDetails) with fallback to `data.message` (legacy format):
+
+```typescript
+const message =
+  data?.detail ||    // ProblemDetails: { detail: "Invalid credentials" }
+  data?.message ||   // Legacy format:  { message: "Invalid credentials" }
+  error.message ||
+  "Request failed. Please try again.";
+```
+
+### Registration
+
+Registered globally in `Program.cs`:
+
+```csharp
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ResultMappingFilter>();
+});
+```
+
+---
+
+## ValidationBehavior vs ResultMappingFilter — Why Both?
+
+These two mechanisms look similar (both intercept and transform `Result<T>`), but they operate at **different layers** and solve **different problems**.
+
+### Request Lifecycle
+
+```
+HTTP Request
+   ↓
+┌──────────────────────────────── ASP.NET MVC Pipeline ──────────────────────────────────┐
+│  Controller action invoked                                                              │
+│     ↓                                                                                   │
+│  ┌───────────────────────────── MediatR Pipeline ─────────────────────────────────────┐ │
+│  │  1️⃣ ValidationBehavior         (Application layer)                                 │ │
+│  │     - Runs FluentValidation validators on the Command/Query                        │ │
+│  │     - If invalid → short-circuits, returns Result<T>.ValidationFailure             │ │
+│  │     - If valid   → passes through to Handler                                      │ │
+│  │     ↓                                                                              │ │
+│  │  Handler executes business logic                                                   │ │
+│  │     ↓                                                                              │ │
+│  │  Returns Result<T>  (Success / NotFound / Forbidden / etc.)                        │ │
+│  └────────────────────────────────────────────────────────────────────────────────────┘ │
+│     ↓                                                                                   │
+│  Controller returns new ObjectResult(result)                                            │
+│     ↓                                                                                   │
+│  2️⃣ ResultMappingFilter           (API layer)                                          │
+│     - Inspects the ObjectResult                                                         │
+│     - Maps Result<T> → HTTP response (200/400/401/403/404 + ProblemDetails)             │
+│     ↓                                                                                   │
+│  HTTP Response sent to client                                                           │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Comparison
+
+|  | ValidationBehavior | ResultMappingFilter |
+|---|---|---|
+| **Layer** | Application (`FairWorkly.Application`) | API (`FairWorkly.API`) |
+| **Mechanism** | MediatR `IPipelineBehavior` | ASP.NET `IAsyncActionFilter` |
+| **Runs when** | Before the Handler executes | After the Controller action returns |
+| **Input** | MediatR `TRequest` (Command/Query) | `ObjectResult` containing `Result<T>` |
+| **Output** | `Result<T>` (domain type) | `ActionResult` (HTTP response) |
+| **Purpose** | Validate input data (FluentValidation) | Map result to HTTP status + ProblemDetails |
+| **Knows about HTTP?** | No — pure domain types | Yes — status codes, ProblemDetails, headers |
+| **Short-circuits?** | Yes — Handler never runs if validation fails | No — runs after action completes |
+
+### Why Not Use a MediatR Behavior for HTTP Mapping?
+
+You might wonder: "Can we add another pipeline behavior that maps `Result<T>` directly to an HTTP response, since we already have `ValidationBehavior` there?"
+
+**No** — this would violate Clean Architecture:
+
+```
+Domain ← Application ← Infrastructure
+                     ← API               ← HTTP concerns live here
+
+MediatR behaviors live in Application.
+HTTP concepts (ProblemDetails, StatusCodes, ActionResult) live in API.
+Application must NOT reference API types.
+```
+
+A MediatR behavior that returns `ActionResult` or `ProblemDetails` would require the Application layer to depend on `Microsoft.AspNetCore.Mvc` — breaking the dependency rule.
+
+### When to Use Which
+
+| Scenario | Use |
+|---|---|
+| Validate command/query input fields (email format, required fields, etc.) | `ValidationBehavior` (via FluentValidation) |
+| Cross-cutting input validation for all handlers | MediatR `IPipelineBehavior` |
+| Map `Result<T>` success/failure to HTTP response | `ResultMappingFilter` (return `new ObjectResult(result)`) |
+| Handle side effects before returning HTTP response (cookies, headers) | Controller manually checks `result.IsFailure`, delegates errors to filter |
+| Catch unhandled exceptions from infrastructure | `GlobalExceptionHandler` |
+
+### Summary
+
+- **ValidationBehavior** answers: *"Is the input valid?"* (pre-processing)
+- **ResultMappingFilter** answers: *"What HTTP response does this result become?"* (post-processing)
+- They work together: ValidationBehavior produces `Result<T>.ValidationFailure` → Controller returns it → ResultMappingFilter transforms it to a 400 ProblemDetails response.
 
 ---
 
@@ -528,7 +739,9 @@ Compliance engine checks → Finds 50 compliance issues (RosterIssue entities)
    ↓
 ✅ Result<ValidateRosterResponse>.Success(containing 50 RosterIssues)
    ↓
-Controller: return Ok(result.Value)  → 200 + all issues list
+Controller: return new ObjectResult(result)
+   ↓
+ResultMappingFilter: IsSuccess → OkObjectResult(result.Value)  → 200
    ↓
 Frontend displays: Validation failed, 50 issues need fixing
 ```
@@ -552,7 +765,9 @@ Backend Handler receives ParseResponse
    ↓
 ✅ Result<RosterDto>.Success(containing 95 shifts + 5 issues)
    ↓
-Controller: return Ok(result.Value)  → 200
+Controller: return new ObjectResult(result)
+   ↓
+ResultMappingFilter: IsSuccess → OkObjectResult(result.Value)  → 200
 ```
 
 ---
@@ -568,7 +783,9 @@ Handler checks errors.Any() == true
    ↓
 ❌ Result<PayrollDto>.ValidationFailure(errors)
    ↓
-Controller: return BadRequest(ProblemDetails)  → 400
+Controller: return new ObjectResult(result)
+   ↓
+ResultMappingFilter: ValidationFailure → ProblemDetails 400 + errors
 ```
 
 ---
@@ -621,20 +838,154 @@ Returns 500 Internal Server Error
 
 ---
 
-## Best Practices
+## Adding a New Feature — Error Handling Checklist
+
+When building a new feature (e.g., Billing, Settings, Payroll), you get error handling **for free** if you follow the existing patterns. Here's what you need to do — and what you **don't** need to do.
+
+### What the Framework Handles for You
+
+| Concern | Handled by | You write |
+|---|---|---|
+| Input validation (required fields, format, range) | `ValidationBehavior` + FluentValidation | A `Validator` class only |
+| Result → HTTP response mapping | `ResultMappingFilter` | Nothing — just `return new ObjectResult(result)` |
+| Unhandled exceptions (DB errors, null refs) | `GlobalExceptionHandler` | Nothing — automatic |
+
+### Step-by-Step: New Feature Example (Billing)
+
+**1. Create a FluentValidation Validator** — input validation is automatic.
+
+```csharp
+// Application/Billing/Features/UpdatePlan/UpdatePlanCommandValidator.cs
+public class UpdatePlanCommandValidator : AbstractValidator<UpdatePlanCommand>
+{
+    public UpdatePlanCommandValidator()
+    {
+        RuleFor(x => x.PlanId).NotEmpty();
+        RuleFor(x => x.Seats).GreaterThan(0).WithMessage("Seats must be at least 1");
+    }
+}
+```
+
+That's it. `ValidationBehavior` will run this automatically before your Handler. If validation fails, the controller receives `Result<T>.ValidationFailure` → the filter returns 400 ProblemDetails. **You write zero error handling code for this.**
+
+**2. Write the Handler** — return `Result<T>` for business outcomes.
+
+```csharp
+// Application/Billing/Features/UpdatePlan/UpdatePlanHandler.cs
+public class UpdatePlanHandler : IRequestHandler<UpdatePlanCommand, Result<UpdatePlanResponse>>
+{
+    public async Task<Result<UpdatePlanResponse>> Handle(...)
+    {
+        var plan = await _repo.GetByIdAsync(request.PlanId);
+
+        if (plan == null)
+            return Result<UpdatePlanResponse>.NotFound("Plan not found");
+
+        if (plan.OrganizationId != request.OrganizationId)
+            return Result<UpdatePlanResponse>.Forbidden("Not your plan");
+
+        plan.UpdateSeats(request.Seats);
+        await _repo.SaveAsync();
+
+        return Result<UpdatePlanResponse>.Success(new UpdatePlanResponse { ... });
+
+        // ❌ DO NOT: try/catch database exceptions — GlobalExceptionHandler handles them
+        // ❌ DO NOT: throw new ValidationException — use Result<T>.ValidationFailure
+        // ❌ DO NOT: return HTTP types (BadRequest, ProblemDetails) — that's the API layer's job
+    }
+}
+```
+
+**3. Write the Controller** — pure dispatch, no error mapping.
+
+```csharp
+// API/Controllers/Billing/BillingController.cs
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class BillingController(IMediator mediator, ICurrentUserService currentUser) : ControllerBase
+{
+    [HttpPut("plan")]
+    public async Task<IActionResult> UpdatePlan([FromBody] UpdatePlanCommand command)
+    {
+        command.OrganizationId = Guid.Parse(currentUser.OrganizationId!);
+        var result = await mediator.Send(command);
+        return new ObjectResult(result);  // ✅ That's it. Filter handles everything.
+    }
+
+    // ❌ DO NOT: write if (result.IsFailure) return BadRequest(...)
+    // ❌ DO NOT: write HandleValidationFailureAsync(...)
+    // ❌ DO NOT: manually create ProblemDetails
+}
+```
+
+**4. What happens automatically for each error scenario:**
+
+| Scenario | Who handles it | HTTP Response |
+|---|---|---|
+| `Seats` is missing or ≤ 0 | Validator → `ValidationBehavior` → Filter | 400 + `{ errors: { "Seats": ["..."] } }` |
+| Plan not found | Handler returns `NotFound` → Filter | 404 + ProblemDetails |
+| Wrong organization | Handler returns `Forbidden` → Filter | 403 + ProblemDetails |
+| DB connection failure | EF Core throws → `GlobalExceptionHandler` | 500 + ProblemDetails |
+| Success | Handler returns `Success` → Filter | 200 + response body |
+
+**You wrote 0 lines of error-to-HTTP mapping code.** The framework handles it all.
+
+### When You DO Need Manual Handling
+
+Only for controllers with **side effects between getting the result and returning the response**:
+
+```csharp
+// Example: Login sets a cookie on success — can't use pure dispatch
+[HttpPost("login")]
+public async Task<IActionResult> Login([FromBody] LoginCommand command)
+{
+    var result = await mediator.Send(command);
+
+    if (result.IsFailure)
+        return new ObjectResult(result);  // Filter handles error → ProblemDetails
+
+    // Side effect that must happen before response
+    SetRefreshTokenCookie(result.Value!.RefreshToken, ...);
+    return Ok(result.Value);
+}
+```
+
+### Anti-Patterns — Do NOT Do These
+
+```csharp
+// ❌ Manual error mapping in controller — use the filter
+if (result.Type == ResultType.ValidationFailure) { return BadRequest(...); }
+if (result.Type == ResultType.NotFound) { return NotFound(...); }
+
+// ❌ Duplicating HandleValidationFailureAsync — deleted, use the filter
+private async Task<ActionResult> HandleValidationFailureAsync<T>(Result<T> result) { ... }
+
+// ❌ Throwing exceptions for business logic — use Result<T>
+if (plan == null) throw new NotFoundException("Plan not found");
+// ✅ Instead:
+if (plan == null) return Result<T>.NotFound("Plan not found");
+
+// ❌ Catching DB exceptions in Handler — let GlobalExceptionHandler handle
+try { await _repo.SaveAsync(); } catch (DbUpdateException ex) { return Result<T>.Failure(...); }
+// ✅ Instead: just call await _repo.SaveAsync() without try/catch
+```
+
+---
+
+## Best Practices Summary
 
 ### When to Use Result<T>
 
 ✅ **DO use Result\<T\>** for:
-- Input validation failures
+- Input validation failures (via FluentValidation + `ValidationBehavior`)
 - Business rule violations
 - Resource not found scenarios
 - Authentication/authorization failures
-- Any predictable failure in business logic
 
 ❌ **DO NOT use Result\<T\>** for:
-- Returning business data that includes issue lists (use Success with data)
-- System-level failures (let GlobalExceptionHandler catch them)
+- Returning business data that includes issue lists (use `Result<T>.Success(dataWithIssues)`)
+- System-level failures (let `GlobalExceptionHandler` catch them)
 
 ### When to Use Business Data Models
 
@@ -651,8 +1002,8 @@ Returns 500 Internal Server Error
 
 ✅ **DO throw exceptions** for:
 - Programming errors (null references, invalid state)
-- Database errors (let EF Core throw, GlobalHandler will catch)
-- Domain rule violations (throw DomainException)
+- Database errors (let EF Core throw, `GlobalExceptionHandler` will catch)
+- Domain rule violations (throw `DomainException`)
 - Infrastructure failures (network, file system)
 
 ---
@@ -664,6 +1015,10 @@ Returns 500 Internal Server Error
 - `src/FairWorkly.Domain/Common/IResultBase.cs` - Result interface
 - `src/FairWorkly.Domain/Common/ValidationError.cs` - Base validation error
 - `src/FairWorkly.Application/Common/Behaviors/ValidationBehavior.cs` - Auto validation
+
+### Result-to-HTTP Mapping
+- `src/FairWorkly.API/Filters/ResultMappingFilter.cs` - Centralized Result<T> → ActionResult filter
+- `tests/FairWorkly.UnitTests/Unit/ResultMappingFilterTests.cs` - Filter unit tests
 
 ### Exception Handling
 - `src/FairWorkly.API/ExceptionHandlers/GlobalExceptionHandler.cs` - Global exception catcher

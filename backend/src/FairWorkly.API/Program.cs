@@ -47,8 +47,11 @@ try
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
-    // Add controllers
-    builder.Services.AddControllers();
+    // Add controllers with global Result<T> → ActionResult mapping filter
+    builder.Services.AddControllers(options =>
+    {
+        options.Filters.Add<FairWorkly.API.Filters.ResultMappingFilter>();
+    });
 
     // Add Swagger generator
     builder.Services.AddEndpointsApiExplorer();

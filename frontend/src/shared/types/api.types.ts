@@ -14,11 +14,15 @@ export interface ApiError {
 
 /**
  * 约定后端可能返回的错误结构（可按后端实际格式调整）
+ * Supports both ProblemDetails (RFC 7807) and legacy { message } format.
  */
 export interface BackendErrorShape {
   message?: string;
+  detail?: string; // ProblemDetails format
+  title?: string; // ProblemDetails title
   code?: string;
   details?: unknown;
+  errors?: Record<string, string[]>; // ProblemDetails validation errors
 }
 
 /**
@@ -37,8 +41,9 @@ export function normalizeApiError(error: unknown): ApiError {
     const status = error.response?.status;
     const data = error.response?.data as BackendErrorShape | undefined;
 
-    // 优先用后端 message，其次用 axios message
+    // ProblemDetails uses 'detail', legacy format uses 'message'
     const message =
+      data?.detail ||
       data?.message ||
       error.message ||
       "Request failed. Please try again.";
@@ -47,7 +52,7 @@ export function normalizeApiError(error: unknown): ApiError {
       status,
       message,
       code: data?.code,
-      details: data?.details,
+      details: data?.details ?? data?.errors,
       raw: error,
     };
   }

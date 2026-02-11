@@ -2,18 +2,12 @@
 using FairWorkly.Application.Roster.Features.GetRosterDetails;
 using FairWorkly.Application.Roster.Features.UploadRoster;
 using FairWorkly.Application.Roster.Interfaces;
-using FairWorkly.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FairWorkly.API.Controllers.Roster;
 
-// TODO: [Refactor] Move Result-to-ActionResult mapping out of controllers.
-// Create a centralized IActionFilter or MediatR pipeline behavior that maps
-// Result<T>.ValidationFailure → ProblemDetails 400, Result<T>.NotFound → 404, etc.
-// This eliminates HandleValidationFailureAsync duplication across controllers.
-// See GitHub issue for details.
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
@@ -65,17 +59,7 @@ public class RosterController(
 
         var result = await _mediator.Send(command);
 
-        if (result.Type == ResultType.ValidationFailure)
-        {
-            return await HandleValidationFailureAsync(result);
-        }
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new { message = result.ErrorMessage });
-        }
-
-        return Ok(result.Value);
+        return new ObjectResult(result);
     }
 
     /// <summary>
@@ -101,12 +85,7 @@ public class RosterController(
 
         var result = await _mediator.Send(query);
 
-        if (result.IsFailure)
-        {
-            return NotFound(new { message = result.ErrorMessage });
-        }
-
-        return Ok(result.Value);
+        return new ObjectResult(result);
     }
 
     /// <summary>
@@ -169,24 +148,4 @@ public class RosterController(
         };
     }
 
-    private async Task<ActionResult> HandleValidationFailureAsync<T>(Result<T> result)
-    {
-        var errors = result.ValidationErrors?
-            .GroupBy(e => e.Field)
-            .ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray())
-            ?? new Dictionary<string, string[]>();
-
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Validation Failed",
-            Detail = "One or more validation errors occurred.",
-            Instance = HttpContext.Request.Path,
-        };
-        problemDetails.Extensions.Add("errors", errors);
-
-        Response.StatusCode = StatusCodes.Status400BadRequest;
-        await Response.WriteAsJsonAsync(problemDetails);
-        return new EmptyResult();
-    }
 }

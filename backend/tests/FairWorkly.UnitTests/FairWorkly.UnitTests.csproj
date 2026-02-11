@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\FairWorkly.API\FairWorkly.API.csproj" />
     <ProjectReference Include="..\..\src\FairWorkly.Domain\FairWorkly.Domain.csproj" />
     <ProjectReference Include="..\..\src\FairWorkly.Application\FairWorkly.Application.csproj" />
     <ProjectReference Include="..\..\src\FairWorkly.Infrastructure\FairWorkly.Infrastructure.csproj" />

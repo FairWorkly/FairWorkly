@@ -5,7 +5,6 @@ using FairWorkly.Application.Auth.Features.Login;
 using FairWorkly.Application.Auth.Features.Logout;
 using FairWorkly.Application.Auth.Features.Me;
 using FairWorkly.Application.Auth.Features.Refresh;
-using FairWorkly.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,39 +26,23 @@ public class AuthController(IMediator mediator) : ControllerBase
         typeof(FairWorkly.API.SwaggerExamples.LoginCommandExample)
     )]
     [HttpPost("login")]
-    [AllowAnonymous] // Allow anonymous access for the login endpoint
-    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginCommand command)
+    [AllowAnonymous]
+    public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
         var result = await mediator.Send(command);
 
-        // Handle validation failures (from ValidationBehavior)
-        if (result.Type == ResultType.ValidationFailure)
-        {
-            return await HandleValidationFailureAsync(result);
-        }
-
         if (result.IsFailure)
-        {
-            if (result.Type == ResultType.Forbidden)
-            {
-                return StatusCode(403, new { message = result.ErrorMessage });
-            }
+            return new ObjectResult(result);
 
-            return Unauthorized(new { message = result.ErrorMessage });
-        }
-
-        // Put the RefreshToken into an HttpOnly cookie
         SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
 
-        // Return the AccessToken and user info (excluding the RefreshToken)
         return Ok(result.Value);
     }
 
     [HttpPost("refresh")]
     [AllowAnonymous]
-    public async Task<ActionResult> Refresh()
+    public async Task<IActionResult> Refresh()
     {
-        // Read refresh token from HttpOnly cookie
         if (
             !Request.Cookies.TryGetValue("refreshToken", out var refreshTokenPlain)
             || string.IsNullOrWhiteSpace(refreshTokenPlain)
@@ -72,46 +55,29 @@ public class AuthController(IMediator mediator) : ControllerBase
         var result = await mediator.Send(cmd);
 
         if (result.IsFailure)
-        {
-            if (result.Type == ResultType.Forbidden)
-            {
-                return StatusCode(403, new { message = result.ErrorMessage });
-            }
+            return new ObjectResult(result);
 
-            return Unauthorized(new { message = result.ErrorMessage });
-        }
-
-        // Update cookie with new refresh token
         SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
 
-        // Return new access token
         return Ok(new { accessToken = result.Value.AccessToken });
     }
 
     [HttpPost("forgot-password")]
     [AllowAnonymous]
-    public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
     {
         var result = await mediator.Send(command);
 
         if (result.IsFailure)
-        {
-            if (result.Type == ResultType.ValidationFailure)
-            {
-                return await HandleValidationFailureAsync(result);
-            }
-
-            return BadRequest(new { message = result.ErrorMessage });
-        }
+            return new ObjectResult(result);
 
         return Ok(new { message = "If that email exists, a reset link has been sent." });
     }
 
     [HttpGet("me")]
     [Authorize]
-    public async Task<ActionResult> Me()
+    public async Task<IActionResult> Me()
     {
-        // Extract user id from claims (sub)
         var sub =
             User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -121,26 +87,15 @@ public class AuthController(IMediator mediator) : ControllerBase
         var query = new GetCurrentUserQuery { UserId = userId };
         var result = await mediator.Send(query);
 
-        if (result.IsFailure)
-        {
-            if (result.Type == ResultType.NotFound)
-            {
-                return NotFound();
-            }
-            return BadRequest(new { message = result.ErrorMessage });
-        }
-
-        return Ok(result.Value);
+        return new ObjectResult(result);
     }
 
     [HttpPost("logout")]
     [Authorize]
     public async Task<IActionResult> Logout()
     {
-        // Read refresh token from cookie (if any) before deleting
         Request.Cookies.TryGetValue("refreshToken", out var refreshTokenPlain);
 
-        // Try get user id from access token (if present)
         var sub =
             User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -149,16 +104,12 @@ public class AuthController(IMediator mediator) : ControllerBase
             userId = parsed;
 
         var cmd = new LogoutCommand { UserId = userId, RefreshTokenPlain = refreshTokenPlain };
-
         var result = await mediator.Send(cmd);
 
-        // Remove cookie from client regardless of DB result (options must match original cookie)
         Response.Cookies.Delete("refreshToken", GetRefreshTokenCookieOptions(DateTime.UtcNow));
 
         if (result.IsFailure)
-        {
-            return BadRequest(new { message = result.ErrorMessage });
-        }
+            return new ObjectResult(result);
 
         return NoContent();
     }
@@ -188,29 +139,4 @@ public class AuthController(IMediator mediator) : ControllerBase
         };
     }
 
-    /// <summary>
-    /// Handle validation failures from ValidationBehavior - return ProblemDetails format
-    /// matching the original GlobalExceptionHandler response format exactly
-    /// </summary>
-    private async Task<ActionResult> HandleValidationFailureAsync<T>(Result<T> result)
-    {
-        var errors =
-            result
-                .ValidationErrors?.GroupBy(e => e.Field)
-                .ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray())
-            ?? new Dictionary<string, string[]>();
-
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Validation Failed",
-            Detail = "One or more validation errors occurred.",
-            Instance = HttpContext.Request.Path,
-        };
-        problemDetails.Extensions.Add("errors", errors);
-
-        Response.StatusCode = StatusCodes.Status400BadRequest;
-        await Response.WriteAsJsonAsync(problemDetails);
-        return new EmptyResult();
-    }
 }
