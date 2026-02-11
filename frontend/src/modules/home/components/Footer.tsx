@@ -90,7 +90,6 @@ const ColumnTitle = styled('h4')(({ theme }) => ({
   color: theme.palette.common.white,
   textTransform: 'uppercase',
   letterSpacing: theme.typography.caption.letterSpacing,
-  marginBottom: theme.spacing(3),
   margin: 0,
   marginBlockEnd: theme.spacing(3),
 }));
@@ -151,62 +150,6 @@ const SocialButton = styled('a')(({ theme }) => ({
   },
 }));
 
-interface FooterLinkItem {
-  label: string;
-  href: string;
-  external?: boolean;
-}
-
-interface FooterColumn {
-  title: string;
-  links: FooterLinkItem[];
-}
-
-interface SocialLink {
-  label: string;
-  href: string;
-  icon: React.ComponentType;
-}
-
-const SUPPORT_EMAIL = 'support@fairworkly.com';
-
-const content = {
-  brand: 'FairWorkly',
-  description: 'Fair Work compliance made simple for Australian SMEs.',
-  supportLabel: 'Support:',
-  copyright: '\u00A9 2025 FairWorkly \u00B7 Made in Melbourne, Australia',
-};
-
-const FOOTER_COLUMNS: FooterColumn[] = [
-  {
-    title: 'Product',
-    links: [
-      { label: 'Features', href: '#features' },
-      { label: 'Pricing', href: '#pricing' },
-      { label: 'FAQ', href: '#faq' },
-      { label: 'Contact', href: `mailto:${SUPPORT_EMAIL}` },
-    ],
-  },
-  {
-    title: 'Resources',
-    links: [
-      { label: 'File Templates', href: '/templates' },
-      { label: 'Fair Work Ombudsman', href: 'https://www.fairwork.gov.au', external: true },
-    ],
-  },
-  {
-    title: 'Legal',
-    links: [
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Terms of Service', href: '/terms' },
-    ],
-  },
-];
-
-const SOCIAL_LINKS: SocialLink[] = [
-  { label: 'Visit our LinkedIn page', href: 'https://www.linkedin.com/company/fairworkly', icon: LinkedIn },
-];
-
 export function Footer() {
   return (
     <PageSection>
@@ -217,55 +160,65 @@ export function Footer() {
               <LogoIcon>
                 <Bolt />
               </LogoIcon>
-              <LogoText>{content.brand}</LogoText>
+              <LogoText>FairWorkly</LogoText>
             </LogoLink>
-            <BrandDescription>{content.description}</BrandDescription>
+            <BrandDescription>
+              Fair Work compliance made simple for Australian SMEs.
+            </BrandDescription>
             <SupportLine>
-              <strong>{content.supportLabel}</strong>{' '}
-              <SupportEmail href={`mailto:${SUPPORT_EMAIL}`}>
-                {SUPPORT_EMAIL}
+              <strong>Support:</strong>{' '}
+              <SupportEmail href="mailto:support@fairworkly.com">
+                support@fairworkly.com
               </SupportEmail>
             </SupportLine>
           </BrandColumn>
 
-          {FOOTER_COLUMNS.map((column) => (
-            <Box key={column.title}>
-              <ColumnTitle>{column.title}</ColumnTitle>
-              <NavList>
-                {column.links.map((link) => (
-                  <FooterLink
-                    key={link.label}
-                    href={link.href}
-                    {...(link.external && {
-                      target: '_blank',
-                      rel: 'noopener noreferrer',
-                    })}
-                  >
-                    {link.label}
-                  </FooterLink>
-                ))}
-              </NavList>
-            </Box>
-          ))}
+          <Box>
+            <ColumnTitle>Product</ColumnTitle>
+            <NavList>
+              <FooterLink href="#features">Features</FooterLink>
+              <FooterLink href="#pricing">Pricing</FooterLink>
+              <FooterLink href="#faq">FAQ</FooterLink>
+              <FooterLink href="mailto:support@fairworkly.com">Contact</FooterLink>
+            </NavList>
+          </Box>
+
+          <Box>
+            <ColumnTitle>Resources</ColumnTitle>
+            <NavList>
+              <FooterLink href="/templates">File Templates</FooterLink>
+              <FooterLink
+                href="https://www.fairwork.gov.au"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Fair Work Ombudsman
+              </FooterLink>
+            </NavList>
+          </Box>
+
+          <Box>
+            <ColumnTitle>Legal</ColumnTitle>
+            <NavList>
+              <FooterLink as="span">Privacy Policy</FooterLink>
+              <FooterLink as="span">Terms of Service</FooterLink>
+            </NavList>
+          </Box>
         </FooterGrid>
 
         <BottomBar>
-          <Typography component="p">{content.copyright}</Typography>
+          <Typography component="p">
+            © 2025 FairWorkly · Made in Melbourne, Australia
+          </Typography>
           <SocialLinks>
-            {SOCIAL_LINKS.map((social) => {
-              const IconComponent = social.icon;
-              return (
-                <SocialButton
-                  key={social.label}
-                  aria-label={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <IconComponent />
-                </SocialButton>
-              );
-            })}
+            <SocialButton
+              aria-label="Visit our LinkedIn page"
+              href="https://www.linkedin.com/company/fairworkly"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <LinkedIn />
+            </SocialButton>
           </SocialLinks>
         </BottomBar>
       </ContentContainer>
