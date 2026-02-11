@@ -27,8 +27,7 @@ public class PayrollValidationTests : IntegrationTestBase
 
         if (sendFile && csvPath != null)
         {
-            var fileStream = File.OpenRead(csvPath);
-            content.Add(new StreamContent(fileStream), "file", Path.GetFileName(csvPath));
+            content.Add(new StreamContent(File.OpenRead(csvPath)), "file", Path.GetFileName(csvPath));
         }
 
         content.Add(new StringContent(awardType), "awardType");
