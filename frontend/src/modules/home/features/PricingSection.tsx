@@ -10,7 +10,7 @@ import {
 import { CheckCircleOutline, SellOutlined } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { ContactModal } from './ContactModel'
+import { ContactModal } from './ContactModal'
 
 const CTAAction = {
   Signup: 'signup',

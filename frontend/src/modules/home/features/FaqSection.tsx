@@ -1,4 +1,4 @@
-import { Box, Card, Button, styled, Typography, alpha } from "@mui/material";
+import { Box, Card, styled, Typography, alpha } from "@mui/material";
 import {
     HelpOutlineOutlined,
     ComputerOutlined,
@@ -9,9 +9,7 @@ import {
     BuildOutlined,
     GavelOutlined,
     CloudDownloadOutlined,
-    ArrowForward,
 } from "@mui/icons-material";
-import templatesUrl from '../../../FairWorklyHomePage-Test/templates.html?url'
 import React from "react";
 
 
@@ -130,27 +128,6 @@ const NoteText = styled(Typography)(({ theme }) => ({
 }));
 
 
-const TemplateButton = styled(Button)(({ theme }) => ({
-    marginTop: theme.spacing(3),
-    padding: theme.spacing(1.5, 3),
-    backgroundColor: alpha(theme.palette.primary.main, 0.12),
-    color: theme.palette.primary.main,
-    fontWeight: theme.typography.fontWeightSemiBold,
-    borderRadius: theme.fairworkly.radius.md,
-    textTransform: 'none',
-    transition: theme.transitions.create(['all'], {
-        duration: theme.transitions.duration.short,
-    }),
-
-    '&:hover': {
-        backgroundColor: alpha(theme.palette.primary.main, 0.18),
-        transform: `translateY(${theme.spacing(-0.25)})`,
-    },
-
-    '& .MuiButton-endIcon': {
-        marginLeft: theme.spacing(1),
-    },
-}));
 
 const ListContainer = styled(Box)(({ theme }) => ({
     marginTop: theme.spacing(1),
@@ -176,7 +153,7 @@ interface FaqMessage {
     answer: string;
     note?: string;
     list?: string[];
-    hasButton?: boolean;
+
 }
 
 const FAQ_MESSAGES: Record<string, FaqMessage> = {
@@ -218,7 +195,6 @@ const FAQ_MESSAGES: Record<string, FaqMessage> = {
     templates: {
         question: 'Do you provide file templates?',
         answer: 'Yes! We provide **CSV templates** for payslip data and **XLSX templates** for roster data to help you get started with FairWorkly.',
-        hasButton: true,
     },
 };
 
@@ -246,13 +222,8 @@ export const FaqSection: React.FC = () => {
         label: 'FAQ',
         title: 'Frequently Asked Questions',
         subtitle: 'Everything you need to know about FairWorkly',
-        templateButton: 'View All Templates',
     };
 
-
-    const handleTemplateClick = () => {
-        window.open(templatesUrl, '_blank');
-    };
 
     return (
         <PageSection id="faq">
@@ -297,15 +268,6 @@ export const FaqSection: React.FC = () => {
                                     </NoteBox>
                                 )}
 
-                                {message.hasButton && (
-                                    <TemplateButton
-                                        fullWidth
-                                        endIcon={<ArrowForward />}
-                                        onClick={handleTemplateClick}
-                                    >
-                                        {content.templateButton}
-                                    </TemplateButton>
-                                )}
                             </FaqCard>
                         );
                     })}

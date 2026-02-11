@@ -1,3 +1,7 @@
 export { Navbar } from './Navbar'
 export { Hero } from './Hero'
 export { TrustBar } from './TrustBar'
+export { FeaturesSection } from './FeaturesSection'
+export { PricingSection } from './PricingSection'
+export { FaqSection } from './FaqSection'
+export { Footer } from './Footer'
