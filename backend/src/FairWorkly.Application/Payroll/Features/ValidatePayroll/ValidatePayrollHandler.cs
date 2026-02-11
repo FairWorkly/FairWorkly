@@ -42,7 +42,8 @@ public class ValidatePayrollHandler(
             command.FileName, command.FileSize);
 
         // Parse AwardType enum from command string
-        var awardType = Enum.Parse<AwardType>(command.AwardType);
+        if (!Enum.TryParse<AwardType>(command.AwardType, out var awardType))
+            return Result<ValidatePayrollDto>.Failure($"Invalid award type: {command.AwardType}");
 
         // Layer 2: CsvParser
         var parseResult = csvParser.Parse(command.FileStream);
@@ -99,7 +100,7 @@ public class ValidatePayrollHandler(
                     LastName = row.LastName,
                     JobTitle = "Unknown",
                     EmploymentType = row.EmploymentType,
-                    StartDate = DateTime.MinValue,
+                    StartDate = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc),
                     AwardType = awardType,
                     AwardLevelNumber = ParseLevelNumber(row.Classification),
                     EmployeeNumber = row.EmployeeId,
@@ -208,10 +209,12 @@ public class ValidatePayrollHandler(
         List<Payslip> payslips,
         List<PayrollIssue> allIssues)
     {
+        var payslipMap = payslips.ToDictionary(p => p.Id);
+
         // Build issue DTOs
         var issueDtos = allIssues.Select(issue =>
         {
-            var payslip = payslips.First(p => p.Id == issue.PayslipId);
+            var payslip = payslipMap[issue.PayslipId];
             var impactAmount = CalculateImpactAmount(issue);
 
             return new IssueDto

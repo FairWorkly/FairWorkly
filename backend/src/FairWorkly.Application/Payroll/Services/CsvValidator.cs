@@ -21,6 +21,15 @@ public class CsvValidator : ICsvValidator
 
     public Result<List<ValidatedPayrollRow>> Validate(List<string[]> rows, AwardType awardType)
     {
+        if (rows.Count == 0)
+        {
+            var emptyErrors = new List<ValidationError>
+            {
+                new CsvValidationError { RowNumber = 0, Field = "File", Message = "CSV file contains no data" }
+            };
+            return Result<List<ValidatedPayrollRow>>.ValidationFailure("CSV format validation failed", emptyErrors);
+        }
+
         // Stage 1: Header validation
         var headerErrors = ValidateHeader(rows[0]);
         if (headerErrors != null)
@@ -160,6 +169,14 @@ public class CsvValidator : ICsvValidator
         {
             var row = dataRows[i];
             var rowNumber = i + 2; // Row 1 is header, data starts from row 2
+
+            // Guard: each data row must have exactly 20 columns
+            if (row.Length != 20)
+            {
+                errors.Add(CreateError(rowNumber, "Row", $"Expected 20 columns, found {row.Length}"));
+                continue;
+            }
+
             var validatedRow = new ValidatedPayrollRow();
             var rowHasError = false;
 

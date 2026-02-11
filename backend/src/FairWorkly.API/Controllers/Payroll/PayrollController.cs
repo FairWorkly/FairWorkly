@@ -28,9 +28,11 @@ public class PayrollController : ControllerBase
         [FromForm] bool enableCasualLoadingCheck = true,
         [FromForm] bool enableSuperCheck = true)
     {
+        await using var fileStream = file.OpenReadStream();
+
         var command = new ValidatePayrollCommand
         {
-            FileStream = file.OpenReadStream(),
+            FileStream = fileStream,
             FileName = file.FileName,
             FileSize = file.Length,
             AwardType = awardType,
@@ -51,6 +53,9 @@ public class PayrollController : ControllerBase
 
         if (result.Type == ResultType.Forbidden)
             return StatusCode(403, new { code = 403, msg = result.ErrorMessage });
+
+        if (!result.IsSuccess)
+            return StatusCode(500, new { code = 500, msg = "An unexpected error occurred" });
 
         return Ok(new { code = 200, msg = "Audit completed successfully", data = result.Value });
     }
