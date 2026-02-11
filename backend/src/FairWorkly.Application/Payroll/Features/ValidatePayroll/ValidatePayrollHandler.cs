@@ -282,12 +282,15 @@ public class ValidatePayrollHandler(
         if (issue.WarningMessage != null)
             return 0m;
 
-        return issue.UnitType switch
+        var raw = issue.UnitType switch
         {
             "Hour" => ((issue.ExpectedValue ?? 0) - (issue.ActualValue ?? 0)) * (issue.AffectedUnits ?? 0),
             "Currency" => (issue.ExpectedValue ?? 0) - (issue.ActualValue ?? 0),
             _ => 0m,
         };
+
+        // Overpayment must not offset underpayment totals
+        return Math.Max(0m, raw);
     }
 
     private static int ParseLevelNumber(string classification)
