@@ -1,0 +1,89 @@
+name: Deploy Backend to ECS (EC2) via ECR
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+  ECR_REPO_BACKEND: ${{ vars.ECR_REPO_BACKEND }}
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+  ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push backend image
+        id: build
+        run: |
+          set -euo pipefail
+          ECR_URI_BACKEND="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_BACKEND}"
+          IMAGE_TAG="${GITHUB_SHA}"
+
+          # Build context MUST be repo root
+          docker build -f backend/Dockerfile -t "${ECR_URI_BACKEND}:${IMAGE_TAG}" .
+          docker push "${ECR_URI_BACKEND}:${IMAGE_TAG}"
+
+          echo "image=${ECR_URI_BACKEND}:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Render task definition
+        id: taskdef
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+
+          IMAGE="${{ steps.build.outputs.image }}"
+          jq --arg IMAGE "$IMAGE" '
+            .containerDefinitions |= map(
+              if .name == "backend" then .image = $IMAGE else . end
+            )
+          ' ecs/task-def-backend.json > ecs/task-def-backend.rendered.json
+
+          echo "rendered=ecs/task-def-backend.rendered.json" >> "$GITHUB_OUTPUT"
+
+      - name: Register task definition
+        id: register
+        run: |
+          set -euo pipefail
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://${{ steps.taskdef.outputs.rendered }} \
+            --query "taskDefinition.taskDefinitionArn" \
+            --output text)
+
+          echo "task_def_arn=$TASK_DEF_ARN" >> "$GITHUB_OUTPUT"
+
+      - name: Update ECS service
+        run: |
+          set -euo pipefail
+          aws ecs update-service \
+            --cluster "${ECS_CLUSTER}" \
+            --service "${ECS_SERVICE}" \
+            --task-definition "${{ steps.register.outputs.task_def_arn }}"
+
+      - name: Wait for service stability
+        run: |
+          set -euo pipefail
+          aws ecs wait services-stable \
+            --cluster "${ECS_CLUSTER}" \
+            --services "${ECS_SERVICE}"
