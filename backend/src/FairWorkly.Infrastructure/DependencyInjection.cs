@@ -1,4 +1,5 @@
 using Amazon.S3;
+using FairWorkly.Application.Awards.Interfaces;
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Roster.Interfaces;
@@ -8,6 +9,7 @@ using FairWorkly.Infrastructure.AI.PythonServices;
 using FairWorkly.Infrastructure.Identity;
 using FairWorkly.Infrastructure.Persistence;
 using FairWorkly.Infrastructure.Persistence.Repositories.Auth;
+using FairWorkly.Infrastructure.Persistence.Repositories.Awards;
 using FairWorkly.Infrastructure.Persistence.Repositories.Employees;
 using FairWorkly.Infrastructure.Persistence.Repositories.Roster;
 using FairWorkly.Infrastructure.Services;
@@ -56,6 +58,7 @@ public static class DependencyInjection
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IRosterRepository, RosterRepository>();
         services.AddScoped<IRosterValidationRepository, RosterValidationRepository>();
+        services.AddScoped<IAwardRepository, AwardRepository>();
 
         // Register UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();
