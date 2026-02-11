@@ -47,9 +47,6 @@ try
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
-    // Required for ICurrentUserService to access HttpContext
-    builder.Services.AddHttpContextAccessor();
-
     // Add controllers
     builder.Services.AddControllers();
 
