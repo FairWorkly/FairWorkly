@@ -37,6 +37,7 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
 
     public Task DisposeAsync()
     {
+        Client.Dispose();
         return Task.CompletedTask;
     }
 
@@ -76,7 +77,7 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
                 TestOrganizationId = existingOrg.Id;
                 var existingUser = await db.Set<User>()
                     .FirstOrDefaultAsync(u => u.OrganizationId == existingOrg.Id);
-                TestUserId = existingUser?.Id ?? Guid.Empty;
+                TestUserId = existingUser?.Id ?? throw new InvalidOperationException("Test user not found for Integration Test Company");
                 _seeded = true;
                 return;
             }
@@ -139,7 +140,7 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
         TestOrganizationId = org!.Id;
         var user = await db.Set<User>()
             .FirstOrDefaultAsync(u => u.OrganizationId == org.Id);
-        TestUserId = user?.Id ?? Guid.Empty;
+        TestUserId = user?.Id ?? throw new InvalidOperationException("Test user not found for Integration Test Company");
     }
 
     /// <summary>

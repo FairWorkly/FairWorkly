@@ -23,7 +23,7 @@ public class PayrollValidationTests : IntegrationTestBase
         bool sendFile = true)
     {
         var client = await CreateAuthenticatedClientAsync();
-        var content = new MultipartFormDataContent();
+        using var content = new MultipartFormDataContent();
 
         if (sendFile && csvPath != null)
         {
@@ -39,7 +39,8 @@ public class PayrollValidationTests : IntegrationTestBase
 
     private static JsonElement ParseJson(string json)
     {
-        return JsonDocument.Parse(json).RootElement;
+        using var doc = JsonDocument.Parse(json);
+        return doc.RootElement.Clone();
     }
 
     // ═══════════════════════════════════════════════════════════════

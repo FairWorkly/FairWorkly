@@ -37,8 +37,8 @@ public class GlobalExceptionHandlerTests : IntegrationTestBase
 
         // Send valid request that passes Layer 1-3
         var csvPath = Path.Combine(CsvDir, "compliant.csv");
-        var content = new MultipartFormDataContent();
-        var fileStream = File.OpenRead(csvPath);
+        using var content = new MultipartFormDataContent();
+        await using var fileStream = File.OpenRead(csvPath);
         content.Add(new StreamContent(fileStream), "file", "compliant.csv");
         content.Add(new StringContent("GeneralRetailIndustryAward2020"), "awardType");
         content.Add(new StringContent("VIC"), "state");

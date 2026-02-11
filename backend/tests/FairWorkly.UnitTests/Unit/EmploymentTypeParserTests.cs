@@ -31,7 +31,8 @@ public class EmploymentTypeParserTests
     [InlineData("intern")]
     [InlineData("contractor")]
     [InlineData("")]
-    public void TryParse_InvalidInput_ReturnsFalse(string input)
+    [InlineData(null)]
+    public void TryParse_InvalidInput_ReturnsFalse(string? input)
     {
         // Act
         var success = EmploymentTypeParser.TryParse(input, out _);

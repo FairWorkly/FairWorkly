@@ -193,7 +193,7 @@ public class CsvValidatorTests
     // ==================== Stage 3: Field-level validation ====================
 
     [Fact]
-    public void Validate_FieldErrors_Returns19Errors()
+    public void Validate_FieldErrors_Returns18Errors()
     {
         // Arrange — v3: 10 data rows, 9 with errors (2 errors each), 1 correct
         var rows = LoadCsvFile("v3_field_errors.csv");
@@ -245,7 +245,7 @@ public class CsvValidatorTests
         errors.Should().HaveCount(18);
     }
 
-    // ==================== Stage 3 补充：可选 Pay 字段类型检查 ====================
+    // ==================== Stage 3 supplement: optional Pay field type check ====================
 
     [Fact]
     public void Validate_OptionalPayInvalidWhenHoursZero_ReturnsError()
