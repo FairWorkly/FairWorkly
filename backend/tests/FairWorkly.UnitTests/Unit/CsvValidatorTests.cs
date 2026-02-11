@@ -32,7 +32,7 @@ public class CsvValidatorTests
         var path = Path.Combine("TestData", "Csv", "CsvValidator", fileName);
         using var stream = File.OpenRead(path);
         var parser = new CsvParser(NullLogger<CsvParser>.Instance);
-        var result = parser.Parse(stream);
+        var result = parser.Parse(stream, CancellationToken.None);
         return result.Value!;
     }
 
@@ -40,7 +40,7 @@ public class CsvValidatorTests
     {
         var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
         var parser = new CsvParser(NullLogger<CsvParser>.Instance);
-        var result = parser.Parse(stream);
+        var result = parser.Parse(stream, CancellationToken.None);
         return result.Value!;
     }
 
@@ -55,7 +55,7 @@ public class CsvValidatorTests
         var rows = LoadCsvFile("v1_wrong_header.csv");
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -75,7 +75,7 @@ public class CsvValidatorTests
         var rows = ParseInlineCsv(header + "\n" + dataRow);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -95,7 +95,7 @@ public class CsvValidatorTests
         var rows = ParseInlineCsv(wrongHeader + "\n" + dataRow);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -115,7 +115,7 @@ public class CsvValidatorTests
         var rows = LoadCsvFile("v2_global_errors.csv");
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -143,7 +143,7 @@ public class CsvValidatorTests
         var rows = ParseInlineCsv(csv);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -162,7 +162,7 @@ public class CsvValidatorTests
         var rows = ParseInlineCsv(csv);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -179,7 +179,7 @@ public class CsvValidatorTests
         var rows = ParseInlineCsv(ValidHeader);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -199,7 +199,7 @@ public class CsvValidatorTests
         var rows = LoadCsvFile("v3_field_errors.csv");
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -256,7 +256,7 @@ public class CsvValidatorTests
         var rows = ParseInlineCsv(csv);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -276,7 +276,7 @@ public class CsvValidatorTests
         var rows = LoadCsvFile("v4_happy_path.csv");
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020);
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

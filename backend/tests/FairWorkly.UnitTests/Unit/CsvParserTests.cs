@@ -28,7 +28,7 @@ public class CsvParserTests
         var stream = new MemoryStream();
 
         // Act
-        var result = _parser.Parse(stream);
+        var result = _parser.Parse(stream, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -43,7 +43,7 @@ public class CsvParserTests
         var stream = new MemoryStream(Encoding.UTF8.GetBytes(corruptedCsv));
 
         // Act
-        var result = _parser.Parse(stream);
+        var result = _parser.Parse(stream, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -60,7 +60,7 @@ public class CsvParserTests
         var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
 
         // Act
-        var result = _parser.Parse(stream);
+        var result = _parser.Parse(stream, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -78,7 +78,7 @@ public class CsvParserTests
         var stream = new MemoryStream(Encoding.UTF8.GetBytes(ValidHeader));
 
         // Act
-        var result = _parser.Parse(stream);
+        var result = _parser.Parse(stream, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

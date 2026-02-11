@@ -9,7 +9,7 @@ namespace FairWorkly.Application.Payroll.Services;
 
 public class CsvParser(ILogger<CsvParser> logger) : ICsvParser
 {
-    public Result<List<string[]>> Parse(Stream stream)
+    public Result<List<string[]>> Parse(Stream stream, CancellationToken cancellationToken)
     {
         try
         {
@@ -23,6 +23,7 @@ public class CsvParser(ILogger<CsvParser> logger) : ICsvParser
             var rows = new List<string[]>();
             while (csv.Read())
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var record = new string[csv.Parser.Count];
                 for (var i = 0; i < csv.Parser.Count; i++)
                 {

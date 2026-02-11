@@ -19,7 +19,7 @@ public class CsvValidator : ICsvValidator
         "Gross Pay", "Superannuation Paid",
     };
 
-    public Result<List<ValidatedPayrollRow>> Validate(List<string[]> rows, AwardType awardType)
+    public Result<List<ValidatedPayrollRow>> Validate(List<string[]> rows, AwardType awardType, CancellationToken cancellationToken)
     {
         if (rows.Count == 0)
         {
@@ -42,7 +42,7 @@ public class CsvValidator : ICsvValidator
             return Result<List<ValidatedPayrollRow>>.ValidationFailure("CSV format validation failed", globalErrors);
 
         // Stage 3: Field-level validation
-        var (validatedRows, fieldErrors) = ValidateFields(dataRows, awardType);
+        var (validatedRows, fieldErrors) = ValidateFields(dataRows, awardType, cancellationToken);
         if (fieldErrors != null)
             return Result<List<ValidatedPayrollRow>>.ValidationFailure("CSV format validation failed", fieldErrors);
 
@@ -160,13 +160,14 @@ public class CsvValidator : ICsvValidator
     }
 
     private static (List<ValidatedPayrollRow>?, List<ValidationError>?) ValidateFields(
-        List<string[]> dataRows, AwardType awardType)
+        List<string[]> dataRows, AwardType awardType, CancellationToken cancellationToken)
     {
         var errors = new List<ValidationError>();
         var validatedRows = new List<ValidatedPayrollRow>();
 
         for (var i = 0; i < dataRows.Count; i++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var row = dataRows[i];
             var rowNumber = i + 2; // Row 1 is header, data starts from row 2
 

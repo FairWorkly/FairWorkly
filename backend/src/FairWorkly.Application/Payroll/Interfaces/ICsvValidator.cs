@@ -6,5 +6,5 @@ namespace FairWorkly.Application.Payroll.Interfaces;
 
 public interface ICsvValidator
 {
-    Result<List<ValidatedPayrollRow>> Validate(List<string[]> rows, AwardType awardType);
+    Result<List<ValidatedPayrollRow>> Validate(List<string[]> rows, AwardType awardType, CancellationToken cancellationToken);
 }

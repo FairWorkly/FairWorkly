@@ -46,7 +46,7 @@ public class ValidatePayrollHandler(
             return Result<ValidatePayrollDto>.Failure($"Invalid award type: {command.AwardType}");
 
         // Layer 2: CsvParser
-        var parseResult = csvParser.Parse(command.FileStream);
+        var parseResult = csvParser.Parse(command.FileStream, cancellationToken);
         if (parseResult.IsFailure)
         {
             logger.LogWarning("CSV parsing failed: {Error}", parseResult.ErrorMessage);
@@ -60,7 +60,7 @@ public class ValidatePayrollHandler(
         logger.LogInformation("CSV parsed successfully: {RowCount} rows", parseResult.Value!.Count);
 
         // Layer 3: CsvValidator
-        var validateResult = csvValidator.Validate(parseResult.Value!, awardType);
+        var validateResult = csvValidator.Validate(parseResult.Value!, awardType, cancellationToken);
         if (validateResult.IsFailure)
         {
             logger.LogWarning("CSV validation failed: {ErrorCount} errors",

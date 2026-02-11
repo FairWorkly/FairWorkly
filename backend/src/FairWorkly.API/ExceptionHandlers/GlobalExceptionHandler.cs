@@ -20,6 +20,13 @@ public class GlobalExceptionHandler : IExceptionHandler
         CancellationToken cancellationToken
     )
     {
+        // Client disconnected — no response needed, just stop processing
+        if (exception is OperationCanceledException)
+        {
+            _logger.LogInformation("Request was cancelled (client disconnected)");
+            return true;
+        }
+
         // Map exception type to HTTP status code and details
         var (statusCode, title, detail, extensions) = exception switch
         {
