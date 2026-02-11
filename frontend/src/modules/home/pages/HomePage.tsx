@@ -3,10 +3,10 @@ import { styled } from '@/styles/styled'
 import { Navbar } from '../features/Navbar'
 import { Hero } from '../features/Hero'
 import { TrustBar } from '../features/TrustBar'
-import { FeaturesSection } from '../components/FeaturesSection'
-import { PricingSection } from '../components/PricingSection'
-import { FaqSection } from '../components/FaqSection'
-import { Footer } from '../components/Footer'
+import { FeaturesSection } from '../features/FeaturesSection'
+import { PricingSection } from '../features/PricingSection'
+import { FaqSection } from '../features/FaqSection'
+import { Footer } from '../features/Footer'
 
 const HomePageRoot = styled(Box)({
   minHeight: '100vh',

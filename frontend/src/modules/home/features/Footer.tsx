@@ -186,7 +186,6 @@ export function Footer() {
           <Box>
             <ColumnTitle>Resources</ColumnTitle>
             <NavList>
-              <FooterLink href="/templates">File Templates</FooterLink>
               <FooterLink
                 href="https://www.fairwork.gov.au"
                 target="_blank"
