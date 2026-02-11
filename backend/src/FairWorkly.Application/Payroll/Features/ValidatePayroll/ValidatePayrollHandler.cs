@@ -292,8 +292,9 @@ public class ValidatePayrollHandler(
 
     private static int ParseLevelNumber(string classification)
     {
-        // Extract number from "Level 2" → 2
         var parts = classification.Replace("Level ", "");
-        return int.TryParse(parts, out var level) ? level : 1;
+        if (!int.TryParse(parts, out var level))
+            throw new InvalidOperationException($"Unexpected classification format: {classification}");
+        return level;
     }
 }
