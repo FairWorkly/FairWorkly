@@ -18,6 +18,10 @@ import type {
   FairBotMessage,
   FairBotResult,
   FairBotResultType,
+  PayrollSummaryData,
+  RosterSummaryData,
+  EmployeeSummaryData,
+  DocumentSummaryData,
 } from '../types/fairbot.types'
 import { useResultsPanel } from './useResultsPanel'
 
@@ -26,26 +30,37 @@ interface UseFairBotResult extends FairBotConversationState {
   sendMessage: (text: string, file?: File) => Promise<void>
 }
 
-const EMPTY_MESSAGES: FairBotMessage[] = []
+// Initial welcome message from assistant shown when conversation is empty.
+const createWelcomeMessage = (): FairBotMessage => ({
+  id: 'welcome',
+  role: FAIRBOT_ROLES.ASSISTANT,
+  text: FAIRBOT_LABELS.WELCOME_MESSAGE,
+  timestamp: new Date().toISOString(),
+})
+
+const INITIAL_MESSAGES: FairBotMessage[] = [createWelcomeMessage()]
 
 const canUseSessionStorage = (): boolean =>
   typeof window !== FAIRBOT_ENV.TYPEOF_UNDEFINED && Boolean(window.sessionStorage)
 
 const readMessagesFromSession = (): FairBotMessage[] => {
   if (!canUseSessionStorage()) {
-    return EMPTY_MESSAGES
+    return INITIAL_MESSAGES
   }
 
   try {
     const stored = window.sessionStorage.getItem(FAIRBOT_SESSION_KEYS.CONVERSATION)
     if (!stored) {
-      return EMPTY_MESSAGES
+      return INITIAL_MESSAGES
     }
 
     const parsed = JSON.parse(stored) as unknown
-    return Array.isArray(parsed) ? (parsed as FairBotMessage[]) : EMPTY_MESSAGES
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed as FairBotMessage[]
+    }
+    return INITIAL_MESSAGES
   } catch {
-    return EMPTY_MESSAGES
+    return INITIAL_MESSAGES
   }
 }
 
@@ -129,25 +144,25 @@ const buildQuickSummary = (resultType: FairBotResultType): FairBotResult => {
     case FAIRBOT_RESULTS.TYPES.PAYROLL:
       return {
         type: FAIRBOT_RESULTS.TYPES.PAYROLL,
-        data: FAIRBOT_MOCK_DATA.PAYROLL,
+        data: FAIRBOT_MOCK_DATA.PAYROLL as unknown as PayrollSummaryData,
         detailsUrl: FAIRBOT_ROUTES.PAYROLL,
       }
     case FAIRBOT_RESULTS.TYPES.ROSTER:
       return {
         type: FAIRBOT_RESULTS.TYPES.ROSTER,
-        data: FAIRBOT_MOCK_DATA.ROSTER,
+        data: FAIRBOT_MOCK_DATA.ROSTER as unknown as RosterSummaryData,
         detailsUrl: FAIRBOT_ROUTES.ROSTER,
       }
     case FAIRBOT_RESULTS.TYPES.EMPLOYEE:
       return {
         type: FAIRBOT_RESULTS.TYPES.EMPLOYEE,
-        data: FAIRBOT_MOCK_DATA.EMPLOYEE,
+        data: FAIRBOT_MOCK_DATA.EMPLOYEE as unknown as EmployeeSummaryData,
         detailsUrl: FAIRBOT_ROUTES.EMPLOYEE,
       }
     case FAIRBOT_RESULTS.TYPES.DOCUMENT:
       return {
         type: FAIRBOT_RESULTS.TYPES.DOCUMENT,
-        data: FAIRBOT_MOCK_DATA.DOCUMENT,
+        data: FAIRBOT_MOCK_DATA.DOCUMENT as unknown as DocumentSummaryData,
         detailsUrl: FAIRBOT_ROUTES.DOCUMENT,
       }
   }

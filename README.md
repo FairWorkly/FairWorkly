@@ -1,15 +1,31 @@
 # FairWorkly
 
+> **Status:** MVP Development
+
 FairWorkly is a B2B SaaS platform that helps Australian SMEs make compliant, auditable, and explainable HR decisions.
 
-👉 **New here? Start with:**  
-📘 [Project Overview – How FairWorkly Works](docs/00-project-overview.md)
+## Tech Stack
+
+| Layer          | Technology                                                     |
+| -------------- | -------------------------------------------------------------- |
+| Frontend       | React 18, TypeScript, Vite, MUI, TanStack Query, Redux Toolkit |
+| Backend        | .NET 8, EF Core 8, MediatR, PostgreSQL                         |
+| AI Agent       | Python 3.11, FastAPI, LangChain, FAISS                         |
+| Infrastructure | Docker, GitHub Actions                                         |
+
+## Prerequisites
+
+- Node.js 18+
+- .NET 8 SDK
+- Python 3.11+
+- PostgreSQL 15+
+- Docker (optional)
 
 ## What We Are Building
 
 FairWorkly focuses on **agent-driven HR compliance**, with the following core agents in the MVP:
 
-- **Compliance Agent**  
+- **Roster Agent**  
   Checks whether rosters and working arrangements comply with relevant Award rules.
 
 - **Payroll Agent**  
@@ -20,21 +36,56 @@ FairWorkly focuses on **agent-driven HR compliance**, with the following core ag
 - **FairBot**  
   Provides guided interaction and explanations across agents, helping users understand compliance outcomes.
 
+## Project Structure
+
+```
+fairworkly/
+├── frontend/          # React SPA
+├── backend/           # .NET Web API
+├── agent-service/     # Python AI agents
+└── docs/              # Architecture & guides
+```
+
 ## Getting Started
 
-This section is intentionally minimal. Detailed architecture and workflows are documented separately.
+### Option 1: Docker (Recommended)
 
-### Frontend
+```bash
+# 1. Copy environment files
+cp frontend/.env.example frontend/.env
+cp agent-service/.env.example agent-service/.env
 
-cd frontend
-npm install
-npm run dev
+# 2. Start all services
+docker compose up --build
+```
 
-### Backend
+### Option 2: Manual Setup
 
-cd backend
-dotnet restore
-dotnet run
+**Frontend:**
+
+```bash
+cd frontend && npm install && npm run dev
+```
+
+**Backend:**
+
+```bash
+cd backend && dotnet restore && dotnet run --project src/FairWorkly.API
+```
+
+**Agent Service:**
+
+```bash
+cd agent-service && poetry install && poetry run uvicorn main:app --reload
+```
+
+### Ports
+
+| Service       | URL                   |
+| ------------- | --------------------- |
+| Frontend      | http://localhost:5173 |
+| Backend API   | http://localhost:5680 |
+| Agent Service | http://localhost:8000 |
 
 ## 📚 Documentation
 

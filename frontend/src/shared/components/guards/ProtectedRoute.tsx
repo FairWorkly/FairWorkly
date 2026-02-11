@@ -1,10 +1,11 @@
 import { Navigate, Outlet } from 'react-router-dom'
-import { useAuth } from '@/modules/auth'
+import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner'
+import { useAppSelector } from '@/store/hooks'
 
 export function ProtectedRoute() {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { status } = useAppSelector((state) => state.auth)
 
-  if (isLoading) return null
+  if (status === 'initializing') return <LoadingSpinner />
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />
+  return status === 'authenticated' ? <Outlet /> : <Navigate to="/login" replace />
 }

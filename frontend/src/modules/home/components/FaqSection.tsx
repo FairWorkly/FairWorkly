@@ -1,280 +1,316 @@
-import React from 'react';
+import { Box, Card, Button, styled, Typography, alpha } from "@mui/material";
 import {
-  Box,
-  Container,
-  Typography,
-  Card,
-  Chip,
-  Link as MuiLink,
-  styled,
-} from '@mui/material';
-import {
-  HelpOutline,
-  Computer,
-  EventOutlined,
-  VerifiedOutlined,
-  ScheduleOutlined,
-  DescriptionOutlined,
-  BuildOutlined,
-  Gavel,
-  CloudDownloadOutlined,
-} from '@mui/icons-material';
+    HelpOutlineOutlined,
+    ComputerOutlined,
+    EventOutlined,
+    VerifiedOutlined,
+    ScheduleOutlined,
+    DescriptionOutlined,
+    BuildOutlined,
+    GavelOutlined,
+    CloudDownloadOutlined,
+    ArrowForward,
+} from "@mui/icons-material";
+import templatesUrl from '../../../FairWorklyHomePage-Test/templates.html?url'
+import React from "react";
 
-const FaqContainer = styled('section')(({ theme }) => ({
-  padding: theme.spacing(12, 0),
-  backgroundColor: theme.palette.background.default,
+
+
+const PageSection = styled(Box)(({ theme }) => ({
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(12, 0),
 }));
 
-const SectionHeader = styled(Box)(({ theme }) => ({
-  textAlign: 'center',
-  marginBottom: theme.spacing(8),
+const ContentContainer = styled(Box)(({ theme }) => ({
+    margin: '0 auto',
+    padding: theme.spacing(0, 4),
 }));
 
-const SectionLabel = styled(Chip)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
-  padding: theme.spacing(0.5, 2),
-  fontSize: theme.typography.caption.fontSize,
-  fontWeight: theme.typography.fontWeightBold,
-  textTransform: 'uppercase',
-  letterSpacing: theme.typography.caption.letterSpacing,
-  backgroundColor: theme.fairworkly.effect.primaryGlow,
-  color: theme.palette.primary.main,
-  borderRadius: theme.fairworkly.radius.pill,
-  '& .MuiChip-icon': {
+const HeaderContainer = styled(Box)(({ theme }) => ({
+    textAlign: 'center',
+    marginBottom: theme.spacing(8),
+}));
+
+const SectionLabel = styled(Box)(({ theme }) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+    padding: theme.spacing(0.75, 2),
+    backgroundColor: alpha(theme.palette.primary.main, 0.12),
     color: theme.palette.primary.main,
-  },
+    borderRadius: theme.shape.borderRadius,
+    marginBottom: theme.spacing(2),
+    '& .MuiSvgIcon-root': {
+        fontSize: theme.spacing(2),
+    }
 }));
+
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.h2.fontSize,
-  fontWeight: theme.typography.h2.fontWeight,
-  marginBottom: theme.spacing(2),
-  color: theme.palette.text.primary,
-  [theme.breakpoints.down('sm')]: {
-    fontSize: theme.typography.h3.fontSize,
-  },
+    marginBottom: theme.spacing(2),
 }));
 
-const SectionSubtitle = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.body1.fontSize,
-  color: theme.palette.text.secondary,
-  maxWidth: '600px',
-  margin: '0 auto',
+const SectionSubTitle = styled(Typography)(({ theme }) => ({
+    margin: '0 auto',
+    color: theme.palette.text.secondary,
 }));
 
-const FaqGrid = styled(Box)(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(2, 1fr)',
-  gap: theme.spacing(4),
-  [theme.breakpoints.down('md')]: {
+
+const FaqLayout = styled(Box)(({ theme }) => ({
+    display: 'grid',
     gridTemplateColumns: '1fr',
-  },
+    gap: theme.spacing(4),
+
+    [theme.breakpoints.up('md')]: {
+        gridTemplateColumns: 'repeat(2, 1fr)',
+    },
 }));
 
 const FaqCard = styled(Card)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.fairworkly.radius.lg,
-  padding: theme.spacing(4),
-  border: `1px solid ${theme.palette.divider}`,
-  transition: theme.transitions.create(['all'], {
-    duration: theme.transitions.duration.standard,
-  }),
-  '&:hover': {
-    borderColor: theme.palette.primary.main,
-    boxShadow: theme.fairworkly.shadow.md,
-  },
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: theme.fairworkly.radius.lg,
+    padding: theme.spacing(4),
+    border: `1px solid ${theme.palette.divider}`,
+    transition: theme.transitions.create(['border-color', 'box-shadow'], {
+        duration: theme.transitions.duration.standard,
+    }),
+
+    '&:hover': {
+        borderColor: theme.palette.primary.main,
+        boxShadow: theme.shadows[2],
+    },
 }));
 
-const FaqQuestion = styled(Box)(({ theme }) => ({
-  fontSize: theme.typography.h6.fontSize,
-  fontWeight: theme.typography.fontWeightBold,
-  color: theme.palette.text.primary,
-  marginBottom: theme.spacing(2),
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: theme.spacing(1.5),
+
+const QuestionContainer = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: theme.spacing(1.5),
+    marginBottom: theme.spacing(2),
 }));
 
-const FaqAnswer = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.body2.fontSize,
-  lineHeight: 1.7,
-  color: theme.palette.text.secondary,
-  '& strong': {
+const QuestionIcon = styled(Box)(({ theme }) => ({
+    color: theme.palette.primary.main,
+    display: 'flex',
+    alignItems: 'center',
+    flexShrink: 0,
+
+    '& svg': {
+        fontSize: theme.spacing(3),
+    },
+}));
+
+const QuestionText = styled(Typography)(({ theme }) => ({
+    fontWeight: theme.typography.fontWeightSemiBold,
     color: theme.palette.text.primary,
-    fontWeight: theme.typography.fontWeightBold,
-  },
 }));
 
-const FaqNote = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.fairworkly.effect.primaryGlow,
-  padding: theme.spacing(2),
-  borderRadius: theme.fairworkly.radius.md,
-  marginTop: theme.spacing(2),
-  fontSize: theme.typography.body2.fontSize,
-  borderLeft: `3px solid ${theme.palette.primary.main}`,
-  color: theme.palette.text.secondary,
+
+const AnswerText = styled(Typography)(({ theme }) => ({
+    color: theme.palette.text.secondary,
+
 }));
 
-const FaqLink = styled(MuiLink)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  textDecoration: 'none',
-  fontWeight: theme.typography.fontWeightMedium,
-  '&:hover': {
-    textDecoration: 'underline',
-  },
+const BoldText = styled('span')(({ theme }) => ({
+    color: theme.palette.text.primary,
+    fontWeight: theme.typography.fontWeightSemiBold,
 }));
 
-const TemplateButton = styled(MuiLink)(({ theme }) => ({
-  display: 'inline-block',
-  padding: theme.spacing(1.5, 3),
-  backgroundColor: theme.fairworkly.effect.primaryGlow,
-  color: theme.palette.primary.main,
-  borderRadius: theme.fairworkly.radius.md,
-  textDecoration: 'none',
-  fontWeight: theme.typography.fontWeightBold,
-  transition: theme.transitions.create(['all'], {
-    duration: theme.transitions.duration.short,
-  }),
-  '&:hover': {
-    backgroundColor: theme.fairworkly.effect.primaryGlowHover,
-  },
+const NoteBox = styled(Box)(({ theme }) => ({
+    backgroundColor: alpha(theme.palette.primary.main, 0.05),
+    padding: theme.spacing(2),
+    borderRadius: theme.fairworkly.radius.md,
+    borderLeft: `3px solid ${theme.palette.primary.main}`,
+    marginTop: theme.spacing(2),
 }));
 
-interface FaqItem {
-  icon: React.ReactNode;
-  question: string;
-  answer: React.ReactNode;
+const NoteText = styled(Typography)(({ theme }) => ({
+    color: theme.palette.text.secondary,
+    fontSize: theme.typography.body2.fontSize,
+}));
+
+
+const TemplateButton = styled(Button)(({ theme }) => ({
+    marginTop: theme.spacing(3),
+    padding: theme.spacing(1.5, 3),
+    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+    color: theme.palette.primary.main,
+    fontWeight: theme.typography.fontWeightSemiBold,
+    borderRadius: theme.fairworkly.radius.md,
+    textTransform: 'none',
+    transition: theme.transitions.create(['all'], {
+        duration: theme.transitions.duration.short,
+    }),
+
+    '&:hover': {
+        backgroundColor: alpha(theme.palette.primary.main, 0.18),
+        transform: `translateY(${theme.spacing(-0.25)})`,
+    },
+
+    '& .MuiButton-endIcon': {
+        marginLeft: theme.spacing(1),
+    },
+}));
+
+const ListContainer = styled(Box)(({ theme }) => ({
+    marginTop: theme.spacing(1),
+}));
+
+const ListItemText = styled(AnswerText)(({ theme }) => ({
+    marginTop: theme.spacing(0.5),
+}));
+
+const parseTextWithBold = (text: string): React.ReactNode => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+
+    return parts.map((part, index) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+            return <BoldText key={index}>{part.slice(2, -2)}</BoldText>;
+        }
+        return <React.Fragment key={index}>{part}</React.Fragment>;
+    });
+};
+
+interface FaqMessage {
+    question: string;
+    answer: string;
+    note?: string;
+    list?: string[];
+    hasButton?: boolean;
 }
 
-export function FaqSection() {
-  const faqs: FaqItem[] = [
-    {
-      icon: <Computer />,
-      question: 'What systems does FairWorkly work with?',
-      answer: (
-        <>
-          <strong>FairWorkly doesn't require integration.</strong> We accept standard CSV files,
-          which means you can use any payroll or rostering system that can export CSV — including
-          Xero, MYOB, QuickBooks, Keypay, Deputy, Tanda, and many others.
-          <FaqNote>
-            💡 Simply export your data as CSV and upload. No API keys, no IT setup required.
-          </FaqNote>
-        </>
-      ),
+const FAQ_MESSAGES: Record<string, FaqMessage> = {
+    systems: {
+        question: 'What systems does FairWorkly work with?',
+        answer: "**FairWorkly doesn't require integration.** We accept **CSV** for payroll and **XLSX** for rosters, which means you can use any payroll or rostering system that can export these formats — including Xero, MYOB, QuickBooks, Keypay, Deputy, Tanda, and many others.",
+        note: '💡 Simply export your data as CSV or XLSX and upload. No API keys, no IT setup required.',
     },
-    {
-      icon: <EventOutlined />,
-      question: 'Do I need rostering software?',
-      answer: (
-        <>
-          No! While we work great with Deputy and Tanda exports, you can also upload roster data
-          from Excel. We provide a <strong>free template</strong> that makes it easy to convert
-          your existing schedules to CSV format.
-        </>
-      ),
+    rostering: {
+        question: 'Do I need rostering software?',
+        answer: "No! While we work great with Deputy and Tanda exports, you can also upload roster data from Excel. We provide a **free template** that makes it easy to convert your existing schedules to XLSX format.",
     },
-    {
-      icon: <VerifiedOutlined />,
-      question: 'Which Awards do you cover?',
-      answer: (
-        <>
-          We currently support the three most common Awards:
-          <br />• <strong>Hospitality Industry Award 2020</strong>
-          <br />• <strong>General Retail Industry Award</strong>
-          <br />• <strong>Clerks Private Sector Award</strong>
-        </>
-      ),
+    awards: {
+        question: 'Which Awards do you cover?',
+        answer: 'We currently support the three most common Awards:',
+        list: [
+            'Hospitality Industry (General) Award 2020',
+            'General Retail Industry Award 2020',
+            'Clerks\u2014Private Sector Award 2020',
+        ],
     },
-    {
-      icon: <ScheduleOutlined />,
-      question: 'How long does validation take?',
-      answer: (
-        <>
-          Most validations complete in <strong>2-3 minutes</strong>. Upload your CSV, grab a
-          coffee, and your compliance report will be ready. Larger files (100+ employees) may take
-          up to 5 minutes.
-        </>
-      ),
+    validationTime: {
+        question: 'How long does validation take?',
+        answer: "Most validations complete in **2-3 minutes**. Upload your file, grab a coffee, and your compliance report will be ready. Larger files (100+ employees) may take up to 5 minutes.",
     },
-    {
-      icon: <DescriptionOutlined />,
-      question: 'Do you generate employment contracts?',
-      answer: (
-        <>
-          No, we don't generate documents in the MVP. Our <strong>Document Agent</strong> helps you{' '}
-          <strong>track mandatory documents</strong> like Fair Work Information Statement (FWIS),
-          Separation Certificates, and Casual Conversion Notices — ensuring you don't miss critical
-          deadlines.
-        </>
-      ),
+    contracts: {
+        question: 'Do you generate employment contracts?',
+        answer: "No, we don't generate documents in the MVP. Our **Document Agent** helps you **track mandatory documents** like Fair Work Information Statement (FWIS), Separation Certificates, and Casual Conversion Notices — ensuring you don't miss critical deadlines.",
     },
-    {
-      icon: <BuildOutlined />,
-      question: 'What if I find issues in my payroll?',
-      answer: (
-        <>
-          We provide <strong>detailed reports</strong> with expected vs actual values and
-          step-by-step recommendations. You can then fix issues in your payroll system
-          (Xero/MYOB/etc) and re-upload to verify.
-          <FaqNote>
-            📌 For complex issues, we recommend consulting the Fair Work Ombudsman or an employment
-            lawyer.
-          </FaqNote>
-        </>
-      ),
+    issues: {
+        question: 'What if I find issues in my payroll?',
+        answer: 'We provide **detailed reports** with expected vs actual values and step-by-step recommendations. You can then fix issues in your payroll system (Xero/MYOB/etc) and re-upload to verify.',
+        note: '📌 For complex issues, we recommend consulting the Fair Work Ombudsman or an employment lawyer.',
     },
-    {
-      icon: <Gavel />,
-      question: 'Is this a substitute for legal advice?',
-      answer: (
-        <>
-          <strong>No.</strong> FairWorkly is a compliance validation tool, not legal advice. We
-          check your payroll and rosters against Fair Work rules and highlight potential issues.
-          For complex situations or disputes, consult the Fair Work Ombudsman or an employment
-          lawyer.
-        </>
-      ),
+    legal: {
+        question: 'Is this a substitute for legal advice?',
+        answer: '**No.** FairWorkly is a compliance validation tool, not legal advice. We check your payroll and rosters against Fair Work rules and highlight potential issues. For complex situations or disputes, consult the Fair Work Ombudsman or an employment lawyer.',
     },
-    {
-      icon: <CloudDownloadOutlined />,
-      question: 'Do you provide CSV templates?',
-      answer: (
-        <>
-          Yes! We provide <strong>CSV templates</strong> for both payslip and roster data to help
-          you get started with FairWorkly.
-          <br />
-          <br />
-          <TemplateButton href="/templates">View All CSV Templates →</TemplateButton>
-        </>
-      ),
+    templates: {
+        question: 'Do you provide file templates?',
+        answer: 'Yes! We provide **CSV templates** for payslip data and **XLSX templates** for roster data to help you get started with FairWorkly.',
+        hasButton: true,
     },
-  ];
+};
 
-  return (
-    <FaqContainer id="faq" aria-labelledby="faq-heading">
-      <Container maxWidth="lg">
-        <SectionHeader>
-          <SectionLabel icon={<HelpOutline />} label="FAQ" />
-          <SectionTitle variant="h2" component="h2" id="faq-heading">
-            Frequently Asked Questions
-          </SectionTitle>
-          <SectionSubtitle>Everything you need to know about FairWorkly</SectionSubtitle>
-        </SectionHeader>
-
-        <FaqGrid>
-          {faqs.map((faq, index) => (
-            <FaqCard key={index}>
-              <FaqQuestion>
-                <Box sx={{ color: 'primary.main', fontSize: '1.5rem', flexShrink: 0 }}>
-                  {faq.icon}
-                </Box>
-                <Typography component="span">{faq.question}</Typography>
-              </FaqQuestion>
-              <FaqAnswer>{faq.answer}</FaqAnswer>
-            </FaqCard>
-          ))}
-        </FaqGrid>
-      </Container>
-    </FaqContainer>
-  );
+interface FaqConfig {
+    id: keyof typeof FAQ_MESSAGES;
+    icon: React.ComponentType;
 }
+
+const FAQ_CONFIGS: FaqConfig[] = [
+    { id: 'systems', icon: ComputerOutlined },
+    { id: 'rostering', icon: EventOutlined },
+    { id: 'awards', icon: VerifiedOutlined },
+    { id: 'validationTime', icon: ScheduleOutlined },
+    { id: 'contracts', icon: DescriptionOutlined },
+    { id: 'issues', icon: BuildOutlined },
+    { id: 'legal', icon: GavelOutlined },
+    { id: 'templates', icon: CloudDownloadOutlined },
+];
+
+
+
+export const FaqSection: React.FC = () => {
+
+    const content = {
+        label: 'FAQ',
+        title: 'Frequently Asked Questions',
+        subtitle: 'Everything you need to know about FairWorkly',
+        templateButton: 'View All Templates',
+    };
+
+
+    const handleTemplateClick = () => {
+        window.open(templatesUrl, '_blank');
+    };
+
+    return (
+        <PageSection id="faq">
+            <ContentContainer>
+                <HeaderContainer>
+                    <SectionLabel>
+                        <HelpOutlineOutlined fontSize="inherit" />
+                        {content.label}
+                    </SectionLabel>
+                    <SectionTitle variant="h2">{content.title}</SectionTitle>
+                    <SectionSubTitle variant="h5">{content.subtitle}</SectionSubTitle>
+                </HeaderContainer>
+
+                <FaqLayout>
+                    {FAQ_CONFIGS.map((config: FaqConfig) => {
+                        const message = FAQ_MESSAGES[config.id];
+                        const IconComponent = config.icon;
+                        return (
+                            <FaqCard key={config.id} elevation={0}>
+                                <QuestionContainer>
+                                    <QuestionIcon aria-hidden="true">
+                                        <IconComponent />
+                                    </QuestionIcon>
+                                    <QuestionText variant="h6">{message.question}</QuestionText>
+                                </QuestionContainer>
+                                <AnswerText variant="body1">
+                                    {parseTextWithBold(message.answer)}
+                                </AnswerText>
+
+                                {message.list && (
+                                    <ListContainer>
+                                        {message.list.map((item) => (
+                                            <ListItemText key={item} variant="body1">
+                                                • <BoldText>{item}</BoldText>
+                                            </ListItemText>
+                                        ))}
+                                    </ListContainer>
+                                )}
+                                {message.note && (
+                                    <NoteBox>
+                                        <NoteText>{message.note}</NoteText>
+                                    </NoteBox>
+                                )}
+
+                                {message.hasButton && (
+                                    <TemplateButton
+                                        fullWidth
+                                        endIcon={<ArrowForward />}
+                                        onClick={handleTemplateClick}
+                                    >
+                                        {content.templateButton}
+                                    </TemplateButton>
+                                )}
+                            </FaqCard>
+                        );
+                    })}
+                </FaqLayout>
+            </ContentContainer>
+        </PageSection>
+    );
+};

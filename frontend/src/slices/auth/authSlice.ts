@@ -2,49 +2,64 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 export interface AuthUser {
-  id?: string;
+  id: string;
   name?: string;
-  role?: string; // e.g. "owner" | "manager" | "employee"
+  email?: string;
+  role?: "admin" | "manager";
 }
 
+export type AuthStatus =
+  | "initializing"
+  | "authenticating"
+  | "authenticated"
+  | "unauthenticated";
+
 export interface AuthState {
-  isAuthenticated: boolean;
-  user?: AuthUser;
-  token?: string; // placeholder; you can remove if you don't store token in Redux
+  user: AuthUser | null;
+  accessToken: string | null;
+  status: AuthStatus;
 }
 
 const initialState: AuthState = {
-  isAuthenticated: false,
-  user: undefined,
-  token: undefined,
+  user: null,
+  accessToken: null,
+  status: "initializing",
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setAuthenticated(state, action: PayloadAction<boolean>) {
-      state.isAuthenticated = action.payload;
-      if (!action.payload) {
-        state.user = undefined;
-        state.token = undefined;
+    setAuthData(
+      state,
+      action: PayloadAction<{ user: AuthUser; accessToken: string }>
+    ) {
+      state.user = action.payload.user;
+      state.accessToken = action.payload.accessToken;
+      state.status = "authenticated";
+    },
+    setAccessToken(state, action: PayloadAction<string>) {
+      state.accessToken = action.payload;
+      if (action.payload) {
+        state.status = "authenticated";
       }
     },
-    setUser(state, action: PayloadAction<AuthUser | undefined>) {
-      state.user = action.payload;
-    },
-    setToken(state, action: PayloadAction<string | undefined>) {
-      state.token = action.payload;
-    },
     logout(state) {
-      state.isAuthenticated = false;
-      state.user = undefined;
-      state.token = undefined;
+      state.user = null;
+      state.accessToken = null;
+      state.status = "unauthenticated";
+    },
+    setInitialized(state) {
+      state.status =
+        state.user && state.accessToken ? "authenticated" : "unauthenticated";
+    },
+    setStatus(state, action: PayloadAction<AuthStatus>) {
+      state.status = action.payload;
     },
   },
 });
 
-export const { setAuthenticated, setUser, setToken, logout } =
+export const { setAuthData, setAccessToken, logout, setInitialized, setStatus } =
   authSlice.actions;
 
 export default authSlice.reducer;

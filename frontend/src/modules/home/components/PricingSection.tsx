@@ -1,150 +1,158 @@
 import {
   Box,
-  Container,
-  Typography,
   Button,
   Card,
-  CardContent,
   Chip,
   styled,
-} from '@mui/material';
-import { CheckCircle, LocalOfferOutlined } from '@mui/icons-material';
+  Typography,
+  Stack,
+} from '@mui/material'
+import { CheckCircleOutline, SellOutlined } from '@mui/icons-material'
+import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { ContactModal } from './ContactModel'
 
-const PricingSectionRoot = styled('section')(({ theme }) => ({
-  padding: theme.spacing(12, 0),
-  backgroundColor: theme.palette.background.paper,
-  borderTop: `1px solid ${theme.palette.divider}`,
-}));
+const CTAAction = {
+  Signup: 'signup',
+  Contact: 'contact',
+} as const
 
-const SectionHeader = styled(Box)(({ theme }) => ({
+type CTAAction = 'signup' | 'contact'
+
+const PageSection = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
+  padding: theme.spacing(12, 0, 8),
+}))
+
+const ContentContainer = styled(Box)(({ theme }) => ({
+  margin: '0 auto',
+  padding: theme.spacing(0, 4),
+}))
+
+const HeaderContainer = styled(Box)(({ theme }) => ({
   textAlign: 'center',
   marginBottom: theme.spacing(8),
-}));
+}))
 
-const SectionLabel = styled(Chip)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
-  padding: theme.spacing(0.5, 2),
-  fontSize: theme.typography.caption.fontSize,
-  fontWeight: theme.typography.fontWeightBold,
-  textTransform: 'uppercase',
-  letterSpacing: theme.typography.caption.letterSpacing,
+const SectionLabel = styled(Box)(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: theme.spacing(1),
+  padding: theme.spacing(0.75, 2),
   backgroundColor: theme.fairworkly.effect.primaryGlow,
   color: theme.palette.primary.main,
-  borderRadius: theme.fairworkly.radius.pill,
-  '& .MuiChip-icon': {
-    color: theme.palette.primary.main,
+  borderRadius: theme.shape.borderRadius,
+  marginBottom: theme.spacing(2),
+  '& .MuiSvgIcon-root': {
+    fontSize: theme.spacing(2),
   },
-}));
+}))
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.h2.fontSize,
-  fontWeight: theme.typography.h2.fontWeight,
   marginBottom: theme.spacing(2),
-  color: theme.palette.text.primary,
-  [theme.breakpoints.down('sm')]: {
-    fontSize: theme.typography.h3.fontSize,
-  },
-}));
+}))
 
-const SectionSubtitle = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.body1.fontSize,
+const SectionSubTitle = styled(Typography)(({ theme }) => ({
+  margin: '0 auto',
   color: theme.palette.text.secondary,
-  maxWidth: '600px',
-  margin: '0 auto',
-}));
+}))
 
-const PricingGrid = styled(Box)(({ theme }) => ({
+const FEATURED_SCALE = 1.05
+const CARDS_WIDTH_RATIO = 0.86
+const SIGNUP_ROUTE = '/login?signup=true'
+
+const CardsLayout = styled(Box)(({ theme }) => ({
   display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
   gap: theme.spacing(4),
-  maxWidth: '1100px',
+  maxWidth: theme.fairworkly.layout.containerMaxWidth * CARDS_WIDTH_RATIO,
   margin: '0 auto',
-  [theme.breakpoints.down('md')]: {
-    gridTemplateColumns: '1fr',
-    maxWidth: '400px',
-  },
-}));
+  gridTemplateColumns: '1fr',
 
-const PricingCard = styled(Card, {
-  shouldForwardProp: (prop) => prop !== 'featured',
+  [theme.breakpoints.up('md')]: {
+    gridTemplateColumns: 'repeat(3, 1fr)',
+  },
+}))
+
+const CardContainer = styled(Card, {
+  shouldForwardProp: prop => prop !== 'featured',
 })<{ featured?: boolean }>(({ theme, featured }) => ({
   padding: theme.spacing(5),
-  overflow: 'visible',
-  borderRadius: theme.fairworkly.radius.xl,
+  borderRadius: theme.spacing(3),
   border: `2px solid ${featured ? theme.palette.primary.main : theme.palette.divider}`,
-  backgroundColor: featured ? theme.palette.background.paper : theme.palette.background.default,
-  transition: theme.transitions.create(['all'], {
+  backgroundColor: featured
+    ? theme.palette.background.paper
+    : theme.palette.background.default,
+  transition: theme.transitions.create(['transform', 'box-shadow'], {
     duration: theme.transitions.duration.standard,
+    easing: theme.transitions.easing.easeInOut,
   }),
   position: 'relative',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
+  overflow: 'visible',
   ...(featured && {
-    transform: 'scale(1.05)',
-    boxShadow: theme.fairworkly.shadow.xl,
+    boxShadow: theme.fairworkly.shadow.lg,
+    [theme.breakpoints.up('md')]: {
+      transform: `scale(${FEATURED_SCALE})`,
+    },
   }),
   '&:hover': {
-    transform: featured ? 'scale(1.05) translateY(-8px)' : 'translateY(-8px)',
-    boxShadow: theme.fairworkly.shadow.xl,
-  },
-  [theme.breakpoints.down('md')]: {
-    transform: 'none !important',
-    '&:hover': {
-      transform: 'translateY(-4px) !important',
+    boxShadow: theme.fairworkly.shadow.lg,
+    [theme.breakpoints.up('md')]: {
+      transform: featured
+        ? `scale(${FEATURED_SCALE}) translateY(${theme.spacing(-1)})`
+        : `translateY(${theme.spacing(-1)})`,
     },
   },
-}));
+}))
 
-// Featured badge
 const FeaturedBadge = styled(Chip)(({ theme }) => ({
   position: 'absolute',
   top: theme.spacing(-1.5),
   left: '50%',
   transform: 'translateX(-50%)',
   background: theme.fairworkly.gradient.primary,
+  padding: theme.spacing(0.75, 2),
   color: theme.palette.common.white,
+  fontWeight: theme.typography.fontWeightBold,
   fontSize: theme.typography.caption.fontSize,
-  fontWeight: theme.typography.fontWeightBold,
-  padding: theme.spacing(0.5, 2),
-  borderRadius: theme.fairworkly.radius.pill,
-}));
+  height: theme.spacing(3),
+  zIndex: 1,
+}))
 
-const PlanName = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.h4.fontSize,
-  fontWeight: theme.typography.fontWeightBold,
+const CardTitle = styled(Typography)(({ theme }) => ({
   marginBottom: theme.spacing(1),
-  color: theme.palette.text.primary,
-}));
+}))
 
-const PlanDescription = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.body2.fontSize,
+const CardDescription = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   marginBottom: theme.spacing(3),
-}));
+}))
 
-const PriceWrapper = styled(Box)(({ theme }) => ({
+const PriceContainer = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(3),
-}));
+}))
 
 const PriceAmount = styled(Typography)(({ theme }) => ({
-  fontSize: '3rem',
-  fontWeight: 900,
   display: 'inline',
-  color: theme.palette.text.primary,
-}));
+  fontSize: theme.typography.h2.fontSize,
+  fontWeight: theme.typography.h1.fontWeight,
+}))
 
 const PricePeriod = styled(Typography)(({ theme }) => ({
+  display: 'inline',
   fontSize: theme.typography.body1.fontSize,
   color: theme.palette.text.disabled,
-  display: 'inline',
-}));
+  marginLeft: theme.spacing(0.5),
+}))
 
-const FeaturesList = styled(Box)(({ theme }) => ({
+const FeaturesList = styled(Stack)(({ theme }) => ({
   marginBottom: theme.spacing(4),
-  flex: 1,
-}));
+  flexGrow: 1,
+}))
 
-const FeatureItem = styled(Box)(({ theme }) => ({
+const FeatureItem = styled(Typography)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(1.5),
@@ -152,69 +160,172 @@ const FeatureItem = styled(Box)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,
   fontSize: theme.typography.body2.fontSize,
   color: theme.palette.text.secondary,
+
   '&:last-child': {
     borderBottom: 'none',
   },
-}));
+}))
 
-const PlanButton = styled(Button, {
-  shouldForwardProp: (prop) => prop !== 'featured',
+const FeatureCheckIcon = styled(CheckCircleOutline)(({ theme }) => ({
+  fontSize: theme.spacing(2.5),
+  color: theme.palette.success.main,
+  flexShrink: 0,
+}))
+
+const ActionButton = styled(Button, {
+  shouldForwardProp: prop => prop !== 'featured',
 })<{ featured?: boolean }>(({ theme, featured }) => ({
-  borderRadius: theme.fairworkly.radius.md,
+  borderRadius: theme.fairworkly.radius.sm,
   padding: theme.spacing(1.5),
-  fontWeight: theme.typography.button.fontWeight,
-  fontSize: theme.typography.button.fontSize,
-  ...(featured && {
-    background: theme.fairworkly.gradient.primary,
-    '&:hover': {
-      background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.main})`,
-    },
-  }),
-}));
+  fontWeight: theme.typography.fontWeightSemiBold,
+  background: featured
+    ? theme.fairworkly.gradient.primary
+    : theme.palette.background.paper,
+  boxShadow: featured ? theme.fairworkly.shadow.primaryButton : 'none',
+  '&:hover': {
+    background: featured
+      ? `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.main})`
+      : `linear-gradient(${theme.fairworkly.effect.primaryGlow})`,
+    transform: `translateY(${theme.spacing(-0.25)})`,
+    boxShadow: featured ? theme.fairworkly.shadow.primaryButtonHover : 'none',
+  },
+}))
 
-const PricingNote = styled(Box)(({ theme }) => ({
+const BottomNoteContainer = styled(Box)(({ theme }) => ({
   textAlign: 'center',
-  marginTop: theme.spacing(6),
+  marginTop: theme.spacing(4),
   paddingTop: theme.spacing(4),
   borderTop: `1px solid ${theme.palette.divider}`,
-}));
+}))
 
-const NoteText = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.body2.fontSize,
+const BottomNote = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
-}));
+}))
 
-interface Plan {
-  name: string;
-  description: string;
-  price: string;
-  features: string[];
-  buttonText: string;
-  buttonVariant: 'contained' | 'outlined';
-  featured?: boolean;
+interface PricingPlan {
+  id: string
+  name: string
+  description: string
+  price?: string
+  period?: string
+  features: string[]
+  featured?: boolean
+  badgeLabel?: string
+  buttonText: string
+  buttonVariant: 'contained' | 'outlined'
+  buttonAction: CTAAction
 }
 
-export function PricingSection() {
+const content = {
+  label: 'PRICING',
+  title: 'Simple, Transparent Pricing',
+  subtitle: 'Choose the plan that fits your business size',
+  bottomNote: 'All plans include 14-day free trial • No credit card required',
+  priceFallback: 'Custom',
+}
 
-  const plans: Plan[] = [
+const PricingCard = ({
+  plan,
+  onButtonClick,
+}: {
+  plan: PricingPlan
+  onButtonClick: (action: CTAAction) => void
+}) => {
+  const {
+    name,
+    description,
+    price,
+    period,
+    features,
+    featured,
+    badgeLabel,
+    buttonText,
+    buttonVariant,
+    buttonAction,
+  } = plan
+
+  return (
+    <CardContainer elevation={0} featured={featured}>
+      {badgeLabel && <FeaturedBadge label={badgeLabel} />}
+
+      <CardTitle variant="h4">{name}</CardTitle>
+      <CardDescription variant="body2">{description}</CardDescription>
+
+      <PriceContainer>
+        <PriceAmount>{price || content.priceFallback}</PriceAmount>
+        {period && <PricePeriod>/{period}</PricePeriod>}
+      </PriceContainer>
+
+      <FeaturesList>
+        {features.map(feature => (
+          <FeatureItem key={feature}>
+            <FeatureCheckIcon aria-hidden="true" />
+            {feature}
+          </FeatureItem>
+        ))}
+      </FeaturesList>
+
+      <ActionButton
+        variant={buttonVariant}
+        color="primary"
+        fullWidth
+        size="large"
+        featured={featured}
+        onClick={() => onButtonClick(buttonAction)}
+      >
+        {buttonText}
+      </ActionButton>
+    </CardContainer>
+  )
+}
+
+export const PricingSection: React.FC = () => {
+  const navigate = useNavigate()
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
+
+  const handleNavigation = (action: CTAAction) => {
+    if (action === CTAAction.Signup) {
+      navigate(SIGNUP_ROUTE)
+    }
+  }
+  const handleModalAction = (action: CTAAction) => {
+    if (action === CTAAction.Contact) {
+      setIsContactModalOpen(true)
+    }
+  }
+
+  const handleClick = (action: CTAAction) => {
+    if (action === CTAAction.Signup) {
+      handleNavigation(action)
+    } else if (action === CTAAction.Contact) {
+      handleModalAction(action)
+    }
+  }
+
+  const plans: PricingPlan[] = [
     {
+      id: 'starter',
       name: 'Starter',
       description: 'Perfect for single locations',
       price: '$149',
+      period: 'month',
       features: [
         '1 location (same state)',
         'Up to 50 employees',
-        'Unlimited CSV uploads',
+        'Unlimited file uploads (CSV/XLSX)',
         'Payroll + Roster + Document',
         '3 Awards (Hospitality/Retail/Clerks)',
       ],
       buttonText: 'Start Free Trial',
       buttonVariant: 'outlined',
+      buttonAction: CTAAction.Signup,
     },
     {
+      id: 'professional',
       name: 'Professional',
       description: 'Perfect for multi-location chains',
       price: '$299',
+      period: 'month',
       features: [
         'Everything in Starter, plus:',
         'Up to 10 locations (same state)',
@@ -222,14 +333,16 @@ export function PricingSection() {
         'Multi-location dashboard',
         'Export reports (Excel/CSV)',
       ],
+      featured: true,
+      badgeLabel: 'Most Popular',
       buttonText: 'Start Free Trial',
       buttonVariant: 'contained',
-      featured: true,
+      buttonAction: CTAAction.Signup,
     },
     {
+      id: 'enterprise',
       name: 'Enterprise',
       description: 'For large organizations',
-      price: 'Custom',
       features: [
         'Everything in Professional, plus:',
         'Multi-state support (VIC/NSW/QLD...)',
@@ -239,67 +352,42 @@ export function PricingSection() {
       ],
       buttonText: 'Contact Sales',
       buttonVariant: 'outlined',
+      buttonAction: CTAAction.Contact,
     },
-  ];
+  ]
 
   return (
-    <PricingSectionRoot id="pricing" aria-labelledby="pricing-heading">
-      <Container maxWidth="lg">
-        <SectionHeader>
-          <SectionLabel icon={<LocalOfferOutlined />} label="Pricing" />
-          <SectionTitle variant="h2" component="h2" id="pricing-heading">
-            Simple, Transparent Pricing
-          </SectionTitle>
-          <SectionSubtitle>Choose the plan that fits your business size</SectionSubtitle>
-        </SectionHeader>
+    <>
+      <PageSection id="pricing">
+        <ContentContainer>
+          <HeaderContainer>
+            <SectionLabel>
+              <SellOutlined fontSize="inherit" />
+              {content.label}
+            </SectionLabel>
+            <SectionTitle variant="h2">{content.title}</SectionTitle>
+            <SectionSubTitle variant="h5">{content.subtitle}</SectionSubTitle>
+          </HeaderContainer>
 
-        <PricingGrid>
-          {plans.map((plan, index) => (
-            <PricingCard key={index} featured={plan.featured}>
-              {plan.featured && <FeaturedBadge label="Most Popular" />}
-              <CardContent
-                sx={{
-                  padding: 0,
-                  '&:last-child': { paddingBottom: 0 },
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <PlanName>{plan.name}</PlanName>
-                <PlanDescription>{plan.description}</PlanDescription>
-                <PriceWrapper>
-                  <PriceAmount>{plan.price}</PriceAmount>
-                  {plan.price !== 'Custom' && <PricePeriod>/month</PricePeriod>}
-                </PriceWrapper>
-                <FeaturesList>
-                  {plan.features.map((feature, idx) => (
-                    <FeatureItem key={idx}>
-                      <CheckCircle
-                        sx={{ color: 'success.main', fontSize: '1.25rem', flexShrink: 0 }}
-                      />
-                      <Typography variant="body2">{feature}</Typography>
-                    </FeatureItem>
-                  ))}
-                </FeaturesList>
-                <PlanButton
-                  variant={plan.buttonVariant}
-                  color="primary"
-                  size="large"
-                  fullWidth
-                  featured={plan.featured}
-                >
-                  {plan.buttonText}
-                </PlanButton>
-              </CardContent>
-            </PricingCard>
-          ))}
-        </PricingGrid>
+          <CardsLayout>
+            {plans.map(plan => (
+              <PricingCard
+                key={plan.id}
+                plan={plan}
+                onButtonClick={handleClick}
+              />
+            ))}
+          </CardsLayout>
 
-        <PricingNote>
-          <NoteText>All plans include 14-day free trial • No credit card required</NoteText>
-        </PricingNote>
-      </Container>
-    </PricingSectionRoot>
-  );
+          <BottomNoteContainer>
+            <BottomNote variant="body1">{content.bottomNote}</BottomNote>
+          </BottomNoteContainer>
+        </ContentContainer>
+      </PageSection>
+      <ContactModal
+        open={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+      />
+    </>
+  )
 }

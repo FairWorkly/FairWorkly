@@ -1,4 +1,4 @@
-import { styled } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
 import Typography from '@mui/material/Typography'
 import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined'
 import {
@@ -11,8 +11,8 @@ const EmptyStateContainer = styled('div')(({ theme }) => ({
   flexDirection: 'column',
   alignItems: 'center',
   textAlign: 'center',
-  gap: `${FAIRBOT_RESULTS_UI.STAT_GAP}px`,
-  padding: `${FAIRBOT_RESULTS_UI.CARD_PADDING}px`,
+  gap: theme.spacing(1.5),
+  padding: theme.spacing(2),
   color: theme.palette.text.secondary,
 }))
 

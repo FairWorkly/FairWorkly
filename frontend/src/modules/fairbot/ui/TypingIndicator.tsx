@@ -1,9 +1,8 @@
-import { styled, keyframes } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
+import { keyframes } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import {
   FAIRBOT_LABELS,
-  FAIRBOT_LAYOUT,
-  FAIRBOT_NUMBERS,
   FAIRBOT_TYPING_UI,
 } from '../constants/fairbot.constants'
 
@@ -16,11 +15,11 @@ const bounce = keyframes`
   40% { transform: scale(1); opacity: 1; }
 `
 
-const TypingContainer = styled('div')({
+const TypingContainer = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  gap: `${FAIRBOT_LAYOUT.MESSAGE_STACK_GAP}px`,
-})
+  gap: theme.spacing(1),
+}))
 
 const Dots = styled('div')({
   display: 'flex',
@@ -47,7 +46,7 @@ export const TypingIndicator = ({ isVisible }: TypingIndicatorProps) => {
     <TypingContainer aria-live="polite">
       <Typography variant="caption">{FAIRBOT_LABELS.LOADING_MESSAGE}</Typography>
       <Dots>
-        <Dot delay={FAIRBOT_NUMBERS.ZERO} />
+        <Dot delay={0} />
         <Dot delay={FAIRBOT_TYPING_UI.DELAY_SHORT_MS} />
         <Dot delay={FAIRBOT_TYPING_UI.DELAY_LONG_MS} />
       </Dots>

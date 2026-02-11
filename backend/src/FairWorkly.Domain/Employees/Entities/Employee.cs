@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
-using FairWorkly.Domain.Compliance.Entities;
 using FairWorkly.Domain.Documents.Entities;
 using FairWorkly.Domain.Payroll.Entities;
+using FairWorkly.Domain.Roster.Entities;
 
 namespace FairWorkly.Domain.Employees.Entities;
 
@@ -23,11 +23,11 @@ public class Employee : AuditableEntity
     // Basic Info
     [Required]
     [MaxLength(100)]
-    public string FirstName { get; set; } = string.Empty;
+    public required string FirstName { get; set; }
 
     [Required]
     [MaxLength(100)]
-    public string LastName { get; set; } = string.Empty;
+    public required string LastName { get; set; }
 
     /// <summary>
     /// Full name (computed)
@@ -35,10 +35,13 @@ public class Employee : AuditableEntity
     [NotMapped]
     public string FullName => $"{FirstName} {LastName}";
 
-    [Required]
+    /// <summary>
+    /// Employee email address (optional)
+    /// May be null for employees imported from payroll/roster files
+    /// </summary>
     [EmailAddress]
     [MaxLength(255)]
-    public string Email { get; set; } = string.Empty;
+    public string? Email { get; set; }
 
     [Phone]
     [MaxLength(20)]
@@ -52,7 +55,7 @@ public class Employee : AuditableEntity
     // Employment Details
     [Required]
     [MaxLength(100)]
-    public string JobTitle { get; set; } = string.Empty;
+    public required string JobTitle { get; set; }
 
     [MaxLength(100)]
     public string? Department { get; set; }
@@ -66,6 +69,11 @@ public class Employee : AuditableEntity
     public DateTime? EndDate { get; set; }
 
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Reserved: Future use for student rule exceptions (e.g. some Awards have different minimum engagement rules).
+    /// </summary>
+    public bool IsStudent { get; set; } = false;
 
     /// <summary>
     /// Guaranteed hours per week (for Part-time only)

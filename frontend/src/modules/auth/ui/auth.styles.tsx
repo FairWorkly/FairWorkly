@@ -1,8 +1,13 @@
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import SvgIcon from '@mui/material/SvgIcon'
 import { styled } from '@/styles/styled'
+
+export const AuthErrorAlert = styled(Alert)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}))
 
 export const GoogleButton = styled('button')(({ theme }) => ({
   display: 'flex',
@@ -250,6 +255,10 @@ export const AuthTitle = styled(Typography)(({ theme }) => ({
 export const AuthSubtitle = styled(Typography)(({ theme }) => ({
   fontSize: theme.typography.body1.fontSize,
   color: theme.palette.text.secondary,
+}))
+
+export const AuthErrorText = styled(Typography)(({ theme }) => ({
+  marginTop: theme.spacing(1),
 }))
 
 export const AuthTabList = styled('nav')(({ theme }) => ({
