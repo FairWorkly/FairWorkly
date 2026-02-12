@@ -24,7 +24,7 @@ def project_root() -> Path:
 
 
 def discover_assets_dir(root: Path) -> Path:
-    candidates = [root / "assets", root / "agents" / "shared" / "assets"]
+    candidates = [root / "assets", root / "agents" / "shared" / "assets", root / "shared" / "assets"]
     for candidate in candidates:
         if candidate.exists():
             return candidate
