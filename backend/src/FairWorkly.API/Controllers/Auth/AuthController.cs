@@ -37,7 +37,7 @@ public class AuthController(IMediator mediator) : BaseApiController
             SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
         }
 
-        return RespondResult(result, "Login successful");
+        return RespondResult(result);
     }
 
     [HttpPost("refresh")]
@@ -62,7 +62,7 @@ public class AuthController(IMediator mediator) : BaseApiController
             SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
         }
 
-        return RespondResult(result, "Token refreshed");
+        return RespondResult(result);
     }
 
     [HttpPost("forgot-password")]
@@ -70,7 +70,7 @@ public class AuthController(IMediator mediator) : BaseApiController
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
     {
         var result = await mediator.Send(command);
-        return RespondResult(result, "If that email exists, a reset link has been sent.");
+        return RespondResult(result);
     }
 
     [HttpGet("me")]
@@ -87,7 +87,7 @@ public class AuthController(IMediator mediator) : BaseApiController
         var query = new GetCurrentUserQuery { UserId = userId };
         var result = await mediator.Send(query);
 
-        return RespondResult(result, "User retrieved");
+        return RespondResult(result);
     }
 
     [HttpPost("logout")]
@@ -111,7 +111,7 @@ public class AuthController(IMediator mediator) : BaseApiController
         // Remove cookie from client regardless of DB result (options must match original cookie)
         Response.Cookies.Delete("refreshToken", GetRefreshTokenCookieOptions(DateTime.UtcNow));
 
-        return RespondResult(result, "Logged out successfully");
+        return RespondResult(result);
     }
 
     // --- Private helper: centralize cookie policy ---

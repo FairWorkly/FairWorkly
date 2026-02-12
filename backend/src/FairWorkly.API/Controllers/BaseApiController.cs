@@ -24,8 +24,8 @@ public abstract class BaseApiController : ControllerBase
     /// </list>
     /// </remarks>
     /// <param name="result">The Result from the Handler.</param>
-    /// <param name="successMessage">Message for 2xx responses (default: "Success").</param>
-    protected IActionResult RespondResult<T>(Result<T> result, string successMessage = "Success")
+    /// <param name="successMessage">Message for 2xx responses. Falls back to <c>result.Message</c> if not provided.</param>
+    protected IActionResult RespondResult<T>(Result<T> result, string? successMessage = null)
     {
         // 2xx success
         if (result.IsSuccess)
@@ -33,7 +33,8 @@ public abstract class BaseApiController : ControllerBase
             if (result.Code == 204)
                 return NoContent();
 
-            return StatusCode(result.Code, new { code = result.Code, msg = successMessage, data = result.Value });
+            var msg = successMessage ?? result.Message ?? "Success";
+            return StatusCode(result.Code, new { code = result.Code, msg, data = result.Value });
         }
 
         // 4xx with structured errors (400, 422)

@@ -57,7 +57,7 @@ public class RosterController(
 
         var result = await _mediator.Send(command);
 
-        return RespondResult(result, "Roster uploaded successfully");
+        return RespondResult(result);
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ public class RosterController(
 
         var result = await _mediator.Send(query);
 
-        return RespondResult(result, "Roster details retrieved");
+        return RespondResult(result);
     }
 
     /// <summary>
