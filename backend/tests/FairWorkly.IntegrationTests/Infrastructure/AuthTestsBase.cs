@@ -36,7 +36,7 @@ public abstract class AuthTestsBase : IClassFixture<CustomWebApplicationFactory>
 
         var json = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
-        return doc.RootElement.GetProperty("accessToken").GetString()!;
+        return doc.RootElement.GetProperty("data").GetProperty("accessToken").GetString()!;
     }
 
     /// <summary>

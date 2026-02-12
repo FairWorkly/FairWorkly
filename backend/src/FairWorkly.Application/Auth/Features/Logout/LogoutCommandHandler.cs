@@ -33,8 +33,7 @@ public class LogoutCommandHandler(
 
         if (user == null)
         {
-            // Nothing to do - return failure
-            return Result<bool>.Failure("Logout failed.");
+            return Result<bool>.Of404("Logout failed.");
         }
 
         // Clear persisted refresh token and expiry
@@ -43,6 +42,6 @@ public class LogoutCommandHandler(
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<bool>.Success(true);
+        return Result<bool>.Of204();
     }
 }

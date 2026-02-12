@@ -47,7 +47,7 @@ public class RefreshTests : AuthTestsBase
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.GetProperty("message").GetString().Should().Be("Invalid refresh token.");
+        root.GetProperty("msg").GetString().Should().Be("Invalid refresh token.");
     }
 
     #endregion
@@ -71,7 +71,7 @@ public class RefreshTests : AuthTestsBase
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.GetProperty("message").GetString().Should().Be("Refresh token expired.");
+        root.GetProperty("msg").GetString().Should().Be("Refresh token expired.");
     }
 
     #endregion
@@ -123,7 +123,7 @@ public class RefreshTests : AuthTestsBase
         using var doc = System.Text.Json.JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.GetProperty("message").GetString().Should().Be("Account is disabled.");
+        root.GetProperty("msg").GetString().Should().Be("Account is disabled.");
     }
 
     #endregion
@@ -148,7 +148,10 @@ public class RefreshTests : AuthTestsBase
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.TryGetProperty("accessToken", out var accessToken).Should().BeTrue();
+        root.GetProperty("code").GetInt32().Should().Be(200);
+
+        var data = root.GetProperty("data");
+        data.TryGetProperty("accessToken", out var accessToken).Should().BeTrue();
         accessToken.GetString().Should().NotBeNullOrEmpty();
 
         // Assert - New cookie is set

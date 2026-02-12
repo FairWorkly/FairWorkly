@@ -16,19 +16,17 @@ public class GetCurrentUserQueryHandler(IUserRepository userRepository)
         var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
         if (user == null)
         {
-            return Result<UserDto>.NotFound("User not found.");
+            return Result<UserDto>.Of404("User not found.");
         }
 
-        return Result<UserDto>.Success(
-            new UserDto
-            {
-                Id = user.Id,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Role = user.Role.ToString(),
-                OrganizationId = user.OrganizationId,
-            }
-        );
+        return Result<UserDto>.Of200("User retrieved", new UserDto
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Role = user.Role.ToString(),
+            OrganizationId = user.OrganizationId,
+        });
     }
 }

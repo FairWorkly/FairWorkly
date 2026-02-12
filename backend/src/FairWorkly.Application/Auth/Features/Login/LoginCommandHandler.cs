@@ -30,13 +30,13 @@ public class LoginCommandHandler(
             || !passwordHasher.Verify(request.Password, user.PasswordHash)
         )
         {
-            return Result<LoginResponse>.Unauthorized("Invalid email or password.");
+            return Result<LoginResponse>.Of401("Invalid email or password.");
         }
 
         // Check account status (if account is disabled)
         if (!user.IsActive)
         {
-            return Result<LoginResponse>.Forbidden("Account is disabled.");
+            return Result<LoginResponse>.Of403("Account is disabled.");
         }
 
         var accessToken = tokenService.GenerateAccessToken(user);
@@ -57,23 +57,20 @@ public class LoginCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // return
-        return Result<LoginResponse>.Success(
-            new LoginResponse
+        return Result<LoginResponse>.Of200("Login successful", new LoginResponse
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken, // to Controller
+            RefreshTokenExpiration = expiresAt,
+            User = new UserDto
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken, // to Controller
-                RefreshTokenExpiration = expiresAt,
-                User = new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Role = user.Role.ToString(),
-                    OrganizationId = user.OrganizationId,
-                },
-            }
-        );
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role.ToString(),
+                OrganizationId = user.OrganizationId,
+            },
+        });
     }
 }

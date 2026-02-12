@@ -14,7 +14,7 @@ public class LoginTests : AuthTestsBase
     #region 1.1 FluentValidation Failures (400)
 
     [Fact]
-    public async Task Login_EmptyEmailAndPassword_Returns400WithExactProblemDetails()
+    public async Task Login_EmptyEmailAndPassword_Returns400WithValidationErrors()
     {
         // Arrange
         var request = new { email = "", password = "" };
@@ -28,38 +28,28 @@ public class LoginTests : AuthTestsBase
         // Assert - Content-Type
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
 
-        // Assert - Complete ProblemDetails structure
+        // Assert - Unified response format { code, msg, data: { errors } }
         var json = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        // Note: GlobalExceptionHandler doesn't set "type" property
-        root.GetProperty("title").GetString().Should().Be("Validation Failed");
-        root.GetProperty("status").GetInt32().Should().Be(400);
-        root.GetProperty("detail")
-            .GetString()
-            .Should()
-            .Be("One or more validation errors occurred.");
-        root.GetProperty("instance").GetString().Should().Be("/api/auth/login");
+        root.GetProperty("code").GetInt32().Should().Be(400);
+        root.GetProperty("msg").GetString().Should().NotBeNullOrEmpty();
 
-        // Assert - Exact errors structure (in ProblemDetails extensions)
-        var errors = root.GetProperty("errors");
+        // Assert - Errors array in data.errors
+        var errors = root.GetProperty("data").GetProperty("errors");
+        errors.GetArrayLength().Should().BeGreaterThan(0);
 
-        // Email error
-        var emailErrors = errors
-            .GetProperty("Email")
-            .EnumerateArray()
-            .Select(e => e.GetString())
+        // Collect all error fields and messages
+        var errorList = errors.EnumerateArray()
+            .Select(e => new { Field = e.GetProperty("field").GetString(), Message = e.GetProperty("message").GetString() })
             .ToList();
-        emailErrors.Should().Contain("Email is required.");
 
-        // Password error
-        var passwordErrors = errors
-            .GetProperty("Password")
-            .EnumerateArray()
-            .Select(e => e.GetString())
-            .ToList();
-        passwordErrors.Should().Contain("Password is required.");
+        // Email errors
+        errorList.Should().Contain(e => e.Field == "Email" && e.Message == "Email is required.");
+
+        // Password errors
+        errorList.Should().Contain(e => e.Field == "Password" && e.Message == "Password is required.");
     }
 
     [Fact]
@@ -78,15 +68,14 @@ public class LoginTests : AuthTestsBase
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.GetProperty("title").GetString().Should().Be("Validation Failed");
+        root.GetProperty("code").GetInt32().Should().Be(400);
 
-        var errors = root.GetProperty("errors");
-        var emailErrors = errors
-            .GetProperty("Email")
-            .EnumerateArray()
-            .Select(e => e.GetString())
+        var errors = root.GetProperty("data").GetProperty("errors");
+        var errorList = errors.EnumerateArray()
+            .Select(e => new { Field = e.GetProperty("field").GetString(), Message = e.GetProperty("message").GetString() })
             .ToList();
-        emailErrors.Should().Contain("A valid email is required.");
+
+        errorList.Should().Contain(e => e.Field == "Email" && e.Message == "A valid email is required.");
     }
 
     [Fact]
@@ -105,15 +94,14 @@ public class LoginTests : AuthTestsBase
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.GetProperty("title").GetString().Should().Be("Validation Failed");
+        root.GetProperty("code").GetInt32().Should().Be(400);
 
-        var errors = root.GetProperty("errors");
-        var passwordErrors = errors
-            .GetProperty("Password")
-            .EnumerateArray()
-            .Select(e => e.GetString())
+        var errors = root.GetProperty("data").GetProperty("errors");
+        var errorList = errors.EnumerateArray()
+            .Select(e => new { Field = e.GetProperty("field").GetString(), Message = e.GetProperty("message").GetString() })
             .ToList();
-        passwordErrors.Should().Contain("Password must be at least 8 characters.");
+
+        errorList.Should().Contain(e => e.Field == "Password" && e.Message == "Password must be at least 8 characters.");
     }
 
     #endregion
@@ -136,7 +124,7 @@ public class LoginTests : AuthTestsBase
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.GetProperty("message").GetString().Should().Be("Invalid email or password.");
+        root.GetProperty("msg").GetString().Should().Be("Invalid email or password.");
     }
 
     [Fact]
@@ -155,7 +143,7 @@ public class LoginTests : AuthTestsBase
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.GetProperty("message").GetString().Should().Be("Invalid email or password.");
+        root.GetProperty("msg").GetString().Should().Be("Invalid email or password.");
     }
 
     #endregion
@@ -178,7 +166,7 @@ public class LoginTests : AuthTestsBase
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.GetProperty("message").GetString().Should().Be("Account is disabled.");
+        root.GetProperty("msg").GetString().Should().Be("Account is disabled.");
     }
 
     #endregion
@@ -197,20 +185,24 @@ public class LoginTests : AuthTestsBase
         // Assert - Status code
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // Assert - Response body structure
-        // Note: refreshToken and refreshTokenExpiration are [JsonIgnore] and only set as cookie
+        // Assert - Unified response format { code, msg, data }
         var json = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.TryGetProperty("accessToken", out var accessToken).Should().BeTrue();
+        root.GetProperty("code").GetInt32().Should().Be(200);
+        root.GetProperty("msg").GetString().Should().Be("Login successful");
+
+        var data = root.GetProperty("data");
+
+        data.TryGetProperty("accessToken", out var accessToken).Should().BeTrue();
         accessToken.GetString().Should().NotBeNullOrEmpty();
 
-        // Verify refreshToken is NOT in body (it's HttpOnly cookie only)
-        root.TryGetProperty("refreshToken", out _).Should().BeFalse();
-        root.TryGetProperty("refreshTokenExpiration", out _).Should().BeFalse();
+        // Verify refreshToken is NOT in body (it's HttpOnly cookie only, [JsonIgnore])
+        data.TryGetProperty("refreshToken", out _).Should().BeFalse();
+        data.TryGetProperty("refreshTokenExpiration", out _).Should().BeFalse();
 
-        root.TryGetProperty("user", out var user).Should().BeTrue();
+        data.TryGetProperty("user", out var user).Should().BeTrue();
         user.TryGetProperty("id", out _).Should().BeTrue();
         user.TryGetProperty("email", out _).Should().BeTrue();
         user.TryGetProperty("firstName", out _).Should().BeTrue();
