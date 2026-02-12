@@ -243,6 +243,16 @@ Important notes:
 - **`catch (OperationCanceledException) { throw; }` must come before `catch (Exception)`** — otherwise client disconnections get swallowed and the user receives a 500 instead of a normal cancellation
 - Of500 is for infrastructure failures the Handler **anticipates**. Completely unexpected exceptions (NullReferenceException, etc.) should not be caught — let `GlobalExceptionHandler` handle them with a generic 500
 
+### Result\<T\> vs GlobalExceptionHandler
+
+The key distinction is **decision-making**, not status codes.
+
+**Result\<T\>** — The Handler anticipated the situation and made a conscious decision. Whether the outcome is good or bad, the Handler knows what happened, picks a status code, and writes a friendly message for the frontend. A 404 not-found is a decision, a 422 bad-data is a decision, and a 500 S3-is-down is also a decision — the Handler caught the exception, determined "this is an infrastructure problem", and deliberately returned `Of500` with a friendly message.
+
+**GlobalExceptionHandler** — Nobody made a decision; the exception bubbled all the way up and was caught at the outermost layer. Two situations end up here: completely unexpected bugs (`NullReferenceException`, etc.) that nobody caught, returning a generic 500; or the Domain layer safety net catching an invalid entity state (`InvalidDomainStateException`), which essentially means upstream code has a defect that slipped past validation, also uncaught, returning a 422.
+
+In one sentence: **Result\<T\> is the Handler saying "I know what happened", GlobalExceptionHandler is the system saying "something unexpected happened".**
+
 ---
 
 ## 6. Controller: One Line Does It All
