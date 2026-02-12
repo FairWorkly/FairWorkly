@@ -24,17 +24,15 @@ public abstract class BaseApiController : ControllerBase
     /// </list>
     /// </remarks>
     /// <param name="result">The Result from the Handler.</param>
-    /// <param name="successMessage">Message for 2xx responses. Falls back to <c>result.Message</c> if not provided.</param>
-    protected IActionResult RespondResult<T>(Result<T> result, string? successMessage = null)
+    protected IActionResult RespondResult<T>(Result<T> result)
     {
-        // 2xx success
+        // 2xx success — msg comes from Handler's Of{code} method
         if (result.IsSuccess)
         {
             if (result.Code == 204)
                 return NoContent();
 
-            var msg = successMessage ?? result.Message ?? "Success";
-            return StatusCode(result.Code, new { code = result.Code, msg, data = result.Value });
+            return StatusCode(result.Code, new { code = result.Code, msg = result.Message, data = result.Value });
         }
 
         // 4xx with structured errors (400, 422)

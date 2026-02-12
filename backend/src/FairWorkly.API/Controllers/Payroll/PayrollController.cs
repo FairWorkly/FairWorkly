@@ -43,6 +43,6 @@ public class PayrollController : BaseApiController
 
         var result = await _mediator.Send(command);
 
-        return RespondResult(result, "Audit completed successfully");
+        return RespondResult(result);
     }
 }
