@@ -2,6 +2,7 @@ using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Application.Roster.Services;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Roster.Entities;
 using FairWorkly.Domain.Roster.ValueObjects;

@@ -1,6 +1,7 @@
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 

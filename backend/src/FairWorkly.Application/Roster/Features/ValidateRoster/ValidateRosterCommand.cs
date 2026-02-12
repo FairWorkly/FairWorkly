@@ -1,4 +1,5 @@
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using MediatR;
 
 namespace FairWorkly.Application.Roster.Features.ValidateRoster;

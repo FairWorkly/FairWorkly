@@ -3,6 +3,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Payroll;
 using Microsoft.Extensions.Logging;
 

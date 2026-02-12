@@ -1,4 +1,4 @@
-namespace FairWorkly.Domain.Common;
+namespace FairWorkly.Domain.Common.Result;
 
 /// <summary>
 /// Unified result type for all Handler return values.

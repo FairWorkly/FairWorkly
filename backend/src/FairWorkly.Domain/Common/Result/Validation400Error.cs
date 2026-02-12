@@ -1,4 +1,4 @@
-namespace FairWorkly.Domain.Common;
+namespace FairWorkly.Domain.Common.Result;
 
 /// <summary>
 /// Validation error produced by FluentValidation and returned via <c>Result&lt;T&gt;.Of400</c>.

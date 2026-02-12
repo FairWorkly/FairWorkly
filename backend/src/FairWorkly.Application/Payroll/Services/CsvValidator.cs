@@ -2,6 +2,7 @@ using System.Globalization;
 using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Application.Payroll.Services.Models;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Common.Parsing;
 using FairWorkly.Domain.Payroll;

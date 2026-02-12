@@ -3,6 +3,7 @@ using FairWorkly.Application.Roster.Features.GetRosterDetails;
 using FairWorkly.Application.Roster.Features.UploadRoster;
 using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

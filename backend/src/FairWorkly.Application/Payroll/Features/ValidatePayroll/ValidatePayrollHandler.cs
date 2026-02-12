@@ -2,6 +2,7 @@ using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Employees.Entities;
 using FairWorkly.Domain.Payroll;

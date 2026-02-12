@@ -1,5 +1,6 @@
 using FairWorkly.Application.Payroll.Services.Models;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Common.Enums;
 
 namespace FairWorkly.Application.Payroll.Interfaces;

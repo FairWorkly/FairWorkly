@@ -1,4 +1,5 @@
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FairWorkly.API.Controllers;

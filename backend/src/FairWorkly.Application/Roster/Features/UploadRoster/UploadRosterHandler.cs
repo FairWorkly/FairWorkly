@@ -3,6 +3,7 @@ using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Roster.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
