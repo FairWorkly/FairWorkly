@@ -7,6 +7,7 @@ using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Employees.Entities;
 using FairWorkly.Domain.Payroll;
 using FairWorkly.Domain.Payroll.ComplianceEngine;
+using FairWorkly.Domain.Payroll.Errors;
 using FairWorkly.Domain.Payroll.Entities;
 using FairWorkly.Domain.Payroll.Enums;
 using MediatR;

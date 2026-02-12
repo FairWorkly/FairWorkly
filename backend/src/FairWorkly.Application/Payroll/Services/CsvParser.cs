@@ -5,6 +5,7 @@ using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Payroll;
+using FairWorkly.Domain.Payroll.Errors;
 using Microsoft.Extensions.Logging;
 
 namespace FairWorkly.Application.Payroll.Services;

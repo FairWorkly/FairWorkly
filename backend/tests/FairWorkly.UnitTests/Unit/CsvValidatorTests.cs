@@ -3,6 +3,7 @@ using FairWorkly.Application.Payroll.Services;
 using FairWorkly.Application.Payroll.Services.Models;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Payroll;
+using FairWorkly.Domain.Payroll.Errors;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 

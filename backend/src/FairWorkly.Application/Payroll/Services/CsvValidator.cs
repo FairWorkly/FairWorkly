@@ -6,6 +6,7 @@ using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Common.Parsing;
 using FairWorkly.Domain.Payroll;
+using FairWorkly.Domain.Payroll.Errors;
 
 namespace FairWorkly.Application.Payroll.Services;
 

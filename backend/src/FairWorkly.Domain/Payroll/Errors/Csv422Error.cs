@@ -1,4 +1,4 @@
-namespace FairWorkly.Domain.Payroll;
+namespace FairWorkly.Domain.Payroll.Errors;
 
 /// <summary>
 /// Structured error for CSV parsing and format validation failures (HTTP 422).
