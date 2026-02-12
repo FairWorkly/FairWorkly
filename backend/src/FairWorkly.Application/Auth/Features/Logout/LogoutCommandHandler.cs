@@ -9,9 +9,9 @@ public class LogoutCommandHandler(
     IUserRepository userRepository,
     ISecretHasher secretHasher,
     IUnitOfWork unitOfWork
-) : IRequestHandler<LogoutCommand, Result<bool>>
+) : IRequestHandler<LogoutCommand, Result<Unit>>
 {
-    public async Task<Result<bool>> Handle(
+    public async Task<Result<Unit>> Handle(
         LogoutCommand request,
         CancellationToken cancellationToken
     )
@@ -33,7 +33,7 @@ public class LogoutCommandHandler(
 
         if (user == null)
         {
-            return Result<bool>.Of404("Logout failed.");
+            return Result<Unit>.Of404("Logout failed.");
         }
 
         // Clear persisted refresh token and expiry
@@ -42,6 +42,6 @@ public class LogoutCommandHandler(
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<bool>.Of204();
+        return Result<Unit>.Of204();
     }
 }
