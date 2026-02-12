@@ -46,6 +46,10 @@ public class CsvParser(ILogger<CsvParser> logger) : ICsvParser
 
             return Result<List<string[]>>.Of200("CSV parsed successfully", rows);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "CSV parsing failed with exception");
