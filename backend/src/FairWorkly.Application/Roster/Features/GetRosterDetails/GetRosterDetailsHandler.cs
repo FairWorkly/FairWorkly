@@ -25,7 +25,7 @@ public class GetRosterDetailsHandler(
 
         if (roster == null)
         {
-            return Result<RosterDetailsResponse>.Failure("Roster not found");
+            return Result<RosterDetailsResponse>.Of404("Roster not found");
         }
 
         var employeeGroups = roster.Shifts
@@ -76,6 +76,6 @@ public class GetRosterDetailsHandler(
             Employees = employeeGroups,
         };
 
-        return Result<RosterDetailsResponse>.Success(response);
+        return Result<RosterDetailsResponse>.Of200("Roster details retrieved", response);
     }
 }

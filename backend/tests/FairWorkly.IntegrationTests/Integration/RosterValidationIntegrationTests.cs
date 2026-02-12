@@ -392,7 +392,7 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Type.Should().Be(Domain.Common.ResultType.NotFound);
+        result.Code.Should().Be(404);
     }
 
     [Fact]

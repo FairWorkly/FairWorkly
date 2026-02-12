@@ -189,6 +189,15 @@ public class Result<T> : IResultBase
     // ── 422 Unprocessable Entity ────────────────────────────────────
 
     /// <summary>
+    /// Creates a <b>422 Unprocessable Entity</b> result with a message only (no structured errors).
+    /// Used when processing fails but there are no field-level error details to report.
+    /// </summary>
+    /// <param name="message">Frontend-facing summary (e.g., "Roster validation failed.").</param>
+    /// <example><code>return Result&lt;RosterDto&gt;.Of422("Roster validation failed.");</code></example>
+    public static Result<T> Of422(string message) =>
+        new(422, default, message, null);
+
+    /// <summary>
     /// Creates a <b>422 Unprocessable Entity</b> result with a message and structured error list.
     /// Used for business-level validation failures (CSV parsing, format checks, etc.).
     /// </summary>
