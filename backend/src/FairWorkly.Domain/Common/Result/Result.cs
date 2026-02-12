@@ -175,4 +175,18 @@ public class Result<T> : IResultBase
     /// <example><code>return Result&lt;PayrollDto&gt;.Of422("CSV file parsing failed", errors);</code></example>
     public static Result<T> Of422<TError>(string message, List<TError> errors) =>
         new(422, default, message, errors);
+
+    // ── 500 Internal Server Error ─────────────────────────────────────
+
+    /// <summary>
+    /// Creates a <b>500 Internal Server Error</b> result with a user-facing message.
+    /// Used when a Handler catches an anticipated infrastructure failure
+    /// (external service down, storage unavailable, database error)
+    /// and wants to return a friendly message instead of letting the exception
+    /// propagate to GlobalExceptionHandler.
+    /// </summary>
+    /// <param name="message">Frontend-facing summary (e.g., "Failed to save roster. Please try again or contact support.").</param>
+    /// <example><code>return Result&lt;RosterDto&gt;.Of500("Failed to save roster. Please try again or contact support.");</code></example>
+    public static Result<T> Of500(string message) =>
+        new(500, default, message, null);
 }

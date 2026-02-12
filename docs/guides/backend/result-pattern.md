@@ -169,7 +169,7 @@ return Result<ValidatePayrollDto>.Of422("CSV format validation failed", errors);
 }
 ```
 
-What each entry in `errors` looks like depends on the Error class you define (covered in Section 7).
+What each entry in `errors` looks like depends on the Error class you define (covered in Section 8).
 
 ### 400 — Input Validation Failed (You Don't Write This — It's Auto-Generated)
 
@@ -213,11 +213,39 @@ The frontend receives:
 }
 ```
 
-> **Summary**: Except for 400 which is handled automatically by the framework, all other Results (200, 201, 204, 401, 403, 404, 409, 422) are written by you in the Handler.
+> **Summary**: Except for 400 which is handled automatically by the framework, all other Results (200, 201, 204, 401, 403, 404, 409, 422, 500) are written by you in the Handler.
 
 ---
 
-## 5. Controller: One Line Does It All
+## 5. Server Errors: When Infrastructure Goes Down
+
+Sometimes a Handler calls an external service (AI Agent, S3, database) and it fails. This is not the user's fault — our own infrastructure is down. Use `Of500` to return a friendly message:
+
+```csharp
+catch (OperationCanceledException) { throw; }
+catch (Exception ex)
+{
+    logger.LogError(ex, "Failed to parse file via Agent Service. File: {FileName}", request.FileName);
+    return Result<RosterDto>.Of500(
+        "Failed to parse roster file. Please try again or contact support."
+    );
+}
+```
+
+The frontend receives:
+
+```json
+{ "code": 500, "msg": "Failed to parse roster file. Please try again or contact support." }
+```
+
+Important notes:
+
+- **`catch (OperationCanceledException) { throw; }` must come before `catch (Exception)`** — otherwise client disconnections get swallowed and the user receives a 500 instead of a normal cancellation
+- Of500 is for infrastructure failures the Handler **anticipates**. Completely unexpected exceptions (NullReferenceException, etc.) should not be caught — let `GlobalExceptionHandler` handle them with a generic 500
+
+---
+
+## 6. Controller: One Line Does It All
 
 Controllers inherit `BaseApiController` and call `RespondResult` — that's it. **Controllers don't handle errors** — whether the Handler returns 200, 404, or 422, `BaseApiController` has already handled the JSON formatting for every case. Controllers don't manage messages; messages are set exclusively in the Handler's `Of{code}` methods.
 
@@ -259,7 +287,7 @@ return RespondResult(result);
 
 ---
 
-## 6. What a Complete Handler Looks Like
+## 7. What a Complete Handler Looks Like
 
 Putting everything above together, here's a typical Handler:
 
@@ -288,7 +316,7 @@ public class GetOrderHandler(
 
 ---
 
-## 7. Custom Error Classes
+## 8. Custom Error Classes
 
 When a 422 needs to return structured errors, you create an Error class to define the fields in each entry of the `errors` array.
 
@@ -308,7 +336,7 @@ Rules:
 
 - Each Error class is standalone — no base class inheritance
 - Fields are determined by the API contract (define whatever the frontend needs)
-- Need a new code that isn't among the existing 9? Talk to Jason first — don't modify the Result class yourself
+- Need a new code that isn't among the existing 10? Talk to Jason first — don't modify the Result class yourself
 
 ---
 
@@ -325,6 +353,7 @@ Rules:
 | Conflict | `Of409()` or `Of409(msg)` | `{ code, msg }` |
 | Processing error (simple) | `Of422(msg)` | `{ code, msg }` |
 | Processing error (with list) | `Of422(msg, errors)` | `{ code, msg, data: { errors } }` |
+| Infrastructure failure | `Of500(msg)` | `{ code, msg }` |
 | Input validation failed | No code needed — Validator handles it | `{ code: 400, msg, data: { errors } }` |
 
 ---

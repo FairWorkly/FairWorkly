@@ -34,19 +34,24 @@ public class UploadRosterHandler(
         CancellationToken cancellationToken
     )
     {
+        // Snapshot file bytes — both Agent Service and S3 need to read the stream,
+        // but HttpClient disposes the stream after sending, so each consumer
+        // gets its own MemoryStream from the shared byte array.
+        byte[] fileBytes;
+        using (var buffer = new MemoryStream())
+        {
+            await request.FileStream.CopyToAsync(buffer, cancellationToken);
+            fileBytes = buffer.ToArray();
+        }
+
         // ========== Step 1: Parse file via Agent Service ==========
         ParseResponse parseResponse;
         try
         {
-            // Reset stream position in case it was read before
-            if (request.FileStream.CanSeek)
-            {
-                request.FileStream.Position = 0;
-            }
-
+            using var agentStream = new MemoryStream(fileBytes);
             var agentResponse = await aiClient.PostMultipartAsync<AgentChatResponse>(
                 "/api/agent/chat",
-                request.FileStream,
+                agentStream,
                 request.FileName,
                 request.ContentType,
                 "Parse this roster file",
@@ -56,10 +61,11 @@ public class UploadRosterHandler(
             // Extract ParseResponse from wrapper
             parseResponse = agentResponse.Result;
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to parse roster file via Agent Service. File: {FileName}", request.FileName);
-            return Result<UploadRosterResponse>.Of422(
+            return Result<UploadRosterResponse>.Of500(
                 "Failed to parse roster file. Please try again or contact support."
             );
         }
@@ -122,21 +128,18 @@ public class UploadRosterHandler(
         string s3Key;
         try
         {
-            if (request.FileStream.CanSeek)
-            {
-                request.FileStream.Position = 0;
-            }
-
+            using var s3Stream = new MemoryStream(fileBytes);
             s3Key = await fileStorageService.UploadAsync(
-                request.FileStream,
+                s3Stream,
                 request.FileName,
                 cancellationToken
             );
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to upload roster file to storage. File: {FileName}", request.FileName);
-            return Result<UploadRosterResponse>.Of422(
+            return Result<UploadRosterResponse>.Of500(
                 "Failed to store roster file. Please try again or contact support."
             );
         }
@@ -146,19 +149,27 @@ public class UploadRosterHandler(
         {
             return await CreateRosterAndShifts(parseResponse, request, s3Key, weekStart, weekEnd, cancellationToken);
         }
+        catch (OperationCanceledException)
+        {
+            // Client disconnected — clean up orphaned S3 file, use CancellationToken.None
+            // since the original token is already cancelled
+            try { await fileStorageService.DeleteAsync(s3Key, CancellationToken.None); }
+            catch (Exception deleteEx)
+            {
+                logger.LogWarning(deleteEx, "Failed to delete orphaned S3 file: {S3Key}", s3Key);
+            }
+            throw;
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create roster after S3 upload. Cleaning up file: {S3Key}", s3Key);
-            try
-            {
-                await fileStorageService.DeleteAsync(s3Key, cancellationToken);
-            }
+            try { await fileStorageService.DeleteAsync(s3Key, CancellationToken.None); }
             catch (Exception deleteEx)
             {
                 logger.LogWarning(deleteEx, "Failed to delete orphaned S3 file: {S3Key}", s3Key);
             }
 
-            return Result<UploadRosterResponse>.Of422(
+            return Result<UploadRosterResponse>.Of500(
                 "Failed to save roster. Please try again or contact support."
             );
         }
