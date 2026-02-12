@@ -24,7 +24,7 @@ class FeatureRegistry:
         Register a Feature
         """
         self._features[feature_type] = feature
-        print(f"✅ Registered feature: {feature_type}")
+        print(f"[OK] Registered feature: {feature_type}")
     
     def get_feature(self, feature_type: str) -> FeatureBase:
         """
