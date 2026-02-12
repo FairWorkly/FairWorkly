@@ -3,6 +3,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Payroll;
 using Microsoft.Extensions.Logging;
 
 namespace FairWorkly.Application.Payroll.Services;
@@ -33,14 +34,24 @@ public class CsvParser(ILogger<CsvParser> logger) : ICsvParser
             }
 
             if (rows.Count == 0)
-                return Result<List<string[]>>.Failure("CSV file is corrupted or cannot be parsed");
+            {
+                var errors = new List<Csv422Error>
+                {
+                    new() { RowNumber = 0, Field = "File", Message = "CSV file is corrupted or cannot be parsed" }
+                };
+                return Result<List<string[]>>.Of422("CSV file is corrupted or cannot be parsed", errors);
+            }
 
-            return Result<List<string[]>>.Success(rows);
+            return Result<List<string[]>>.Of200("CSV parsed successfully", rows);
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "CSV parsing failed with exception");
-            return Result<List<string[]>>.Failure("CSV file is corrupted or cannot be parsed");
+            var errors = new List<Csv422Error>
+            {
+                new() { RowNumber = 0, Field = "File", Message = "CSV file is corrupted or cannot be parsed" }
+            };
+            return Result<List<string[]>>.Of422("CSV file is corrupted or cannot be parsed", errors);
         }
     }
 }

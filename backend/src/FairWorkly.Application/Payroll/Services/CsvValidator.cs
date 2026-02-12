@@ -23,39 +23,39 @@ public class CsvValidator : ICsvValidator
     {
         if (rows.Count == 0)
         {
-            var emptyErrors = new List<ValidationError>
+            var emptyErrors = new List<Csv422Error>
             {
-                new CsvValidationError { RowNumber = 0, Field = "File", Message = "CSV file contains no data" }
+                new Csv422Error { RowNumber = 0, Field = "File", Message = "CSV file contains no data" }
             };
-            return Result<List<ValidatedPayrollRow>>.ValidationFailure("CSV format validation failed", emptyErrors);
+            return Result<List<ValidatedPayrollRow>>.Of422("CSV format validation failed", emptyErrors);
         }
 
         // Stage 1: Header validation
         var headerErrors = ValidateHeader(rows[0]);
         if (headerErrors != null)
-            return Result<List<ValidatedPayrollRow>>.ValidationFailure("CSV format validation failed", headerErrors);
+            return Result<List<ValidatedPayrollRow>>.Of422("CSV format validation failed", headerErrors);
 
         // Stage 2: Global validation
         var dataRows = rows.Skip(1).ToList();
         var globalErrors = ValidateGlobal(dataRows);
         if (globalErrors != null)
-            return Result<List<ValidatedPayrollRow>>.ValidationFailure("CSV format validation failed", globalErrors);
+            return Result<List<ValidatedPayrollRow>>.Of422("CSV format validation failed", globalErrors);
 
         // Stage 3: Field-level validation
         var (validatedRows, fieldErrors) = ValidateFields(dataRows, awardType, cancellationToken);
         if (fieldErrors != null)
-            return Result<List<ValidatedPayrollRow>>.ValidationFailure("CSV format validation failed", fieldErrors);
+            return Result<List<ValidatedPayrollRow>>.Of422("CSV format validation failed", fieldErrors);
 
-        return Result<List<ValidatedPayrollRow>>.Success(validatedRows!);
+        return Result<List<ValidatedPayrollRow>>.Of200("CSV validation passed", validatedRows!);
     }
 
-    private static List<ValidationError>? ValidateHeader(string[] headerRow)
+    private static List<Csv422Error>? ValidateHeader(string[] headerRow)
     {
-        var errors = new List<ValidationError>();
+        var errors = new List<Csv422Error>();
 
         if (headerRow.Length != 20)
         {
-            errors.Add(new CsvValidationError
+            errors.Add(new Csv422Error
             {
                 RowNumber = 1,
                 Field = "Header",
@@ -68,7 +68,7 @@ public class CsvValidator : ICsvValidator
         {
             if (!string.Equals(headerRow[i].Trim(), ExpectedHeaders[i], StringComparison.Ordinal))
             {
-                errors.Add(new CsvValidationError
+                errors.Add(new Csv422Error
                 {
                     RowNumber = 1,
                     Field = "Header",
@@ -80,14 +80,14 @@ public class CsvValidator : ICsvValidator
         return errors.Count > 0 ? errors : null;
     }
 
-    private static List<ValidationError>? ValidateGlobal(List<string[]> dataRows)
+    private static List<Csv422Error>? ValidateGlobal(List<string[]> dataRows)
     {
-        var errors = new List<ValidationError>();
+        var errors = new List<Csv422Error>();
 
         // No data rows
         if (dataRows.Count == 0)
         {
-            errors.Add(new CsvValidationError
+            errors.Add(new Csv422Error
             {
                 RowNumber = 0,
                 Field = "File",
@@ -102,7 +102,7 @@ public class CsvValidator : ICsvValidator
         var payPeriodInconsistent = dataRows.Any(r => r[3].Trim() != firstStart || r[4].Trim() != firstEnd);
         if (payPeriodInconsistent)
         {
-            errors.Add(new CsvValidationError
+            errors.Add(new Csv422Error
             {
                 RowNumber = 0,
                 Field = "Pay Period",
@@ -120,7 +120,7 @@ public class CsvValidator : ICsvValidator
         foreach (var group in idGroups)
         {
             var rowNumbers = string.Join(", ", group.Select(x => x.Row));
-            errors.Add(new CsvValidationError
+            errors.Add(new Csv422Error
             {
                 RowNumber = 0,
                 Field = "Employee ID",
@@ -135,7 +135,7 @@ public class CsvValidator : ICsvValidator
         if (!DateOnly.TryParseExact(firstStart, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var startDate)
             || !DateOnly.TryParseExact(firstEnd, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var endDate))
         {
-            errors.Add(new CsvValidationError
+            errors.Add(new Csv422Error
             {
                 RowNumber = 0,
                 Field = "Pay Period",
@@ -147,7 +147,7 @@ public class CsvValidator : ICsvValidator
         // Pay Period Start ≤ End
         if (startDate > endDate)
         {
-            errors.Add(new CsvValidationError
+            errors.Add(new Csv422Error
             {
                 RowNumber = 0,
                 Field = "Pay Period",
@@ -159,10 +159,10 @@ public class CsvValidator : ICsvValidator
         return null;
     }
 
-    private static (List<ValidatedPayrollRow>?, List<ValidationError>?) ValidateFields(
+    private static (List<ValidatedPayrollRow>?, List<Csv422Error>?) ValidateFields(
         List<string[]> dataRows, AwardType awardType, CancellationToken cancellationToken)
     {
-        var errors = new List<ValidationError>();
+        var errors = new List<Csv422Error>();
         var validatedRows = new List<ValidatedPayrollRow>();
 
         for (var i = 0; i < dataRows.Count; i++)
@@ -352,7 +352,7 @@ public class CsvValidator : ICsvValidator
 
     private static void ValidateOptionalHoursPay(
         string[] row, int hoursCol, int payCol, string label,
-        int rowNumber, ValidatedPayrollRow validatedRow, List<ValidationError> errors, ref bool rowHasError)
+        int rowNumber, ValidatedPayrollRow validatedRow, List<Csv422Error> errors, ref bool rowHasError)
     {
         var hoursStr = row[hoursCol].Trim();
         var payStr = row[payCol].Trim();
@@ -410,7 +410,7 @@ public class CsvValidator : ICsvValidator
         }
     }
 
-    private static CsvValidationError CreateError(int rowNumber, string field, string message) =>
+    private static Csv422Error CreateError(int rowNumber, string field, string message) =>
         new() { RowNumber = rowNumber, Field = field, Message = message };
 
     private static bool TryParsePositiveDecimal(string value, out decimal result)

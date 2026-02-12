@@ -34,7 +34,7 @@ public class ValidatePayrollHandler(
         // Guard: must belong to an organization
         var organizationId = currentUserService.OrganizationId;
         if (organizationId == null)
-            return Result<ValidatePayrollDto>.Forbidden("User does not belong to an organization");
+            return Result<ValidatePayrollDto>.Of403("User does not belong to an organization");
 
         var orgId = organizationId.Value;
 
@@ -43,30 +43,32 @@ public class ValidatePayrollHandler(
 
         // Parse AwardType enum from command string
         if (!Enum.TryParse<AwardType>(command.AwardType, out var awardType))
-            return Result<ValidatePayrollDto>.Failure($"Invalid award type: {command.AwardType}");
+        {
+            var errors = new List<Csv422Error>
+            {
+                new() { RowNumber = 0, Field = "AwardType", Message = $"Invalid award type: {command.AwardType}" }
+            };
+            return Result<ValidatePayrollDto>.Of422("Invalid award type", errors);
+        }
 
         // Layer 2: CsvParser
         var parseResult = csvParser.Parse(command.FileStream, cancellationToken);
-        if (parseResult.IsFailure)
+        if (!parseResult.IsSuccess)
         {
-            logger.LogWarning("CSV parsing failed: {Error}", parseResult.ErrorMessage);
-            var errors = new List<ValidationError>
-            {
-                new CsvValidationError { RowNumber = 0, Field = "File", Message = parseResult.ErrorMessage! }
-            };
-            return Result<ValidatePayrollDto>.ProcessingFailure("CSV file parsing failed", errors);
+            logger.LogWarning("CSV parsing failed: {Error}", parseResult.Message);
+            return Result<ValidatePayrollDto>.Of422("CSV file parsing failed",
+                (List<Csv422Error>)parseResult.Errors!);
         }
 
         logger.LogInformation("CSV parsed successfully: {RowCount} rows", parseResult.Value!.Count);
 
         // Layer 3: CsvValidator
         var validateResult = csvValidator.Validate(parseResult.Value!, awardType, cancellationToken);
-        if (validateResult.IsFailure)
+        if (!validateResult.IsSuccess)
         {
-            logger.LogWarning("CSV validation failed: {ErrorCount} errors",
-                validateResult.ValidationErrors?.Count ?? 0);
-            return Result<ValidatePayrollDto>.ProcessingFailure(
-                validateResult.ErrorMessage!, validateResult.ValidationErrors!);
+            var csvErrors = (List<Csv422Error>)validateResult.Errors!;
+            logger.LogWarning("CSV validation failed: {ErrorCount} errors", csvErrors.Count);
+            return Result<ValidatePayrollDto>.Of422(validateResult.Message!, csvErrors);
         }
 
         var validatedRows = validateResult.Value!;
@@ -201,7 +203,7 @@ public class ValidatePayrollHandler(
 
         // ═══ Build DTO ═══
         var dto = BuildDto(validation, payslips, allIssues);
-        return Result<ValidatePayrollDto>.Success(dto);
+        return Result<ValidatePayrollDto>.Of200("Payroll validation completed", dto);
     }
 
     private static ValidatePayrollDto BuildDto(

@@ -1,7 +1,6 @@
 using System.Text;
 using FairWorkly.Application.Payroll.Services;
 using FairWorkly.Application.Payroll.Services.Models;
-using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Payroll;
 using FluentAssertions;
@@ -44,7 +43,7 @@ public class CsvValidatorTests
         return result.Value!;
     }
 
-    private static CsvValidationError AsCsvError(ValidationError error) => (CsvValidationError)error;
+    private static List<Csv422Error> GetErrors(object? errors) => (List<Csv422Error>)errors!;
 
     // ==================== Stage 1: Header validation ====================
 
@@ -58,9 +57,9 @@ public class CsvValidatorTests
         var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.ValidationErrors.Should().HaveCount(1);
-        var error = AsCsvError(result.ValidationErrors![0]);
+        result.IsSuccess.Should().BeFalse();
+        GetErrors(result.Errors).Should().HaveCount(1);
+        var error = GetErrors(result.Errors)[0];
         error.RowNumber.Should().Be(1);
         error.Field.Should().Be("Header");
         error.Message.Should().Be("Expected 20 columns, found 19");
@@ -78,9 +77,9 @@ public class CsvValidatorTests
         var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.ValidationErrors.Should().HaveCount(1);
-        var error = AsCsvError(result.ValidationErrors![0]);
+        result.IsSuccess.Should().BeFalse();
+        GetErrors(result.Errors).Should().HaveCount(1);
+        var error = GetErrors(result.Errors)[0];
         error.RowNumber.Should().Be(1);
         error.Field.Should().Be("Header");
         error.Message.Should().Be("Expected 20 columns, found 21");
@@ -98,9 +97,9 @@ public class CsvValidatorTests
         var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.ValidationErrors.Should().HaveCount(1);
-        var error = AsCsvError(result.ValidationErrors![0]);
+        result.IsSuccess.Should().BeFalse();
+        GetErrors(result.Errors).Should().HaveCount(1);
+        var error = GetErrors(result.Errors)[0];
         error.RowNumber.Should().Be(1);
         error.Field.Should().Be("Header");
         error.Message.Should().Be("Column 2: expected \"First Name\", found \"Employee Name\"");
@@ -118,10 +117,10 @@ public class CsvValidatorTests
         var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.ValidationErrors.Should().HaveCount(2);
+        result.IsSuccess.Should().BeFalse();
+        GetErrors(result.Errors).Should().HaveCount(2);
 
-        var errors = result.ValidationErrors!.Cast<CsvValidationError>().ToList();
+        var errors = GetErrors(result.Errors);
 
         errors.Should().Contain(e =>
             e.RowNumber == 0 &&
@@ -146,8 +145,8 @@ public class CsvValidatorTests
         var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        var error = AsCsvError(result.ValidationErrors![0]);
+        result.IsSuccess.Should().BeFalse();
+        var error = GetErrors(result.Errors)[0];
         error.RowNumber.Should().Be(0);
         error.Field.Should().Be("Pay Period");
         error.Message.Should().Contain("Invalid Pay Period format");
@@ -165,8 +164,8 @@ public class CsvValidatorTests
         var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        var error = AsCsvError(result.ValidationErrors![0]);
+        result.IsSuccess.Should().BeFalse();
+        var error = GetErrors(result.Errors)[0];
         error.RowNumber.Should().Be(0);
         error.Field.Should().Be("Pay Period");
         error.Message.Should().Be("Invalid Pay Period. Start date must be on or before end date");
@@ -182,9 +181,9 @@ public class CsvValidatorTests
         var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.ValidationErrors.Should().HaveCount(1);
-        var error = AsCsvError(result.ValidationErrors![0]);
+        result.IsSuccess.Should().BeFalse();
+        GetErrors(result.Errors).Should().HaveCount(1);
+        var error = GetErrors(result.Errors)[0];
         error.RowNumber.Should().Be(0);
         error.Field.Should().Be("File");
         error.Message.Should().Be("CSV file has no data rows");
@@ -202,8 +201,8 @@ public class CsvValidatorTests
         var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        var errors = result.ValidationErrors!.Cast<CsvValidationError>().ToList();
+        result.IsSuccess.Should().BeFalse();
+        var errors = GetErrors(result.Errors);
 
         // Row 2: Employee ID empty + Last Name empty
         errors.Should().Contain(e => e.RowNumber == 2 && e.Message == "Employee ID is required");
@@ -259,8 +258,8 @@ public class CsvValidatorTests
         var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        var errors = result.ValidationErrors!.Cast<CsvValidationError>().ToList();
+        result.IsSuccess.Should().BeFalse();
+        var errors = GetErrors(result.Errors);
         errors.Should().ContainSingle();
         errors[0].RowNumber.Should().Be(2);
         errors[0].Field.Should().Be("Saturday Pay");

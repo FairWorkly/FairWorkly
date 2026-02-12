@@ -31,8 +31,8 @@ public class CsvParserTests
         var result = _parser.Parse(stream, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.ErrorMessage.Should().Be("CSV file is corrupted or cannot be parsed");
+        result.IsSuccess.Should().BeFalse();
+        result.Message.Should().Be("CSV file is corrupted or cannot be parsed");
     }
 
     [Fact]
@@ -46,8 +46,8 @@ public class CsvParserTests
         var result = _parser.Parse(stream, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.ErrorMessage.Should().Be("CSV file is corrupted or cannot be parsed");
+        result.IsSuccess.Should().BeFalse();
+        result.Message.Should().Be("CSV file is corrupted or cannot be parsed");
     }
 
     [Fact]

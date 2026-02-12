@@ -1,14 +1,12 @@
 using FairWorkly.Application.Payroll.Features.ValidatePayroll;
-using FairWorkly.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FairWorkly.API.Controllers.Payroll;
 
-[ApiController]
 [Route("api/[controller]")]
-public class PayrollController : ControllerBase
+public class PayrollController : BaseApiController
 {
     private readonly IMediator _mediator;
 
@@ -45,18 +43,6 @@ public class PayrollController : ControllerBase
 
         var result = await _mediator.Send(command);
 
-        if (result.Type == ResultType.ValidationFailure)
-            return BadRequest(new { code = 400, msg = "Request validation failed", data = new { errors = result.ValidationErrors } });
-
-        if (result.Type == ResultType.ProcessingFailure)
-            return UnprocessableEntity(new { code = 422, msg = result.ErrorMessage, data = new { errors = result.ValidationErrors } });
-
-        if (result.Type == ResultType.Forbidden)
-            return StatusCode(403, new { code = 403, msg = result.ErrorMessage });
-
-        if (!result.IsSuccess)
-            return StatusCode(500, new { code = 500, msg = "An unexpected error occurred" });
-
-        return Ok(new { code = 200, msg = "Audit completed successfully", data = result.Value });
+        return RespondResult(result, "Audit completed successfully");
     }
 }
