@@ -87,4 +87,20 @@ public class CsvParserTests
         result.Value[0][0].Should().Be("Employee ID");
         result.Value[0][19].Should().Be("Superannuation Paid");
     }
+
+    [Fact]
+    public void Parse_InconsistentColumnCount_ReturnsFailure()
+    {
+        // Arrange — header has 20 columns, data row has only 2
+        var csv = ValidHeader + "\nE001,John";
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
+
+        // Act
+        var result = _parser.Parse(stream, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Code.Should().Be(422);
+        result.Message.Should().Be("CSV file is corrupted or cannot be parsed");
+    }
 }

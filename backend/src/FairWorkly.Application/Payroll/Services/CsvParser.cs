@@ -44,6 +44,17 @@ public class CsvParser(ILogger<CsvParser> logger) : ICsvParser
                 return Result<List<string[]>>.Of422("CSV file is corrupted or cannot be parsed", errors);
             }
 
+            // Structural integrity: all rows must have the same column count as the header
+            var expectedColumnCount = rows[0].Length;
+            for (var i = 1; i < rows.Count; i++)
+            {
+                if (rows[i].Length != expectedColumnCount)
+                {
+                    throw new InvalidDataException(
+                        $"Row {i + 1} has {rows[i].Length} columns, expected {expectedColumnCount}");
+                }
+            }
+
             return Result<List<string[]>>.Of200("CSV parsed successfully", rows);
         }
         catch (OperationCanceledException)

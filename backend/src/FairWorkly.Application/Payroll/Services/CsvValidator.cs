@@ -173,13 +173,6 @@ public class CsvValidator : ICsvValidator
             var row = dataRows[i];
             var rowNumber = i + 2; // Row 1 is header, data starts from row 2
 
-            // Guard: each data row must have exactly 20 columns
-            if (row.Length != 20)
-            {
-                errors.Add(CreateError(rowNumber, "Row", $"Expected 20 columns, found {row.Length}"));
-                continue;
-            }
-
             var validatedRow = new ValidatedPayrollRow();
             var rowHasError = false;
 
