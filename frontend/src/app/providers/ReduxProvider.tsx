@@ -24,7 +24,8 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({ children }) => {
           withCredentials: true,
         })
 
-        const accessToken = refreshRes.data?.accessToken
+        const refreshData = refreshRes.data?.data ?? refreshRes.data
+        const accessToken = refreshData?.accessToken
         if (!accessToken) return
 
         // Fetch real user data using the new access token
@@ -32,7 +33,7 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({ children }) => {
           headers: { Authorization: `Bearer ${accessToken}` },
         })
 
-        const u = meRes.data
+        const u = meRes.data?.data ?? meRes.data
         const role = typeof u?.role === 'string' ? u.role.toLowerCase() : undefined
         if (!u?.id || !u?.email || !role) {
           throw new Error('/auth/me returned incomplete user data')
