@@ -1,10 +1,10 @@
 namespace FairWorkly.Domain.Common;
 
 /// <summary>
-/// Generic validation error base class containing only basic field information.
-/// Business modules can inherit from this class to add business-specific fields.
+/// Validation error produced by FluentValidation and returned via <c>Result&lt;T&gt;.Of400</c>.
+/// Each error represents a single field-level validation failure.
 /// </summary>
-public class ValidationError
+public class Validation400Error
 {
     public required string Field { get; init; }
     public required string Message { get; init; }

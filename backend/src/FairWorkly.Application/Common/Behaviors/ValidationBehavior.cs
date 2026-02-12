@@ -15,7 +15,7 @@ namespace FairWorkly.Application.Common.Behaviors;
 ///   <item>MediatR sends a request (Command/Query) through the pipeline.</item>
 ///   <item>This behavior collects all <c>IValidator&lt;TRequest&gt;</c> registered via DI.</item>
 ///   <item>Runs all validators in parallel.</item>
-///   <item>If any fail, maps <c>ValidationFailure</c> → <c>ValidationError</c> and
+///   <item>If any fail, maps <c>ValidationFailure</c> → <c>Validation400Error</c> and
 ///         calls <c>Result&lt;T&gt;.Of400(errors)</c> via reflection.</item>
 ///   <item>If all pass, delegates to <c>next()</c> (the Handler).</item>
 /// </list>
@@ -23,7 +23,7 @@ namespace FairWorkly.Application.Common.Behaviors;
 /// <para>
 /// <c>TResponse</c> is constrained to <c>IResultBase</c>, but the static factory method
 /// <c>Of400</c> lives on <c>Result&lt;T&gt;</c> (a concrete generic class). We must use
-/// reflection to call the correctly-typed <c>Result&lt;T&gt;.Of400(List&lt;ValidationError&gt;)</c>
+/// reflection to call the correctly-typed <c>Result&lt;T&gt;.Of400(List&lt;Validation400Error&gt;)</c>
 /// at runtime, since <c>T</c> varies per handler.
 /// </para>
 /// <para><b>400 is exclusively owned by this behavior.</b></para>
@@ -68,26 +68,26 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
 
         if (failures.Any())
         {
-            // Map FluentValidation failures to our ValidationError type.
+            // Map FluentValidation failures to our Validation400Error type.
             // Field = the property name (.OverridePropertyName() in validators controls this).
             // Message = the error message (.WithMessage() in validators controls this).
             var errors = failures
-                .Select(f => new ValidationError
+                .Select(f => new Validation400Error
                 {
                     Field = f.PropertyName,
                     Message = f.ErrorMessage,
                 })
                 .ToList();
 
-            // Reflection: call Result<T>.Of400(List<ValidationError>) where T is the
+            // Reflection: call Result<T>.Of400(List<Validation400Error>) where T is the
             // handler's return DTO type. GetMethod finds the concrete (non-generic) overload
-            // by matching the List<ValidationError> parameter type exactly.
+            // by matching the List<Validation400Error> parameter type exactly.
             var resultType = typeof(TResponse).GetGenericArguments()[0];
             var method = typeof(Result<>)
                 .MakeGenericType(resultType)
                 .GetMethod(
                     nameof(Result<object>.Of400),
-                    new[] { typeof(List<ValidationError>) }
+                    new[] { typeof(List<Validation400Error>) }
                 );
 
             return (TResponse)method!.Invoke(null, new object[] { errors })!;

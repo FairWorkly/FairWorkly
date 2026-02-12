@@ -20,7 +20,7 @@ namespace FairWorkly.Domain.Common;
 public class Result<T> : IResultBase
 {
     // ════════════════════════════════════════════════════════════════
-    // Properties (new API)
+    // Properties
     // ════════════════════════════════════════════════════════════════
 
     /// <summary>HTTP status code (e.g., 200, 400, 404, 422). Set by the factory method.</summary>
@@ -47,38 +47,6 @@ public class Result<T> : IResultBase
     public object? Errors { get; }
 
     // ════════════════════════════════════════════════════════════════
-    // Obsolete properties (bridge to new API — will be removed)
-    // ════════════════════════════════════════════════════════════════
-
-    /// <inheritdoc />
-    [Obsolete("Use !IsSuccess instead.")]
-    public bool IsFailure => !IsSuccess;
-
-    /// <inheritdoc />
-    [Obsolete("Use Message instead.")]
-    public string? ErrorMessage => Message;
-
-    /// <inheritdoc />
-    [Obsolete("Use Errors instead. Cast to the expected list type.")]
-    public List<ValidationError>? ValidationErrors => Errors as List<ValidationError>;
-
-    /// <inheritdoc />
-    [Obsolete("Use Code (int) instead. ResultType enum will be removed.")]
-    public ResultType Type => Code switch
-    {
-        200 => ResultType.Success,
-        201 => ResultType.Success,
-        204 => ResultType.Success,
-        400 => ResultType.ValidationFailure,
-        401 => ResultType.Unauthorized,
-        403 => ResultType.Forbidden,
-        404 => ResultType.NotFound,
-        409 => ResultType.BusinessFailure,
-        422 => ResultType.ProcessingFailure,
-        _ => ResultType.Success,
-    };
-
-    // ════════════════════════════════════════════════════════════════
     // Private constructor — all instances created via factory methods
     // ════════════════════════════════════════════════════════════════
 
@@ -91,7 +59,7 @@ public class Result<T> : IResultBase
     }
 
     // ════════════════════════════════════════════════════════════════
-    // New API: Of{code} factory methods
+    // Of{code} factory methods
     // ════════════════════════════════════════════════════════════════
 
     // ── 200 OK ──────────────────────────────────────────────────────
@@ -132,11 +100,11 @@ public class Result<T> : IResultBase
     /// </para>
     /// <para>
     /// Reflection call site: <c>ValidationBehavior.cs</c> uses <c>GetMethod("Of400", ...)</c>
-    /// to find this concrete overload by matching the <c>List&lt;ValidationError&gt;</c> parameter type.
+    /// to find this concrete overload by matching the <c>List&lt;Validation400Error&gt;</c> parameter type.
     /// </para>
     /// </remarks>
     /// <param name="errors">Validation errors produced by FluentValidation.</param>
-    public static Result<T> Of400(List<ValidationError> errors) =>
+    public static Result<T> Of400(List<Validation400Error> errors) =>
         new(400, default, "Request validation failed", errors);
 
     /// <summary>Creates a <b>400 Bad Request</b> result with a custom message and typed error list.</summary>
@@ -207,61 +175,4 @@ public class Result<T> : IResultBase
     /// <example><code>return Result&lt;PayrollDto&gt;.Of422("CSV file parsing failed", errors);</code></example>
     public static Result<T> Of422<TError>(string message, List<TError> errors) =>
         new(422, default, message, errors);
-
-    // ════════════════════════════════════════════════════════════════
-    // Obsolete factory methods (bridge — will be removed in cleanup)
-    // ════════════════════════════════════════════════════════════════
-
-    /// <inheritdoc cref="Of200"/>
-    [Obsolete("Use Of200(message, value) instead.")]
-    public static Result<T> Success(T value) =>
-        new(200, value, "Success", null);
-
-    /// <inheritdoc cref="Of400(List{ValidationError})"/>
-    [Obsolete("Use Of400 instead. This method is only called by ValidationBehavior.")]
-    public static Result<T> ValidationFailure(List<ValidationError> errors) =>
-        Of400(errors);
-
-    /// <inheritdoc cref="Of400{TError}(string, List{TError})"/>
-    [Obsolete("Use Of400 instead.")]
-    public static Result<T> ValidationFailure(string errorMessage, List<ValidationError> errors) =>
-        new(400, default, errorMessage, errors);
-
-    /// <summary>Obsolete. BusinessFailure has been removed — use the appropriate Of{code} method.</summary>
-    [Obsolete("BusinessFailure removed. Use the appropriate Of{code} method.")]
-    public static Result<T> Failure(string message) =>
-        new(422, default, message, null);
-
-    /// <inheritdoc cref="Of422{TError}"/>
-    [Obsolete("Use Of422<TError>(message, errors) instead.")]
-    public static Result<T> ProcessingFailure(string message, List<ValidationError> errors) =>
-        new(422, default, message, errors);
-
-    /// <inheritdoc cref="Of404(string)"/>
-    [Obsolete("Use Of404() or Of404(message) instead.")]
-    public static Result<T> NotFound(string message) =>
-        Of404(message);
-
-    /// <inheritdoc cref="Of401(string)"/>
-    [Obsolete("Use Of401() or Of401(message) instead.")]
-    public static Result<T> Unauthorized(string message) =>
-        Of401(message);
-
-    /// <inheritdoc cref="Of403(string)"/>
-    [Obsolete("Use Of403() or Of403(message) instead.")]
-    public static Result<T> Forbidden(string message) =>
-        Of403(message);
-}
-
-/// <summary>Obsolete. Use <c>Result&lt;T&gt;.Code</c> (int) directly. This enum will be removed.</summary>
-[Obsolete("Use Result<T>.Code (int) instead. This enum will be removed.")]
-public enum ResultType
-{
-    Success,
-    ValidationFailure,
-    BusinessFailure,
-    ProcessingFailure,
-    NotFound,
-    Unauthorized,
-    Forbidden,
 }
