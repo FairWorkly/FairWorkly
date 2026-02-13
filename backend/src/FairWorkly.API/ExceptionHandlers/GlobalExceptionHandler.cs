@@ -46,22 +46,6 @@ public class GlobalExceptionHandler : IExceptionHandler
                 }
             ),
 
-            // Not Found (404)
-            NotFoundException => (
-                StatusCodes.Status404NotFound,
-                "Resource Not Found",
-                exception.Message,
-                null
-            ),
-
-            // Forbidden (403)
-            ForbiddenAccessException => (
-                StatusCodes.Status403Forbidden,
-                "Forbidden",
-                exception.Message,
-                null
-            ),
-
             // Domain Rule Violation (422)
             DomainException => (
                 StatusCodes.Status422UnprocessableEntity,
