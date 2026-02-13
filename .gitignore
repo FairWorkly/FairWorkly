@@ -25,6 +25,9 @@ AGENTS.md
 [Bb]in/
 [Oo]bj/
 
+# Test Coverage Reports
+TestResults/
+
 # Backend AI Files
 .raw_materials/
 .doc/
