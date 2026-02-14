@@ -26,7 +26,7 @@ public class PayrollController : BaseApiController
         [FromForm] bool enableCasualLoadingCheck = true,
         [FromForm] bool enableSuperCheck = true)
     {
-        await using var fileStream = file.OpenReadStream();
+        var fileStream = file.OpenReadStream();
 
         var command = new ValidatePayrollCommand
         {

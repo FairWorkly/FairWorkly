@@ -53,8 +53,18 @@ public class ValidatePayrollHandler(
             return Result<ValidatePayrollDto>.Of422("Invalid award type", errors);
         }
 
+        // Snapshot file bytes for stream lifecycle safety.
+        // Currently only CsvParser consumes the stream, but S3 upload will be added later.
+        byte[] fileBytes;
+        using (var buffer = new MemoryStream())
+        {
+            await command.FileStream.CopyToAsync(buffer, cancellationToken);
+            fileBytes = buffer.ToArray();
+        }
+
         // Layer 2: CsvParser
-        var parseResult = csvParser.Parse(command.FileStream, cancellationToken);
+        using var csvStream = new MemoryStream(fileBytes);
+        var parseResult = csvParser.Parse(csvStream, cancellationToken);
         if (!parseResult.IsSuccess)
         {
             logger.LogWarning("CSV parsing failed: {Error}", parseResult.Message);
