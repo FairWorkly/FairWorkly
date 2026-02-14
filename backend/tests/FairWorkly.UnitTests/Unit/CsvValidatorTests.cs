@@ -190,6 +190,26 @@ public class CsvValidatorTests
         error.Message.Should().Be("CSV file has no data rows");
     }
 
+    [Fact]
+    public void Validate_TooManyRows_ReturnsError()
+    {
+        // Arrange — header + 5001 data rows
+        var dataRow = "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
+        var csv = ValidHeader + "\n" + string.Join("\n", Enumerable.Range(1, 5001).Select(_ => dataRow));
+        var rows = ParseInlineCsv(csv);
+
+        // Act
+        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        GetErrors(result.Errors).Should().HaveCount(1);
+        var error = GetErrors(result.Errors)[0];
+        error.RowNumber.Should().Be(0);
+        error.Field.Should().Be("File");
+        error.Message.Should().Be("CSV file contains too many rows. Maximum is 5,000");
+    }
+
     // ==================== Stage 3: Field-level validation ====================
 
     [Fact]

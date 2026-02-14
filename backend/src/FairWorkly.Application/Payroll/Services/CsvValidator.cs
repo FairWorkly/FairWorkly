@@ -12,6 +12,8 @@ namespace FairWorkly.Application.Payroll.Services;
 
 public class CsvValidator : ICsvValidator
 {
+    private const int MaxRowCount = 5000;
+
     private static readonly string[] ExpectedHeaders =
     {
         "Employee ID", "First Name", "Last Name", "Pay Period Start", "Pay Period End", "Pay Date",
@@ -94,6 +96,18 @@ public class CsvValidator : ICsvValidator
                 RowNumber = 0,
                 Field = "File",
                 Message = "CSV file has no data rows",
+            });
+            return errors;
+        }
+
+        // Too many data rows
+        if (dataRows.Count > MaxRowCount)
+        {
+            errors.Add(new Csv422Error
+            {
+                RowNumber = 0,
+                Field = "File",
+                Message = "CSV file contains too many rows. Maximum is 5,000",
             });
             return errors;
         }

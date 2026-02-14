@@ -47,17 +47,17 @@ public class ValidatePayrollValidatorTests
     }
 
     [Fact]
-    public async Task Validate_FileOver50MB_ReturnsError()
+    public async Task Validate_FileOver2MB_ReturnsError()
     {
         var command = CreateValidCommand();
-        command.FileSize = 51 * 1024 * 1024L;
+        command.FileSize = 3 * 1024 * 1024L;
 
         var result = await _validator.ValidateAsync(command);
 
         result.IsValid.Should().BeFalse();
         result.Errors.Should().Contain(e =>
             e.PropertyName == "file" &&
-            e.ErrorMessage == "File size must not exceed 50MB");
+            e.ErrorMessage == "File size must not exceed 2MB");
     }
 
     // ==================== AwardType validation ====================

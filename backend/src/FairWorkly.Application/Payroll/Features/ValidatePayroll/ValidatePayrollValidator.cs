@@ -22,9 +22,9 @@ public class ValidatePayrollValidator : AbstractValidator<ValidatePayrollCommand
             .OverridePropertyName("file");
 
         RuleFor(x => x.FileSize)
-            .LessThanOrEqualTo(50 * 1024 * 1024L)
+            .LessThanOrEqualTo(2 * 1024 * 1024L)
             .When(x => x.FileStream != null)
-            .WithMessage("File size must not exceed 50MB")
+            .WithMessage("File size must not exceed 2MB")
             .OverridePropertyName("file");
 
         RuleFor(x => x.AwardType)

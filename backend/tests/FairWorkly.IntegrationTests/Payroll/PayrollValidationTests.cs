@@ -43,6 +43,39 @@ public class PayrollValidationTests : IntegrationTestBase
     }
 
     // ═══════════════════════════════════════════════════════════════
+    //  Case 0: File too large (400 via Validator)
+    //  Note: In production Kestrel enforces [RequestSizeLimit] → 413,
+    //  but TestServer does not support IHttpMaxRequestBodySizeFeature,
+    //  so the request falls through to ValidatePayrollValidator → 400.
+    // ═══════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task Post_FileTooLarge_Returns400()
+    {
+        // Arrange: 3MB payload exceeds 2MB limit
+        var client = await CreateAuthenticatedClientAsync();
+        using var content = new MultipartFormDataContent();
+        var largeBytes = new byte[3 * 1024 * 1024];
+        content.Add(new ByteArrayContent(largeBytes), "file", "large.csv");
+        content.Add(new StringContent("GeneralRetailIndustryAward2020"), "awardType");
+        content.Add(new StringContent("VIC"), "state");
+
+        // Act
+        var response = await client.PostAsync("/api/payroll/validation", content);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var json = ParseJson(await response.Content.ReadAsStringAsync());
+        json.GetProperty("code").GetInt32().Should().Be(400);
+
+        var errors = json.GetProperty("data").GetProperty("errors");
+        errors.EnumerateArray().Should().Contain(e =>
+            e.GetProperty("field").GetString() == "file" &&
+            e.GetProperty("message").GetString() == "File size must not exceed 2MB");
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     //  Case 1: Layer 1 error format (400)
     // ═══════════════════════════════════════════════════════════════
 
