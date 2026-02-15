@@ -1,244 +1,381 @@
-# Result<T> Pattern Guide
+# Result\<T\> Usage Guide
 
-## What is Result<T>?
+## 1. What Our JSON Responses Look Like
 
-An "envelope" class that wraps operation results. All Handler return values are wrapped with it.
+All API responses revolve around three fields: `code`, `msg`, `data`.
 
-```csharp
-public class Result<T>
-{
-    public bool IsSuccess { get; }                    // Whether successful
-    public bool IsFailure => !IsSuccess;              // Whether failed
-    public T? Value { get; }                          // Data on success
-    public string? ErrorMessage { get; }              // Error message on failure
-    public List<ValidationError>? ValidationErrors { get; }  // Validation error list
-    public ResultType Type { get; }                   // Result type
-}
+**Success with data** (200, 201):
+
+```json
+{ "code": 200, "msg": "Employee retrieved", "data": { ... DTO fields ... } }
 ```
 
-**What is the generic `<T>`?** The data type returned on success. e.g., `Result<OrderDto>` means on success, `Value` is an `OrderDto`.
+**Error with errors list** (400, 422 with errors):
 
----
-
-## Factory Methods Overview
-
-You cannot directly `new Result()`—must use static methods to create:
-
-| Method | Purpose | Example |
-|--------|---------|---------|
-| `Success(value)` | Operation succeeded | `Result<OrderDto>.Success(dto)` |
-| `ValidationFailure(errors)` | Input validation failed | `Result<OrderDto>.ValidationFailure(errorList)` |
-| `Failure(message)` | Business logic failed | `Result<OrderDto>.Failure("Out of stock")` |
-| `NotFound(message)` | Resource not found | `Result<OrderDto>.NotFound("Order not found")` |
-| `Unauthorized(message)` | Not logged in | `Result<UserDto>.Unauthorized("Please log in first")` |
-| `Forbidden(message)` | No permission | `Result<OrderDto>.Forbidden("No access to this operation")` |
-
----
-
-## Property Values for Each Scenario
-
-| Scenario | IsSuccess | Value | ErrorMessage | ValidationErrors | Type |
-|----------|-----------|-------|--------------|------------------|------|
-| Success | `true` | DTO data | `null` | `null` | `Success` |
-| Validation Failed | `false` | `null` | `"Validation failed"` | Error list | `ValidationFailure` |
-| Business Failed | `false` | `null` | Custom message | `null` | `BusinessFailure` |
-| Resource Not Found | `false` | `null` | Custom message | `null` | `NotFound` |
-| Not Logged In | `false` | `null` | Custom message | `null` | `Unauthorized` |
-| No Permission | `false` | `null` | Custom message | `null` | `Forbidden` |
-
----
-
-## How to Write Handlers
-
-```csharp
-public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, Result<OrderDto>>
-{
-    public async Task<Result<OrderDto>> Handle(GetOrderQuery query, CancellationToken ct)
-    {
-        var order = await _repo.GetByIdAsync(query.OrderId);
-
-        // Failure cases - return corresponding Result
-        if (order == null)
-            return Result<OrderDto>.NotFound($"Order {query.OrderId} not found");
-
-        if (order.UserId != _currentUser.Id)
-            return Result<OrderDto>.Forbidden("You don't have access to view this order");
-
-        // Success case - wrap DTO and return
-        var dto = new OrderDto { Id = order.Id, ... };
-        return Result<OrderDto>.Success(dto);
-    }
-}
+```json
+{ "code": 422, "msg": "CSV format validation failed", "data": { "errors": [...] } }
 ```
 
-**Note:** Even when returning failure, the generic must be `Result<OrderDto>` because the method signature requires consistent return type.
+**Error with msg only** (401, 403, 404, 409, 422 simple rejection):
+
+```json
+{ "code": 404, "msg": "Roster not found" }
+```
+
+**No body** (204):
+
+Nothing is returned.
+
+That's all the formats. The sections below explain how to produce each type of response.
 
 ---
 
-## How to Write Controllers
+## 2. Success Responses: How to Return Data
+
+### 200 — Query/Operation Succeeded
+
+The most common case. Put your DTO in `data`.
 
 ```csharp
-[HttpGet("{id}")]
-public async Task<IActionResult> GetOrder(int id)
+// In the Handler:
+var dto = new EmployeeDto
 {
-    var result = await _mediator.Send(new GetOrderQuery { OrderId = id });
-
-    // Decide what to return based on Type
-    if (result.Type == ResultType.ValidationFailure)
-        return BadRequest(new
-        {
-            code = "VALIDATION_ERROR",
-            errors = result.ValidationErrors  // Get validation error list
-        });
-
-    if (result.Type == ResultType.NotFound)
-        return NotFound(new
-        {
-            code = "NOT_FOUND",
-            message = result.ErrorMessage  // Get error message
-        });
-
-    if (result.Type == ResultType.Forbidden)
-        return StatusCode(403, new
-        {
-            code = "FORBIDDEN",
-            message = result.ErrorMessage
-        });
-
-    // Success
-    return Ok(result.Value);  // Extract DTO data
-}
-```
-
----
-
-## Complex Errors: Custom Error Classes
-
-Simple errors use `ValidationError` (only `Field` and `Message`). But business errors may be more complex—e.g., CSV parsing errors need to return row number, employee info, etc.
-
-**Solution: Inherit from `ValidationError` base class**
-
-```csharp
-// Domain/Payroll/CsvParsingError.cs
-public class CsvParsingError : ValidationError
-{
-    public int RowNumber { get; init; }        // Which row
-    public string EmployeeId { get; init; }    // Employee ID, "unknown" if unrecognized
-    public string EmployeeName { get; init; }  // Employee name, "unknown" if unrecognized
-}
-```
-
-**Handler usage:**
-
-```csharp
-var errors = new List<ValidationError>
-{
-    new CsvParsingError
-    {
-        RowNumber = 5,
-        Field = "hourlyRate",
-        Message = "Hourly rate must be a number",
-        EmployeeId = "EMP001",
-        EmployeeName = "John Smith"
-    },
-    new CsvParsingError
-    {
-        RowNumber = 12,
-        Field = "workDate",
-        Message = "Invalid date format",
-        EmployeeId = "unknown",
-        EmployeeName = "unknown"
-    }
+    Id = 42,
+    Name = "Alice Wang",
+    Email = "alice@example.com"
 };
-
-return Result<PayrollDto>.ValidationFailure("CSV parsing failed, please correct and re-upload", errors);
+return Result<EmployeeDto>.Of200("Employee retrieved", dto);
 ```
 
-**Controller:**
-
-```csharp
-if (result.Type == ResultType.ValidationFailure)
-    return BadRequest(new
-    {
-        code = "CSV_VALIDATION_ERROR",
-        message = result.ErrorMessage,
-        errors = result.ValidationErrors
-    });
-```
-
-**Frontend receives 400:**
+The frontend receives:
 
 ```json
 {
-  "code": "CSV_VALIDATION_ERROR",
-  "message": "CSV parsing failed, please correct and re-upload",
-  "errors": [
-    {
-      "rowNumber": 5,
-      "field": "hourlyRate",
-      "message": "Hourly rate must be a number",
-      "employeeId": "EMP001",
-      "employeeName": "John Smith"
-    },
-    {
-      "rowNumber": 12,
-      "field": "workDate",
-      "message": "Invalid date format",
-      "employeeId": "unknown",
-      "employeeName": "unknown"
-    }
-  ]
+  "code": 200,
+  "msg": "Employee retrieved",
+  "data": {
+    "id": 42,
+    "name": "Alice Wang",
+    "email": "alice@example.com"
+  }
 }
 ```
 
-**Key points:**
-- Inherit `ValidationError`, add fields needed by business
-- Place in corresponding Domain module (e.g., `Domain/Payroll/`)
-- `List<ValidationError>` can hold subclasses—polymorphic serialization preserves subclass fields
+The contents of `data` correspond directly to the fields of your DTO.
+
+### 201 — Creation Succeeded
+
+Used when creating a new resource. Same pattern, different method name.
+
+```csharp
+var dto = new EmployeeDto { Id = employee.Id, ... };
+return Result<EmployeeDto>.Of201("Employee created", dto);
+```
+
+### 204 — Done, No Need to Return Anything
+
+For operations like delete or logout where the frontend doesn't need any data — just knowing "it worked" is enough.
+
+```csharp
+return Result<Unit>.Of204();
+```
+
+Note the use of `Result<Unit>` instead of `Result<SomeDto>`. `Unit` is built into MediatR and semantically means "no return value".
+
+Your Handler signature must match accordingly:
+
+```csharp
+public class LogoutCommandHandler(...)
+    : IRequestHandler<LogoutCommand, Result<Unit>>
+```
+
+> **Do not use `Result<bool>` or `Result<string>` as substitutes.** They imply meaningful data on success, but there is none. For "no return value", always use `Result<Unit>`.
 
 ---
 
-## ValidationBehavior's Role
+## 3. Error Responses: When Only msg Is Needed
 
-You don't need to manually handle validation failures—`ValidationBehavior` auto-intercepts:
+For 401, 403, 404, and 409 errors, the frontend only needs a `msg` to display a prompt. No `data`.
 
+Each has a default message, but you can also provide your own:
+
+```csharp
+// 401 Unauthorized
+return Result<UserDto>.Of401();                              // msg: "Unauthorized"
+return Result<LoginResponse>.Of401("Invalid email or password.");  // msg: custom
+
+// 403 Forbidden
+return Result<ValidatePayrollDto>.Of403();                   // msg: "Forbidden"
+return Result<ValidatePayrollDto>.Of403("User does not belong to an organization");
+
+// 404 Not Found
+return Result<RosterDetailsResponse>.Of404();                // msg: "Not found"
+return Result<RosterDetailsResponse>.Of404("Roster not found");
+
+// 409 Conflict
+return Result<EmployeeDto>.Of409();                          // msg: "Conflict"
+return Result<EmployeeDto>.Of409("Employee number E999 already exists");
 ```
-Request comes in
-   ↓
-ValidationBehavior (FluentValidation check)
-   ↓ Failed → Auto-returns Result.ValidationFailure(errors)
-   ↓ Passed
-Handler executes business logic
-   ↓
-Returns Result<T>
-   ↓
-Controller handles
+
+The frontend receives something like this (404 example):
+
+```json
+{ "code": 404, "msg": "Roster not found" }
+```
+
+Note: Even on failure paths, the generic type must match your Handler's return type (e.g., `Result<OrderDto>`) — you cannot change it.
+
+---
+
+## 4. Error Responses: With an Errors List
+
+Two scenarios include an `errors` array in `data`: **400 (input validation)** and **422 (business processing errors)**.
+
+### 422 — Errors Found During Business Processing
+
+For example, when parsing a CSV and finding issues in certain rows, you want to report each row's error to the frontend.
+
+**Simple rejection (no errors list needed):**
+
+```csharp
+return Result<UploadRosterResponse>.Of422("Could not determine week dates from roster");
+```
+
+```json
+{ "code": 422, "msg": "Could not determine week dates from roster" }
+```
+
+**With structured errors:**
+
+```csharp
+var errors = new List<Csv422Error>
+{
+    new() { RowNumber = 5, Field = "Hourly Rate", Message = "Hourly Rate must be a positive number" },
+    new() { RowNumber = 8, Field = "Employment Type", Message = "Must be one of: full-time, part-time, casual" },
+};
+return Result<ValidatePayrollDto>.Of422("CSV format validation failed", errors);
+```
+
+```json
+{
+  "code": 422,
+  "msg": "CSV format validation failed",
+  "data": {
+    "errors": [
+      { "rowNumber": 5, "field": "Hourly Rate", "message": "Hourly Rate must be a positive number" },
+      { "rowNumber": 8, "field": "Employment Type", "message": "Must be one of: full-time, part-time, casual" }
+    ]
+  }
+}
+```
+
+What each entry in `errors` looks like depends on the Error class you define (covered in Section 8).
+
+### 400 — Input Validation Failed (You Don't Write This — It's Auto-Generated)
+
+This one is special: **you don't need to write any 400-related code in the Handler.** You just write a Validator. When validation fails, the framework automatically intercepts the request and returns 400 — the Handler never executes at all.
+
+```csharp
+public class ValidatePayrollValidator : AbstractValidator<ValidatePayrollCommand>
+{
+    public ValidatePayrollValidator()
+    {
+        RuleFor(x => x.FileStream)
+            .NotNull()
+            .WithMessage("File is required")      // -> message in errors
+            .OverridePropertyName("file");         // -> field in errors
+
+        RuleFor(x => x.AwardType)
+            .NotEmpty()
+            .WithMessage("Award type is required")
+            .OverridePropertyName("awardType");
+    }
+}
+```
+
+Two key methods:
+
+- `.WithMessage("...")` — the `message` in each entry of the `errors` array
+- `.OverridePropertyName("...")` — the `field` in each entry of the `errors` array
+
+The frontend receives:
+
+```json
+{
+  "code": 400,
+  "msg": "Request validation failed",
+  "data": {
+    "errors": [
+      { "field": "file", "message": "File is required" },
+      { "field": "awardType", "message": "Award type is required" }
+    ]
+  }
+}
+```
+
+> **Summary**: Except for 400 which is handled automatically by the framework, all other Results (200, 201, 204, 401, 403, 404, 409, 422, 500) are written by you in the Handler.
+
+---
+
+## 5. Server Errors: When Infrastructure Goes Down
+
+Sometimes a Handler calls an external service (AI Agent, S3, database) and it fails. This is not the user's fault — our own infrastructure is down. Use `Of500` to return a friendly message:
+
+```csharp
+catch (OperationCanceledException) { throw; }
+catch (Exception ex)
+{
+    logger.LogError(ex, "Failed to parse file via Agent Service. File: {FileName}", request.FileName);
+    return Result<RosterDto>.Of500(
+        "Failed to parse roster file. Please try again or contact support."
+    );
+}
+```
+
+The frontend receives:
+
+```json
+{ "code": 500, "msg": "Failed to parse roster file. Please try again or contact support." }
+```
+
+Important notes:
+
+- **`catch (OperationCanceledException) { throw; }` must come before `catch (Exception)`** — otherwise client disconnections get swallowed and the user receives a 500 instead of a normal cancellation
+- Of500 is for infrastructure failures the Handler **anticipates**. Completely unexpected exceptions (NullReferenceException, etc.) should not be caught — let `GlobalExceptionHandler` handle them with a generic 500
+
+### Result\<T\> vs GlobalExceptionHandler
+
+The key distinction is **decision-making**, not status codes.
+
+**Result\<T\>** — The Handler anticipated the situation and made a conscious decision. Whether the outcome is good or bad, the Handler knows what happened, picks a status code, and writes a friendly message for the frontend. A 404 not-found is a decision, a 422 bad-data is a decision, and a 500 S3-is-down is also a decision — the Handler caught the exception, determined "this is an infrastructure problem", and deliberately returned `Of500` with a friendly message.
+
+**GlobalExceptionHandler** — Nobody made a decision; the exception bubbled all the way up and was caught at the outermost layer. Two situations end up here: completely unexpected bugs (`NullReferenceException`, etc.) that nobody caught, returning a generic 500; or the Domain layer safety net catching an invalid entity state (`InvalidDomainStateException`), which essentially means upstream code has a defect that slipped past validation, also uncaught, returning a 422.
+
+In one sentence: **Result\<T\> is the Handler saying "I know what happened", GlobalExceptionHandler is the system saying "something unexpected happened".**
+
+---
+
+## 6. Controller: One Line Does It All
+
+Controllers inherit `BaseApiController` and call `RespondResult` — that's it. **Controllers don't handle errors** — whether the Handler returns 200, 404, or 422, `BaseApiController` has already handled the JSON formatting for every case. Controllers don't manage messages; messages are set exclusively in the Handler's `Of{code}` methods.
+
+```csharp
+[Route("api/[controller]")]
+public class PayrollController : BaseApiController
+{
+    private readonly IMediator _mediator;
+
+    public PayrollController(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    [HttpPost("validation")]
+    [Authorize(Policy = "RequireManager")]
+    public async Task<IActionResult> Validate(IFormFile file, [FromForm] string awardType, ...)
+    {
+        var command = new ValidatePayrollCommand { ... };
+        var result = await _mediator.Send(command);
+        return RespondResult(result);
+    }
+}
+```
+
+The `msg` comes from the message written in `Of200` inside the Handler:
+
+```csharp
+// In the Handler:
+return Result<ValidatePayrollDto>.Of200("Payroll validation completed", dto);
+
+// In the Controller:
+return RespondResult(result);
+```
+
+```json
+{ "code": 200, "msg": "Payroll validation completed", "data": { ... } }
 ```
 
 ---
 
-## Complete Flow Example
+## 7. What a Complete Handler Looks Like
 
-**Request:** `GET /api/orders/999`
+Putting everything above together, here's a typical Handler:
 
-```
-1. Controller calls _mediator.Send(new GetOrderQuery { OrderId = 999 })
-2. ValidationBehavior validates OrderId > 0 ✓ Passed
-3. Handler executes, queries database, order == null
-4. Handler returns Result<OrderDto>.NotFound("Order 999 not found")
-5. Controller receives result:
-   - result.Type == ResultType.NotFound
-   - result.ErrorMessage == "Order 999 not found"
-   - result.Value == null
-6. Controller returns NotFound(new { message = "Order 999 not found" })
-7. Client receives 404 + JSON
+```csharp
+public class GetOrderHandler(
+    IOrderRepository orderRepository,
+    ICurrentUserService currentUser
+) : IRequestHandler<GetOrderQuery, Result<OrderDto>>
+{
+    public async Task<Result<OrderDto>> Handle(
+        GetOrderQuery query, CancellationToken cancellationToken)
+    {
+        var order = await orderRepository.GetByIdAsync(query.OrderId, cancellationToken);
+
+        if (order == null)
+            return Result<OrderDto>.Of404("Order not found");           // -> { code: 404, msg: "..." }
+
+        if (order.OrganizationId != currentUser.OrganizationId)
+            return Result<OrderDto>.Of403("Not authorized to view this order");  // -> { code: 403, msg: "..." }
+
+        var dto = new OrderDto { Id = order.Id, ... };
+        return Result<OrderDto>.Of200("Order retrieved", dto);          // -> { code: 200, msg: "...", data: { ... } }
+    }
+}
 ```
 
 ---
 
-## File Locations
+## 8. Custom Error Classes
 
-- `src/FairWorkly.Domain/Common/Result.cs` - Result<T> class
-- `src/FairWorkly.Domain/Common/IResultBase.cs` - Interface
-- `src/FairWorkly.Domain/Common/ValidationError.cs` - Validation error class
-- `src/FairWorkly.Application/Common/Behaviors/ValidationBehavior.cs` - Auto validation
+When a 422 needs to return structured errors, you create an Error class to define the fields in each entry of the `errors` array.
+
+**Naming convention**: `<Context><Code>Error`
+
+```csharp
+// Domain/Payroll/Errors/Csv422Error.cs
+public class Csv422Error
+{
+    public int RowNumber { get; init; }
+    public required string Field { get; init; }
+    public required string Message { get; init; }
+}
+```
+
+Rules:
+
+- Each Error class is standalone — no base class inheritance
+- Fields are determined by the API contract (define whatever the frontend needs)
+- Need a new code that isn't among the existing 10? Talk to Jason first — don't modify the Result class yourself
+
+---
+
+## Quick Reference
+
+| Scenario | What to Write in Handler | JSON the Frontend Receives |
+|----------|-------------------------|---------------------------|
+| Query/operation succeeded | `Of200(msg, dto)` | `{ code, msg, data: { DTO } }` |
+| Creation succeeded | `Of201(msg, dto)` | `{ code, msg, data: { DTO } }` |
+| Done, no return needed | `Of204()` | No body |
+| Unauthorized | `Of401()` or `Of401(msg)` | `{ code, msg }` |
+| Forbidden | `Of403()` or `Of403(msg)` | `{ code, msg }` |
+| Not found | `Of404()` or `Of404(msg)` | `{ code, msg }` |
+| Conflict | `Of409()` or `Of409(msg)` | `{ code, msg }` |
+| Processing error (simple) | `Of422(msg)` | `{ code, msg }` |
+| Processing error (with list) | `Of422(msg, errors)` | `{ code, msg, data: { errors } }` |
+| Infrastructure failure | `Of500(msg)` | `{ code, msg }` |
+| Input validation failed | No code needed — Validator handles it | `{ code: 400, msg, data: { errors } }` |
+
+---
+
+## Source Code Paths
+
+To dive deeper into the internals, go straight to the source code (every method and property has detailed XML comments):
+
+| File | Description |
+|------|-------------|
+| `Domain/Common/Result/Result.cs` | Result\<T\> main class, all Of{code} factory methods |
+| `Domain/Common/Result/IResultBase.cs` | Marker interface for ValidationBehavior generic constraint |
+| `Domain/Common/Result/Validation400Error.cs` | 400 error structure (used internally by ValidationBehavior) |
+| `Application/Common/Behaviors/ValidationBehavior.cs` | FluentValidation auto-interception pipeline |
+| `API/Controllers/BaseApiController.cs` | RespondResult unified response mapping |

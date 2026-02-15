@@ -6,7 +6,6 @@ from typing import Optional, List, Dict, Any
 from master_agent.config import load_config
 from .provider_base import LLMProviderBase
 from .langchain_provider import LangChainOpenAIProvider
-from .local_provider import LocalHuggingFaceProvider
 
 
 class LLMProviderFactory:
@@ -37,6 +36,7 @@ class LLMProviderFactory:
             return LangChainOpenAIProvider(model=model, api_base=api_base, temperature=temperature)
 
         if provider_type == "local":
+            from .local_provider import LocalHuggingFaceProvider
             return LocalHuggingFaceProvider(config)
 
         raise ValueError(f"Unknown provider type: {provider_type}")

@@ -2,6 +2,7 @@ using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Application.Roster.Services;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Roster.Entities;
 using FairWorkly.Domain.Roster.ValueObjects;
@@ -43,7 +44,7 @@ public class ValidateRosterHandler(
 
         if (roster == null)
         {
-            return Result<ValidateRosterResponse>.NotFound("Roster not found");
+            return Result<ValidateRosterResponse>.Of404("Roster not found");
         }
 
         var employeeNameById = roster
@@ -131,7 +132,7 @@ public class ValidateRosterHandler(
             await validationRepository.UpdateAsync(validation, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return Result<ValidateRosterResponse>.Failure("Roster validation failed.");
+            return Result<ValidateRosterResponse>.Of422("Roster validation failed.");
         }
 
         // Build response
@@ -159,6 +160,6 @@ public class ValidateRosterHandler(
             }).ToList(),
         };
 
-        return Result<ValidateRosterResponse>.Success(response);
+        return Result<ValidateRosterResponse>.Of200("Roster validation completed", response);
     }
 }

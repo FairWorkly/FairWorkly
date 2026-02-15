@@ -1,6 +1,7 @@
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -27,7 +28,7 @@ public class ForgotPasswordCommandHandler(
         if (user == null)
         {
             logger.LogInformation("Forgot password requested for unknown email: {Email}", email);
-            return Result<bool>.Success(true);
+            return Result<bool>.Of200("Password reset requested", true);
         }
 
         var token = secretHasher.GenerateToken(32);
@@ -69,6 +70,6 @@ public class ForgotPasswordCommandHandler(
             logger.LogInformation("Password reset link generated for {Email}", email);
         }
 
-        return Result<bool>.Success(true);
+        return Result<bool>.Of200("Password reset requested", true);
     }
 }

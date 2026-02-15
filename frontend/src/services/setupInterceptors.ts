@@ -54,7 +54,13 @@ export function setupInterceptors(store: StoreLike) {
   });
 
   httpClient.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      // Auto-unwrap backend's { code, msg, data } envelope
+      if (response.data && typeof response.data === 'object' && 'code' in response.data && 'data' in response.data) {
+        response.data = response.data.data;
+      }
+      return response;
+    },
     async (error: AxiosError) => {
       const originalConfig = error.config as
         | (AxiosRequestConfig & { _retry?: boolean })
@@ -102,8 +108,9 @@ export function setupInterceptors(store: StoreLike) {
 
       try {
         const refreshResponse = await refreshClient.post("/auth/refresh");
+        const refreshData = refreshResponse.data?.data ?? refreshResponse.data;
         const accessToken =
-          refreshResponse.data?.accessToken ?? refreshResponse.data?.token;
+          refreshData?.accessToken ?? refreshData?.token;
 
         if (!accessToken) {
           throw new Error("Refresh succeeded without access token");
@@ -112,7 +119,7 @@ export function setupInterceptors(store: StoreLike) {
         const meResponse = await refreshClient.get("/auth/me", {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
-        const u = meResponse.data;
+        const u = meResponse.data?.data ?? meResponse.data;
         const role = typeof u?.role === "string" ? u.role.toLowerCase() : undefined;
         if (!u?.id || !u?.email || !role) {
           throw new Error("/auth/me returned incomplete user data");

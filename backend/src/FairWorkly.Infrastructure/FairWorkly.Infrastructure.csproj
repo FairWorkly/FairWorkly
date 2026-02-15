@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FairWorkly.Domain\FairWorkly.Domain.csproj" />
     <ProjectReference Include="..\FairWorkly.Application\FairWorkly.Application.csproj" />
   </ItemGroup>
@@ -30,7 +34,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
 </Project>

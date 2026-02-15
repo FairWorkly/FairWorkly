@@ -3,6 +3,7 @@ using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Roster.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -33,19 +34,24 @@ public class UploadRosterHandler(
         CancellationToken cancellationToken
     )
     {
+        // Snapshot file bytes — both Agent Service and S3 need to read the stream,
+        // but HttpClient disposes the stream after sending, so each consumer
+        // gets its own MemoryStream from the shared byte array.
+        byte[] fileBytes;
+        using (var buffer = new MemoryStream())
+        {
+            await request.FileStream.CopyToAsync(buffer, cancellationToken);
+            fileBytes = buffer.ToArray();
+        }
+
         // ========== Step 1: Parse file via Agent Service ==========
         ParseResponse parseResponse;
         try
         {
-            // Reset stream position in case it was read before
-            if (request.FileStream.CanSeek)
-            {
-                request.FileStream.Position = 0;
-            }
-
+            using var agentStream = new MemoryStream(fileBytes);
             var agentResponse = await aiClient.PostMultipartAsync<AgentChatResponse>(
                 "/api/agent/chat",
-                request.FileStream,
+                agentStream,
                 request.FileName,
                 request.ContentType,
                 "Parse this roster file",
@@ -55,10 +61,11 @@ public class UploadRosterHandler(
             // Extract ParseResponse from wrapper
             parseResponse = agentResponse.Result;
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to parse roster file via Agent Service. File: {FileName}", request.FileName);
-            return Result<UploadRosterResponse>.Failure(
+            return Result<UploadRosterResponse>.Of500(
                 "Failed to parse roster file. Please try again or contact support."
             );
         }
@@ -66,7 +73,7 @@ public class UploadRosterHandler(
         // Guard against unexpected response shape (e.g. Agent Service routed to wrong feature)
         if (parseResponse?.Summary == null || parseResponse.Result == null)
         {
-            return Result<UploadRosterResponse>.Failure(
+            return Result<UploadRosterResponse>.Of422(
                 "Agent Service returned an unexpected response format. Ensure the file was routed to the roster parser."
             );
         }
@@ -82,7 +89,7 @@ public class UploadRosterHandler(
                 .Select(i => $"Row {i.Row}: {i.Message}")
                 .ToList();
 
-            return Result<UploadRosterResponse>.Failure(
+            return Result<UploadRosterResponse>.Of422(
                 $"Roster file contains errors that prevent import:\n{string.Join("\n", errorMessages)}"
             );
         }
@@ -90,7 +97,7 @@ public class UploadRosterHandler(
         // ========== Step 3: Validate parsed result has data and valid dates ==========
         if (parseResponse.Result.Entries.Count == 0)
         {
-            return Result<UploadRosterResponse>.Failure(
+            return Result<UploadRosterResponse>.Of422(
                 "Roster file contains no valid shift entries"
             );
         }
@@ -98,7 +105,7 @@ public class UploadRosterHandler(
         if (!parseResponse.Result.WeekStartDate.HasValue ||
             !parseResponse.Result.WeekEndDate.HasValue)
         {
-            return Result<UploadRosterResponse>.Failure(
+            return Result<UploadRosterResponse>.Of422(
                 "Could not determine week dates from roster"
             );
         }
@@ -112,7 +119,7 @@ public class UploadRosterHandler(
         var now = DateTime.UtcNow;
         if (weekStart < now.AddYears(-2) || weekStart > now.AddYears(2))
         {
-            return Result<UploadRosterResponse>.Failure(
+            return Result<UploadRosterResponse>.Of422(
                 "Roster dates are outside acceptable range (must be within 2 years of today)"
             );
         }
@@ -121,21 +128,18 @@ public class UploadRosterHandler(
         string s3Key;
         try
         {
-            if (request.FileStream.CanSeek)
-            {
-                request.FileStream.Position = 0;
-            }
-
+            using var s3Stream = new MemoryStream(fileBytes);
             s3Key = await fileStorageService.UploadAsync(
-                request.FileStream,
+                s3Stream,
                 request.FileName,
                 cancellationToken
             );
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to upload roster file to storage. File: {FileName}", request.FileName);
-            return Result<UploadRosterResponse>.Failure(
+            return Result<UploadRosterResponse>.Of500(
                 "Failed to store roster file. Please try again or contact support."
             );
         }
@@ -145,19 +149,27 @@ public class UploadRosterHandler(
         {
             return await CreateRosterAndShifts(parseResponse, request, s3Key, weekStart, weekEnd, cancellationToken);
         }
+        catch (OperationCanceledException)
+        {
+            // Client disconnected — clean up orphaned S3 file, use CancellationToken.None
+            // since the original token is already cancelled
+            try { await fileStorageService.DeleteAsync(s3Key, CancellationToken.None); }
+            catch (Exception deleteEx)
+            {
+                logger.LogWarning(deleteEx, "Failed to delete orphaned S3 file: {S3Key}", s3Key);
+            }
+            throw;
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create roster after S3 upload. Cleaning up file: {S3Key}", s3Key);
-            try
-            {
-                await fileStorageService.DeleteAsync(s3Key, cancellationToken);
-            }
+            try { await fileStorageService.DeleteAsync(s3Key, CancellationToken.None); }
             catch (Exception deleteEx)
             {
                 logger.LogWarning(deleteEx, "Failed to delete orphaned S3 file: {S3Key}", s3Key);
             }
 
-            return Result<UploadRosterResponse>.Failure(
+            return Result<UploadRosterResponse>.Of500(
                 "Failed to save roster. Please try again or contact support."
             );
         }
@@ -349,7 +361,7 @@ public class UploadRosterHandler(
             Warnings = warnings,
         };
 
-        return Result<UploadRosterResponse>.Success(response);
+        return Result<UploadRosterResponse>.Of200("Roster uploaded successfully", response);
     }
 
     /// <summary>

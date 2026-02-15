@@ -70,3 +70,8 @@ async def chat(
         "routed_to": feature_type,
         "result": result
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("master_agent.main:app", host="127.0.0.1", port=8000, reload=True)

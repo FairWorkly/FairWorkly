@@ -1,20 +1,15 @@
-﻿using FairWorkly.Application.Common.Interfaces;
+using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Roster.Features.GetRosterDetails;
 using FairWorkly.Application.Roster.Features.UploadRoster;
 using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FairWorkly.API.Controllers.Roster;
 
-// TODO: [Refactor] Move Result-to-ActionResult mapping out of controllers.
-// Create a centralized IActionFilter or MediatR pipeline behavior that maps
-// Result<T>.ValidationFailure → ProblemDetails 400, Result<T>.NotFound → 404, etc.
-// This eliminates HandleValidationFailureAsync duplication across controllers.
-// See GitHub issue for details.
-[ApiController]
 [Route("api/[controller]")]
 [Authorize]
 public class RosterController(
@@ -22,7 +17,7 @@ public class RosterController(
     ICurrentUserService currentUser,
     IRosterRepository rosterRepository,
     IFileStorageService fileStorageService
-) : ControllerBase
+) : BaseApiController
 {
     private readonly IMediator _mediator = mediator;
     private readonly ICurrentUserService _currentUser = currentUser;
@@ -36,19 +31,16 @@ public class RosterController(
     /// <returns>Roster ID and summary with any warnings</returns>
     [HttpPost("upload")]
     [RequestSizeLimit(52_428_800)] // 50MB
-    [ProducesResponseType(typeof(UploadRosterResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<UploadRosterResponse>> Upload([FromForm] IFormFile file)
+    public async Task<IActionResult> Upload(IFormFile file)
     {
-        if (!Guid.TryParse(_currentUser.UserId, out var userId) || userId == Guid.Empty)
+        if (_currentUser.UserId is not { } userId || userId == Guid.Empty)
         {
-            return Unauthorized(new { message = "Invalid user token" });
+            return RespondResult(Result<UploadRosterResponse>.Of401("Invalid user token"));
         }
 
-        if (!Guid.TryParse(_currentUser.OrganizationId, out var organizationId) || organizationId == Guid.Empty)
+        if (_currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
         {
-            return Unauthorized(new { message = "Organization context not found in token" });
+            return RespondResult(Result<UploadRosterResponse>.Of401("Organization context not found in token"));
         }
 
         using var fileStream = file.OpenReadStream();
@@ -65,17 +57,7 @@ public class RosterController(
 
         var result = await _mediator.Send(command);
 
-        if (result.Type == ResultType.ValidationFailure)
-        {
-            return await HandleValidationFailureAsync(result);
-        }
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new { message = result.ErrorMessage });
-        }
-
-        return Ok(result.Value);
+        return RespondResult(result);
     }
 
     /// <summary>
@@ -83,14 +65,11 @@ public class RosterController(
     /// Used by the results page after roster upload.
     /// </summary>
     [HttpGet("{rosterId}")]
-    [ProducesResponseType(typeof(RosterDetailsResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<RosterDetailsResponse>> GetDetails(Guid rosterId)
+    public async Task<IActionResult> GetDetails(Guid rosterId)
     {
-        if (!Guid.TryParse(_currentUser.OrganizationId, out var organizationId) || organizationId == Guid.Empty)
+        if (_currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
         {
-            return Unauthorized(new { message = "Organization context not found in token" });
+            return RespondResult(Result<RosterDetailsResponse>.Of401("Organization context not found in token"));
         }
 
         var query = new GetRosterDetailsQuery
@@ -101,12 +80,7 @@ public class RosterController(
 
         var result = await _mediator.Send(query);
 
-        if (result.IsFailure)
-        {
-            return NotFound(new { message = result.ErrorMessage });
-        }
-
-        return Ok(result.Value);
+        return RespondResult(result);
     }
 
     /// <summary>
@@ -115,14 +89,11 @@ public class RosterController(
     /// <param name="rosterId">Roster ID</param>
     /// <returns>Original Excel file</returns>
     [HttpGet("{rosterId}/download")]
-    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DownloadOriginalFile(Guid rosterId, CancellationToken ct)
     {
-        if (!Guid.TryParse(_currentUser.OrganizationId, out var organizationId) || organizationId == Guid.Empty)
+        if (_currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
         {
-            return Unauthorized(new { message = "Organization context not found in token" });
+            return RespondResult(Result<object>.Of401("Organization context not found in token"));
         }
 
         var roster = await _rosterRepository.GetByIdWithShiftsAsync(
@@ -133,12 +104,12 @@ public class RosterController(
 
         if (roster == null)
         {
-            return NotFound(new { message = "Roster not found" });
+            return RespondResult(Result<object>.Of404("Roster not found"));
         }
 
         if (string.IsNullOrWhiteSpace(roster.OriginalFileS3Key))
         {
-            return NotFound(new { message = "Original file not available for this roster" });
+            return RespondResult(Result<object>.Of404("Original file not available for this roster"));
         }
 
         var fileStream = await _fileStorageService.GetFileStreamAsync(
@@ -148,7 +119,7 @@ public class RosterController(
 
         if (fileStream == null)
         {
-            return NotFound(new { message = "File not found in storage" });
+            return RespondResult(Result<object>.Of404("File not found in storage"));
         }
 
         var fileName = roster.OriginalFileName ?? "roster.xlsx";
@@ -167,26 +138,5 @@ public class RosterController(
             ".csv" => "text/csv",
             _ => "application/octet-stream",
         };
-    }
-
-    private async Task<ActionResult> HandleValidationFailureAsync<T>(Result<T> result)
-    {
-        var errors = result.ValidationErrors?
-            .GroupBy(e => e.Field)
-            .ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray())
-            ?? new Dictionary<string, string[]>();
-
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Validation Failed",
-            Detail = "One or more validation errors occurred.",
-            Instance = HttpContext.Request.Path,
-        };
-        problemDetails.Extensions.Add("errors", errors);
-
-        Response.StatusCode = StatusCodes.Status400BadRequest;
-        await Response.WriteAsJsonAsync(problemDetails);
-        return new EmptyResult();
     }
 }

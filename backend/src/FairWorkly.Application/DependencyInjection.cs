@@ -9,7 +9,7 @@ using FairWorkly.Application.Employees.Services;
 using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Application.Payroll.Orchestrators;
 using FairWorkly.Application.Payroll.Services;
-using FairWorkly.Application.Payroll.Services.ComplianceEngine;
+using FairWorkly.Domain.Payroll.ComplianceEngine;
 using FairWorkly.Application.Roster.Orchestrators;
 using FairWorkly.Application.Roster.Services;
 using FairWorkly.Domain.Roster.Parameters;
@@ -41,10 +41,8 @@ public static class DependencyInjection
         // Register Services
         services.AddScoped<IEmployeeService, EmployeeService>();
         services.AddScoped<IDocumentService, DocumentService>();
-
-        // Register Payroll Services
-        services.AddScoped<ICsvParserService, CsvParserService>();
-        services.AddScoped<IEmployeeSyncService, EmployeeSyncService>();
+        services.AddScoped<ICsvParser, CsvParser>();
+        services.AddScoped<ICsvValidator, CsvValidator>();
 
         // Register Compliance Rules
         services.AddScoped<IComplianceRule, BaseRateRule>();

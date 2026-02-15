@@ -1,6 +1,7 @@
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
@@ -24,12 +25,12 @@ public class RefreshCommandHandler(
         var user = await userRepository.GetByRefreshTokenHashAsync(incomingHash, cancellationToken);
         if (user == null)
         {
-            return Result<RefreshResponse>.Unauthorized("Invalid refresh token.");
+            return Result<RefreshResponse>.Of401("Invalid refresh token.");
         }
 
         if (!user.IsActive)
         {
-            return Result<RefreshResponse>.Forbidden("Account is disabled.");
+            return Result<RefreshResponse>.Of403("Account is disabled.");
         }
 
         // Check expiry
@@ -38,7 +39,7 @@ public class RefreshCommandHandler(
             || user.RefreshTokenExpiresAt.Value < DateTime.UtcNow
         )
         {
-            return Result<RefreshResponse>.Unauthorized("Refresh token expired.");
+            return Result<RefreshResponse>.Of401("Refresh token expired.");
         }
 
         // Passed validation - rotate tokens
@@ -55,13 +56,11 @@ public class RefreshCommandHandler(
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<RefreshResponse>.Success(
-            new RefreshResponse
-            {
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshPlain,
-                RefreshTokenExpiration = newExpires,
-            }
-        );
+        return Result<RefreshResponse>.Of200("Token refreshed", new RefreshResponse
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshPlain,
+            RefreshTokenExpiration = newExpires,
+        });
     }
 }

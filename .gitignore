@@ -12,6 +12,7 @@
 .claude/
 CLAUDE.md
 AGENTS.md
+.playwright-mcp/
 
 # Visual Studio (Backend)
 .vs/
@@ -23,6 +24,9 @@ AGENTS.md
 # Build Output (Backend)
 [Bb]in/
 [Oo]bj/
+
+# Test Coverage Reports
+TestResults/
 
 # Backend AI Files
 .raw_materials/
