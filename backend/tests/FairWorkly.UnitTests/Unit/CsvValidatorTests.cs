@@ -12,11 +12,11 @@ namespace FairWorkly.UnitTests.Unit;
 public class CsvValidatorTests
 {
     private const string ValidHeader =
-        "Employee ID,First Name,Last Name,Pay Period Start,Pay Period End,Pay Date," +
-        "Award Type,Classification,Employment Type,Hourly Rate," +
-        "Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay," +
-        "Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay," +
-        "Gross Pay,Superannuation Paid";
+        "Employee ID,First Name,Last Name,Pay Period Start,Pay Period End,Pay Date,"
+        + "Award Type,Classification,Employment Type,Hourly Rate,"
+        + "Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,"
+        + "Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,"
+        + "Gross Pay,Superannuation Paid";
 
     private readonly CsvValidator _validator;
 
@@ -55,7 +55,11 @@ public class CsvValidatorTests
         var rows = LoadCsvFile("v1_wrong_header.csv");
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -71,11 +75,16 @@ public class CsvValidatorTests
     {
         // Arrange — 21 columns (extra column added)
         var header = ValidHeader + ",Extra";
-        var dataRow = "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85,extra";
+        var dataRow =
+            "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85,extra";
         var rows = ParseInlineCsv(header + "\n" + dataRow);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -91,11 +100,16 @@ public class CsvValidatorTests
     {
         // Arrange — 20 columns but column 2 name wrong ("Employee Name" instead of "First Name")
         var wrongHeader = ValidHeader.Replace("First Name", "Employee Name");
-        var dataRow = "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
+        var dataRow =
+            "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
         var rows = ParseInlineCsv(wrongHeader + "\n" + dataRow);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -115,7 +129,11 @@ public class CsvValidatorTests
         var rows = LoadCsvFile("v2_global_errors.csv");
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -123,27 +141,39 @@ public class CsvValidatorTests
 
         var errors = GetErrors(result.Errors);
 
-        errors.Should().Contain(e =>
-            e.RowNumber == 0 &&
-            e.Field == "Pay Period" &&
-            e.Message == "Pay Period must be the same for all rows");
+        errors
+            .Should()
+            .Contain(e =>
+                e.RowNumber == 0
+                && e.Field == "Pay Period"
+                && e.Message == "Pay Period must be the same for all rows"
+            );
 
-        errors.Should().Contain(e =>
-            e.RowNumber == 0 &&
-            e.Field == "Employee ID" &&
-            e.Message.Contains("Duplicate Employee ID"));
+        errors
+            .Should()
+            .Contain(e =>
+                e.RowNumber == 0
+                && e.Field == "Employee ID"
+                && e.Message.Contains("Duplicate Employee ID")
+            );
     }
 
     [Fact]
     public void Validate_InvalidPayPeriodFormat_ReturnsFormatError()
     {
         // Arrange — consistent Pay Period but invalid format "2026-13-01"
-        var csv = ValidHeader + "\n" +
-            "E001,John,Smith,2026-13-01,2026-13-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
+        var csv =
+            ValidHeader
+            + "\n"
+            + "E001,John,Smith,2026-13-01,2026-13-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
         var rows = ParseInlineCsv(csv);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -157,12 +187,18 @@ public class CsvValidatorTests
     public void Validate_PayPeriodStartAfterEnd_ReturnsLogicError()
     {
         // Arrange — Pay Period Start > End
-        var csv = ValidHeader + "\n" +
-            "E001,John,Smith,2026-01-07,2026-01-01,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
+        var csv =
+            ValidHeader
+            + "\n"
+            + "E001,John,Smith,2026-01-07,2026-01-01,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
         var rows = ParseInlineCsv(csv);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -179,7 +215,11 @@ public class CsvValidatorTests
         var rows = ParseInlineCsv(ValidHeader);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -194,12 +234,18 @@ public class CsvValidatorTests
     public void Validate_TooManyRows_ReturnsError()
     {
         // Arrange — header + 5001 data rows
-        var dataRow = "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
-        var csv = ValidHeader + "\n" + string.Join("\n", Enumerable.Range(1, 5001).Select(_ => dataRow));
+        var dataRow =
+            "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85";
+        var csv =
+            ValidHeader + "\n" + string.Join("\n", Enumerable.Range(1, 5001).Select(_ => dataRow));
         var rows = ParseInlineCsv(csv);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -219,7 +265,11 @@ public class CsvValidatorTests
         var rows = LoadCsvFile("v3_field_errors.csv");
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -231,35 +281,72 @@ public class CsvValidatorTests
 
         // Row 3: First Name empty + Pay Date format error
         errors.Should().Contain(e => e.RowNumber == 3 && e.Message == "First Name is required");
-        errors.Should().Contain(e => e.RowNumber == 3 && e.Message.Contains("Invalid Pay Date format"));
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 3 && e.Message.Contains("Invalid Pay Date format"));
 
         // Row 4: Award Type mismatch + Classification invalid
-        errors.Should().Contain(e => e.RowNumber == 4 && e.Message.Contains("Award Type is required"));
-        errors.Should().Contain(e => e.RowNumber == 4 && e.Message.Contains("Classification is required"));
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 4 && e.Message.Contains("Award Type is required"));
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 4 && e.Message.Contains("Classification is required"));
 
         // Row 5: Employment Type invalid + Hourly Rate parse failure
-        errors.Should().Contain(e => e.RowNumber == 5 && e.Message.Contains("Employment Type is required"));
-        errors.Should().Contain(e => e.RowNumber == 5 && e.Message == "Hourly Rate must be a positive number");
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 5 && e.Message.Contains("Employment Type is required"));
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 5 && e.Message == "Hourly Rate must be a positive number");
 
         // Row 6: Hourly Rate = 0 + Ordinary Hours = -5
-        errors.Should().Contain(e => e.RowNumber == 6 && e.Message == "Hourly Rate must be a positive number");
-        errors.Should().Contain(e => e.RowNumber == 6 && e.Message == "Ordinary Hours must be a number >= 0");
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 6 && e.Message == "Hourly Rate must be a positive number");
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 6 && e.Message == "Ordinary Hours must be a number >= 0");
 
         // Row 7: Saturday Pay conditionally required + Sunday Pay conditionally required
-        errors.Should().Contain(e => e.RowNumber == 7 && e.Message == "Saturday Pay is required when Saturday Hours > 0");
-        errors.Should().Contain(e => e.RowNumber == 7 && e.Message == "Sunday Pay is required when Sunday Hours > 0");
+        errors
+            .Should()
+            .Contain(e =>
+                e.RowNumber == 7 && e.Message == "Saturday Pay is required when Saturday Hours > 0"
+            );
+        errors
+            .Should()
+            .Contain(e =>
+                e.RowNumber == 7 && e.Message == "Sunday Pay is required when Sunday Hours > 0"
+            );
 
         // Row 8: Ordinary Pay parse failure + Public Holiday Pay conditionally required
-        errors.Should().Contain(e => e.RowNumber == 8 && e.Message == "Ordinary Pay must be a number");
-        errors.Should().Contain(e => e.RowNumber == 8 && e.Message == "Public Holiday Pay is required when Public Holiday Hours > 0");
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 8 && e.Message == "Ordinary Pay must be a number");
+        errors
+            .Should()
+            .Contain(e =>
+                e.RowNumber == 8
+                && e.Message == "Public Holiday Pay is required when Public Holiday Hours > 0"
+            );
 
         // Row 9: Gross Pay parse failure + Super parse failure
-        errors.Should().Contain(e => e.RowNumber == 9 && e.Message == "Gross Pay must be a number");
-        errors.Should().Contain(e => e.RowNumber == 9 && e.Message == "Superannuation Paid must be a number");
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 9 && e.Message == "Gross Pay must be a number");
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 9 && e.Message == "Superannuation Paid must be a number");
 
         // Row 10: Saturday Hours negative + Sunday Hours non-numeric
-        errors.Should().Contain(e => e.RowNumber == 10 && e.Message == "Saturday Hours must be a number >= 0");
-        errors.Should().Contain(e => e.RowNumber == 10 && e.Message == "Sunday Hours must be a number >= 0");
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 10 && e.Message == "Saturday Hours must be a number >= 0");
+        errors
+            .Should()
+            .Contain(e => e.RowNumber == 10 && e.Message == "Sunday Hours must be a number >= 0");
 
         // 18 errors total (9 rows × 2 errors/row)
         errors.Should().HaveCount(18);
@@ -271,12 +358,18 @@ public class CsvValidatorTests
     public void Validate_OptionalPayInvalidWhenHoursZero_ReturnsError()
     {
         // Arrange — Saturday Hours = 0, Saturday Pay = "abc" (non-numeric)
-        var csv = ValidHeader + "\n" +
-            "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,abc,0,,0,,1032.08,123.85";
+        var csv =
+            ValidHeader
+            + "\n"
+            + "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,abc,0,,0,,1032.08,123.85";
         var rows = ParseInlineCsv(csv);
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -296,7 +389,11 @@ public class CsvValidatorTests
         var rows = LoadCsvFile("v4_happy_path.csv");
 
         // Act
-        var result = _validator.Validate(rows, AwardType.GeneralRetailIndustryAward2020, CancellationToken.None);
+        var result = _validator.Validate(
+            rows,
+            AwardType.GeneralRetailIndustryAward2020,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.Should().BeTrue();

@@ -45,7 +45,8 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
 
         return configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException(
-                "No database connection string configured. Set FAIRWORKLY_TEST_DB_CONNECTION or configure appsettings.json");
+                "No database connection string configured. Set FAIRWORKLY_TEST_DB_CONNECTION or configure appsettings.json"
+            );
     }
 
     private FairWorklyDbContext _dbContext = null!;
@@ -86,7 +87,7 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
             new MealBreakRule(parametersProvider),
             new RestPeriodRule(parametersProvider),
             new WeeklyHoursLimitRule(parametersProvider),
-            new ConsecutiveDaysRule(parametersProvider)
+            new ConsecutiveDaysRule(parametersProvider),
         };
         var complianceEngine = new RosterComplianceEngine(rules);
 
@@ -272,8 +273,8 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
             RosterId = _testRosterId,
             EmployeeId = employeeId,
             Date = date,
-            StartTime = new TimeSpan(9, 0, 0),  // 09:00
-            EndTime = new TimeSpan(17, 0, 0),   // 17:00
+            StartTime = new TimeSpan(9, 0, 0), // 09:00
+            EndTime = new TimeSpan(17, 0, 0), // 17:00
             HasMealBreak = true,
             MealBreakDuration = 30,
             HasRestBreaks = false,
@@ -291,7 +292,7 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
             EmployeeId = employeeId,
             Date = date,
             StartTime = new TimeSpan(10, 0, 0), // 10:00
-            EndTime = new TimeSpan(12, 0, 0),   // 12:00
+            EndTime = new TimeSpan(12, 0, 0), // 12:00
             HasMealBreak = false,
             HasRestBreaks = false,
         };
@@ -307,8 +308,8 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
             RosterId = _testRosterId,
             EmployeeId = employeeId,
             Date = date,
-            StartTime = new TimeSpan(9, 0, 0),  // 09:00
-            EndTime = new TimeSpan(15, 0, 0),   // 15:00
+            StartTime = new TimeSpan(9, 0, 0), // 09:00
+            EndTime = new TimeSpan(15, 0, 0), // 15:00
             HasMealBreak = false,
             HasRestBreaks = false,
         };
@@ -328,7 +329,7 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
         var command = new ValidateRosterCommand
         {
             RosterId = _testRosterId,
-            OrganizationId = _testOrganizationId
+            OrganizationId = _testOrganizationId,
         };
 
         // Act
@@ -351,14 +352,14 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
         var weekStart = new DateTime(2026, 2, 2, 0, 0, 0, DateTimeKind.Utc);
         await AddShiftsAsync(
             CreateCompliantShift(_testEmployeeFullTimeId, weekStart),
-            CreateShortShift(_testEmployeePartTimeId, weekStart.AddDays(1)),     // Violation: < 3 hours
-            CreateNoBreakShift(_testEmployeeFullTimeId, weekStart.AddDays(2))    // Violation: no meal break
+            CreateShortShift(_testEmployeePartTimeId, weekStart.AddDays(1)), // Violation: < 3 hours
+            CreateNoBreakShift(_testEmployeeFullTimeId, weekStart.AddDays(2)) // Violation: no meal break
         );
 
         var command = new ValidateRosterCommand
         {
             RosterId = _testRosterId,
-            OrganizationId = _testOrganizationId
+            OrganizationId = _testOrganizationId,
         };
 
         // Act
@@ -384,7 +385,7 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
         var command = new ValidateRosterCommand
         {
             RosterId = Guid.NewGuid(), // Non-existent roster
-            OrganizationId = _testOrganizationId
+            OrganizationId = _testOrganizationId,
         };
 
         // Act
@@ -408,7 +409,7 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
         var command = new ValidateRosterCommand
         {
             RosterId = _testRosterId,
-            OrganizationId = _testOrganizationId
+            OrganizationId = _testOrganizationId,
         };
 
         // Act
@@ -421,8 +422,9 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
         // Assert - verify database persistence
         _dbContext.ChangeTracker.Clear();
 
-        var dbValidation = await _dbContext.RosterValidations
-            .FirstOrDefaultAsync(v => v.Id == validationId);
+        var dbValidation = await _dbContext.RosterValidations.FirstOrDefaultAsync(v =>
+            v.Id == validationId
+        );
         dbValidation.Should().NotBeNull();
         dbValidation!.RosterId.Should().Be(_testRosterId);
         dbValidation.OrganizationId.Should().Be(_testOrganizationId);
@@ -430,14 +432,14 @@ public class RosterValidationIntegrationTests : IAsyncLifetime
         dbValidation.CompletedAt.Should().NotBeNull();
 
         // Use Count to avoid AffectedDateSet value conversion issue with NULL columns
-        var issueCount = await _dbContext.RosterIssues
-            .Where(i => i.RosterValidationId == validationId)
+        var issueCount = await _dbContext
+            .RosterIssues.Where(i => i.RosterValidationId == validationId)
             .CountAsync();
         issueCount.Should().BeGreaterThan(0);
 
         // Verify issues belong to correct organization using projection
-        var issueOrgIds = await _dbContext.RosterIssues
-            .Where(i => i.RosterValidationId == validationId)
+        var issueOrgIds = await _dbContext
+            .RosterIssues.Where(i => i.RosterValidationId == validationId)
             .Select(i => i.OrganizationId)
             .ToListAsync();
         issueOrgIds.Should().AllSatisfy(orgId => orgId.Should().Be(_testOrganizationId));

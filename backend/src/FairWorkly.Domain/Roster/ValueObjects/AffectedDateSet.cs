@@ -138,4 +138,3 @@ public readonly record struct AffectedDateSet
         );
     }
 }
-

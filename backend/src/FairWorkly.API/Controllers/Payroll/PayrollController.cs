@@ -25,7 +25,8 @@ public class PayrollController : BaseApiController
         [FromForm] bool enableBaseRateCheck = true,
         [FromForm] bool enablePenaltyCheck = true,
         [FromForm] bool enableCasualLoadingCheck = true,
-        [FromForm] bool enableSuperCheck = true)
+        [FromForm] bool enableSuperCheck = true
+    )
     {
         var fileStream = file.OpenReadStream();
 

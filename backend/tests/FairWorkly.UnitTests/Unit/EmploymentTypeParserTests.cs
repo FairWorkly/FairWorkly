@@ -17,7 +17,10 @@ public class EmploymentTypeParserTests
     [InlineData("ft", EmploymentType.FullTime)]
     [InlineData("pt", EmploymentType.PartTime)]
     [InlineData("cas", EmploymentType.Casual)]
-    public void TryParse_ValidInput_ReturnsTrueWithCorrectType(string input, EmploymentType expected)
+    public void TryParse_ValidInput_ReturnsTrueWithCorrectType(
+        string input,
+        EmploymentType expected
+    )
     {
         // Act
         var success = EmploymentTypeParser.TryParse(input, out var result);

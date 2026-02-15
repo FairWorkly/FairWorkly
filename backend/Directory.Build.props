@@ -1,0 +1,11 @@
+<Project>
+  <Target Name="InstallPreCommitHook"
+          BeforeTargets="Build"
+          Condition="Exists('$(MSBuildThisFileDirectory)..\\.git\\hooks')">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)scripts\pre-commit"
+          DestinationFolder="$(MSBuildThisFileDirectory)..\\.git\\hooks\"
+          SkipUnchangedFiles="true" />
+    <Exec Command="chmod +x '$(MSBuildThisFileDirectory)..\\.git\\hooks\\pre-commit'"
+          Condition="$([MSBuild]::IsOSPlatform('Linux')) Or $([MSBuild]::IsOSPlatform('OSX'))" />
+  </Target>
+</Project>

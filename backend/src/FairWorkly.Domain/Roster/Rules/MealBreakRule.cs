@@ -40,8 +40,7 @@ public class MealBreakRule(IRosterRuleParametersProvider parametersProvider) : I
                         EmployeeId = shift.EmployeeId,
                         CheckType = CheckType,
                         Severity = IssueSeverity.Error,
-                        Description =
-                            $"No meal break provided for {shift.Duration:F2} hour shift",
+                        Description = $"No meal break provided for {shift.Duration:F2} hour shift",
                         ExpectedValue = requiredBreak,
                         ActualValue = 0,
                         AffectedDates = AffectedDateSet.FromDates([shift.Date]),

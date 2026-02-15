@@ -1,9 +1,9 @@
-using FairWorkly.Domain.Roster.Rules;
-using FairWorkly.Domain.Roster.Parameters;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Employees.Entities;
 using FairWorkly.Domain.Roster.Entities;
 using FairWorkly.Domain.Roster.Enums;
+using FairWorkly.Domain.Roster.Parameters;
+using FairWorkly.Domain.Roster.Rules;
 using FluentAssertions;
 
 namespace FairWorkly.UnitTests.Unit;
@@ -89,9 +89,9 @@ public class RestPeriodRuleTests
 
         var shifts = new List<Shift>
         {
-            CreateShiftForEmployee(employee, new DateTime(2026, 1, 6), 8, 16),  // Day 1: 8am-4pm
-            CreateShiftForEmployee(employee, new DateTime(2026, 1, 7), 9, 17),  // Day 2: 9am-5pm (17hr rest - OK)
-            CreateShiftForEmployee(employee, new DateTime(2026, 1, 7), 22, 6),  // Day 2 night: 10pm-6am (5hr rest - ISSUE)
+            CreateShiftForEmployee(employee, new DateTime(2026, 1, 6), 8, 16), // Day 1: 8am-4pm
+            CreateShiftForEmployee(employee, new DateTime(2026, 1, 7), 9, 17), // Day 2: 9am-5pm (17hr rest - OK)
+            CreateShiftForEmployee(employee, new DateTime(2026, 1, 7), 22, 6), // Day 2 night: 10pm-6am (5hr rest - ISSUE)
         };
 
         var issues = _rule.Evaluate(shifts, _validationId);
@@ -190,7 +190,9 @@ public class RestPeriodRuleTests
         var firstShiftEnd = new TimeSpan(16, 0, 0);
 
         var firstShiftEndDateTime = firstShiftDate.Add(firstShiftEnd);
-        var secondShiftStartDateTime = firstShiftEndDateTime.AddHours(restHours).AddMinutes(restMinutes);
+        var secondShiftStartDateTime = firstShiftEndDateTime
+            .AddHours(restHours)
+            .AddMinutes(restMinutes);
 
         return new List<Shift>
         {
@@ -291,7 +293,12 @@ public class RestPeriodRuleTests
         };
     }
 
-    private static Shift CreateShiftForEmployee(Employee employee, DateTime date, int startHour, int endHour)
+    private static Shift CreateShiftForEmployee(
+        Employee employee,
+        DateTime date,
+        int startHour,
+        int endHour
+    )
     {
         return new Shift
         {

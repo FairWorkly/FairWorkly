@@ -68,24 +68,21 @@ public class Result<T> : IResultBase
     /// <param name="message">Frontend-facing summary (e.g., "Audit completed successfully").</param>
     /// <param name="value">The DTO to return.</param>
     /// <example><code>return Result&lt;PayrollDto&gt;.Of200("Payroll validation completed", dto);</code></example>
-    public static Result<T> Of200(string message, T value) =>
-        new(200, value, message, null);
+    public static Result<T> Of200(string message, T value) => new(200, value, message, null);
 
     // ── 201 Created ─────────────────────────────────────────────────
 
     /// <summary>Creates a <b>201 Created</b> result.</summary>
     /// <param name="message">Frontend-facing summary (e.g., "Employee created").</param>
     /// <param name="value">The DTO of the newly created resource.</param>
-    public static Result<T> Of201(string message, T value) =>
-        new(201, value, message, null);
+    public static Result<T> Of201(string message, T value) => new(201, value, message, null);
 
     // ── 204 No Content ──────────────────────────────────────────────
 
     /// <summary>Creates a <b>204 No Content</b> result. Typically used for delete operations.</summary>
     /// <remarks>Use with <c>Result&lt;Unit&gt;</c> since there is no response body.</remarks>
     /// <example><code>return Result&lt;Unit&gt;.Of204();</code></example>
-    public static Result<T> Of204() =>
-        new(204, default, null, null);
+    public static Result<T> Of204() => new(204, default, null, null);
 
     // ── 400 Bad Request (ValidationBehavior exclusive) ──────────────
 
@@ -115,44 +112,36 @@ public class Result<T> : IResultBase
     // ── 401 Unauthorized ────────────────────────────────────────────
 
     /// <summary>Creates a <b>401 Unauthorized</b> result with the default message "Unauthorized".</summary>
-    public static Result<T> Of401() =>
-        new(401, default, "Unauthorized", null);
+    public static Result<T> Of401() => new(401, default, "Unauthorized", null);
 
     /// <summary>Creates a <b>401 Unauthorized</b> result with a custom message.</summary>
-    public static Result<T> Of401(string message) =>
-        new(401, default, message, null);
+    public static Result<T> Of401(string message) => new(401, default, message, null);
 
     // ── 403 Forbidden ───────────────────────────────────────────────
 
     /// <summary>Creates a <b>403 Forbidden</b> result with the default message "Forbidden".</summary>
-    public static Result<T> Of403() =>
-        new(403, default, "Forbidden", null);
+    public static Result<T> Of403() => new(403, default, "Forbidden", null);
 
     /// <summary>Creates a <b>403 Forbidden</b> result with a custom message.</summary>
     /// <example><code>return Result&lt;PayrollDto&gt;.Of403("User does not belong to an organization");</code></example>
-    public static Result<T> Of403(string message) =>
-        new(403, default, message, null);
+    public static Result<T> Of403(string message) => new(403, default, message, null);
 
     // ── 404 Not Found ───────────────────────────────────────────────
 
     /// <summary>Creates a <b>404 Not Found</b> result with the default message "Not found".</summary>
-    public static Result<T> Of404() =>
-        new(404, default, "Not found", null);
+    public static Result<T> Of404() => new(404, default, "Not found", null);
 
     /// <summary>Creates a <b>404 Not Found</b> result with a custom message.</summary>
-    public static Result<T> Of404(string message) =>
-        new(404, default, message, null);
+    public static Result<T> Of404(string message) => new(404, default, message, null);
 
     // ── 409 Conflict ────────────────────────────────────────────────
 
     /// <summary>Creates a <b>409 Conflict</b> result with the default message "Conflict".</summary>
-    public static Result<T> Of409() =>
-        new(409, default, "Conflict", null);
+    public static Result<T> Of409() => new(409, default, "Conflict", null);
 
     /// <summary>Creates a <b>409 Conflict</b> result with a custom message.</summary>
     /// <example><code>return Result&lt;EmployeeDto&gt;.Of409("Employee number E999 already exists");</code></example>
-    public static Result<T> Of409(string message) =>
-        new(409, default, message, null);
+    public static Result<T> Of409(string message) => new(409, default, message, null);
 
     // ── 422 Unprocessable Entity ────────────────────────────────────
 
@@ -162,8 +151,7 @@ public class Result<T> : IResultBase
     /// </summary>
     /// <param name="message">Frontend-facing summary (e.g., "Roster validation failed.").</param>
     /// <example><code>return Result&lt;RosterDto&gt;.Of422("Roster validation failed.");</code></example>
-    public static Result<T> Of422(string message) =>
-        new(422, default, message, null);
+    public static Result<T> Of422(string message) => new(422, default, message, null);
 
     /// <summary>
     /// Creates a <b>422 Unprocessable Entity</b> result with a message and structured error list.
@@ -187,6 +175,5 @@ public class Result<T> : IResultBase
     /// </summary>
     /// <param name="message">Frontend-facing summary (e.g., "Failed to save roster. Please try again or contact support.").</param>
     /// <example><code>return Result&lt;RosterDto&gt;.Of500("Failed to save roster. Please try again or contact support.");</code></example>
-    public static Result<T> Of500(string message) =>
-        new(500, default, message, null);
+    public static Result<T> Of500(string message) => new(500, default, message, null);
 }

@@ -56,11 +56,14 @@ public class RefreshCommandHandler(
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<RefreshResponse>.Of200("Token refreshed", new RefreshResponse
-        {
-            AccessToken = newAccessToken,
-            RefreshToken = newRefreshPlain,
-            RefreshTokenExpiration = newExpires,
-        });
+        return Result<RefreshResponse>.Of200(
+            "Token refreshed",
+            new RefreshResponse
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshPlain,
+                RefreshTokenExpiration = newExpires,
+            }
+        );
     }
 }

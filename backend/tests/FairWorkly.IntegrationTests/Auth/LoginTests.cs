@@ -41,15 +41,22 @@ public class LoginTests : AuthTestsBase
         errors.GetArrayLength().Should().BeGreaterThan(0);
 
         // Collect all error fields and messages
-        var errorList = errors.EnumerateArray()
-            .Select(e => new { Field = e.GetProperty("field").GetString(), Message = e.GetProperty("message").GetString() })
+        var errorList = errors
+            .EnumerateArray()
+            .Select(e => new
+            {
+                Field = e.GetProperty("field").GetString(),
+                Message = e.GetProperty("message").GetString(),
+            })
             .ToList();
 
         // Email errors
         errorList.Should().Contain(e => e.Field == "Email" && e.Message == "Email is required.");
 
         // Password errors
-        errorList.Should().Contain(e => e.Field == "Password" && e.Message == "Password is required.");
+        errorList
+            .Should()
+            .Contain(e => e.Field == "Password" && e.Message == "Password is required.");
     }
 
     [Fact]
@@ -71,11 +78,18 @@ public class LoginTests : AuthTestsBase
         root.GetProperty("code").GetInt32().Should().Be(400);
 
         var errors = root.GetProperty("data").GetProperty("errors");
-        var errorList = errors.EnumerateArray()
-            .Select(e => new { Field = e.GetProperty("field").GetString(), Message = e.GetProperty("message").GetString() })
+        var errorList = errors
+            .EnumerateArray()
+            .Select(e => new
+            {
+                Field = e.GetProperty("field").GetString(),
+                Message = e.GetProperty("message").GetString(),
+            })
             .ToList();
 
-        errorList.Should().Contain(e => e.Field == "Email" && e.Message == "A valid email is required.");
+        errorList
+            .Should()
+            .Contain(e => e.Field == "Email" && e.Message == "A valid email is required.");
     }
 
     [Fact]
@@ -97,11 +111,20 @@ public class LoginTests : AuthTestsBase
         root.GetProperty("code").GetInt32().Should().Be(400);
 
         var errors = root.GetProperty("data").GetProperty("errors");
-        var errorList = errors.EnumerateArray()
-            .Select(e => new { Field = e.GetProperty("field").GetString(), Message = e.GetProperty("message").GetString() })
+        var errorList = errors
+            .EnumerateArray()
+            .Select(e => new
+            {
+                Field = e.GetProperty("field").GetString(),
+                Message = e.GetProperty("message").GetString(),
+            })
             .ToList();
 
-        errorList.Should().Contain(e => e.Field == "Password" && e.Message == "Password must be at least 8 characters.");
+        errorList
+            .Should()
+            .Contain(e =>
+                e.Field == "Password" && e.Message == "Password must be at least 8 characters."
+            );
     }
 
     #endregion

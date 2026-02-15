@@ -2,14 +2,14 @@ using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Domain.Common;
-using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Common.Enums;
+using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Employees.Entities;
 using FairWorkly.Domain.Payroll;
 using FairWorkly.Domain.Payroll.ComplianceEngine;
-using FairWorkly.Domain.Payroll.Errors;
 using FairWorkly.Domain.Payroll.Entities;
 using FairWorkly.Domain.Payroll.Enums;
+using FairWorkly.Domain.Payroll.Errors;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -31,7 +31,8 @@ public class ValidatePayrollHandler(
 {
     public async Task<Result<ValidatePayrollDto>> Handle(
         ValidatePayrollCommand command,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         // Guard: must belong to an organization
         var organizationId = currentUserService.OrganizationId;
@@ -40,15 +41,23 @@ public class ValidatePayrollHandler(
 
         var orgId = organizationId.Value;
 
-        logger.LogInformation("Starting payroll validation: file={FileName}, size={FileSize}",
-            command.FileName, command.FileSize);
+        logger.LogInformation(
+            "Starting payroll validation: file={FileName}, size={FileSize}",
+            command.FileName,
+            command.FileSize
+        );
 
         // Parse AwardType enum from command string
         if (!Enum.TryParse<AwardType>(command.AwardType, out var awardType))
         {
             var errors = new List<Csv422Error>
             {
-                new() { RowNumber = 0, Field = "AwardType", Message = $"Invalid award type: {command.AwardType}" }
+                new()
+                {
+                    RowNumber = 0,
+                    Field = "AwardType",
+                    Message = $"Invalid award type: {command.AwardType}",
+                },
             };
             return Result<ValidatePayrollDto>.Of422("Invalid award type", errors);
         }
@@ -68,14 +77,20 @@ public class ValidatePayrollHandler(
         if (!parseResult.IsSuccess)
         {
             logger.LogWarning("CSV parsing failed: {Error}", parseResult.Message);
-            return Result<ValidatePayrollDto>.Of422("CSV file parsing failed",
-                (List<Csv422Error>)parseResult.Errors!);
+            return Result<ValidatePayrollDto>.Of422(
+                "CSV file parsing failed",
+                (List<Csv422Error>)parseResult.Errors!
+            );
         }
 
         logger.LogInformation("CSV parsed successfully: {RowCount} rows", parseResult.Value!.Count);
 
         // Layer 3: CsvValidator
-        var validateResult = csvValidator.Validate(parseResult.Value!, awardType, cancellationToken);
+        var validateResult = csvValidator.Validate(
+            parseResult.Value!,
+            awardType,
+            cancellationToken
+        );
         if (!validateResult.IsSuccess)
         {
             var csvErrors = (List<Csv422Error>)validateResult.Errors!;
@@ -89,7 +104,10 @@ public class ValidatePayrollHandler(
         // ═══ Stage A: Employee Upsert ═══
         var employeeNumbers = validatedRows.Select(r => r.EmployeeId).Distinct().ToList();
         var existingEmployees = await employeeRepository.GetByEmployeeNumbersAsync(
-            orgId, employeeNumbers, cancellationToken);
+            orgId,
+            employeeNumbers,
+            cancellationToken
+        );
         var employeeMap = existingEmployees.ToDictionary(e => e.EmployeeNumber!, e => e);
 
         foreach (var row in validatedRows)
@@ -178,12 +196,18 @@ public class ValidatePayrollHandler(
 
         // ═══ Stage D: Run ComplianceRules ═══
         var enabledCategories = new HashSet<IssueCategory>();
-        if (command.EnableBaseRateCheck) enabledCategories.Add(IssueCategory.BaseRate);
-        if (command.EnablePenaltyCheck) enabledCategories.Add(IssueCategory.PenaltyRate);
-        if (command.EnableCasualLoadingCheck) enabledCategories.Add(IssueCategory.CasualLoading);
-        if (command.EnableSuperCheck) enabledCategories.Add(IssueCategory.Superannuation);
+        if (command.EnableBaseRateCheck)
+            enabledCategories.Add(IssueCategory.BaseRate);
+        if (command.EnablePenaltyCheck)
+            enabledCategories.Add(IssueCategory.PenaltyRate);
+        if (command.EnableCasualLoadingCheck)
+            enabledCategories.Add(IssueCategory.CasualLoading);
+        if (command.EnableSuperCheck)
+            enabledCategories.Add(IssueCategory.Superannuation);
 
-        var filteredRules = complianceRules.Where(r => enabledCategories.Contains(r.Category)).ToList();
+        var filteredRules = complianceRules
+            .Where(r => enabledCategories.Contains(r.Category))
+            .ToList();
         var allIssues = new List<PayrollIssue>();
 
         foreach (var payslip in payslips)
@@ -210,8 +234,11 @@ public class ValidatePayrollHandler(
 
         // ═══ SaveChanges ═══
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        logger.LogInformation("Payroll validation saved: validationId={ValidationId}, issues={IssueCount}",
-            validation.Id, allIssues.Count);
+        logger.LogInformation(
+            "Payroll validation saved: validationId={ValidationId}, issues={IssueCount}",
+            validation.Id,
+            allIssues.Count
+        );
 
         // ═══ Build DTO ═══
         var dto = BuildDto(validation, payslips, allIssues);
@@ -221,37 +248,41 @@ public class ValidatePayrollHandler(
     private static ValidatePayrollDto BuildDto(
         PayrollValidation validation,
         List<Payslip> payslips,
-        List<PayrollIssue> allIssues)
+        List<PayrollIssue> allIssues
+    )
     {
         var payslipMap = payslips.ToDictionary(p => p.Id);
 
         // Build issue DTOs
-        var issueDtos = allIssues.Select(issue =>
-        {
-            var payslip = payslipMap[issue.PayslipId];
-            var impactAmount = CalculateImpactAmount(issue);
-
-            return new IssueDto
+        var issueDtos = allIssues
+            .Select(issue =>
             {
-                IssueId = issue.Id,
-                CategoryType = issue.CategoryType.ToString(),
-                EmployeeName = payslip.EmployeeName,
-                EmployeeId = payslip.EmployeeNumber,
-                Severity = (int)issue.Severity,
-                ImpactAmount = impactAmount,
-                Description = issue.WarningMessage == null
-                    ? new IssueDescriptionDto
-                    {
-                        ActualValue = issue.ActualValue ?? 0,
-                        ExpectedValue = issue.ExpectedValue ?? 0,
-                        AffectedUnits = issue.AffectedUnits ?? 0,
-                        UnitType = issue.UnitType ?? "",
-                        ContextLabel = issue.ContextLabel ?? "",
-                    }
-                    : null,
-                Warning = issue.WarningMessage,
-            };
-        }).ToList();
+                var payslip = payslipMap[issue.PayslipId];
+                var impactAmount = CalculateImpactAmount(issue);
+
+                return new IssueDto
+                {
+                    IssueId = issue.Id,
+                    CategoryType = issue.CategoryType.ToString(),
+                    EmployeeName = payslip.EmployeeName,
+                    EmployeeId = payslip.EmployeeNumber,
+                    Severity = (int)issue.Severity,
+                    ImpactAmount = impactAmount,
+                    Description =
+                        issue.WarningMessage == null
+                            ? new IssueDescriptionDto
+                            {
+                                ActualValue = issue.ActualValue ?? 0,
+                                ExpectedValue = issue.ExpectedValue ?? 0,
+                                AffectedUnits = issue.AffectedUnits ?? 0,
+                                UnitType = issue.UnitType ?? "",
+                                ContextLabel = issue.ContextLabel ?? "",
+                            }
+                            : null,
+                    Warning = issue.WarningMessage,
+                };
+            })
+            .ToList();
 
         // Build category DTOs
         var categories = allIssues
@@ -262,7 +293,10 @@ public class ValidatePayrollHandler(
                 return new CategoryDto
                 {
                     Key = g.Key.ToString(),
-                    AffectedEmployeeCount = categoryIssues.Select(i => i.EmployeeId).Distinct().Count(),
+                    AffectedEmployeeCount = categoryIssues
+                        .Select(i => i.EmployeeId)
+                        .Distinct()
+                        .Count(),
                     TotalUnderpayment = categoryIssues.Sum(CalculateImpactAmount),
                 };
             })
@@ -298,7 +332,8 @@ public class ValidatePayrollHandler(
 
         var raw = issue.UnitType switch
         {
-            "Hour" => ((issue.ExpectedValue ?? 0) - (issue.ActualValue ?? 0)) * (issue.AffectedUnits ?? 0),
+            "Hour" => ((issue.ExpectedValue ?? 0) - (issue.ActualValue ?? 0))
+                * (issue.AffectedUnits ?? 0),
             "Currency" => (issue.ExpectedValue ?? 0) - (issue.ActualValue ?? 0),
             _ => 0m,
         };
@@ -311,7 +346,9 @@ public class ValidatePayrollHandler(
     {
         var parts = classification.Replace("Level ", "");
         if (!int.TryParse(parts, out var level))
-            throw new InvalidOperationException($"Unexpected classification format: {classification}");
+            throw new InvalidOperationException(
+                $"Unexpected classification format: {classification}"
+            );
         return level;
     }
 }

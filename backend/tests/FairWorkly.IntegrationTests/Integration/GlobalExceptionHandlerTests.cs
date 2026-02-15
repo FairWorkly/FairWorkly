@@ -14,7 +14,8 @@ public class GlobalExceptionHandlerTests : IntegrationTestBase
 {
     private static readonly string CsvDir = Path.Combine("TestData", "Csv", "Payroll");
 
-    public GlobalExceptionHandlerTests(CustomWebApplicationFactory factory) : base(factory) { }
+    public GlobalExceptionHandlerTests(CustomWebApplicationFactory factory)
+        : base(factory) { }
 
     [Fact]
     public async Task Post_SaveChangesThrows_Returns500ProblemDetails()
@@ -23,17 +24,18 @@ public class GlobalExceptionHandlerTests : IntegrationTestBase
         var token = await GetAccessTokenAsync();
 
         // Create isolated client with IUnitOfWork that throws
-        var client = Factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
+        var client = Factory
+            .WithWebHostBuilder(builder =>
             {
-                services.RemoveAll<IUnitOfWork>();
-                services.AddScoped<IUnitOfWork, ThrowingUnitOfWork>();
-            });
-        }).CreateClient();
+                builder.ConfigureServices(services =>
+                {
+                    services.RemoveAll<IUnitOfWork>();
+                    services.AddScoped<IUnitOfWork, ThrowingUnitOfWork>();
+                });
+            })
+            .CreateClient();
 
-        client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Send valid request that passes Layer 1-3
         var csvPath = Path.Combine(CsvDir, "compliant.csv");
@@ -52,12 +54,15 @@ public class GlobalExceptionHandlerTests : IntegrationTestBase
         var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
         json.GetProperty("status").GetInt32().Should().Be(500);
         json.GetProperty("title").GetString().Should().Be("Internal Server Error");
-        json.GetProperty("detail").GetString().Should().Be("An error occurred while processing your request.");
+        json.GetProperty("detail")
+            .GetString()
+            .Should()
+            .Be("An error occurred while processing your request.");
     }
 
     private class ThrowingUnitOfWork : IUnitOfWork
     {
-        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-            => throw new DbUpdateException("Simulated database failure");
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
+            throw new DbUpdateException("Simulated database failure");
     }
 }

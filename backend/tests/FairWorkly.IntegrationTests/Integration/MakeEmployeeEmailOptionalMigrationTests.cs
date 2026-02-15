@@ -33,7 +33,9 @@ public class MakeEmployeeEmailOptionalMigrationTests : IAsyncLifetime
     private static string GetConnectionString()
     {
         // Priority 1: Environment variable
-        var envConnectionString = Environment.GetEnvironmentVariable("FAIRWORKLY_TEST_DB_CONNECTION");
+        var envConnectionString = Environment.GetEnvironmentVariable(
+            "FAIRWORKLY_TEST_DB_CONNECTION"
+        );
         if (!string.IsNullOrWhiteSpace(envConnectionString))
         {
             return envConnectionString;
@@ -47,7 +49,8 @@ public class MakeEmployeeEmailOptionalMigrationTests : IAsyncLifetime
 
         return configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException(
-                "No database connection string configured. Set FAIRWORKLY_TEST_DB_CONNECTION or configure appsettings.json");
+                "No database connection string configured. Set FAIRWORKLY_TEST_DB_CONNECTION or configure appsettings.json"
+            );
     }
 
     public async Task InitializeAsync()
@@ -102,11 +105,12 @@ public class MakeEmployeeEmailOptionalMigrationTests : IAsyncLifetime
     {
         try
         {
-            await _dbContext.Employees
-                .Where(e => e.OrganizationId == _testOrganizationId)
+            await _dbContext
+                .Employees.Where(e => e.OrganizationId == _testOrganizationId)
                 .ExecuteDeleteAsync();
 
-            await _dbContext.Set<Organization>()
+            await _dbContext
+                .Set<Organization>()
                 .Where(o => o.Id == _testOrganizationId)
                 .ExecuteDeleteAsync();
         }
@@ -132,7 +136,8 @@ public class MakeEmployeeEmailOptionalMigrationTests : IAsyncLifetime
             FROM information_schema.columns
             WHERE table_name = 'employees' AND column_name = 'email'
             """,
-            connection);
+            connection
+        );
 
         var result = await cmd.ExecuteScalarAsync();
 
@@ -157,7 +162,8 @@ public class MakeEmployeeEmailOptionalMigrationTests : IAsyncLifetime
             JOIN pg_class c ON c.oid = i.indexrelid
             WHERE c.relname = 'ix_employees_organization_id_email'
             """,
-            connection);
+            connection
+        );
 
         var indexDef = await cmd.ExecuteScalarAsync() as string;
 
@@ -209,31 +215,36 @@ public class MakeEmployeeEmailOptionalMigrationTests : IAsyncLifetime
     public async Task MultipleEmployees_CanHave_NullEmail()
     {
         // Arrange
-        var employees = Enumerable.Range(1, 3).Select(i => new Employee
-        {
-            Id = Guid.NewGuid(),
-            OrganizationId = _testOrganizationId,
-            EmployeeNumber = $"MULTI_NULL_{i:D3}",
-            FirstName = $"Test{i}",
-            LastName = "Employee",
-            Email = null, // All have NULL email
-            JobTitle = "Staff",
-            AwardType = AwardType.GeneralRetailIndustryAward2020,
-            AwardLevelNumber = 1,
-            EmploymentType = EmploymentType.FullTime,
-            StartDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            IsActive = true,
-        }).ToList();
+        var employees = Enumerable
+            .Range(1, 3)
+            .Select(i => new Employee
+            {
+                Id = Guid.NewGuid(),
+                OrganizationId = _testOrganizationId,
+                EmployeeNumber = $"MULTI_NULL_{i:D3}",
+                FirstName = $"Test{i}",
+                LastName = "Employee",
+                Email = null, // All have NULL email
+                JobTitle = "Staff",
+                AwardType = AwardType.GeneralRetailIndustryAward2020,
+                AwardLevelNumber = 1,
+                EmploymentType = EmploymentType.FullTime,
+                StartDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+                IsActive = true,
+            })
+            .ToList();
 
         // Act
         _dbContext.Employees.AddRange(employees);
         var saveAction = async () => await _dbContext.SaveChangesAsync();
 
         // Assert
-        await saveAction.Should().NotThrowAsync("multiple NULL emails should be allowed due to partial index");
+        await saveAction
+            .Should()
+            .NotThrowAsync("multiple NULL emails should be allowed due to partial index");
 
-        var count = await _dbContext.Employees
-            .Where(e => e.OrganizationId == _testOrganizationId && e.Email == null)
+        var count = await _dbContext
+            .Employees.Where(e => e.OrganizationId == _testOrganizationId && e.Email == null)
             .CountAsync();
         count.Should().BeGreaterThanOrEqualTo(3);
     }
@@ -288,8 +299,11 @@ public class MakeEmployeeEmailOptionalMigrationTests : IAsyncLifetime
         var saveAction = async () => await _dbContext.SaveChangesAsync();
 
         // Assert
-        await saveAction.Should().ThrowAsync<DbUpdateException>(
-            "duplicate non-NULL email in same organization should be rejected");
+        await saveAction
+            .Should()
+            .ThrowAsync<DbUpdateException>(
+                "duplicate non-NULL email in same organization should be rejected"
+            );
     }
 
     /// <summary>
@@ -363,16 +377,18 @@ public class MakeEmployeeEmailOptionalMigrationTests : IAsyncLifetime
             var saveAction = async () => await _dbContext.SaveChangesAsync();
 
             // Assert
-            await saveAction.Should().NotThrowAsync(
-                "same email in different organizations should be allowed");
+            await saveAction
+                .Should()
+                .NotThrowAsync("same email in different organizations should be allowed");
         }
         finally
         {
             // Cleanup second org
-            await _dbContext.Employees
-                .Where(e => e.OrganizationId == secondOrgId)
+            await _dbContext
+                .Employees.Where(e => e.OrganizationId == secondOrgId)
                 .ExecuteDeleteAsync();
-            await _dbContext.Set<Organization>()
+            await _dbContext
+                .Set<Organization>()
                 .Where(o => o.Id == secondOrgId)
                 .ExecuteDeleteAsync();
         }

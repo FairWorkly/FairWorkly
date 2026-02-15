@@ -61,10 +61,17 @@ public class UploadRosterHandler(
             // Extract ParseResponse from wrapper
             parseResponse = agentResponse.Result;
         }
-        catch (OperationCanceledException) { throw; }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to parse roster file via Agent Service. File: {FileName}", request.FileName);
+            logger.LogError(
+                ex,
+                "Failed to parse roster file via Agent Service. File: {FileName}",
+                request.FileName
+            );
             return Result<UploadRosterResponse>.Of500(
                 "Failed to parse roster file. Please try again or contact support."
             );
@@ -84,8 +91,8 @@ public class UploadRosterHandler(
         // ========== Step 2: Check for blocking errors ==========
         if (parseResponse.Summary.Status == "blocking" || parseResponse.Summary.ErrorCount > 0)
         {
-            var errorMessages = parseResponse.Issues
-                .Where(i => i.Severity == "error")
+            var errorMessages = parseResponse
+                .Issues.Where(i => i.Severity == "error")
                 .Select(i => $"Row {i.Row}: {i.Message}")
                 .ToList();
 
@@ -102,18 +109,24 @@ public class UploadRosterHandler(
             );
         }
 
-        if (!parseResponse.Result.WeekStartDate.HasValue ||
-            !parseResponse.Result.WeekEndDate.HasValue)
+        if (
+            !parseResponse.Result.WeekStartDate.HasValue
+            || !parseResponse.Result.WeekEndDate.HasValue
+        )
         {
-            return Result<UploadRosterResponse>.Of422(
-                "Could not determine week dates from roster"
-            );
+            return Result<UploadRosterResponse>.Of422("Could not determine week dates from roster");
         }
 
         // Agent Service returns dates as ISO strings which deserialize as DateTimeKind.Unspecified.
         // PostgreSQL timestamp with time zone requires UTC.
-        var weekStart = DateTime.SpecifyKind(parseResponse.Result.WeekStartDate.Value, DateTimeKind.Utc);
-        var weekEnd = DateTime.SpecifyKind(parseResponse.Result.WeekEndDate.Value, DateTimeKind.Utc);
+        var weekStart = DateTime.SpecifyKind(
+            parseResponse.Result.WeekStartDate.Value,
+            DateTimeKind.Utc
+        );
+        var weekEnd = DateTime.SpecifyKind(
+            parseResponse.Result.WeekEndDate.Value,
+            DateTimeKind.Utc
+        );
 
         // Validate dates are reasonable (within 2 years of now)
         var now = DateTime.UtcNow;
@@ -135,10 +148,17 @@ public class UploadRosterHandler(
                 cancellationToken
             );
         }
-        catch (OperationCanceledException) { throw; }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to upload roster file to storage. File: {FileName}", request.FileName);
+            logger.LogError(
+                ex,
+                "Failed to upload roster file to storage. File: {FileName}",
+                request.FileName
+            );
             return Result<UploadRosterResponse>.Of500(
                 "Failed to store roster file. Please try again or contact support."
             );
@@ -147,13 +167,23 @@ public class UploadRosterHandler(
         // ========== Steps 5–8 wrapped to clean up S3 on failure ==========
         try
         {
-            return await CreateRosterAndShifts(parseResponse, request, s3Key, weekStart, weekEnd, cancellationToken);
+            return await CreateRosterAndShifts(
+                parseResponse,
+                request,
+                s3Key,
+                weekStart,
+                weekEnd,
+                cancellationToken
+            );
         }
         catch (OperationCanceledException)
         {
             // Client disconnected — clean up orphaned S3 file, use CancellationToken.None
             // since the original token is already cancelled
-            try { await fileStorageService.DeleteAsync(s3Key, CancellationToken.None); }
+            try
+            {
+                await fileStorageService.DeleteAsync(s3Key, CancellationToken.None);
+            }
             catch (Exception deleteEx)
             {
                 logger.LogWarning(deleteEx, "Failed to delete orphaned S3 file: {S3Key}", s3Key);
@@ -162,8 +192,15 @@ public class UploadRosterHandler(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to create roster after S3 upload. Cleaning up file: {S3Key}", s3Key);
-            try { await fileStorageService.DeleteAsync(s3Key, CancellationToken.None); }
+            logger.LogError(
+                ex,
+                "Failed to create roster after S3 upload. Cleaning up file: {S3Key}",
+                s3Key
+            );
+            try
+            {
+                await fileStorageService.DeleteAsync(s3Key, CancellationToken.None);
+            }
             catch (Exception deleteEx)
             {
                 logger.LogWarning(deleteEx, "Failed to delete orphaned S3 file: {S3Key}", s3Key);
@@ -185,14 +222,14 @@ public class UploadRosterHandler(
     )
     {
         // ========== Step 5: Bulk lookup employees by employee_number and email ==========
-        var employeeNumbers = parseResponse.Result.Entries
-            .Where(e => !string.IsNullOrWhiteSpace(e.EmployeeNumber))
+        var employeeNumbers = parseResponse
+            .Result.Entries.Where(e => !string.IsNullOrWhiteSpace(e.EmployeeNumber))
             .Select(e => e.EmployeeNumber!)
             .Distinct()
             .ToList();
 
-        var emails = parseResponse.Result.Entries
-            .Where(e => !string.IsNullOrWhiteSpace(e.EmployeeEmail))
+        var emails = parseResponse
+            .Result.Entries.Where(e => !string.IsNullOrWhiteSpace(e.EmployeeEmail))
             .Select(e => e.EmployeeEmail!)
             .Distinct()
             .ToList();
@@ -266,21 +303,26 @@ public class UploadRosterHandler(
             Guid employeeId = Guid.Empty;
 
             // Try match by employee_number first
-            if (!string.IsNullOrWhiteSpace(entry.EmployeeNumber) &&
-                employeesByNumber.TryGetValue(entry.EmployeeNumber, out var empIdByNumber))
+            if (
+                !string.IsNullOrWhiteSpace(entry.EmployeeNumber)
+                && employeesByNumber.TryGetValue(entry.EmployeeNumber, out var empIdByNumber)
+            )
             {
                 employeeId = empIdByNumber;
             }
             // Fall back to email
-            else if (!string.IsNullOrWhiteSpace(entry.EmployeeEmail) &&
-                     employeesByEmail.TryGetValue(entry.EmployeeEmail, out var empIdByEmail))
+            else if (
+                !string.IsNullOrWhiteSpace(entry.EmployeeEmail)
+                && employeesByEmail.TryGetValue(entry.EmployeeEmail, out var empIdByEmail)
+            )
             {
                 employeeId = empIdByEmail;
             }
             else
             {
                 // No match found - skip shift creation, track for warning
-                var identifier = entry.EmployeeNumber ?? entry.EmployeeEmail ?? entry.EmployeeName ?? "Unknown";
+                var identifier =
+                    entry.EmployeeNumber ?? entry.EmployeeEmail ?? entry.EmployeeName ?? "Unknown";
                 if (!unmatchedEmployees.Contains(identifier))
                 {
                     unmatchedEmployees.Add(identifier);
@@ -324,8 +366,8 @@ public class UploadRosterHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         // ========== Step 9: Build response with warnings ==========
-        var warnings = parseResponse.Issues
-            .Where(i => i.Severity == "warning")
+        var warnings = parseResponse
+            .Issues.Where(i => i.Severity == "warning")
             .Select(i => new ParserWarning
             {
                 Code = i.Code,
@@ -340,14 +382,22 @@ public class UploadRosterHandler(
         // Add unmatched employee warnings
         if (unmatchedEmployees.Any())
         {
-            warnings.Add(new ParserWarning
-            {
-                Code = "EMPLOYEE_NOT_FOUND",
-                Message = $"{unmatchedEmployees.Count} employee(s) could not be matched to existing employees",
-                Row = 0,
-                Hint = $"Unmatched: {string.Join(", ", unmatchedEmployees.Take(5))}" +
-                       (unmatchedEmployees.Count > 5 ? $" and {unmatchedEmployees.Count - 5} more" : "")
-            });
+            warnings.Add(
+                new ParserWarning
+                {
+                    Code = "EMPLOYEE_NOT_FOUND",
+                    Message =
+                        $"{unmatchedEmployees.Count} employee(s) could not be matched to existing employees",
+                    Row = 0,
+                    Hint =
+                        $"Unmatched: {string.Join(", ", unmatchedEmployees.Take(5))}"
+                        + (
+                            unmatchedEmployees.Count > 5
+                                ? $" and {unmatchedEmployees.Count - 5} more"
+                                : ""
+                        ),
+                }
+            );
         }
 
         var response = new UploadRosterResponse

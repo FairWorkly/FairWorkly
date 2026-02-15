@@ -14,20 +14,26 @@ public class PayrollValidationTests : IntegrationTestBase
 {
     private static readonly string CsvDir = Path.Combine("TestData", "Csv", "Payroll");
 
-    public PayrollValidationTests(CustomWebApplicationFactory factory) : base(factory) { }
+    public PayrollValidationTests(CustomWebApplicationFactory factory)
+        : base(factory) { }
 
     private async Task<HttpResponseMessage> PostValidationAsync(
         string? csvPath = null,
         string awardType = "GeneralRetailIndustryAward2020",
         string state = "VIC",
-        bool sendFile = true)
+        bool sendFile = true
+    )
     {
         var client = await CreateAuthenticatedClientAsync();
         using var content = new MultipartFormDataContent();
 
         if (sendFile && csvPath != null)
         {
-            content.Add(new StreamContent(File.OpenRead(csvPath)), "file", Path.GetFileName(csvPath));
+            content.Add(
+                new StreamContent(File.OpenRead(csvPath)),
+                "file",
+                Path.GetFileName(csvPath)
+            );
         }
 
         content.Add(new StringContent(awardType), "awardType");
@@ -70,9 +76,13 @@ public class PayrollValidationTests : IntegrationTestBase
         json.GetProperty("code").GetInt32().Should().Be(400);
 
         var errors = json.GetProperty("data").GetProperty("errors");
-        errors.EnumerateArray().Should().Contain(e =>
-            e.GetProperty("field").GetString() == "file" &&
-            e.GetProperty("message").GetString() == "File size must not exceed 2MB");
+        errors
+            .EnumerateArray()
+            .Should()
+            .Contain(e =>
+                e.GetProperty("field").GetString() == "file"
+                && e.GetProperty("message").GetString() == "File size must not exceed 2MB"
+            );
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -172,8 +182,8 @@ public class PayrollValidationTests : IntegrationTestBase
         var validationId = data.GetProperty("validationId").GetGuid();
         using var scope = Factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
-        var dbIssues = await db.PayrollIssues
-            .Where(i => i.PayrollValidationId == validationId)
+        var dbIssues = await db
+            .PayrollIssues.Where(i => i.PayrollValidationId == validationId)
             .ToListAsync();
         dbIssues.Should().NotBeEmpty();
     }
@@ -213,22 +223,28 @@ public class PayrollValidationTests : IntegrationTestBase
         using (var scope = Factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
-            var existing = await db.Employees
-                .FirstOrDefaultAsync(e => e.EmployeeNumber == "E999" && e.OrganizationId == TestOrganizationId);
+            var existing = await db.Employees.FirstOrDefaultAsync(e =>
+                e.EmployeeNumber == "E999" && e.OrganizationId == TestOrganizationId
+            );
             if (existing == null)
             {
-                db.Employees.Add(new Employee
-                {
-                    OrganizationId = TestOrganizationId,
-                    FirstName = "Original",
-                    LastName = "Employee",
-                    JobTitle = "Staff",
-                    EmploymentType = EmploymentType.FullTime,
-                    StartDate = DateTime.SpecifyKind(new DateTime(2025, 1, 1), DateTimeKind.Utc),
-                    AwardType = AwardType.GeneralRetailIndustryAward2020,
-                    AwardLevelNumber = 1,
-                    EmployeeNumber = "E999",
-                });
+                db.Employees.Add(
+                    new Employee
+                    {
+                        OrganizationId = TestOrganizationId,
+                        FirstName = "Original",
+                        LastName = "Employee",
+                        JobTitle = "Staff",
+                        EmploymentType = EmploymentType.FullTime,
+                        StartDate = DateTime.SpecifyKind(
+                            new DateTime(2025, 1, 1),
+                            DateTimeKind.Utc
+                        ),
+                        AwardType = AwardType.GeneralRetailIndustryAward2020,
+                        AwardLevelNumber = 1,
+                        EmployeeNumber = "E999",
+                    }
+                );
                 await db.SaveChangesAsync();
             }
         }
@@ -244,8 +260,10 @@ public class PayrollValidationTests : IntegrationTestBase
         // Verify: no duplicate employees with EmployeeNumber "E999"
         using var verifyScope = Factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
-        var employees = await verifyDb.Employees
-            .Where(e => e.EmployeeNumber == "E999" && e.OrganizationId == TestOrganizationId)
+        var employees = await verifyDb
+            .Employees.Where(e =>
+                e.EmployeeNumber == "E999" && e.OrganizationId == TestOrganizationId
+            )
             .ToListAsync();
 
         employees.Should().HaveCount(1);

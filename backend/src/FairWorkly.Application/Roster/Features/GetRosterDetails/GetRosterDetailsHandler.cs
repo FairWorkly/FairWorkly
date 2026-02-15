@@ -9,9 +9,8 @@ namespace FairWorkly.Application.Roster.Features.GetRosterDetails;
 /// Handles fetching roster details with shifts grouped by employee.
 /// Used by the results page after roster upload.
 /// </summary>
-public class GetRosterDetailsHandler(
-    IRosterRepository rosterRepository
-) : IRequestHandler<GetRosterDetailsQuery, Result<RosterDetailsResponse>>
+public class GetRosterDetailsHandler(IRosterRepository rosterRepository)
+    : IRequestHandler<GetRosterDetailsQuery, Result<RosterDetailsResponse>>
 {
     public async Task<Result<RosterDetailsResponse>> Handle(
         GetRosterDetailsQuery request,
@@ -29,8 +28,8 @@ public class GetRosterDetailsHandler(
             return Result<RosterDetailsResponse>.Of404("Roster not found");
         }
 
-        var employeeGroups = roster.Shifts
-            .GroupBy(s => s.EmployeeId)
+        var employeeGroups = roster
+            .Shifts.GroupBy(s => s.EmployeeId)
             .Select(g =>
             {
                 var employee = g.First().Employee;
@@ -41,7 +40,8 @@ public class GetRosterDetailsHandler(
                     EmployeeNumber = employee.EmployeeNumber,
                     ShiftCount = g.Count(),
                     TotalHours = g.Sum(s => s.Duration),
-                    Shifts = g.OrderBy(s => s.Date).ThenBy(s => s.StartTime)
+                    Shifts = g.OrderBy(s => s.Date)
+                        .ThenBy(s => s.StartTime)
                         .Select(s => new ShiftSummary
                         {
                             ShiftId = s.Id,

@@ -41,4 +41,3 @@ public enum RosterCheckType
     /// </summary>
     MaximumConsecutiveDays = 5,
 }
-

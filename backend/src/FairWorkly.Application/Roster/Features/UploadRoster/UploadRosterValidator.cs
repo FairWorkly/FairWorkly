@@ -13,9 +13,7 @@ public class UploadRosterValidator : AbstractValidator<UploadRosterCommand>
 
     public UploadRosterValidator()
     {
-        RuleFor(x => x.FileStream)
-            .NotNull()
-            .WithMessage("Roster file is required");
+        RuleFor(x => x.FileStream).NotNull().WithMessage("Roster file is required");
 
         RuleFor(x => x.FileName)
             .NotEmpty()
@@ -29,22 +27,17 @@ public class UploadRosterValidator : AbstractValidator<UploadRosterCommand>
             .LessThanOrEqualTo(MaxFileSizeBytes)
             .WithMessage($"File size must not exceed {MaxFileSizeBytes / (1024 * 1024)}MB");
 
-        RuleFor(x => x.ContentType)
-            .NotEmpty()
-            .WithMessage("Content type is required");
+        RuleFor(x => x.ContentType).NotEmpty().WithMessage("Content type is required");
 
-        RuleFor(x => x.OrganizationId)
-            .NotEmpty()
-            .WithMessage("OrganizationId is required");
+        RuleFor(x => x.OrganizationId).NotEmpty().WithMessage("OrganizationId is required");
 
-        RuleFor(x => x.UserId)
-            .NotEmpty()
-            .WithMessage("UserId is required");
+        RuleFor(x => x.UserId).NotEmpty().WithMessage("UserId is required");
     }
 
     private static bool HaveValidExtension(string? fileName)
     {
-        if (string.IsNullOrEmpty(fileName)) return false;
+        if (string.IsNullOrEmpty(fileName))
+            return false;
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
         return AllowedExtensions.Contains(extension);
     }

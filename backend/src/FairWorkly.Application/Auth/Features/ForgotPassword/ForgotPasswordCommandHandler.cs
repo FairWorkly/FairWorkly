@@ -59,11 +59,7 @@ public class ForgotPasswordCommandHandler(
         // TODO: Replace with email service integration; avoid logging reset links in production.
         if (isDevelopment)
         {
-            logger.LogDebug(
-                "Password reset link for {Email}: {ResetLink}",
-                email,
-                resetLink
-            );
+            logger.LogDebug("Password reset link for {Email}: {ResetLink}", email, resetLink);
         }
         else
         {
