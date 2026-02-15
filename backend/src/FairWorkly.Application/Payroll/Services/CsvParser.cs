@@ -39,9 +39,17 @@ public class CsvParser(ILogger<CsvParser> logger) : ICsvParser
             {
                 var errors = new List<Csv422Error>
                 {
-                    new() { RowNumber = 0, Field = "File", Message = "CSV file is corrupted or cannot be parsed" }
+                    new()
+                    {
+                        RowNumber = 0,
+                        Field = "File",
+                        Message = "CSV file is corrupted or cannot be parsed",
+                    },
                 };
-                return Result<List<string[]>>.Of422("CSV file is corrupted or cannot be parsed", errors);
+                return Result<List<string[]>>.Of422(
+                    "CSV file is corrupted or cannot be parsed",
+                    errors
+                );
             }
 
             // Structural integrity: all rows must have the same column count as the header
@@ -51,7 +59,8 @@ public class CsvParser(ILogger<CsvParser> logger) : ICsvParser
                 if (rows[i].Length != expectedColumnCount)
                 {
                     throw new InvalidDataException(
-                        $"Row {i + 1} has {rows[i].Length} columns, expected {expectedColumnCount}");
+                        $"Row {i + 1} has {rows[i].Length} columns, expected {expectedColumnCount}"
+                    );
                 }
             }
 
@@ -66,9 +75,17 @@ public class CsvParser(ILogger<CsvParser> logger) : ICsvParser
             logger.LogWarning(ex, "CSV parsing failed with exception");
             var errors = new List<Csv422Error>
             {
-                new() { RowNumber = 0, Field = "File", Message = "CSV file is corrupted or cannot be parsed" }
+                new()
+                {
+                    RowNumber = 0,
+                    Field = "File",
+                    Message = "CSV file is corrupted or cannot be parsed",
+                },
             };
-            return Result<List<string[]>>.Of422("CSV file is corrupted or cannot be parsed", errors);
+            return Result<List<string[]>>.Of422(
+                "CSV file is corrupted or cannot be parsed",
+                errors
+            );
         }
     }
 }

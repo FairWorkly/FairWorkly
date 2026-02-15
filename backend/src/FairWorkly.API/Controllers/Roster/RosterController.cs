@@ -40,7 +40,9 @@ public class RosterController(
 
         if (_currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
         {
-            return RespondResult(Result<UploadRosterResponse>.Of401("Organization context not found in token"));
+            return RespondResult(
+                Result<UploadRosterResponse>.Of401("Organization context not found in token")
+            );
         }
 
         using var fileStream = file.OpenReadStream();
@@ -69,7 +71,9 @@ public class RosterController(
     {
         if (_currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
         {
-            return RespondResult(Result<RosterDetailsResponse>.Of401("Organization context not found in token"));
+            return RespondResult(
+                Result<RosterDetailsResponse>.Of401("Organization context not found in token")
+            );
         }
 
         var query = new GetRosterDetailsQuery
@@ -96,11 +100,7 @@ public class RosterController(
             return RespondResult(Result<object>.Of401("Organization context not found in token"));
         }
 
-        var roster = await _rosterRepository.GetByIdWithShiftsAsync(
-            rosterId,
-            organizationId,
-            ct
-        );
+        var roster = await _rosterRepository.GetByIdWithShiftsAsync(rosterId, organizationId, ct);
 
         if (roster == null)
         {
@@ -109,13 +109,12 @@ public class RosterController(
 
         if (string.IsNullOrWhiteSpace(roster.OriginalFileS3Key))
         {
-            return RespondResult(Result<object>.Of404("Original file not available for this roster"));
+            return RespondResult(
+                Result<object>.Of404("Original file not available for this roster")
+            );
         }
 
-        var fileStream = await _fileStorageService.GetFileStreamAsync(
-            roster.OriginalFileS3Key,
-            ct
-        );
+        var fileStream = await _fileStorageService.GetFileStreamAsync(roster.OriginalFileS3Key, ct);
 
         if (fileStream == null)
         {

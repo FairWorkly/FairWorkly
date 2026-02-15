@@ -32,12 +32,28 @@ public abstract class BaseApiController : ControllerBase
             if (result.Code == 204)
                 return NoContent();
 
-            return StatusCode(result.Code, new { code = result.Code, msg = result.Message, data = result.Value });
+            return StatusCode(
+                result.Code,
+                new
+                {
+                    code = result.Code,
+                    msg = result.Message,
+                    data = result.Value,
+                }
+            );
         }
 
         // 4xx with structured errors (400, 422)
         if (result.Errors != null)
-            return StatusCode(result.Code, new { code = result.Code, msg = result.Message, data = new { errors = result.Errors } });
+            return StatusCode(
+                result.Code,
+                new
+                {
+                    code = result.Code,
+                    msg = result.Message,
+                    data = new { errors = result.Errors },
+                }
+            );
 
         // 4xx without errors (401, 403, 404, 409)
         return StatusCode(result.Code, new { code = result.Code, msg = result.Message });

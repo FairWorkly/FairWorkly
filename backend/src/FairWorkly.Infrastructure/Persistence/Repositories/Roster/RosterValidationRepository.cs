@@ -17,7 +17,10 @@ public class RosterValidationRepository(FairWorklyDbContext context) : IRosterVa
         return Task.FromResult(validation);
     }
 
-    public Task UpdateAsync(RosterValidation validation, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(
+        RosterValidation validation,
+        CancellationToken cancellationToken = default
+    )
     {
         var entry = _context.Entry(validation);
         if (entry.State == EntityState.Detached)
@@ -38,4 +41,3 @@ public class RosterValidationRepository(FairWorklyDbContext context) : IRosterVa
         return Task.CompletedTask;
     }
 }
-

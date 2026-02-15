@@ -20,8 +20,9 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var sub = User?.FindFirstValue(JwtRegisteredClaimNames.Sub)
-                      ?? User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var sub =
+                User?.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                ?? User?.FindFirstValue(ClaimTypes.NameIdentifier);
             return Guid.TryParse(sub, out var id) ? id : null;
         }
     }
@@ -39,9 +40,7 @@ public class CurrentUserService : ICurrentUserService
         User?.FindFirstValue(JwtRegisteredClaimNames.Email)
         ?? User?.FindFirstValue(ClaimTypes.Email);
 
-    public string? Role =>
-        User?.FindFirstValue("role")
-        ?? User?.FindFirstValue(ClaimTypes.Role);
+    public string? Role => User?.FindFirstValue("role") ?? User?.FindFirstValue(ClaimTypes.Role);
 
     public Guid? EmployeeId
     {

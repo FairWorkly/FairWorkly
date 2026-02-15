@@ -19,7 +19,7 @@ public class RosterRepository(FairWorklyDbContext context) : IRosterRepository
             .Rosters.AsNoTracking()
             .Where(r => r.Id == rosterId && r.OrganizationId == organizationId && !r.IsDeleted)
             .Include(r => r.Shifts.Where(s => !s.IsDeleted))
-            .ThenInclude(s => s.Employee)
+                .ThenInclude(s => s.Employee)
             .Include(r => r.RosterValidation)
             .FirstOrDefaultAsync(cancellationToken);
     }
@@ -44,4 +44,3 @@ public class RosterRepository(FairWorklyDbContext context) : IRosterRepository
         await Task.CompletedTask;
     }
 }
-

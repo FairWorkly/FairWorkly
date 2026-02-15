@@ -14,7 +14,9 @@ namespace FairWorkly.IntegrationTests.Infrastructure;
 /// Integration test base class for non-Auth tests (Payroll, Roster, etc.)
 /// Provides: test data seeding, token acquisition, authenticated client creation.
 /// </summary>
-public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFactory>, IAsyncLifetime
+public abstract class IntegrationTestBase
+    : IClassFixture<CustomWebApplicationFactory>,
+        IAsyncLifetime
 {
     private static readonly SemaphoreSlim _seedSemaphore = new(1, 1);
     private static bool _seeded = false;
@@ -77,7 +79,11 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
                 TestOrganizationId = existingOrg.Id;
                 var existingUser = await db.Set<User>()
                     .FirstOrDefaultAsync(u => u.OrganizationId == existingOrg.Id);
-                TestUserId = existingUser?.Id ?? throw new InvalidOperationException("Test user not found for Integration Test Company");
+                TestUserId =
+                    existingUser?.Id
+                    ?? throw new InvalidOperationException(
+                        "Test user not found for Integration Test Company"
+                    );
                 _seeded = true;
                 return;
             }
@@ -138,9 +144,12 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
         var org = await db.Set<Organization>()
             .FirstOrDefaultAsync(o => o.CompanyName == "Integration Test Company");
         TestOrganizationId = org!.Id;
-        var user = await db.Set<User>()
-            .FirstOrDefaultAsync(u => u.OrganizationId == org.Id);
-        TestUserId = user?.Id ?? throw new InvalidOperationException("Test user not found for Integration Test Company");
+        var user = await db.Set<User>().FirstOrDefaultAsync(u => u.OrganizationId == org.Id);
+        TestUserId =
+            user?.Id
+            ?? throw new InvalidOperationException(
+                "Test user not found for Integration Test Company"
+            );
     }
 
     /// <summary>
@@ -148,11 +157,10 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
     /// </summary>
     protected async Task<string> GetAccessTokenAsync()
     {
-        var response = await Client.PostAsJsonAsync("/api/auth/login", new
-        {
-            email = "testuser@integrationtest.com",
-            password = "TestPassword123"
-        });
+        var response = await Client.PostAsJsonAsync(
+            "/api/auth/login",
+            new { email = "testuser@integrationtest.com", password = "TestPassword123" }
+        );
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();

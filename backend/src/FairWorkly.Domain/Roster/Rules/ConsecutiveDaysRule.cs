@@ -1,8 +1,8 @@
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Roster.Entities;
-using FairWorkly.Domain.Roster.ValueObjects;
-using FairWorkly.Domain.Roster.Parameters;
 using FairWorkly.Domain.Roster.Enums;
+using FairWorkly.Domain.Roster.Parameters;
+using FairWorkly.Domain.Roster.ValueObjects;
 
 namespace FairWorkly.Domain.Roster.Rules;
 

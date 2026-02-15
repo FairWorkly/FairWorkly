@@ -2,8 +2,8 @@ using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Application.Roster.Services;
 using FairWorkly.Domain.Common;
-using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Common.Enums;
+using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Roster.Entities;
 using FairWorkly.Domain.Roster.ValueObjects;
 using MediatR;
@@ -115,15 +115,16 @@ public class ValidateRosterHandler(
             validation.TotalIssuesCount = issues.Count;
             validation.CriticalIssuesCount = failingIssues;
             validation.AffectedEmployees = employeesWithIssues;
-            validation.Status = failingIssues > 0 ? ValidationStatus.Failed : ValidationStatus.Passed;
+            validation.Status =
+                failingIssues > 0 ? ValidationStatus.Failed : ValidationStatus.Passed;
             validation.CompletedAt = DateTimeOffset.UtcNow;
 
             await validationRepository.UpdateAsync(validation, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
-        catch (Exception ex) when (
-            ex is not OperationCanceledException && !cancellationToken.IsCancellationRequested
-        )
+        catch (Exception ex)
+            when (ex is not OperationCanceledException && !cancellationToken.IsCancellationRequested
+            )
         {
             validation.Status = ValidationStatus.Failed;
             validation.CompletedAt = DateTimeOffset.UtcNow;
@@ -145,19 +146,21 @@ public class ValidateRosterHandler(
             FailedShifts = validation.FailedShifts,
             TotalIssues = issues.Count,
             CriticalIssues = validation.CriticalIssuesCount,
-            Issues = issues.Select(i => new RosterIssueSummary
-            {
-                Id = i.Id,
-                ShiftId = i.ShiftId,
-                EmployeeId = i.EmployeeId,
-                EmployeeName = GetEmployeeName(i.EmployeeId),
-                CheckType = i.CheckType.ToString(),
-                Severity = i.Severity,
-                Description = i.Description,
-                ExpectedValue = i.ExpectedValue,
-                ActualValue = i.ActualValue,
-                AffectedDates = i.AffectedDates.ToStorageString(),
-            }).ToList(),
+            Issues = issues
+                .Select(i => new RosterIssueSummary
+                {
+                    Id = i.Id,
+                    ShiftId = i.ShiftId,
+                    EmployeeId = i.EmployeeId,
+                    EmployeeName = GetEmployeeName(i.EmployeeId),
+                    CheckType = i.CheckType.ToString(),
+                    Severity = i.Severity,
+                    Description = i.Description,
+                    ExpectedValue = i.ExpectedValue,
+                    ActualValue = i.ActualValue,
+                    AffectedDates = i.AffectedDates.ToStorageString(),
+                })
+                .ToList(),
         };
 
         return Result<ValidateRosterResponse>.Of200("Roster validation completed", response);

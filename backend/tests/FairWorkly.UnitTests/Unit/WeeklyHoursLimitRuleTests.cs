@@ -1,9 +1,9 @@
-using FairWorkly.Domain.Roster.Rules;
-using FairWorkly.Domain.Roster.Parameters;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Employees.Entities;
 using FairWorkly.Domain.Roster.Entities;
 using FairWorkly.Domain.Roster.Enums;
+using FairWorkly.Domain.Roster.Parameters;
+using FairWorkly.Domain.Roster.Rules;
 using FluentAssertions;
 
 namespace FairWorkly.UnitTests.Unit;
@@ -59,7 +59,7 @@ public class WeeklyHoursLimitRuleTests
             EmploymentType.PartTime,
             guaranteedHours: 20,
             dailyHours: 5m,
-            days: 5  // 25 hours total
+            days: 5 // 25 hours total
         );
 
         var issues = _rule.Evaluate(shifts, _validationId);
@@ -79,7 +79,7 @@ public class WeeklyHoursLimitRuleTests
             EmploymentType.PartTime,
             guaranteedHours: 20,
             dailyHours: 5m,
-            days: 4  // 20 hours total
+            days: 4 // 20 hours total
         );
 
         var issues = _rule.Evaluate(shifts, _validationId);
@@ -95,7 +95,7 @@ public class WeeklyHoursLimitRuleTests
             EmploymentType.PartTime,
             guaranteedHours: 20,
             dailyHours: 5m,
-            days: 3  // 15 hours total
+            days: 3 // 15 hours total
         );
 
         var issues = _rule.Evaluate(shifts, _validationId);
@@ -148,9 +148,17 @@ public class WeeklyHoursLimitRuleTests
     public void Evaluate_WhenMultipleEmployees_ShouldEvaluateSeparately()
     {
         var employee1Shifts = CreateWeeklyShiftsForEmployee(
-            Guid.NewGuid(), EmploymentType.FullTime, dailyHours: 10m, days: 4);
+            Guid.NewGuid(),
+            EmploymentType.FullTime,
+            dailyHours: 10m,
+            days: 4
+        );
         var employee2Shifts = CreateWeeklyShiftsForEmployee(
-            Guid.NewGuid(), EmploymentType.FullTime, dailyHours: 7m, days: 5);
+            Guid.NewGuid(),
+            EmploymentType.FullTime,
+            dailyHours: 7m,
+            days: 5
+        );
 
         var allShifts = employee1Shifts.Concat(employee2Shifts).ToList();
         var issues = _rule.Evaluate(allShifts, _validationId);
@@ -288,7 +296,11 @@ public class WeeklyHoursLimitRuleTests
         return CreateShiftsForEmployee(employee, dailyHours, days);
     }
 
-    private static List<Shift> CreateShiftsForEmployee(Employee employee, decimal dailyHours, int days)
+    private static List<Shift> CreateShiftsForEmployee(
+        Employee employee,
+        decimal dailyHours,
+        int days
+    )
     {
         var shifts = new List<Shift>();
         var startDate = new DateTime(2026, 1, 5); // Monday
@@ -318,7 +330,11 @@ public class WeeklyHoursLimitRuleTests
         return shifts;
     }
 
-    private static Employee CreateEmployee(Guid organizationId, Guid employeeId, EmploymentType employmentType)
+    private static Employee CreateEmployee(
+        Guid organizationId,
+        Guid employeeId,
+        EmploymentType employmentType
+    )
     {
         return new Employee
         {

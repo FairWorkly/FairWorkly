@@ -58,22 +58,35 @@ public class User : AuditableEntity, IValidatableDomain
             throw new InvalidDomainStateException(
                 nameof(User),
                 nameof(Role),
-                $"Role must be a valid value (Admin=1, Manager=2). Current value: {(int)Role}");
+                $"Role must be a valid value (Admin=1, Manager=2). Current value: {(int)Role}"
+            );
         }
 
         if (string.IsNullOrWhiteSpace(Email))
         {
-            throw new InvalidDomainStateException(nameof(User), nameof(Email), "Email cannot be empty");
+            throw new InvalidDomainStateException(
+                nameof(User),
+                nameof(Email),
+                "Email cannot be empty"
+            );
         }
 
         if (string.IsNullOrWhiteSpace(FirstName))
         {
-            throw new InvalidDomainStateException(nameof(User), nameof(FirstName), "FirstName cannot be empty");
+            throw new InvalidDomainStateException(
+                nameof(User),
+                nameof(FirstName),
+                "FirstName cannot be empty"
+            );
         }
 
         if (string.IsNullOrWhiteSpace(LastName))
         {
-            throw new InvalidDomainStateException(nameof(User), nameof(LastName), "LastName cannot be empty");
+            throw new InvalidDomainStateException(
+                nameof(User),
+                nameof(LastName),
+                "LastName cannot be empty"
+            );
         }
 
         // At least one authentication credential must be present
@@ -84,7 +97,8 @@ public class User : AuditableEntity, IValidatableDomain
             throw new InvalidDomainStateException(
                 nameof(User),
                 "Credentials",
-                "User must have at least one authentication credential (PasswordHash or GoogleId)");
+                "User must have at least one authentication credential (PasswordHash or GoogleId)"
+            );
         }
     }
 }

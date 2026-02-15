@@ -110,4 +110,3 @@ public readonly record struct ExecutedCheckTypeSet
         return string.Join(',', set.OrderBy(c => (int)c).Select(c => c.ToString()));
     }
 }
-

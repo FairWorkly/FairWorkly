@@ -44,8 +44,8 @@ public class MockAiClient : IAiClient
         // Mock implementation for roster file upload
         // In mock mode, roster upload is not supported
         throw new NotImplementedException(
-            "Roster file upload is not supported in mock mode. " +
-            "Set AiSettings:UseMockAi to false in appsettings.json to use the real Agent Service."
+            "Roster file upload is not supported in mock mode. "
+                + "Set AiSettings:UseMockAi to false in appsettings.json to use the real Agent Service."
         );
     }
 }

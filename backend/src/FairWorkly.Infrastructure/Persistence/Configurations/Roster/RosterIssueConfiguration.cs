@@ -74,16 +74,8 @@ public class RosterIssueConfiguration : IEntityTypeConfiguration<RosterIssue>
 
         // Property configurations
         // Enum to string conversion for SQL readability and consistency
-        builder
-            .Property(ri => ri.Severity)
-            .HasConversion<string>()
-            .HasMaxLength(20)
-            .IsRequired();
-        builder
-            .Property(ri => ri.CheckType)
-            .HasConversion<string>()
-            .HasMaxLength(100)
-            .IsRequired();
+        builder.Property(ri => ri.Severity).HasConversion<string>().HasMaxLength(20).IsRequired();
+        builder.Property(ri => ri.CheckType).HasConversion<string>().HasMaxLength(100).IsRequired();
         builder.Property(ri => ri.Description).HasMaxLength(500).IsRequired();
         builder.Property(ri => ri.DetailedExplanation).HasMaxLength(2000);
         builder.Property(ri => ri.Recommendation).HasMaxLength(1000);

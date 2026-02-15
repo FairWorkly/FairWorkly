@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Enums;
-using FairWorkly.Domain.Payroll.Enums;
 using FairWorkly.Domain.Employees.Entities;
+using FairWorkly.Domain.Payroll.Enums;
 
 namespace FairWorkly.Domain.Payroll.Entities;
 

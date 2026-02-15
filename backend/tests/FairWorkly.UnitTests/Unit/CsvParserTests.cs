@@ -8,11 +8,11 @@ namespace FairWorkly.UnitTests.Unit;
 public class CsvParserTests
 {
     private const string ValidHeader =
-        "Employee ID,First Name,Last Name,Pay Period Start,Pay Period End,Pay Date," +
-        "Award Type,Classification,Employment Type,Hourly Rate," +
-        "Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay," +
-        "Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay," +
-        "Gross Pay,Superannuation Paid";
+        "Employee ID,First Name,Last Name,Pay Period Start,Pay Period End,Pay Date,"
+        + "Award Type,Classification,Employment Type,Hourly Rate,"
+        + "Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,"
+        + "Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,"
+        + "Gross Pay,Superannuation Paid";
 
     private readonly CsvParser _parser;
 
@@ -54,9 +54,11 @@ public class CsvParserTests
     public void Parse_ValidCsv_ReturnsAllRowsIncludingHeader()
     {
         // Arrange
-        var csv = ValidHeader + "\n" +
-            "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85\n" +
-            "E002,Jane,Doe,2026-01-01,2026-01-07,2026-01-10,Retail,Level 3,casual,34.48,20,689.60,4,172.40,0,,0,,862.00,103.44";
+        var csv =
+            ValidHeader
+            + "\n"
+            + "E001,John,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,full-time,27.16,38,1032.08,0,,0,,0,,1032.08,123.85\n"
+            + "E002,Jane,Doe,2026-01-01,2026-01-07,2026-01-10,Retail,Level 3,casual,34.48,20,689.60,4,172.40,0,,0,,862.00,103.44";
         var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
 
         // Act

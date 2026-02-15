@@ -7,14 +7,15 @@ public class ValidatePayrollValidatorTests
 {
     private readonly ValidatePayrollValidator _validator = new();
 
-    private static ValidatePayrollCommand CreateValidCommand() => new()
-    {
-        FileStream = new MemoryStream(new byte[] { 1 }),
-        FileName = "test.csv",
-        FileSize = 1024,
-        AwardType = "GeneralRetailIndustryAward2020",
-        State = "VIC",
-    };
+    private static ValidatePayrollCommand CreateValidCommand() =>
+        new()
+        {
+            FileStream = new MemoryStream(new byte[] { 1 }),
+            FileName = "test.csv",
+            FileSize = 1024,
+            AwardType = "GeneralRetailIndustryAward2020",
+            State = "VIC",
+        };
 
     // ==================== File validation ====================
 
@@ -27,9 +28,9 @@ public class ValidatePayrollValidatorTests
         var result = await _validator.ValidateAsync(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e =>
-            e.PropertyName == "file" &&
-            e.ErrorMessage == "File is required");
+        result
+            .Errors.Should()
+            .Contain(e => e.PropertyName == "file" && e.ErrorMessage == "File is required");
     }
 
     [Fact]
@@ -41,9 +42,11 @@ public class ValidatePayrollValidatorTests
         var result = await _validator.ValidateAsync(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e =>
-            e.PropertyName == "file" &&
-            e.ErrorMessage == "File must be a CSV file (.csv)");
+        result
+            .Errors.Should()
+            .Contain(e =>
+                e.PropertyName == "file" && e.ErrorMessage == "File must be a CSV file (.csv)"
+            );
     }
 
     [Fact]
@@ -55,9 +58,11 @@ public class ValidatePayrollValidatorTests
         var result = await _validator.ValidateAsync(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e =>
-            e.PropertyName == "file" &&
-            e.ErrorMessage == "File size must not exceed 2MB");
+        result
+            .Errors.Should()
+            .Contain(e =>
+                e.PropertyName == "file" && e.ErrorMessage == "File size must not exceed 2MB"
+            );
     }
 
     // ==================== AwardType validation ====================
@@ -71,9 +76,11 @@ public class ValidatePayrollValidatorTests
         var result = await _validator.ValidateAsync(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e =>
-            e.PropertyName == "awardType" &&
-            e.ErrorMessage == "Award type is required");
+        result
+            .Errors.Should()
+            .Contain(e =>
+                e.PropertyName == "awardType" && e.ErrorMessage == "Award type is required"
+            );
     }
 
     [Fact]
@@ -85,9 +92,11 @@ public class ValidatePayrollValidatorTests
         var result = await _validator.ValidateAsync(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e =>
-            e.PropertyName == "awardType" &&
-            e.ErrorMessage.Contains("must be one of"));
+        result
+            .Errors.Should()
+            .Contain(e =>
+                e.PropertyName == "awardType" && e.ErrorMessage.Contains("must be one of")
+            );
     }
 
     [Fact]
@@ -99,9 +108,12 @@ public class ValidatePayrollValidatorTests
         var result = await _validator.ValidateAsync(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e =>
-            e.PropertyName == "awardType" &&
-            e.ErrorMessage == "Only General Retail Industry Award is currently supported");
+        result
+            .Errors.Should()
+            .Contain(e =>
+                e.PropertyName == "awardType"
+                && e.ErrorMessage == "Only General Retail Industry Award is currently supported"
+            );
     }
 
     // ==================== State validation ====================
@@ -115,9 +127,9 @@ public class ValidatePayrollValidatorTests
         var result = await _validator.ValidateAsync(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e =>
-            e.PropertyName == "state" &&
-            e.ErrorMessage.Contains("must be one of"));
+        result
+            .Errors.Should()
+            .Contain(e => e.PropertyName == "state" && e.ErrorMessage.Contains("must be one of"));
     }
 
     // ==================== Happy Path ====================

@@ -1,7 +1,7 @@
-using FairWorkly.Domain.Payroll.ComplianceEngine;
 using FairWorkly.Domain.Common.Enums;
-using FairWorkly.Domain.Payroll.Enums;
+using FairWorkly.Domain.Payroll.ComplianceEngine;
 using FairWorkly.Domain.Payroll.Entities;
+using FairWorkly.Domain.Payroll.Enums;
 using FluentAssertions;
 
 namespace FairWorkly.UnitTests.Unit;
