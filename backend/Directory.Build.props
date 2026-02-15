@@ -1,0 +1,9 @@
+<Project>
+  <Target Name="InstallPreCommitHook"
+          BeforeTargets="Build"
+          Condition="Exists('$(MSBuildThisFileDirectory)..\\.git\\hooks')">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)scripts\pre-commit"
+          DestinationFolder="$(MSBuildThisFileDirectory)..\\.git\\hooks\"
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>
