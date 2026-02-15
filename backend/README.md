@@ -191,7 +191,28 @@ To ensure the testability of business logic (such as "determining if it is withi
 - **Correct Approach**: Inject `IDateTimeProvider` via the constructor.
 - **Usage**: `_dateTimeProvider.Now`.
 
-### 4. File Storage Strategy
+### 4. Current User Service
+
+To access the authenticated user's identity in Handlers or Services, inject `ICurrentUserService`. It reads JWT claims from the current HTTP request automatically.
+
+**Available properties:** `UserId`, `OrganizationId`, `Email`, `Role`, `EmployeeId` (all nullable).
+
+```csharp
+public class MyHandler(ICurrentUserService currentUser)
+{
+    public async Task<Result<MyDto>> Handle(MyQuery query, CancellationToken ct)
+    {
+        var orgId = currentUser.OrganizationId
+            ?? return Result<MyDto>.Of403("User does not belong to an organization");
+        // ...
+    }
+}
+```
+
+- **Interface**: `src/FairWorkly.Application/Common/Interfaces/ICurrentUserService.cs`
+- **Implementation**: `src/FairWorkly.Infrastructure/Services/CurrentUserService.cs`
+
+### 5. File Storage Strategy
 
 This project uses the Adapter Pattern to handle file storage, with the core interface being `IFileStorageService`.
 
@@ -200,7 +221,7 @@ This project uses the Adapter Pattern to handle file storage, with the core inte
   - Physical Path: `src/FairWorkly.API/wwwroot/uploads/`.
   - **Note**: This directory is ignored in `.gitignore`.
 
-### 5. Entity Configuration Standards
+### 6. Entity Configuration Standards
 
 Entity configuration (table mapping, relationships, constraints) must be placed in dedicated Configuration classes, **not in DbContext**.
 
@@ -209,36 +230,50 @@ Entity configuration (table mapping, relationships, constraints) must be placed 
 
 > **Forbidden**: Writing `modelBuilder.Entity<T>()` directly in `FairWorklyDbContext.OnModelCreating()`.
 
-### 6. Result<T> Pattern
+### 7. Result<T> Pattern
 
-MediatR Handlers return `Result<T>` instead of throwing exceptions for better control flow and explicit error handling.
+All MediatR Handlers return `Result<T>` using `Of{code}` factory methods. Controllers inherit `BaseApiController` and call `RespondResult(result)` — no manual status code mapping needed.
 
-**Available factory methods:**
+**Key factory methods:**
 
-| Method | When to use | HTTP Response |
-|--------|-------------|---------------|
-| `Success(value)` | Operation succeeded | 200 OK |
-| `ValidationFailure(errors)` | Input validation failed | 400 Bad Request |
-| `NotFound(message)` | Resource not found | 404 Not Found |
-| `Forbidden(message)` | No permission | 403 Forbidden |
+| Method | Scenario | HTTP |
+|--------|----------|------|
+| `Of200(message, value)` | Success | 200 |
+| `Of201(message, value)` | Resource created | 201 |
+| `Of204()` | No content (delete/logout) | 204 |
+| `Of400(errors)` | Input validation (auto via ValidationBehavior) | 400 |
+| `Of401()` / `Of404()` / `Of403()` | Auth & access errors | 401 / 404 / 403 |
+| `Of422(message, errors)` | Business processing error | 422 |
+| `Of500(message)` | Anticipated infrastructure failure | 500 |
 
 **Example:**
 
 ```csharp
 // Handler
 if (entity == null)
-    return Result<MyDto>.NotFound("Resource not found");
-return Result<MyDto>.Success(dto);
-
-// Controller
-if (result.Type == ResultType.NotFound)
-    return NotFound(new { message = result.ErrorMessage });
-return Ok(result.Value);
+    return Result<MyDto>.Of404("Resource not found");
+return Result<MyDto>.Of200("Retrieved successfully", dto);
 ```
 
-> 📖 For detailed usage, see [Result<T> Pattern Guide](docs/Result_Pattern_Guide.md)
+```csharp
+// Controller — inherit BaseApiController, one line handles the rest
+[Route("api/[controller]")]
+public class MyController(IMediator mediator) : BaseApiController
+{
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        var result = await mediator.Send(new GetMyQuery { Id = id });
+        return RespondResult(result);
+    }
+}
+```
 
-Location: `src/FairWorkly.Domain/Common/Result.cs`
+All responses follow the `{ code, msg, data }` envelope format.
+
+> 📖 For detailed usage, see [Result<T> Pattern Guide](../docs/guides/backend/result-pattern.md)
+
+Location: `src/FairWorkly.Domain/Common/Result/Result.cs`
 
 ## Database Scripts
 
@@ -265,7 +300,7 @@ Test with `reset-database.ps1` or `update-database.ps1` depending on your situat
 
 For details on how to develop new Features, write AI Orchestrators, and interface with the Python Agent, please refer to:
 
-- [Backend Development Guide](docs/Backend_Development_Guide.md) - Comprehensive guide with code examples
-- [Result<T> Pattern Guide](docs/Result_Pattern_Guide.md) - How to use Result pattern in Handlers
+- [Backend Development Guide](../docs/guides/backend/development.md) - Comprehensive guide with code examples
+- [Result<T> Pattern Guide](../docs/guides/backend/result-pattern.md) - How to use Result pattern in Handlers
 
 > These documents are also available on the team's Google Drive.
