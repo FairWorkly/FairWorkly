@@ -202,8 +202,8 @@ public class MyHandler(ICurrentUserService currentUser)
 {
     public async Task<Result<MyDto>> Handle(MyQuery query, CancellationToken ct)
     {
-        var orgId = currentUser.OrganizationId
-            ?? return Result<MyDto>.Of403("User does not belong to an organization");
+        if (currentUser.OrganizationId is not { } orgId)
+            return Result<MyDto>.Of403("User does not belong to an organization");
         // ...
     }
 }

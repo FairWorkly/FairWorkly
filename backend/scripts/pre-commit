@@ -26,7 +26,10 @@ if ! (cd backend && dotnet csharpier --version) &>/dev/null; then
 fi
 
 # Format all files in one call
-(cd backend && dotnet csharpier format "${FILES[@]}")
+if ! (cd backend && dotnet csharpier format "${FILES[@]}"); then
+    echo "[pre-commit] CSharpier formatting failed. Please fix errors and retry."
+    exit 1
+fi
 
 # Re-stage formatted files
 for file in $STAGED_CS; do
