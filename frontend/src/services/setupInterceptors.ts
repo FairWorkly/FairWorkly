@@ -3,6 +3,7 @@ import type { AxiosError, AxiosRequestConfig } from 'axios'
 import httpClient from './httpClient'
 import { logout, setAuthData } from '../slices/auth'
 import type { RootState } from '../store'
+import { isBackendEnvelope } from '@/shared/types/api.types'
 
 type StoreLike = {
   dispatch: (action: unknown) => void
@@ -55,13 +56,11 @@ export function setupInterceptors(store: StoreLike) {
 
   httpClient.interceptors.response.use(
     response => {
-      // Auto-unwrap backend's { code, msg, data } envelope
-      if (
-        response.data &&
-        typeof response.data === 'object' &&
-        'code' in response.data &&
-        'data' in response.data
-      ) {
+      // Unwrap backend's { code, msg, data } envelope.
+      // code mirrors HTTP status (available via response.status).
+      // msg is discarded — no UI consumes server-side success messages yet.
+      // To preserve msg in the future, store it here before unwrapping.
+      if (isBackendEnvelope(response.data)) {
         response.data = response.data.data
       }
       return response
@@ -114,8 +113,8 @@ export function setupInterceptors(store: StoreLike) {
 
       try {
         const refreshResponse = await refreshClient.post('/auth/refresh')
-        const refreshData = refreshResponse.data?.data ?? refreshResponse.data
-        const accessToken = refreshData?.accessToken ?? refreshData?.token
+        const refreshData = refreshResponse.data?.data
+        const accessToken = refreshData?.accessToken
 
         if (!accessToken) {
           throw new Error('Refresh succeeded without access token')
@@ -124,7 +123,7 @@ export function setupInterceptors(store: StoreLike) {
         const meResponse = await refreshClient.get('/auth/me', {
           headers: { Authorization: `Bearer ${accessToken}` },
         })
-        const u = meResponse.data?.data ?? meResponse.data
+        const u = meResponse.data?.data
         const role =
           typeof u?.role === 'string' ? u.role.toLowerCase() : undefined
         if (!u?.id || !u?.email || !role) {
