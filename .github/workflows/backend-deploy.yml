@@ -1,0 +1,83 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+env:
+  AWS_REGION: ap-southeast-2
+  ECR_REPOSITORY: fairworkly-backend
+  CONTAINER_NAME: fairworkly-api
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: vars
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            ENV_TAG="prod"
+          else
+            ENV_TAG="uat"
+          fi
+          
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "env_tag=$ENV_TAG" >> $GITHUB_OUTPUT
+          echo "full_tag=$ENV_TAG-$SHORT_SHA" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          FULL_TAG: ${{ steps.vars.outputs.full_tag }}
+        run: |
+          docker build -f backend/Dockerfile -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$FULL_TAG .
+          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$FULL_TAG
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # login to ECR
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            
+            # pull image
+            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.vars.outputs.full_tag }}
+            
+            # stop old image
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+            
+            # run new image
+            docker run -d \
+              --name ${{ env.CONTAINER_NAME }} \
+              --network host \
+              -e ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=FairWorklyDb;Username=postgres;Password=postgres" \
+              ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.vars.outputs.full_tag }}
+            
+            # clean old image
+            docker image prune -f
