@@ -228,6 +228,11 @@ interface ComplianceUploadProps {
   onCancel: () => void
   acceptFileTypes?: string
   validationItems?: string[]
+  // Optional toggle support — when provided, validation items become
+  // clickable switches (e.g. payroll lets users disable individual checks).
+  // Omit both props to keep items as a static read-only list (roster).
+  validationItemStates?: boolean[]
+  onToggleValidationItem?: (index: number) => void
   isLoading?: boolean
   error?: string | null
 }
@@ -252,6 +257,8 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
   onCancel,
   acceptFileTypes = '.csv',
   validationItems = [],
+  validationItemStates,
+  onToggleValidationItem,
   isLoading = false,
   error = null,
 }) => {
@@ -286,6 +293,8 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
 
     setFileError(null)
 
+    // Wrap in a synthetic ChangeEvent so the parent handler has a
+    // uniform signature for both <input> change and drag-and-drop.
     const event = {
       target: { files },
     } as React.ChangeEvent<HTMLInputElement>
@@ -398,8 +407,28 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
           {validationItems.length > 0 && (
             <Box>
               {validationItems.map((item, index) => (
-                <ValidationListItem key={index}>
-                  <CoverageCheckIcon>
+                <ValidationListItem
+                  key={index}
+                  onClick={
+                    onToggleValidationItem
+                      ? () => onToggleValidationItem(index)
+                      : undefined
+                  }
+                  sx={
+                    onToggleValidationItem ? { cursor: 'pointer' } : undefined
+                  }
+                >
+                  <CoverageCheckIcon
+                    sx={
+                      validationItemStates
+                        ? {
+                            color: validationItemStates[index]
+                              ? 'primary.main'
+                              : 'text.disabled',
+                          }
+                        : undefined
+                    }
+                  >
                     <FiberManualRecordIcon />
                   </CoverageCheckIcon>
                   <ValidationItemText>{item}</ValidationItemText>
