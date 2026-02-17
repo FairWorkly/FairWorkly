@@ -1,3 +1,9 @@
+// Roster-oriented category list: wraps CategoryAccordion with
+// roster-specific icon mapping, issue selection checkboxes, and
+// IssueRow rendering. Payroll will build its own category section
+// using CategoryAccordion directly (Issue #6) with different issue
+// row components and icon resolution.
+
 import React, { useState } from 'react'
 import {
   Box,
@@ -5,37 +11,29 @@ import {
   Button,
   Paper,
   Stack,
-  Collapse,
   styled,
   alpha,
 } from '@mui/material'
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
 import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined'
-import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined'
 import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined'
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined'
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined'
 import CardGiftcardOutlinedIcon from '@mui/icons-material/CardGiftcardOutlined'
 import BeachAccessOutlinedIcon from '@mui/icons-material/BeachAccessOutlined'
-import RestaurantOutlinedIcon from '@mui/icons-material/RestaurantOutlined'
-import BedtimeOutlinedIcon from '@mui/icons-material/BedtimeOutlined'
-import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined'
-import DateRangeOutlinedIcon from '@mui/icons-material/DateRangeOutlined'
-import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined'
 import type { IssueCategory, IssueItem } from '../types/complianceCheck.type'
 import { IssueRow, type GuidanceContent } from './IssueRow'
+import { CategoryAccordion } from './CategoryAccordion'
 
+// Roster icon mapping: backend mock data uses Material icon string keys.
+// Payroll categories use CategoryType enum ('BaseRate', etc.) and will
+// have their own mapping — this iconMap is roster-only.
 const iconMap: Record<string, React.ElementType> = {
   attach_money: AttachMoneyOutlinedIcon,
   gavel: GavelOutlinedIcon,
   schedule: ScheduleOutlinedIcon,
   card_giftcard: CardGiftcardOutlinedIcon,
   beach_access: BeachAccessOutlinedIcon,
-  restaurant: RestaurantOutlinedIcon,
-  bedtime: BedtimeOutlinedIcon,
-  timer: TimerOutlinedIcon,
-  date_range: DateRangeOutlinedIcon,
-  report_problem: ReportProblemOutlinedIcon,
 }
 
 const IssuesWrapper = styled(Paper)(({ theme }) => ({
@@ -92,115 +90,6 @@ const IssuesHeaderIcon = styled(FactCheckOutlinedIcon)(({ theme }) => ({
   color: theme.palette.text.primary,
 }))
 
-const CategoryPanel = styled(Box)(({ theme }) => ({
-  borderRadius: theme.fairworkly.radius.lg,
-  border: `1px solid ${theme.palette.background.default}`,
-  overflow: 'visible',
-}))
-
-const CategoryHeaderRow = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  padding: theme.spacing(1.5, 2),
-  cursor: 'pointer',
-  borderRadius: theme.fairworkly.radius.md,
-  transition: theme.transitions.create('background-color', {
-    duration: theme.transitions.duration.short,
-  }),
-  [theme.breakpoints.down('sm')]: {
-    alignItems: 'flex-start',
-  },
-  [theme.breakpoints.up('sm')]: {
-    padding: theme.spacing(2, 2.5),
-  },
-  '&:hover': {
-    backgroundColor: theme.palette.background.default,
-  },
-}))
-
-const ExpandToggleIcon = styled(Box)(({ theme }) => ({
-  color: theme.palette.text.disabled,
-  marginRight: theme.spacing(1.5),
-}))
-
-const CategoryIconBadge = styled(Box, {
-  shouldForwardProp: prop => prop !== 'iconColor',
-})<{ iconColor?: string }>(({ theme, iconColor }) => ({
-  width: theme.spacing(4.5),
-  height: theme.spacing(4.5),
-  borderRadius: theme.fairworkly.radius.sm,
-  backgroundColor: alpha(iconColor || theme.palette.error.main, 0.1),
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: iconColor || theme.palette.error.main,
-  marginRight: theme.spacing(2),
-  [theme.breakpoints.up('sm')]: {
-    width: theme.spacing(5),
-    height: theme.spacing(5),
-  },
-}))
-
-const CategoryInfoContainer = styled(Box)(() => ({
-  flex: 1,
-  minWidth: 0,
-}))
-
-const CategoryInfoStack = styled(Stack)(({ theme }) => ({
-  flexWrap: 'wrap',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  gap: theme.spacing(0.5),
-  [theme.breakpoints.up('md')]: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing(2),
-  },
-}))
-
-const CategoryTitle = styled(Typography)(({ theme }) => ({
-  fontWeight: theme.typography.h2.fontWeight,
-  color: theme.palette.text.primary,
-}))
-
-const CategoryMetaText = styled(Typography)(({ theme }) => ({
-  fontWeight: theme.typography.caption.fontWeight,
-  color: theme.palette.text.secondary,
-}))
-
-const CategoryAmountText = styled(Typography)(({ theme }) => ({
-  fontWeight: theme.typography.subtitle1.fontWeight,
-  color: theme.palette.error.main,
-}))
-
-/**
- * Fix MUI Collapse overflow:hidden scroll issue on md breakpoint.
- * MUI Collapse sets overflow:hidden during animation which blocks
- * trackpad/wheel scrolling. We override overflowY to visible on all
- * three layers (root, wrapper, wrapperInner) while keeping overflowX
- * hidden to prevent horizontal overflow.
- */
-const StyledCollapse = styled(Collapse)(() => ({
-  // Root level
-  overflowY: 'visible',
-  overflowX: 'hidden',
-  // Wrapper level
-  '& .MuiCollapse-wrapper': {
-    overflowY: 'visible',
-    overflowX: 'hidden',
-  },
-  // Inner wrapper level
-  '& .MuiCollapse-wrapperInner': {
-    overflowY: 'visible',
-    overflowX: 'hidden',
-  },
-}))
-
-const CategoryBody = styled(Box)(({ theme }) => ({
-  borderTop: `1px solid ${theme.palette.background.default}`,
-  backgroundColor: theme.palette.background.default,
-}))
-
 const EmptyState = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
   textAlign: 'center',
@@ -209,6 +98,25 @@ const EmptyState = styled(Box)(({ theme }) => ({
 const EmptyStateText = styled(Typography)({
   fontStyle: 'italic',
 })
+
+const ShowMoreRow = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(1.25),
+  textAlign: 'center',
+  borderTop: `1px solid ${theme.palette.background.default}`,
+  backgroundColor: theme.palette.background.paper,
+  [theme.breakpoints.up('sm')]: {
+    padding: theme.spacing(1.5),
+  },
+}))
+
+const ShowMoreAction = styled(Button)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  fontWeight: theme.typography.button.fontWeight,
+  fontSize: theme.typography.body2.fontSize,
+  [theme.breakpoints.down('sm')]: {
+    width: '100%',
+  },
+}))
 
 const SelectAllAction = styled(Button, {
   shouldForwardProp: prop => prop !== 'isSelected',
@@ -301,68 +209,64 @@ export const IssuesByCategory: React.FC<IssuesByCategoryProps> = ({
       <CategoriesStack>
         {categories
           .filter(cat => cat.employeeCount > 0)
-          .map(category => (
-            <CategoryPanel key={category.id}>
-              <CategoryHeaderRow onClick={() => toggleCategory(category.id)}>
-                <ExpandToggleIcon>
-                  {expandedCategories[category.id] ? (
-                    <ExpandMoreOutlinedIcon />
+          .map(category => {
+            const IconComponent = iconMap[category.icon]
+            return (
+              <CategoryAccordion
+                key={category.id}
+                title={category.title}
+                icon={
+                  IconComponent ? (
+                    <IconComponent fontSize="small" />
                   ) : (
-                    <ChevronRightOutlinedIcon />
-                  )}
-                </ExpandToggleIcon>
-                <CategoryIconBadge iconColor={category.color}>
-                  {(() => {
-                    const IconComponent = iconMap[category.icon]
-                    return IconComponent ? (
-                      <IconComponent fontSize="small" />
-                    ) : (
-                      <FactCheckOutlinedIcon fontSize="small" />
-                    )
-                  })()}
-                </CategoryIconBadge>
-                <CategoryInfoContainer>
-                  <CategoryInfoStack>
-                    <CategoryTitle variant="subtitle1" noWrap>
-                      {category.title}
-                    </CategoryTitle>
-                    <CategoryMetaText variant="body2" noWrap>
-                      {category.employeeCount} employees flagged
-                    </CategoryMetaText>
-                    {resultType !== 'roster' && (
-                      <CategoryAmountText variant="body2" noWrap>
-                        {category.totalUnderpayment} underpayment
-                      </CategoryAmountText>
-                    )}
-                  </CategoryInfoStack>
-                </CategoryInfoContainer>
-              </CategoryHeaderRow>
+                    <FactCheckOutlinedIcon fontSize="small" />
+                  )
+                }
+                iconColor={category.color}
+                employeeCount={category.employeeCount}
+                // Roster hides amount label; payroll shows "$X underpayment"
+                amountLabel={
+                  resultType !== 'roster'
+                    ? `${category.totalUnderpayment} underpayment`
+                    : undefined
+                }
+                expanded={!!expandedCategories[category.id]}
+                onToggle={() => toggleCategory(category.id)}
+              >
+                {category.issues.length > 0 ? (
+                  category.issues.map(issue => (
+                    <IssueRow
+                      key={issue.id}
+                      issue={issue}
+                      isSelected={selectedIssueIds.includes(issue.id)}
+                      onToggleSelection={() => toggleIssueSelection(issue.id)}
+                      guidance={guidanceForIssue?.(issue)}
+                    />
+                  ))
+                ) : (
+                  <EmptyState>
+                    <EmptyStateText variant="body2" color="text.secondary">
+                      Generating detailed record breakdown for {category.title}
+                      ...
+                    </EmptyStateText>
+                  </EmptyState>
+                )}
 
-              <StyledCollapse in={expandedCategories[category.id]}>
-                <CategoryBody>
-                  {category.issues.length > 0 ? (
-                    category.issues.map(issue => (
-                      <IssueRow
-                        key={issue.id}
-                        issue={issue}
-                        isSelected={selectedIssueIds.includes(issue.id)}
-                        onToggleSelection={() => toggleIssueSelection(issue.id)}
-                        guidance={guidanceForIssue?.(issue)}
-                        resultType={resultType}
-                      />
-                    ))
-                  ) : (
-                    <EmptyState>
-                      <EmptyStateText variant="body2" color="text.secondary">
-                        Generating detailed record breakdown for{' '}
-                        {category.title}...
-                      </EmptyStateText>
-                    </EmptyState>
+                {category.issues.length > 0 &&
+                  category.employeeCount > category.issues.length && (
+                    <ShowMoreRow>
+                      <ShowMoreAction
+                        variant="text"
+                        startIcon={<ExpandMoreOutlinedIcon />}
+                      >
+                        Show {category.employeeCount - category.issues.length}{' '}
+                        more results
+                      </ShowMoreAction>
+                    </ShowMoreRow>
                   )}
-                </CategoryBody>
-              </StyledCollapse>
-            </CategoryPanel>
-          ))}
+              </CategoryAccordion>
+            )
+          })}
       </CategoriesStack>
     </IssuesWrapper>
   )
