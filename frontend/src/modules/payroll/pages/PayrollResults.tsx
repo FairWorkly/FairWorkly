@@ -126,7 +126,6 @@ export function PayrollResults() {
 
   // ValidationHeader metadata
   const metadata: ValidationMetadata = {
-    award: 'General Retail Industry Award 2020',
     payPeriod: 'Pending',
     weekStarting: result.payPeriodStart,
     weekEnding: result.payPeriodEnd,

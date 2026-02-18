@@ -9,7 +9,7 @@ export interface UploadedFile {
 }
 
 export interface ValidationMetadata {
-  award: string
+  award?: string
   payPeriod: string
   weekStarting: string
   weekEnding: string

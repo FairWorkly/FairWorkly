@@ -12,6 +12,7 @@ import { styled } from '@/styles/styled'
 import { formatMoney } from '@/shared/compliance-check'
 import type { ValidationIssue } from '../types/payrollValidation.types'
 import { severityConfig } from './payrollCategoryConfig'
+import { buildDescriptionLines } from './payrollDescriptionTemplates'
 
 // --- Styled components ---
 
@@ -65,44 +66,6 @@ const SeverityChip = styled(Chip, {
   backgroundColor: alpha(chipColor, 0.1),
   borderColor: alpha(chipColor, 0.3),
 }))
-
-// --- Description template builders ---
-
-function fmt(n: number): string {
-  return n.toFixed(2)
-}
-
-function buildDescriptionLines(
-  issue: ValidationIssue
-): [string, string] | null {
-  const d = issue.description
-  if (!d) return null
-
-  const diff = fmt(d.expectedValue - d.actualValue)
-
-  switch (issue.categoryType) {
-    case 'BaseRate':
-      return [
-        `Paid $${fmt(d.actualValue)}/hr, should be $${fmt(d.expectedValue)}/hr (${d.contextLabel})`,
-        `Underpayment: $${fmt(issue.impactAmount)} (${fmt(d.affectedUnits)} hours @ $${diff}/hr shortfall)`,
-      ]
-    case 'PenaltyRate':
-      return [
-        `${d.contextLabel}: Paid $${fmt(d.actualValue)}/hr, should be $${fmt(d.expectedValue)}/hr`,
-        `Underpayment: $${fmt(issue.impactAmount)} (${fmt(d.affectedUnits)} hours @ $${diff}/hr shortfall)`,
-      ]
-    case 'Superannuation':
-      return [
-        `Super paid $${fmt(d.actualValue)}, should be $${fmt(d.expectedValue)} (${d.contextLabel} gross)`,
-        `Underpayment: $${fmt(issue.impactAmount)}`,
-      ]
-    case 'CasualLoading':
-      return [
-        `Casual employee: Paid $${fmt(d.actualValue)}/hr, should be $${fmt(d.expectedValue)}/hr (${d.contextLabel})`,
-        `Underpayment: $${fmt(issue.impactAmount)} (${fmt(d.affectedUnits)} hours @ $${diff}/hr shortfall)`,
-      ]
-  }
-}
 
 // --- Component ---
 

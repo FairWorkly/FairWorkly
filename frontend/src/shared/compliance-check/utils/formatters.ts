@@ -111,7 +111,7 @@ interface ExportableCategory {
 }
 
 interface ExportMetadata {
-  award: string
+  award?: string
   weekStarting: string
   weekEnding: string
   validatedAt?: string
