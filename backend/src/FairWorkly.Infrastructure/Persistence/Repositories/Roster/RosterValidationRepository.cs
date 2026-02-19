@@ -53,6 +53,7 @@ public class RosterValidationRepository(FairWorklyDbContext context) : IRosterVa
                 rv.RosterId == rosterId && rv.OrganizationId == organizationId && !rv.IsDeleted
             )
             .Include(rv => rv.Issues.Where(i => !i.IsDeleted))
+            .OrderByDescending(rv => rv.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
     }
 }
