@@ -71,8 +71,6 @@ public class ValidateRosterHandler(
             );
         }
 
-        var employeeLookup = BuildEmployeeLookup(roster);
-
         // Create validation record
         var validation = new RosterValidation
         {
@@ -155,22 +153,6 @@ public class ValidateRosterHandler(
         var response = ValidationResponseBuilder.Build(roster, validation, issues);
 
         return Result<ValidateRosterResponse>.Of200("Roster validation completed", response);
-    }
-
-    private static Dictionary<Guid, (string Name, string? Number)> BuildEmployeeLookup(
-        RosterEntity roster
-    )
-    {
-        return roster
-            .Shifts.Where(s => s.EmployeeId != Guid.Empty && s.Employee != null)
-            .Select(s => new
-            {
-                s.EmployeeId,
-                Name = s.Employee!.FullName,
-                Number = s.Employee.EmployeeNumber,
-            })
-            .GroupBy(x => x.EmployeeId)
-            .ToDictionary(g => g.Key, g => (g.First().Name, g.First().Number));
     }
 }
 
