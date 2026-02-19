@@ -6,11 +6,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const TEST_DATA_DIR = path.resolve(__dirname, '../../test-data')
 
 async function login(page: Page) {
+  const email = process.env.E2E_USER_EMAIL ?? 'admin@fairworkly.com.au'
+  const password = process.env.E2E_USER_PASSWORD ?? 'fairworkly123'
+
   await page.goto('/login')
   const emailField = page.getByLabel('Email Address')
   await emailField.waitFor({ state: 'visible', timeout: 15_000 })
-  await emailField.fill(process.env.E2E_USER_EMAIL ?? '')
-  await page.getByLabel('Password').fill(process.env.E2E_USER_PASSWORD ?? '')
+  await emailField.fill(email)
+  await page.getByLabel('Password').fill(password)
   await page.locator('form').getByRole('button', { name: 'Sign In' }).click()
   await expect(page).not.toHaveURL(/login/, { timeout: 15_000 })
 }
