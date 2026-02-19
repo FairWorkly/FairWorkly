@@ -13,11 +13,11 @@ const payrollConfig: ComplianceConfig = {
 }
 
 const payrollValidationItems = [
-  'Base rates & award classifications',
-  'Penalty rates (weekends & public holidays)',
-  'Casual loading (25%)',
-  'Superannuation guarantee',
-  // Future: 'Single Touch Payroll(STP) compliance'
+  { key: 'enableBaseRateCheck', label: 'Base rates & award classifications' },
+  { key: 'enablePenaltyCheck', label: 'Penalty rates (weekends & public holidays)' },
+  { key: 'enableCasualLoadingCheck', label: 'Casual loading (25%)' },
+  { key: 'enableSuperCheck', label: 'Superannuation guarantee' },
+  // Future: { key: 'enableStpCheck', label: 'Single Touch Payroll(STP) compliance' }
 ]
 
 export function PayrollUpload() {
@@ -29,9 +29,12 @@ export function PayrollUpload() {
   // object in a ref so we can send it via FormData on submit.
   const actualFileRef = useRef<File | null>(null)
 
-  // Toggle state for each validation item, order matches payrollValidationItems:
-  // [0] base rate, [1] penalty rate, [2] casual loading, [3] super
-  const [enableChecks, setEnableChecks] = useState([true, true, true, true])
+  const [enableChecks, setEnableChecks] = useState<Record<string, boolean>>({
+    enableBaseRateCheck: true,
+    enablePenaltyCheck: true,
+    enableCasualLoadingCheck: true,
+    enableSuperCheck: true,
+  })
 
   // Store the real File and build an UploadedFile preview card for the UI.
   // ComplianceUpload only renders the card — it never touches the File itself.
@@ -77,10 +80,10 @@ export function PayrollUpload() {
       const result = await uploadPayrollValidation(actualFileRef.current, {
         awardType: 'GeneralRetailIndustryAward2020',
         state: 'VIC',
-        enableBaseRateCheck: enableChecks[0],
-        enablePenaltyCheck: enableChecks[1],
-        enableCasualLoadingCheck: enableChecks[2],
-        enableSuperCheck: enableChecks[3],
+        enableBaseRateCheck: enableChecks.enableBaseRateCheck,
+        enablePenaltyCheck: enableChecks.enablePenaltyCheck,
+        enableCasualLoadingCheck: enableChecks.enableCasualLoadingCheck,
+        enableSuperCheck: enableChecks.enableSuperCheck,
       })
 
       // Persist to sessionStorage so the results page survives a
@@ -118,8 +121,8 @@ export function PayrollUpload() {
       acceptFileTypes=".csv"
       validationItems={payrollValidationItems}
       validationItemStates={enableChecks}
-      onToggleValidationItem={i =>
-        setEnableChecks(prev => prev.map((v, j) => (j === i ? !v : v)))
+      onToggleValidationItem={key =>
+        setEnableChecks(prev => ({ ...prev, [key]: !prev[key] }))
       }
       isLoading={isProcessing}
       error={error}

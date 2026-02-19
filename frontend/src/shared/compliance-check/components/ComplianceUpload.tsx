@@ -227,12 +227,13 @@ interface ComplianceUploadProps {
   onStartAnalysis: () => void
   onCancel: () => void
   acceptFileTypes?: string
-  validationItems?: string[]
+  validationItems?: { key: string; label: string }[]
   // Optional toggle support — when provided, validation items become
   // clickable switches (e.g. payroll lets users disable individual checks).
+  // Keys must match the keys used in validationItems entries.
   // Omit both props to keep items as a static read-only list (roster).
-  validationItemStates?: boolean[]
-  onToggleValidationItem?: (index: number) => void
+  validationItemStates?: Record<string, boolean>
+  onToggleValidationItem?: (key: string) => void
   isLoading?: boolean
   error?: string | null
 }
@@ -406,12 +407,12 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
           </ValidationCoverageHeader>
           {validationItems.length > 0 && (
             <Box>
-              {validationItems.map((item, index) => (
+              {validationItems.map(item => (
                 <ValidationListItem
-                  key={index}
+                  key={item.key}
                   onClick={
                     onToggleValidationItem
-                      ? () => onToggleValidationItem(index)
+                      ? () => onToggleValidationItem(item.key)
                       : undefined
                   }
                   sx={
@@ -422,7 +423,7 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
                     sx={
                       validationItemStates
                         ? {
-                            color: validationItemStates[index]
+                            color: validationItemStates[item.key]
                               ? 'primary.main'
                               : 'text.disabled',
                           }
@@ -431,7 +432,7 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
                   >
                     <FiberManualRecordIcon />
                   </CoverageCheckIcon>
-                  <ValidationItemText>{item}</ValidationItemText>
+                  <ValidationItemText>{item.label}</ValidationItemText>
                 </ValidationListItem>
               ))}
             </Box>
