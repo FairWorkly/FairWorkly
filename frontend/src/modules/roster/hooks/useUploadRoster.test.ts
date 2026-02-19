@@ -106,7 +106,7 @@ describe('useUploadRoster', () => {
     }))
   })
 
-  it('onSuccess navigates to results page with warnings', () => {
+  it('onSuccess navigates to results page', () => {
     const result = useUploadRoster()
 
     const file = new File(['data'], 'roster.xlsx')
@@ -116,11 +116,9 @@ describe('useUploadRoster', () => {
 
     // Extract and invoke the onSuccess callback
     const onSuccess = mockMutate.mock.calls[0][1].onSuccess
-    onSuccess({ rosterId: 'abc-123', warnings: [{ row: 1, message: 'test' }] })
+    onSuccess({ rosterId: 'abc-123' })
 
-    expect(mockNavigate).toHaveBeenCalledWith('/roster/results/abc-123', {
-      state: { warnings: [{ row: 1, message: 'test' }] },
-    })
+    expect(mockNavigate).toHaveBeenCalledWith('/roster/results/abc-123')
   })
 
   it('handleCancel resets all state', () => {

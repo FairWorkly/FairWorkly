@@ -55,9 +55,7 @@ export function useUploadRoster() {
 
     upload(actualFileRef.current, {
       onSuccess: (response) => {
-        navigate(`/roster/results/${response.rosterId}`, {
-          state: { warnings: response.warnings ?? [] },
-        })
+        navigate(`/roster/results/${response.rosterId}`)
       },
     })
   }, [reset, upload, navigate])
