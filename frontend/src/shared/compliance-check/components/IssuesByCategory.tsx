@@ -15,13 +15,13 @@ import {
   alpha,
 } from '@mui/material'
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
-import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined'
 import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined'
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined'
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined'
 import CardGiftcardOutlinedIcon from '@mui/icons-material/CardGiftcardOutlined'
 import BeachAccessOutlinedIcon from '@mui/icons-material/BeachAccessOutlined'
 import type { IssueCategory, IssueItem } from '../types/complianceCheck.type'
+import { formatMoney } from '../utils/formatters'
 import { IssueRow, type GuidanceContent } from './IssueRow'
 import { CategoryAccordion } from './CategoryAccordion'
 
@@ -109,15 +109,6 @@ const ShowMoreRow = styled(Box)(({ theme }) => ({
   },
 }))
 
-const ShowMoreAction = styled(Button)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  fontWeight: theme.typography.button.fontWeight,
-  fontSize: theme.typography.body2.fontSize,
-  [theme.breakpoints.down('sm')]: {
-    width: '100%',
-  },
-}))
-
 const SelectAllAction = styled(Button, {
   shouldForwardProp: prop => prop !== 'isSelected',
 })<{ isSelected?: boolean }>(({ theme, isSelected }) => ({
@@ -155,12 +146,13 @@ interface IssuesByCategoryProps {
 export const IssuesByCategory: React.FC<IssuesByCategoryProps> = ({
   categories,
   guidanceForIssue,
-  resultType = 'payroll',
+  resultType = 'roster',
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<
     Record<string, boolean>
-  >({
-    [categories[0]?.id]: true,
+  >(() => {
+    const firstId = categories[0]?.id
+    return firstId ? { [firstId]: true } : {}
   })
   const [selectedIssueIds, setSelectedIssueIds] = useState<number[]>([])
 
@@ -227,7 +219,7 @@ export const IssuesByCategory: React.FC<IssuesByCategoryProps> = ({
                 // Roster hides amount label; payroll shows "$X underpayment"
                 amountLabel={
                   resultType !== 'roster'
-                    ? `${category.totalUnderpayment} underpayment`
+                    ? `${formatMoney(category.totalUnderpayment)} underpayment`
                     : undefined
                 }
                 expanded={!!expandedCategories[category.id]}
@@ -255,13 +247,10 @@ export const IssuesByCategory: React.FC<IssuesByCategoryProps> = ({
                 {category.issues.length > 0 &&
                   category.employeeCount > category.issues.length && (
                     <ShowMoreRow>
-                      <ShowMoreAction
-                        variant="text"
-                        startIcon={<ExpandMoreOutlinedIcon />}
-                      >
-                        Show {category.employeeCount - category.issues.length}{' '}
-                        more results
-                      </ShowMoreAction>
+                      <Typography variant="body2" color="text.secondary">
+                        {category.employeeCount - category.issues.length} more
+                        employees not shown
+                      </Typography>
                     </ShowMoreRow>
                   )}
               </CategoryAccordion>

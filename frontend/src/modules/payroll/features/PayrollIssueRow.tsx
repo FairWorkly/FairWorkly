@@ -1,8 +1,8 @@
 // Payroll-specific issue row component. Renders a single ValidationIssue
-// inside a CategoryAccordion body. Two rendering paths:
-//   - warning !== null  → yellow Alert box with backend-provided message
-//   - description !== null → two-line structured text built from 4 templates
-//     (BaseRate / PenaltyRate / Superannuation / CasualLoading)
+// inside a CategoryAccordion body.
+//   - warning: yellow Alert box (shown when a check was disabled)
+//   - description: two-line structured text built from 4 category templates
+// The backend guarantees these are mutually exclusive per issue.
 // Left border color reflects severity (1-4).
 
 import React from 'react'
@@ -62,9 +62,9 @@ const SeverityChip = styled(Chip, {
   height: 22,
   fontSize: 11,
   fontWeight: 600,
-  color: chipColor,
   backgroundColor: alpha(chipColor, 0.1),
   borderColor: alpha(chipColor, 0.3),
+  '& .MuiChip-label': { color: chipColor },
 }))
 
 // --- Component ---

@@ -1,9 +1,8 @@
 // High-level results page shell for compliance validation.
 // Composes three shared building blocks: ValidationHeader (breadcrumb +
 // metadata), SummaryCards (stat grid), and IssuesByCategory (accordion
-// list). Roster uses this component directly; Payroll will compose the
-// building blocks individually (Issue #6) because its issue-row
-// rendering is domain-specific.
+// list). Roster uses this component directly; Payroll composes the
+// building blocks independently with its own issue-row components.
 //
 // The stats array is assembled here based on resultType — roster shows
 // "Critical Issues" while payroll shows "Total Underpayment" in the
@@ -19,8 +18,8 @@ import type {
 import { ValidationHeader } from './ValidationHeader'
 import { IssuesByCategory } from './IssuesByCategory'
 import { SummaryCards } from './SummaryCards'
-import { exportComplianceCsv } from '../utils/formatters'
-import { theme } from '@/styles/theme/theme'
+import { exportComplianceCsv, formatMoney } from '../utils/formatters'
+import { useTheme } from '@mui/material/styles'
 
 interface ComplianceResultsProps {
   metadata: ValidationMetadata
@@ -39,10 +38,11 @@ export const ComplianceResults: React.FC<ComplianceResultsProps> = ({
   categories,
   onNewValidation,
   onNavigateBack,
-  breadcrumbLabel = 'Payroll',
+  breadcrumbLabel = 'Roster',
   periodLabel = 'Pay period',
-  resultType = 'payroll',
+  resultType = 'roster',
 }) => {
+  const theme = useTheme()
   const handleExport = () => {
     exportComplianceCsv(metadata, categories)
   }
@@ -90,7 +90,7 @@ export const ComplianceResults: React.FC<ComplianceResultsProps> = ({
             valueColor: theme.palette.error.main,
           },
           {
-            value: summary.totalUnderpayment,
+            value: formatMoney(summary.totalUnderpayment),
             label: 'Total Underpayment',
             variant: 'warning' as const,
             valueColor: theme.palette.warning.main,

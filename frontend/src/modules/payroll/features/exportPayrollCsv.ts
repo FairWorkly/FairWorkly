@@ -11,7 +11,7 @@ function fmt(n: number): string {
 }
 
 function escapeCsvField(value: string): string {
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+  if (/[,"\n\r]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`
   }
   return value
@@ -29,15 +29,18 @@ export function exportPayrollCsv(result: PayrollValidationResult): void {
 
   const rows = result.issues.map(issue => {
     const lines = buildDescriptionLines(issue)
-    const description = lines
-      ? lines.join('. ')
-      : (issue.warning ?? '')
+    const description = lines ? lines.join('. ') : (issue.warning ?? '')
+
+    const catTitle =
+      categoryConfig[issue.categoryType]?.title ?? issue.categoryType
+    const sevLabel =
+      severityConfig[issue.severity]?.label ?? String(issue.severity)
 
     return [
       escapeCsvField(issue.employeeName),
       escapeCsvField(issue.employeeId),
-      escapeCsvField(categoryConfig[issue.categoryType].title),
-      escapeCsvField(severityConfig[issue.severity].label),
+      escapeCsvField(catTitle),
+      escapeCsvField(sevLabel),
       escapeCsvField(`$${fmt(issue.impactAmount)}`),
       escapeCsvField(description),
     ]
@@ -55,7 +58,9 @@ export function exportPayrollCsv(result: PayrollValidationResult): void {
   const filename = `payroll-report-${result.payPeriodStart}-to-${result.payPeriodEnd}.csv`
   link.href = url
   link.download = filename
+  document.body.appendChild(link)
   link.click()
+  document.body.removeChild(link)
 
-  URL.revokeObjectURL(url)
+  setTimeout(() => URL.revokeObjectURL(url), 100)
 }

@@ -88,7 +88,9 @@ const FileIconContainer = styled(Box)(({ theme }) => ({
   color: theme.palette.primary.main,
 }))
 
-const ValidationListItem = styled(Box)(({ theme }) => ({
+const ValidationListItem = styled(Box, {
+  shouldForwardProp: prop => prop !== 'interactive',
+})<{ interactive?: boolean }>(({ theme, interactive }) => ({
   display: 'flex',
   alignItems: 'center',
   padding: theme.spacing(2, 2.5),
@@ -99,10 +101,13 @@ const ValidationListItem = styled(Box)(({ theme }) => ({
   transition: theme.transitions.create(['border-color', 'background-color'], {
     duration: theme.transitions.duration.shortest,
   }),
-  '&:hover': {
-    borderColor: theme.palette.divider,
-    backgroundColor: theme.palette.background.default,
-  },
+  ...(interactive && {
+    cursor: 'pointer',
+    '&:hover': {
+      borderColor: theme.palette.divider,
+      backgroundColor: theme.palette.background.default,
+    },
+  }),
   '&:last-child': {
     marginBottom: 0,
   },
@@ -410,14 +415,23 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
               {validationItems.map(item => (
                 <ValidationListItem
                   key={item.key}
+                  interactive={!!onToggleValidationItem}
                   onClick={
                     onToggleValidationItem
                       ? () => onToggleValidationItem(item.key)
                       : undefined
                   }
-                  sx={
-                    onToggleValidationItem ? { cursor: 'pointer' } : undefined
-                  }
+                  {...(onToggleValidationItem && {
+                    role: 'switch',
+                    tabIndex: 0,
+                    'aria-checked': validationItemStates?.[item.key] ?? false,
+                    onKeyDown: (e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onToggleValidationItem(item.key)
+                      }
+                    },
+                  })}
                 >
                   <CoverageCheckIcon
                     sx={

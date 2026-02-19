@@ -6,6 +6,7 @@ export type CategoryType =
   | 'Superannuation'
   | 'CasualLoading'
 
+/** 1 = Info, 2 = Warning, 3 = Error, 4 = Critical (higher = more severe) */
 export type Severity = 1 | 2 | 3 | 4
 
 export type ValidationStatus = 'Passed' | 'Failed'
@@ -89,6 +90,6 @@ export interface PayrollCsvError {
 export interface PayrollServerError {
   status: number
   title: string
-  detail: string
-  instance: string
+  detail?: string
+  instance?: string
 }

@@ -14,7 +14,10 @@ const payrollConfig: ComplianceConfig = {
 
 const payrollValidationItems = [
   { key: 'enableBaseRateCheck', label: 'Base rates & award classifications' },
-  { key: 'enablePenaltyCheck', label: 'Penalty rates (weekends & public holidays)' },
+  {
+    key: 'enablePenaltyCheck',
+    label: 'Penalty rates (weekends & public holidays)',
+  },
   { key: 'enableCasualLoadingCheck', label: 'Casual loading (25%)' },
   { key: 'enableSuperCheck', label: 'Superannuation guarantee' },
   // Future: { key: 'enableStpCheck', label: 'Single Touch Payroll(STP) compliance' }
@@ -88,17 +91,27 @@ export function PayrollUpload() {
 
       // Persist to sessionStorage so the results page survives a
       // browser refresh (router state is lost on reload).
-      sessionStorage.setItem(
-        'payroll-validation-result',
-        JSON.stringify(result)
-      )
+      try {
+        sessionStorage.setItem(
+          'payroll-validation-result',
+          JSON.stringify(result)
+        )
+      } catch {
+        // Storage quota exceeded — current session still works via router
+        // state; F5 refresh will redirect to upload instead of restoring.
+        console.warn('sessionStorage unavailable; refresh recovery disabled')
+      }
 
       navigate('/payroll/results', { state: { result } })
     } catch (err) {
-      const apiError = err as ApiError
-      console.log('Payroll validation error:', apiError)
-      console.log('Error details:', apiError.details)
-      setError(apiError.message)
+      console.error('Payroll validation error:', err)
+      if (err && typeof err === 'object' && 'message' in err) {
+        const apiError = err as ApiError
+        console.error('Error details:', apiError.details)
+        setError(apiError.message ?? 'An unexpected error occurred')
+      } else {
+        setError('An unexpected error occurred')
+      }
       setIsProcessing(false)
     }
   }

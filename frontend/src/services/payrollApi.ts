@@ -31,12 +31,12 @@ export async function uploadPayrollValidation(
   formData.append('enableSuperCheck', String(options.enableSuperCheck))
 
   try {
+    // Clear the default application/json Content-Type so the browser
+    // auto-sets multipart/form-data with the correct boundary.
     const response = await httpClient.post<PayrollValidationResult>(
       '/payroll/validation',
       formData,
-      {
-        headers: { 'Content-Type': undefined },
-      }
+      { headers: { 'Content-Type': undefined } }
     )
     return response.data
   } catch (err) {

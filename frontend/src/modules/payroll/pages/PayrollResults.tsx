@@ -104,8 +104,13 @@ export function PayrollResults() {
   const result: PayrollValidationResult | null =
     location.state?.result ??
     (() => {
-      const cached = sessionStorage.getItem('payroll-validation-result')
-      return cached ? JSON.parse(cached) : null
+      try {
+        const cached = sessionStorage.getItem('payroll-validation-result')
+        return cached ? JSON.parse(cached) : null
+      } catch {
+        sessionStorage.removeItem('payroll-validation-result')
+        return null
+      }
     })()
 
   // Expand/collapse state — first category open by default.
@@ -126,7 +131,6 @@ export function PayrollResults() {
 
   // ValidationHeader metadata
   const metadata: ValidationMetadata = {
-    payPeriod: 'Pending',
     weekStarting: result.payPeriodStart,
     weekEnding: result.payPeriodEnd,
     validatedAt: formatDateTime(result.timestamp),
@@ -194,6 +198,7 @@ export function PayrollResults() {
               .filter(cat => cat.affectedEmployeeCount > 0)
               .map(cat => {
                 const config = categoryConfig[cat.key]
+                if (!config) return null
                 const Icon = config.icon
                 const catIssues = result.issues.filter(
                   i => i.categoryType === cat.key

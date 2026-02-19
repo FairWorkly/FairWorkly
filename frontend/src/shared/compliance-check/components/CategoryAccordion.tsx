@@ -10,7 +10,7 @@
 // pass a formatted string to show it, omit to hide.
 
 import React from 'react'
-import { Box, Typography, Collapse, alpha } from '@mui/material'
+import { Box, Typography, Collapse, alpha, ButtonBase } from '@mui/material'
 import { styled } from '@/styles/styled'
 import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined'
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined'
@@ -21,9 +21,11 @@ const CategoryPanel = styled(Box)(({ theme }) => ({
   overflow: 'visible',
 }))
 
-const CategoryHeaderRow = styled(Box)(({ theme }) => ({
+const CategoryHeaderRow = styled(ButtonBase)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
+  width: '100%',
+  textAlign: 'left',
   padding: theme.spacing(1.5, 2),
   cursor: 'pointer',
   borderRadius: theme.fairworkly.radius.md,
@@ -147,7 +149,7 @@ export const CategoryAccordion: React.FC<CategoryAccordionProps> = ({
   children,
 }) => (
   <CategoryPanel>
-    <CategoryHeaderRow onClick={onToggle}>
+    <CategoryHeaderRow onClick={onToggle} aria-expanded={expanded}>
       <ExpandToggleIcon>
         {expanded ? <ExpandMoreOutlinedIcon /> : <ChevronRightOutlinedIcon />}
       </ExpandToggleIcon>
@@ -158,7 +160,8 @@ export const CategoryAccordion: React.FC<CategoryAccordionProps> = ({
             {title}
           </CategoryTitle>
           <CategoryMetaText variant="body2" noWrap>
-            {employeeCount} employees flagged
+            {employeeCount} {employeeCount === 1 ? 'employee' : 'employees'}{' '}
+            flagged
           </CategoryMetaText>
           {amountLabel && (
             <CategoryAmountText variant="body2" noWrap>

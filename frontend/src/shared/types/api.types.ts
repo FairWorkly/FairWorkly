@@ -1,4 +1,4 @@
-import type { AxiosError } from 'axios'
+import { isAxiosError } from 'axios'
 
 // --- Unified API error model ---
 
@@ -30,9 +30,9 @@ export interface BackendEnvelope<T = unknown> {
  * Used by both the success interceptor (unwrapping) and normalizeApiError.
  */
 export function isBackendEnvelope(data: unknown): data is BackendEnvelope {
-  return (
-    typeof data === 'object' && data !== null && 'code' in data && 'msg' in data
-  )
+  if (typeof data !== 'object' || data === null) return false
+  const d = data as Record<string, unknown>
+  return typeof d.code === 'number' && typeof d.msg === 'string'
 }
 
 /**
@@ -47,13 +47,12 @@ interface ProblemDetails {
 }
 
 function isProblemDetails(data: unknown): data is ProblemDetails {
-  return typeof data === 'object' && data !== null && 'title' in data
-}
-
-// --- Axios type guard ---
-
-export function isAxiosError(error: unknown): error is AxiosError {
-  return typeof error === 'object' && error !== null && 'isAxiosError' in error
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'title' in data &&
+    ('status' in data || 'detail' in data)
+  )
 }
 
 // --- Error normalizer ---
@@ -69,23 +68,23 @@ export function isAxiosError(error: unknown): error is AxiosError {
 export function normalizeApiError(error: unknown): ApiError {
   if (isAxiosError(error)) {
     const status = error.response?.status
-    const data = error.response?.data
+    const responseBody = error.response?.data
 
     // Backend envelope: { code, msg, data }
-    if (isBackendEnvelope(data)) {
+    if (isBackendEnvelope(responseBody)) {
       return {
         status,
-        message: data.msg,
-        details: data.data,
+        message: responseBody.msg,
+        details: responseBody.data,
         raw: error,
       }
     }
 
     // ProblemDetails (GlobalExceptionHandler — unexpected bugs)
-    if (isProblemDetails(data)) {
+    if (isProblemDetails(responseBody)) {
       return {
         status,
-        message: data.detail || data.title || 'Server error',
+        message: responseBody.detail || responseBody.title || 'Server error',
         raw: error,
       }
     }
@@ -104,5 +103,5 @@ export function normalizeApiError(error: unknown): ApiError {
   }
 
   // Catch-all
-  return { message: 'Network error. Please try again.', raw: error }
+  return { message: 'An unexpected error occurred.', raw: error }
 }

@@ -41,5 +41,7 @@ export function buildDescriptionLines(
         `Casual employee: Paid $${fmt(d.actualValue)}/hr, should be $${fmt(d.expectedValue)}/hr (${d.contextLabel})`,
         `Underpayment: $${fmt(issue.impactAmount)} (${fmt(d.affectedUnits)} hours @ $${diff}/hr shortfall)`,
       ]
+    default:
+      return null
   }
 }
