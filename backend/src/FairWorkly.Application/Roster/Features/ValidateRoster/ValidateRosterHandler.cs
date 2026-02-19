@@ -71,23 +71,38 @@ public class ValidateRosterHandler(
             );
         }
 
-        // Create validation record
-        var validation = new RosterValidation
+        // Reuse stale InProgress record (e.g. previous run crashed) or create new
+        RosterValidation validation;
+        if (existingValidation != null && existingValidation.Status == ValidationStatus.InProgress)
         {
-            Id = Guid.NewGuid(),
-            OrganizationId = request.OrganizationId,
-            RosterId = request.RosterId,
-            Status = ValidationStatus.InProgress,
-            WeekStartDate = roster.WeekStartDate,
-            WeekEndDate = roster.WeekEndDate,
-            StartedAt = DateTimeOffset.UtcNow,
-            ExecutedCheckTypes = ExecutedCheckTypeSet.FromCheckTypes(
+            validation = existingValidation;
+            validation.StartedAt = DateTimeOffset.UtcNow;
+            validation.CompletedAt = null;
+            validation.Notes = null;
+            validation.ExecutedCheckTypes = ExecutedCheckTypeSet.FromCheckTypes(
                 complianceEngine.GetExecutedCheckTypes()
-            ),
-        };
+            );
+            await validationRepository.UpdateAsync(validation, cancellationToken);
+        }
+        else
+        {
+            validation = new RosterValidation
+            {
+                Id = Guid.NewGuid(),
+                OrganizationId = request.OrganizationId,
+                RosterId = request.RosterId,
+                Status = ValidationStatus.InProgress,
+                WeekStartDate = roster.WeekStartDate,
+                WeekEndDate = roster.WeekEndDate,
+                StartedAt = DateTimeOffset.UtcNow,
+                ExecutedCheckTypes = ExecutedCheckTypeSet.FromCheckTypes(
+                    complianceEngine.GetExecutedCheckTypes()
+                ),
+            };
+            await validationRepository.CreateAsync(validation, cancellationToken);
+        }
 
-        await validationRepository.CreateAsync(validation, cancellationToken);
-        // Persist InProgress record immediately so it's visible to frontend/background queries
+        // Persist immediately so it's visible to frontend/background queries
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         List<RosterIssue> issues;
