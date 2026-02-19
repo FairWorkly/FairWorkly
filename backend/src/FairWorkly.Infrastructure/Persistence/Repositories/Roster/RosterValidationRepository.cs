@@ -40,4 +40,19 @@ public class RosterValidationRepository(FairWorklyDbContext context) : IRosterVa
         _context.RosterIssues.AddRange(issues);
         return Task.CompletedTask;
     }
+
+    public async Task<RosterValidation?> GetByRosterIdWithIssuesAsync(
+        Guid rosterId,
+        Guid organizationId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return await _context
+            .RosterValidations.AsNoTracking()
+            .Where(rv =>
+                rv.RosterId == rosterId && rv.OrganizationId == organizationId && !rv.IsDeleted
+            )
+            .Include(rv => rv.Issues.Where(i => !i.IsDeleted))
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }

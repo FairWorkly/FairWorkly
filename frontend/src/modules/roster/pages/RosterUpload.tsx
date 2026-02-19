@@ -7,8 +7,8 @@ import type {
   ComplianceConfig,
   UploadedFile,
 } from '@/shared/compliance-check'
-import type { ApiError } from '@/shared/types/api.types'
-import { uploadRoster, type ParserWarning } from '@/services/rosterApi'
+import type { ParserWarning } from '@/services/rosterApi'
+import { useUploadRoster } from '../hooks'
 
 const WarningAlert = styled(Alert)(({ theme }) => ({
   marginBottom: theme.spacing(3),
@@ -43,10 +43,10 @@ const rosterValidationItems = [
 export function RosterUpload() {
   const navigate = useNavigate()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [warnings, setWarnings] = useState<ParserWarning[]>([])
   const actualFileRef = useRef<File | null>(null)
+
+  const { mutate: upload, isPending, error: uploadError, reset } = useUploadRoster()
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -66,48 +66,36 @@ export function RosterUpload() {
     }
 
     setUploadedFiles([newFile])
-    setError(null)
+    reset()
     setWarnings([])
   }
 
   const handleRemoveFile = (id: number) => {
     setUploadedFiles(prev => prev.filter(file => file.id !== id))
     actualFileRef.current = null
-    setError(null)
+    reset()
     setWarnings([])
   }
 
-  const handleStartAnalysis = async () => {
-    if (!actualFileRef.current) {
-      setError('No file selected')
-      return
-    }
+  const handleStartAnalysis = () => {
+    if (!actualFileRef.current) return
 
-    setIsProcessing(true)
-    setError(null)
+    reset()
     setWarnings([])
 
-    try {
-      const response = await uploadRoster(actualFileRef.current)
-
-      navigate('/roster/results', {
-        state: {
-          rosterId: response.rosterId,
-          warnings: response.warnings ?? [],
-        },
-      })
-    } catch (err) {
-      const errorMessage = (err as ApiError).message ?? 'Failed to upload roster. Please try again.'
-      setError(errorMessage)
-      setIsProcessing(false)
-    }
+    upload(actualFileRef.current, {
+      onSuccess: (response) => {
+        navigate(`/roster/results/${response.rosterId}`, {
+          state: { warnings: response.warnings ?? [] },
+        })
+      },
+    })
   }
 
   const handleCancel = () => {
-    setIsProcessing(false)
     setUploadedFiles([])
     actualFileRef.current = null
-    setError(null)
+    reset()
     setWarnings([])
   }
 
@@ -140,8 +128,8 @@ export function RosterUpload() {
         onCancel={handleCancel}
         acceptFileTypes=".xlsx"
         validationItems={rosterValidationItems}
-        isLoading={isProcessing}
-        error={error}
+        isLoading={isPending}
+        error={uploadError?.message ?? null}
       />
     </>
   )

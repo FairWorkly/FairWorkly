@@ -12,3 +12,8 @@ scratch/
 # System screenshots
 Screenshot*.png
 屏幕截图*.png
+
+# Playwright
+.auth/
+test-results/
+playwright-report/

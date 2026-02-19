@@ -82,6 +82,8 @@ export function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
+import * as XLSX from 'xlsx'
+
 /**
  * Escape a CSV field value
  * Wraps in quotes if contains comma, quote, or newline
@@ -114,6 +116,34 @@ interface ExportMetadata {
   weekEnding: string
   validatedAt?: string
   validationId?: string
+}
+
+/**
+ * Export compliance results to Excel (.xlsx) and trigger download
+ */
+export function exportComplianceXlsx(
+  metadata: ExportMetadata,
+  categories: ExportableCategory[]
+): void {
+  const rows = categories.flatMap(category =>
+    category.issues.map(issue => ({
+      Category: category.title,
+      Employee: issue.name,
+      'Employee ID': issue.empId,
+      Actual: issue.actualValue,
+      Expected: issue.expectedValue,
+      Variance: issue.variance,
+      Reason: issue.reason,
+      Breakdown: issue.breakdown,
+    }))
+  )
+
+  const worksheet = XLSX.utils.json_to_sheet(rows)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Compliance Report')
+
+  const filename = `compliance-report-${metadata.weekStarting}-to-${metadata.weekEnding}.xlsx`
+  XLSX.writeFile(workbook, filename)
 }
 
 /**

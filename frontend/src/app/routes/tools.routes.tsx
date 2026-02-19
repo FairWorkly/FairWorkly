@@ -50,7 +50,7 @@ export const toolRoutes: RouteObject[] = [
                 path: '/roster',
                 children: [
                   { path: 'upload', element: <RosterUpload /> },
-                  { path: 'results', element: <RosterResults /> },
+                  { path: 'results/:rosterId', element: <RosterResults /> },
                   { index: true, element: <Navigate to="upload" replace /> },
                 ],
               },

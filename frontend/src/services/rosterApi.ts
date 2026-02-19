@@ -1,4 +1,3 @@
-import { post } from "./baseApi";
 import httpClient from "./httpClient";
 import { normalizeApiError } from "@/shared/types/api.types";
 
@@ -109,30 +108,71 @@ export async function getRosterDetails(rosterId: string): Promise<RosterDetailsR
   return response.data
 }
 
-// ─── Compliance Check (placeholder) ─────────────────────────────────
+// ─── Roster Validation ───────────────────────────────────────────────
 
 /**
- * Roster 合规检查 API 骨架
- * 后续会补：
- * - CSV 上传与校验
- * - 结果查询/导出
+ * Individual compliance issue found during validation.
  */
-export interface RosterComplianceCheckRequest {
-  fileId: string;
-  awardCode?: string;
-  rosterStart?: string;
-  rosterEnd?: string;
+export interface RosterIssueSummary {
+  id: string
+  shiftId: string | null
+  employeeId: string
+  employeeName: string | null
+  employeeNumber: string | null
+  checkType: string
+  severity: string
+  description: string
+  expectedValue: number | null
+  actualValue: number | null
+  affectedDates: string | null
 }
 
-export interface RosterComplianceCheckResponse {
-  runId: string;
+/**
+ * Response from roster validation endpoint.
+ * Includes roster metadata and all compliance issues found.
+ */
+export interface ValidateRosterResponse {
+  validationId: string
+  status: string
+  totalShifts: number
+  passedShifts: number
+  failedShifts: number
+  totalIssues: number
+  criticalIssues: number
+  affectedEmployees: number
+  weekStartDate: string
+  weekEndDate: string
+  totalEmployees: number
+  validatedAt: string | null
+  issues: RosterIssueSummary[]
 }
 
-export function startRosterComplianceCheck(
-  payload: RosterComplianceCheckRequest,
-): Promise<RosterComplianceCheckResponse> {
-  return post<RosterComplianceCheckResponse, RosterComplianceCheckRequest>(
-    "/roster/compliance/check",
-    payload,
-  );
+/**
+ * Trigger compliance validation for a roster (idempotent).
+ * Returns existing results if validation already completed.
+ */
+export async function validateRoster(rosterId: string): Promise<ValidateRosterResponse> {
+  try {
+    const response = await httpClient.post<ValidateRosterResponse>(
+      `/roster/${rosterId}/validate`
+    )
+    return response.data
+  } catch (err) {
+    throw normalizeApiError(err)
+  }
+}
+
+/**
+ * Get existing validation results for a roster.
+ * Returns 404 if no validation has been run yet.
+ */
+export async function getValidationResults(rosterId: string): Promise<ValidateRosterResponse> {
+  try {
+    const response = await httpClient.get<ValidateRosterResponse>(
+      `/roster/${rosterId}/validation`
+    )
+    return response.data
+  } catch (err) {
+    throw normalizeApiError(err)
+  }
 }

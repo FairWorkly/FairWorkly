@@ -7,11 +7,13 @@ using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Roster.Entities;
 using FairWorkly.Domain.Roster.ValueObjects;
 using MediatR;
+using RosterEntity = FairWorkly.Domain.Roster.Entities.Roster;
 
 namespace FairWorkly.Application.Roster.Features.ValidateRoster;
 
 /// <summary>
-/// Handles roster validation by orchestrating compliance rule execution
+/// Handles roster validation by orchestrating compliance rule execution.
+/// Idempotent: returns existing results if validation already completed.
 /// </summary>
 public class ValidateRosterHandler(
     IRosterRepository rosterRepository,
@@ -47,16 +49,29 @@ public class ValidateRosterHandler(
             return Result<ValidateRosterResponse>.Of404("Roster not found");
         }
 
-        var employeeNameById = roster
-            .Shifts.Where(s => s.EmployeeId != Guid.Empty && s.Employee != null)
-            .Select(s => new { s.EmployeeId, Name = s.Employee!.FullName })
-            .GroupBy(x => x.EmployeeId)
-            .ToDictionary(g => g.Key, g => g.First().Name);
+        // Check for existing completed validation (idempotency)
+        var existingValidation = await validationRepository.GetByRosterIdWithIssuesAsync(
+            request.RosterId,
+            request.OrganizationId,
+            cancellationToken
+        );
 
-        string? GetEmployeeName(Guid employeeId)
+        if (
+            existingValidation != null
+            && existingValidation.Status is ValidationStatus.Passed or ValidationStatus.Failed
+        )
         {
-            return employeeNameById.TryGetValue(employeeId, out var name) ? name : null;
+            return Result<ValidateRosterResponse>.Of200(
+                "Roster validation completed",
+                ValidationResponseBuilder.Build(
+                    roster,
+                    existingValidation,
+                    existingValidation.Issues
+                )
+            );
         }
+
+        var employeeLookup = BuildEmployeeLookup(roster);
 
         // Create validation record
         var validation = new RosterValidation
@@ -137,32 +152,87 @@ public class ValidateRosterHandler(
         }
 
         // Build response
-        var response = new ValidateRosterResponse
+        var response = ValidationResponseBuilder.Build(roster, validation, issues);
+
+        return Result<ValidateRosterResponse>.Of200("Roster validation completed", response);
+    }
+
+    private static Dictionary<Guid, (string Name, string? Number)> BuildEmployeeLookup(
+        RosterEntity roster
+    )
+    {
+        return roster
+            .Shifts.Where(s => s.EmployeeId != Guid.Empty && s.Employee != null)
+            .Select(s => new
+            {
+                s.EmployeeId,
+                Name = s.Employee!.FullName,
+                Number = s.Employee.EmployeeNumber,
+            })
+            .GroupBy(x => x.EmployeeId)
+            .ToDictionary(g => g.Key, g => (g.First().Name, g.First().Number));
+    }
+}
+
+/// <summary>
+/// Shared helper to build ValidateRosterResponse from roster, validation, and issues.
+/// Used by both ValidateRosterHandler and GetValidationResultsHandler.
+/// </summary>
+public static class ValidationResponseBuilder
+{
+    public static ValidateRosterResponse Build(
+        RosterEntity roster,
+        RosterValidation validation,
+        IEnumerable<RosterIssue> issues
+    )
+    {
+        var employeeLookup = roster
+            .Shifts.Where(s => s.EmployeeId != Guid.Empty && s.Employee != null)
+            .Select(s => new
+            {
+                s.EmployeeId,
+                Name = s.Employee!.FullName,
+                Number = s.Employee.EmployeeNumber,
+            })
+            .GroupBy(x => x.EmployeeId)
+            .ToDictionary(g => g.Key, g => (Name: g.First().Name, Number: g.First().Number));
+
+        var issueList = issues.ToList();
+
+        return new ValidateRosterResponse
         {
             ValidationId = validation.Id,
             Status = validation.Status,
             TotalShifts = validation.TotalShifts,
             PassedShifts = validation.PassedShifts,
             FailedShifts = validation.FailedShifts,
-            TotalIssues = issues.Count,
+            TotalIssues = validation.TotalIssuesCount,
             CriticalIssues = validation.CriticalIssuesCount,
-            Issues = issues
-                .Select(i => new RosterIssueSummary
+            AffectedEmployees = validation.AffectedEmployees,
+            WeekStartDate = roster.WeekStartDate,
+            WeekEndDate = roster.WeekEndDate,
+            TotalEmployees = roster.TotalEmployees,
+            ValidatedAt = validation.CompletedAt,
+            Issues = issueList
+                .Select(i =>
                 {
-                    Id = i.Id,
-                    ShiftId = i.ShiftId,
-                    EmployeeId = i.EmployeeId,
-                    EmployeeName = GetEmployeeName(i.EmployeeId),
-                    CheckType = i.CheckType.ToString(),
-                    Severity = i.Severity,
-                    Description = i.Description,
-                    ExpectedValue = i.ExpectedValue,
-                    ActualValue = i.ActualValue,
-                    AffectedDates = i.AffectedDates.ToStorageString(),
+                    employeeLookup.TryGetValue(i.EmployeeId, out var emp);
+                    return new RosterIssueSummary
+                    {
+                        Id = i.Id,
+                        ShiftId = i.ShiftId,
+                        EmployeeId = i.EmployeeId,
+                        EmployeeName = emp.Name,
+                        EmployeeNumber = emp.Number,
+                        CheckType = i.CheckType.ToString(),
+                        Severity = i.Severity,
+                        Description = i.Description,
+                        ExpectedValue = i.ExpectedValue,
+                        ActualValue = i.ActualValue,
+                        AffectedDates = i.AffectedDates.ToStorageString(),
+                    };
                 })
                 .ToList(),
         };
-
-        return Result<ValidateRosterResponse>.Of200("Roster validation completed", response);
     }
 }

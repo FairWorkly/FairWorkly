@@ -27,4 +27,14 @@ public interface IRosterValidationRepository
         IEnumerable<RosterIssue> issues,
         CancellationToken cancellationToken = default
     );
+
+    /// <summary>
+    /// Gets an existing (non-deleted) validation for a roster, including its issues.
+    /// Returns null if no validation exists.
+    /// </summary>
+    Task<RosterValidation?> GetByRosterIdWithIssuesAsync(
+        Guid rosterId,
+        Guid organizationId,
+        CancellationToken cancellationToken = default
+    );
 }

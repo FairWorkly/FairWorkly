@@ -12,7 +12,7 @@ import type {
 } from '../types/complianceCheck.type'
 import { ValidationHeader } from './ValidationHeader'
 import { IssuesByCategory } from './IssuesByCategory'
-import { exportComplianceCsv } from '../utils/formatters'
+import { exportComplianceXlsx, exportComplianceCsv } from '../utils/formatters'
 import { theme } from '@/styles/theme/theme'
 
 const SummaryStatCard = styled(Card)(({ theme }) => ({
@@ -157,8 +157,9 @@ export const ComplianceResults: React.FC<ComplianceResultsProps> = ({
   periodLabel = 'Pay period',
   resultType = 'payroll',
 }) => {
+  const exportFn = resultType === 'roster' ? exportComplianceXlsx : exportComplianceCsv
   const handleExport = () => {
-    exportComplianceCsv(metadata, categories)
+    exportFn(metadata, categories)
   }
   const stats =
     resultType === 'roster'
@@ -224,6 +225,7 @@ export const ComplianceResults: React.FC<ComplianceResultsProps> = ({
         onNavigateBack={onNavigateBack}
         breadcrumbLabel={breadcrumbLabel}
         periodLabel={periodLabel}
+        exportLabel={resultType === 'roster' ? 'Export Excel' : 'Export CSV'}
       />
 
       <StatsGrid>

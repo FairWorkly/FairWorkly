@@ -19,6 +19,7 @@ export {
   formatDateTime,
   generateValidationId,
   formatFileSize,
+  exportComplianceXlsx,
   exportComplianceCsv,
 } from './utils/formatters'
 export { mapBackendToComplianceResults } from './utils/mapper'
