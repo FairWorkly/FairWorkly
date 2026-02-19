@@ -104,8 +104,12 @@ export interface RosterDetailsResponse {
  * Returns roster metadata and shifts grouped by employee.
  */
 export async function getRosterDetails(rosterId: string): Promise<RosterDetailsResponse> {
-  const response = await httpClient.get<RosterDetailsResponse>(`/roster/${rosterId}`)
-  return response.data
+  try {
+    const response = await httpClient.get<RosterDetailsResponse>(`/roster/${rosterId}`)
+    return response.data
+  } catch (err) {
+    throw normalizeApiError(err)
+  }
 }
 
 // ─── Roster Validation ───────────────────────────────────────────────
