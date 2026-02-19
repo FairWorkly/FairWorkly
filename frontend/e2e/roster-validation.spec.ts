@@ -9,8 +9,8 @@ async function login(page: Page) {
   await page.goto('/login')
   const emailField = page.getByLabel('Email Address')
   await emailField.waitFor({ state: 'visible', timeout: 15_000 })
-  await emailField.fill('admin@fairworkly.com.au')
-  await page.getByLabel('Password').fill('fairworkly123')
+  await emailField.fill(process.env.E2E_USER_EMAIL ?? '')
+  await page.getByLabel('Password').fill(process.env.E2E_USER_PASSWORD ?? '')
   await page.locator('form').getByRole('button', { name: 'Sign In' }).click()
   await expect(page).not.toHaveURL(/login/, { timeout: 15_000 })
 }
