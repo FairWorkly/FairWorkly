@@ -62,7 +62,6 @@ describe('useUploadRoster', () => {
     const result = useUploadRoster()
 
     expect(result.uploadedFiles).toEqual([])
-    expect(result.warnings).toEqual([])
     expect(result.isPending).toBe(false)
     expect(result.uploadError).toBeNull()
   })

@@ -1,17 +1,12 @@
 import { useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApiMutation } from '@/shared/hooks/useApiMutation'
-import {
-  uploadRoster,
-  type UploadRosterResponse,
-  type ParserWarning,
-} from '@/services/rosterApi'
+import { uploadRoster, type UploadRosterResponse } from '@/services/rosterApi'
 import type { UploadedFile } from '@/shared/compliance-check'
 
 export function useUploadRoster() {
   const navigate = useNavigate()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
-  const [warnings, setWarnings] = useState<ParserWarning[]>([])
   const actualFileRef = useRef<File | null>(null)
 
   const {
@@ -40,7 +35,6 @@ export function useUploadRoster() {
 
       setUploadedFiles([newFile])
       reset()
-      setWarnings([])
     },
     [reset],
   )
@@ -50,7 +44,6 @@ export function useUploadRoster() {
       setUploadedFiles((prev) => prev.filter((file) => file.id !== id))
       actualFileRef.current = null
       reset()
-      setWarnings([])
     },
     [reset],
   )
@@ -59,7 +52,6 @@ export function useUploadRoster() {
     if (!actualFileRef.current) return
 
     reset()
-    setWarnings([])
 
     upload(actualFileRef.current, {
       onSuccess: (response) => {
@@ -74,12 +66,10 @@ export function useUploadRoster() {
     setUploadedFiles([])
     actualFileRef.current = null
     reset()
-    setWarnings([])
   }, [reset])
 
   return {
     uploadedFiles,
-    warnings,
     isPending,
     uploadError: uploadError?.message ?? null,
     handleFileUpload,
