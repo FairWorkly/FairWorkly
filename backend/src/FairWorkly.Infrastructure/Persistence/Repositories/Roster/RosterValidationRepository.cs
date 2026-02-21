@@ -56,4 +56,22 @@ public class RosterValidationRepository(FairWorklyDbContext context) : IRosterVa
             .OrderByDescending(rv => rv.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    public Task SoftDeleteIssuesAsync(
+        Guid rosterValidationId,
+        Guid organizationId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return _context
+            .RosterIssues.Where(i =>
+                i.RosterValidationId == rosterValidationId
+                && i.OrganizationId == organizationId
+                && !i.IsDeleted
+            )
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(i => i.IsDeleted, true),
+                cancellationToken
+            );
+    }
 }

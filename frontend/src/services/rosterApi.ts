@@ -12,6 +12,7 @@ export interface UploadRosterResponse {
   totalShifts: number;
   totalHours: number;
   totalEmployees: number;
+  // Reserved for future non-blocking import hints; usually empty under current policy.
   warnings: ParserWarning[];
 }
 
@@ -31,10 +32,10 @@ export interface ParserWarning {
 /**
  * Upload roster file to backend for parsing and storage.
  * File is uploaded to S3 and parsed via Agent Service.
- * Returns roster ID and any warnings (non-fatal issues).
+ * Returns roster ID and optional non-blocking warnings (reserved; usually empty today).
  *
  * @param file - Roster Excel file (.xlsx)
- * @returns Promise with roster ID, summary, and warnings
+ * @returns Promise with roster ID, summary, and optional warnings
  * @throws ApiError with normalized error structure
  */
 export async function uploadRoster(file: File): Promise<UploadRosterResponse> {
@@ -148,6 +149,8 @@ export interface ValidateRosterResponse {
   weekEndDate: string
   totalEmployees: number
   validatedAt: string | null
+  failureType: 'Compliance' | 'Execution' | null
+  retriable: boolean | null
   issues: RosterIssueSummary[]
 }
 

@@ -30,6 +30,16 @@ public class GetValidationResultsHandler(
             return Result<ValidateRosterResponse>.Of404("No validation found for this roster");
         }
 
+        if (
+            validation.Status == Domain.Common.Enums.ValidationStatus.InProgress
+            || ValidationFailureMarker.IsExecutionFailure(validation)
+        )
+        {
+            return Result<ValidateRosterResponse>.Of404(
+                "Validation is not currently available. Please trigger validation again."
+            );
+        }
+
         // Load roster for employee names/metadata
         var roster = await rosterRepository.GetByIdWithShiftsAsync(
             request.RosterId,

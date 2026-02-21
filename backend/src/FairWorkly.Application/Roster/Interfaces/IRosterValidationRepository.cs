@@ -37,4 +37,14 @@ public interface IRosterValidationRepository
         Guid organizationId,
         CancellationToken cancellationToken = default
     );
+
+    /// <summary>
+    /// Soft deletes all non-deleted issues for a validation run.
+    /// Used when retrying a previously failed execution.
+    /// </summary>
+    Task SoftDeleteIssuesAsync(
+        Guid rosterValidationId,
+        Guid organizationId,
+        CancellationToken cancellationToken = default
+    );
 }

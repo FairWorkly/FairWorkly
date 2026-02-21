@@ -56,9 +56,22 @@ public class ValidateRosterHandler(
             cancellationToken
         );
 
+        if (existingValidation != null && existingValidation.Status == ValidationStatus.Passed)
+        {
+            return Result<ValidateRosterResponse>.Of200(
+                "Roster validation completed",
+                ValidationResponseBuilder.Build(
+                    roster,
+                    existingValidation,
+                    existingValidation.Issues
+                )
+            );
+        }
+
         if (
             existingValidation != null
-            && existingValidation.Status is ValidationStatus.Passed or ValidationStatus.Failed
+            && existingValidation.Status == ValidationStatus.Failed
+            && !ValidationFailureMarker.IsExecutionFailure(existingValidation)
         )
         {
             return Result<ValidateRosterResponse>.Of200(
@@ -71,18 +84,39 @@ public class ValidateRosterHandler(
             );
         }
 
-        // Reuse stale InProgress record (e.g. previous run crashed) or create new
+        var shouldReuseExisting =
+            existingValidation != null
+            && (
+                existingValidation.Status == ValidationStatus.InProgress
+                || ValidationFailureMarker.IsExecutionFailure(existingValidation)
+            );
+
+        // Reuse stale InProgress/execution-failed record or create new
         RosterValidation validation;
-        if (existingValidation != null && existingValidation.Status == ValidationStatus.InProgress)
+        if (shouldReuseExisting)
         {
-            validation = existingValidation;
+            validation = existingValidation!;
+            validation.Status = ValidationStatus.InProgress;
             validation.StartedAt = DateTimeOffset.UtcNow;
             validation.CompletedAt = null;
             validation.Notes = null;
+            validation.TotalShifts = 0;
+            validation.PassedShifts = 0;
+            validation.FailedShifts = 0;
+            validation.TotalIssuesCount = 0;
+            validation.CriticalIssuesCount = 0;
+            validation.AffectedEmployees = 0;
+            validation.WeekStartDate = roster.WeekStartDate;
+            validation.WeekEndDate = roster.WeekEndDate;
             validation.ExecutedCheckTypes = ExecutedCheckTypeSet.FromCheckTypes(
                 complianceEngine.GetExecutedCheckTypes()
             );
             await validationRepository.UpdateAsync(validation, cancellationToken);
+            await validationRepository.SoftDeleteIssuesAsync(
+                validation.Id,
+                request.OrganizationId,
+                cancellationToken
+            );
         }
         else
         {
@@ -156,12 +190,16 @@ public class ValidateRosterHandler(
         {
             validation.Status = ValidationStatus.Failed;
             validation.CompletedAt = DateTimeOffset.UtcNow;
-            validation.Notes = ToSafeNotes($"Validation failed: {ex.Message}");
+            validation.Notes = ToSafeNotes(
+                ValidationFailureMarker.BuildExecutionFailureNote(ex.Message)
+            );
 
             await validationRepository.UpdateAsync(validation, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return Result<ValidateRosterResponse>.Of422("Roster validation failed.");
+            return Result<ValidateRosterResponse>.Of500(
+                "Roster validation failed due to an internal error. Please retry."
+            );
         }
 
         // Build response
@@ -210,6 +248,8 @@ public static class ValidationResponseBuilder
             WeekEndDate = roster.WeekEndDate,
             TotalEmployees = roster.TotalEmployees,
             ValidatedAt = validation.CompletedAt,
+            FailureType = ValidationFailureMarker.GetFailureType(validation),
+            Retriable = ValidationFailureMarker.IsRetriable(validation),
             Issues = issueList
                 .Select(i =>
                 {

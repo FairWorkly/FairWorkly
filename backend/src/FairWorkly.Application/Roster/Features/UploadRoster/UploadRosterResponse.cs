@@ -39,8 +39,9 @@ public class UploadRosterResponse
 
     /// <summary>
     /// Parser warnings (non-fatal issues from Agent Service).
-    /// Empty list if no warnings.
-    /// Frontend displays these as alerts to inform user of potential data quality issues.
+    /// Kept for forward compatibility with non-blocking import hints.
+    /// Current policy treats most data quality issues as blocking errors (422),
+    /// so this list is usually empty.
     /// </summary>
     public List<ParserWarning> Warnings { get; set; } = new();
 }

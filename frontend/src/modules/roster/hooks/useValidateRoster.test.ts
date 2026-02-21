@@ -118,6 +118,8 @@ describe('useValidateRoster', () => {
       weekEndDate: '2026-02-08',
       totalEmployees: 5,
       validatedAt: null,
+      failureType: null,
+      retriable: null,
       issues: [],
     }
 

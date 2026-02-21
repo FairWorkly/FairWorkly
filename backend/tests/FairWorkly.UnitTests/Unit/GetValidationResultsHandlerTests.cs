@@ -294,4 +294,79 @@ public class GetValidationResultsHandlerTests
         result.Value.Issues.Should().BeEmpty();
         result.Value.CriticalIssues.Should().Be(0);
     }
+
+    [Fact]
+    public async Task Handle_ExecutionFailedValidation_Returns404ForRetry()
+    {
+        // Arrange
+        var validation = new RosterValidation
+        {
+            Id = _validationId,
+            OrganizationId = _orgId,
+            RosterId = _rosterId,
+            Status = ValidationStatus.Failed,
+            Notes = "ExecutionFailure: transient storage error",
+        };
+
+        _validationRepoMock
+            .Setup(r =>
+                r.GetByRosterIdWithIssuesAsync(_rosterId, _orgId, It.IsAny<CancellationToken>())
+            )
+            .ReturnsAsync(validation);
+
+        var query = new GetValidationResultsQuery { RosterId = _rosterId, OrganizationId = _orgId };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Code.Should().Be(404);
+        _rosterRepoMock.Verify(
+            r =>
+                r.GetByIdWithShiftsAsync(
+                    It.IsAny<Guid>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Never
+        );
+    }
+
+    [Fact]
+    public async Task Handle_InProgressValidation_Returns404ForRetry()
+    {
+        // Arrange
+        var validation = new RosterValidation
+        {
+            Id = _validationId,
+            OrganizationId = _orgId,
+            RosterId = _rosterId,
+            Status = ValidationStatus.InProgress,
+        };
+
+        _validationRepoMock
+            .Setup(r =>
+                r.GetByRosterIdWithIssuesAsync(_rosterId, _orgId, It.IsAny<CancellationToken>())
+            )
+            .ReturnsAsync(validation);
+
+        var query = new GetValidationResultsQuery { RosterId = _rosterId, OrganizationId = _orgId };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Code.Should().Be(404);
+        _rosterRepoMock.Verify(
+            r =>
+                r.GetByIdWithShiftsAsync(
+                    It.IsAny<Guid>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Never
+        );
+    }
 }

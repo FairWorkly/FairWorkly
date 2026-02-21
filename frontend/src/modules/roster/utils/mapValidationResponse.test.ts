@@ -18,6 +18,8 @@ function createBaseResponse(
     weekEndDate: '2026-02-08',
     totalEmployees: 5,
     validatedAt: '2026-02-03T10:30:00Z',
+    failureType: null,
+    retriable: null,
     issues: [],
     ...overrides,
   }
@@ -148,6 +150,9 @@ describe('mapValidationToComplianceResults', () => {
     expect(mealBreakCategory!.title).toBe('Meal Break Requirements')
     expect(mealBreakCategory!.employeeCount).toBe(1)
     expect(mealBreakCategory!.totalUnderpayment).toBe('1 violation')
+
+    const allMappedIds = result.categories.flatMap(c => c.issues.map(i => i.id))
+    expect(new Set(allMappedIds).size).toBe(allMappedIds.length)
   })
 
   it('maps issue details correctly', () => {

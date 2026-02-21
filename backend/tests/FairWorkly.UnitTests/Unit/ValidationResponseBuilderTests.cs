@@ -113,6 +113,8 @@ public class ValidationResponseBuilderTests
         result.WeekStartDate.Should().Be(roster.WeekStartDate);
         result.WeekEndDate.Should().Be(roster.WeekEndDate);
         result.ValidatedAt.Should().Be(completedAt);
+        result.FailureType.Should().BeNull();
+        result.Retriable.Should().BeNull();
         result.Issues.Should().BeEmpty();
     }
 
@@ -186,6 +188,8 @@ public class ValidationResponseBuilderTests
         issue2.EmployeeName.Should().Be("Bob Jones");
         issue2.EmployeeNumber.Should().Be("EMP002");
         issue2.AffectedDates.Should().BeNull();
+        result.FailureType.Should().Be(ValidationFailureType.Compliance);
+        result.Retriable.Should().BeFalse();
     }
 
     [Fact]
@@ -349,5 +353,31 @@ public class ValidationResponseBuilderTests
         checkTypeStrings.Should().Contain("RestPeriodBetweenShifts");
         checkTypeStrings.Should().Contain("WeeklyHoursLimit");
         checkTypeStrings.Should().Contain("MaximumConsecutiveDays");
+    }
+
+    [Fact]
+    public void Build_ExecutionFailure_IsRetriable()
+    {
+        // Arrange
+        var emp = CreateEmployee(_employee1Id, "Alice", "Smith", "EMP001");
+        var roster = CreateRoster((_employee1Id, emp));
+
+        var validation = new RosterValidation
+        {
+            Id = _validationId,
+            OrganizationId = _orgId,
+            RosterId = _rosterId,
+            Status = ValidationStatus.Failed,
+            Notes = "ExecutionFailure: database timeout",
+            WeekStartDate = roster.WeekStartDate,
+            WeekEndDate = roster.WeekEndDate,
+        };
+
+        // Act
+        var result = ValidationResponseBuilder.Build(roster, validation, []);
+
+        // Assert
+        result.FailureType.Should().Be(ValidationFailureType.Execution);
+        result.Retriable.Should().BeTrue();
     }
 }

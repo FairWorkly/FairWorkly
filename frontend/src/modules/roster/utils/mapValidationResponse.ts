@@ -36,6 +36,17 @@ export function mapValidationToComplianceResults(
     issuesByCheckType.set(issue.checkType, existing)
   }
 
+  // Keep IssueItem.id globally unique across all categories by mapping
+  // backend issue IDs to a stable numeric ID for the current payload.
+  const issueIdMap = new Map<string, number>()
+  let nextIssueId = 1
+  for (const issue of complianceIssues) {
+    if (!issueIdMap.has(issue.id)) {
+      issueIdMap.set(issue.id, nextIssueId)
+      nextIssueId += 1
+    }
+  }
+
   // Build categories from grouped issues
   const categories: IssueCategory[] = Array.from(
     issuesByCheckType.entries(),
@@ -56,8 +67,8 @@ export function mapValidationToComplianceResults(
       color: display.color,
       employeeCount: uniqueEmployees.size,
       totalUnderpayment: `${issues.length} violation${issues.length !== 1 ? 's' : ''}`,
-      issues: issues.map((issue, index) => ({
-        id: index + 1,
+      issues: issues.map(issue => ({
+        id: issueIdMap.get(issue.id)!,
         name: issue.employeeName ?? 'Unknown',
         empId: issue.employeeNumber ?? issue.employeeId.substring(0, 8),
         actualValue: formatIssueValue(issue.actualValue, issue.checkType),

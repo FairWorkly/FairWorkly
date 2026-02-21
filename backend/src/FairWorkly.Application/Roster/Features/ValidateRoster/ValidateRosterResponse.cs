@@ -68,6 +68,18 @@ public class ValidateRosterResponse
     public DateTimeOffset? ValidatedAt { get; set; }
 
     /// <summary>
+    /// Failure type when status is Failed.
+    /// Execution failures are retriable; compliance failures are final results.
+    /// </summary>
+    public ValidationFailureType? FailureType { get; set; }
+
+    /// <summary>
+    /// Whether this failed validation can be retried.
+    /// Null when status is not Failed.
+    /// </summary>
+    public bool? Retriable { get; set; }
+
+    /// <summary>
     /// List of issue summaries
     /// </summary>
     public List<RosterIssueSummary> Issues { get; set; } = [];
