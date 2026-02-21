@@ -148,6 +148,7 @@ interface IssueRowProps {
   isSelected: boolean
   onToggleSelection: () => void
   guidance?: GuidanceContent
+  resultType?: 'payroll' | 'roster'
 }
 
 export const IssueRow: React.FC<IssueRowProps> = ({
@@ -155,7 +156,9 @@ export const IssueRow: React.FC<IssueRowProps> = ({
   isSelected,
   onToggleSelection,
   guidance,
+  resultType = 'payroll',
 }) => {
+  const varianceLabel = resultType === 'roster' ? 'Deviation' : 'Variance'
   const [fixModalOpen, setFixModalOpen] = useState(false)
 
   return (
@@ -177,7 +180,7 @@ export const IssueRow: React.FC<IssueRowProps> = ({
           <IssueAlert>
             <IssueAlertIcon />
             <IssueAlertText variant="body2">
-              <VarianceLabel>Variance: {issue.variance}</VarianceLabel>
+              <VarianceLabel>{varianceLabel}: {issue.variance}</VarianceLabel>
               {issue.breakdown}
             </IssueAlertText>
           </IssueAlert>

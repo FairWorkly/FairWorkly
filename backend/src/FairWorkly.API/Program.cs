@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using FairWorkly.API.ExceptionHandlers;
 using FairWorkly.Application;
 using FairWorkly.Infrastructure;
@@ -47,8 +48,13 @@ try
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
-    // Add controllers
-    builder.Services.AddControllers();
+    // Add controllers with JSON enum-as-string serialization
+    builder
+        .Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
 
     // Add Swagger generator
     builder.Services.AddEndpointsApiExplorer();

@@ -12,7 +12,7 @@ namespace FairWorkly.Application.Roster.Features.UploadRoster;
 /// 3. Match employees by number/email
 /// 4. Create Roster and Shift entities
 /// 5. Save to database
-/// 6. Return response with warnings
+/// 6. Return response with non-blocking warnings (reserved; usually empty under current policy)
 /// </summary>
 public class UploadRosterCommand : IRequest<Result<UploadRosterResponse>>
 {

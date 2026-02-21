@@ -17,6 +17,11 @@ import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined'
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined'
 import CardGiftcardOutlinedIcon from '@mui/icons-material/CardGiftcardOutlined'
 import BeachAccessOutlinedIcon from '@mui/icons-material/BeachAccessOutlined'
+import RestaurantOutlinedIcon from '@mui/icons-material/RestaurantOutlined'
+import BedtimeOutlinedIcon from '@mui/icons-material/BedtimeOutlined'
+import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined'
+import DateRangeOutlinedIcon from '@mui/icons-material/DateRangeOutlined'
+import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined'
 import type { IssueCategory, IssueItem } from '../types/complianceCheck.type'
 import { IssueRow, type GuidanceContent } from './IssueRow'
 
@@ -26,6 +31,11 @@ const iconMap: Record<string, React.ElementType> = {
   schedule: ScheduleOutlinedIcon,
   card_giftcard: CardGiftcardOutlinedIcon,
   beach_access: BeachAccessOutlinedIcon,
+  restaurant: RestaurantOutlinedIcon,
+  bedtime: BedtimeOutlinedIcon,
+  timer: TimerOutlinedIcon,
+  date_range: DateRangeOutlinedIcon,
+  report_problem: ReportProblemOutlinedIcon,
 }
 
 const IssuesWrapper = styled(Paper)(({ theme }) => ({
@@ -200,25 +210,6 @@ const EmptyStateText = styled(Typography)({
   fontStyle: 'italic',
 })
 
-const ShowMoreRow = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(1.25),
-  textAlign: 'center',
-  borderTop: `1px solid ${theme.palette.background.default}`,
-  backgroundColor: theme.palette.background.paper,
-  [theme.breakpoints.up('sm')]: {
-    padding: theme.spacing(1.5),
-  },
-}))
-
-const ShowMoreAction = styled(Button)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  fontWeight: theme.typography.button.fontWeight,
-  fontSize: theme.typography.body2.fontSize,
-  [theme.breakpoints.down('sm')]: {
-    width: '100%',
-  },
-}))
-
 const SelectAllAction = styled(Button, {
   shouldForwardProp: prop => prop !== 'isSelected',
 })<{ isSelected?: boolean }>(({ theme, isSelected }) => ({
@@ -357,6 +348,7 @@ export const IssuesByCategory: React.FC<IssuesByCategoryProps> = ({
                         isSelected={selectedIssueIds.includes(issue.id)}
                         onToggleSelection={() => toggleIssueSelection(issue.id)}
                         guidance={guidanceForIssue?.(issue)}
+                        resultType={resultType}
                       />
                     ))
                   ) : (
@@ -368,18 +360,6 @@ export const IssuesByCategory: React.FC<IssuesByCategoryProps> = ({
                     </EmptyState>
                   )}
 
-                  {category.issues.length > 0 &&
-                    category.employeeCount > category.issues.length && (
-                      <ShowMoreRow>
-                        <ShowMoreAction
-                          variant="text"
-                          startIcon={<ExpandMoreOutlinedIcon />}
-                        >
-                          Show {category.employeeCount - category.issues.length}{' '}
-                          more results
-                        </ShowMoreAction>
-                      </ShowMoreRow>
-                    )}
                 </CategoryBody>
               </StyledCollapse>
             </CategoryPanel>
