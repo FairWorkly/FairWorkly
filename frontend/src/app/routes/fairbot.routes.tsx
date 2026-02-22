@@ -11,9 +11,9 @@ export const fairbotRoutes: RouteObject[] = [
       {
         element: <MainLayout />,
         children: [
-          // Admin + Manager - FairBot compliance tool
+          // Admin only - FairBot compliance tool
           {
-            element: <RoleBasedRoute allow={['admin', 'manager']} />,
+            element: <RoleBasedRoute allow={['admin']} />,
             children: [
               {
                 path: '/fairbot',

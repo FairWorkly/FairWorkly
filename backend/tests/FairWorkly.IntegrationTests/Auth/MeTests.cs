@@ -95,20 +95,24 @@ public class MeTests : AuthTestsBase
         // Assert - Status code
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // Assert - Response body structure
+        // Assert - Unified response format { code, msg, data }
         var json = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.TryGetProperty("id", out _).Should().BeTrue();
-        root.TryGetProperty("email", out var email).Should().BeTrue();
+        root.GetProperty("code").GetInt32().Should().Be(200);
+        root.GetProperty("msg").GetString().Should().Be("User retrieved");
+
+        var data = root.GetProperty("data");
+        data.TryGetProperty("id", out _).Should().BeTrue();
+        data.TryGetProperty("email", out var email).Should().BeTrue();
         email.GetString().Should().Be("test@example.com");
-        root.TryGetProperty("firstName", out var firstName).Should().BeTrue();
+        data.TryGetProperty("firstName", out var firstName).Should().BeTrue();
         firstName.GetString().Should().Be("Test");
-        root.TryGetProperty("lastName", out var lastName).Should().BeTrue();
+        data.TryGetProperty("lastName", out var lastName).Should().BeTrue();
         lastName.GetString().Should().Be("User");
-        root.TryGetProperty("role", out _).Should().BeTrue();
-        root.TryGetProperty("organizationId", out _).Should().BeTrue();
+        data.TryGetProperty("role", out _).Should().BeTrue();
+        data.TryGetProperty("organizationId", out _).Should().BeTrue();
     }
 
     #endregion

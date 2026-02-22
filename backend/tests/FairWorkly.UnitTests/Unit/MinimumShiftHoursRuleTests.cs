@@ -1,9 +1,9 @@
-using FairWorkly.Domain.Roster.Rules;
-using FairWorkly.Domain.Roster.Parameters;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Employees.Entities;
 using FairWorkly.Domain.Roster.Entities;
 using FairWorkly.Domain.Roster.Enums;
+using FairWorkly.Domain.Roster.Parameters;
+using FairWorkly.Domain.Roster.Rules;
 using FluentAssertions;
 
 namespace FairWorkly.UnitTests.Unit;

@@ -56,4 +56,3 @@ public sealed record RosterRuleParameterSet(
         return 60;
     }
 }
-

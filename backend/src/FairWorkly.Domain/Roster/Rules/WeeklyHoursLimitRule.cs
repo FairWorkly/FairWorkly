@@ -1,7 +1,7 @@
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Roster.Entities;
-using FairWorkly.Domain.Roster.Parameters;
 using FairWorkly.Domain.Roster.Enums;
+using FairWorkly.Domain.Roster.Parameters;
 using FairWorkly.Domain.Roster.ValueObjects;
 
 namespace FairWorkly.Domain.Roster.Rules;
@@ -69,7 +69,8 @@ public class WeeklyHoursLimitRule(IRosterRuleParametersProvider parametersProvid
                                 EmployeeId = employeeId,
                                 CheckType = RosterCheckType.DataQuality,
                                 Severity = IssueSeverity.Warning,
-                                Description = "Part-time employee missing GuaranteedHours - weekly hours limit cannot be validated",
+                                Description =
+                                    "Part-time employee missing GuaranteedHours - weekly hours limit cannot be validated",
                                 AffectedDates = AffectedDateSet.FromDates(weekDates),
                                 AffectedShiftsCount = week.Count(),
                             }
@@ -98,12 +99,14 @@ public class WeeklyHoursLimitRule(IRosterRuleParametersProvider parametersProvid
                         ShiftId = null,
                         EmployeeId = employeeId,
                         CheckType = CheckType,
-                        Severity = employmentType == EmploymentType.PartTime
-                            ? IssueSeverity.Warning
-                            : IssueSeverity.Info,
-                        Description = employmentType == EmploymentType.PartTime
-                            ? $"Total weekly hours {totalHours:F2} exceed guaranteed {threshold:F0} hours"
-                            : $"Total weekly hours {totalHours:F2} exceed {threshold:F0} hour limit",
+                        Severity =
+                            employmentType == EmploymentType.PartTime
+                                ? IssueSeverity.Warning
+                                : IssueSeverity.Info,
+                        Description =
+                            employmentType == EmploymentType.PartTime
+                                ? $"Total weekly hours {totalHours:F2} exceed guaranteed {threshold:F0} hours"
+                                : $"Total weekly hours {totalHours:F2} exceed {threshold:F0} hour limit",
                         ExpectedValue = threshold,
                         ActualValue = totalHours,
                         AffectedDates = AffectedDateSet.FromDates(weekDates),

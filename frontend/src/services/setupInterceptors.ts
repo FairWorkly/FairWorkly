@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { AxiosError, AxiosRequestConfig } from "axios";
 import httpClient from "./httpClient";
-import { logout, setAccessToken, setAuthData } from "../slices/auth";
+import { logout, setAuthData } from "../slices/auth";
 import type { RootState } from "../store";
 
 type StoreLike = {
@@ -54,7 +54,13 @@ export function setupInterceptors(store: StoreLike) {
   });
 
   httpClient.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      // Auto-unwrap backend's { code, msg, data } envelope
+      if (response.data && typeof response.data === 'object' && 'code' in response.data && 'data' in response.data) {
+        response.data = response.data.data;
+      }
+      return response;
+    },
     async (error: AxiosError) => {
       const originalConfig = error.config as
         | (AxiosRequestConfig & { _retry?: boolean })
@@ -65,6 +71,17 @@ export function setupInterceptors(store: StoreLike) {
       }
 
       if (error.response.status !== 401) {
+        return Promise.reject(error);
+      }
+
+      const requestUrl = (originalConfig.baseURL ?? "") + (originalConfig.url ?? "");
+      const authPaths = [
+        "/auth/login",
+        "/auth/refresh",
+        "/auth/logout",
+        "/auth/register",
+      ];
+      if (authPaths.some((path) => requestUrl.includes(path))) {
         return Promise.reject(error);
       }
 
@@ -91,19 +108,30 @@ export function setupInterceptors(store: StoreLike) {
 
       try {
         const refreshResponse = await refreshClient.post("/auth/refresh");
+        const refreshData = refreshResponse.data?.data ?? refreshResponse.data;
         const accessToken =
-          refreshResponse.data?.accessToken ?? refreshResponse.data?.token;
-        const user = refreshResponse.data?.user ?? null;
+          refreshData?.accessToken ?? refreshData?.token;
 
         if (!accessToken) {
           throw new Error("Refresh succeeded without access token");
         }
 
-        if (user) {
-          store.dispatch(setAuthData({ user, accessToken }));
-        } else {
-          store.dispatch(setAccessToken(accessToken));
+        const meResponse = await refreshClient.get("/auth/me", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const u = meResponse.data?.data ?? meResponse.data;
+        const role = typeof u?.role === "string" ? u.role.toLowerCase() : undefined;
+        if (!u?.id || !u?.email || !role) {
+          throw new Error("/auth/me returned incomplete user data");
         }
+        const normalizedUser = {
+          id: u.id,
+          email: u.email,
+          name: [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email,
+          role,
+        };
+
+        store.dispatch(setAuthData({ user: normalizedUser, accessToken }));
 
         processQueue(null, accessToken);
 

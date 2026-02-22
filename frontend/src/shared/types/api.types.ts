@@ -16,7 +16,8 @@ export interface ApiError {
  * 约定后端可能返回的错误结构（可按后端实际格式调整）
  */
 export interface BackendErrorShape {
-  message?: string;
+  msg?: string;       // backend envelope: { code, msg, data }
+  message?: string;   // legacy / ProblemDetails fallback
   code?: string;
   details?: unknown;
 }
@@ -39,6 +40,7 @@ export function normalizeApiError(error: unknown): ApiError {
 
     // 优先用后端 message，其次用 axios message
     const message =
+      data?.msg ||
       data?.message ||
       error.message ||
       "Request failed. Please try again.";

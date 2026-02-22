@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using FairWorkly.API.ExceptionHandlers;
 using FairWorkly.Application;
 using FairWorkly.Infrastructure;
@@ -47,8 +48,13 @@ try
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
-    // Add controllers
-    builder.Services.AddControllers();
+    // Add controllers with JSON enum-as-string serialization
+    builder
+        .Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
 
     // Add Swagger generator
     builder.Services.AddEndpointsApiExplorer();
@@ -101,19 +107,27 @@ try
     builder.Services.AddCors(options =>
     {
         options.AddPolicy(
-            "AllowAll",
+            "AllowFrontend",
             policy =>
             {
                 if (builder.Environment.IsDevelopment())
                 {
-                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    policy
+                        .WithOrigins("http://localhost:5173")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 }
                 else
                 {
                     var allowedOrigins =
                         builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
                         ?? Array.Empty<string>();
-                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
+                    policy
+                        .WithOrigins(allowedOrigins)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 }
             }
         );
@@ -159,7 +173,7 @@ try
     builder.Services.AddAuthorization(options =>
     {
         options.AddPolicy("RequireAdmin", policy => policy.RequireRole("Admin"));
-        options.AddPolicy("RequireManager", policy => policy.RequireRole("Admin", "HrManager"));
+        options.AddPolicy("RequireManager", policy => policy.RequireRole("Admin", "Manager"));
         options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Employee"));
     });
 
@@ -193,7 +207,7 @@ try
     }
 
     // Must before UseAuthorization
-    app.UseCors("AllowAll");
+    app.UseCors("AllowFrontend");
 
     app.UseHttpsRedirection();
 

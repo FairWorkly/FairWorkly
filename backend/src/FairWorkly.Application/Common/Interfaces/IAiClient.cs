@@ -10,4 +10,25 @@ public interface IAiClient
         TRequest request,
         CancellationToken cancellationToken = default
     );
+
+    /// <summary>
+    /// Sends multipart/form-data POST request with file upload to AI service.
+    /// Used for uploading roster Excel files to Agent Service for parsing.
+    /// </summary>
+    /// <typeparam name="TResponse">Type of response from AI service</typeparam>
+    /// <param name="route">API route (e.g., "/api/agent/chat")</param>
+    /// <param name="fileStream">File stream to upload</param>
+    /// <param name="fileName">Name of the file</param>
+    /// <param name="contentType">Content type of the file (e.g., "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")</param>
+    /// <param name="message">Message parameter for Agent Service</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Parsed response from AI service</returns>
+    Task<TResponse> PostMultipartAsync<TResponse>(
+        string route,
+        Stream fileStream,
+        string fileName,
+        string contentType,
+        string message,
+        CancellationToken cancellationToken = default
+    );
 }

@@ -6,6 +6,7 @@ using FairWorkly.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FairWorkly.IntegrationTests.Infrastructure;
@@ -15,8 +16,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     // The JWT secret used in tests - must match what's set in environment variables
     public const string TestJwtSecret = "integration-test-secret-key-at-least-32-characters-long";
 
-    // Use a static database name to ensure consistency across all test classes
-    private static readonly string DatabaseName = "IntegrationTestDb_" + Guid.NewGuid().ToString();
     private static bool _seeded = false;
     private static readonly object _seedLock = new();
 
@@ -45,20 +44,24 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // Add InMemory database for testing - use same name for all tests
+            // Connect to real PostgreSQL
+            var sp = services.BuildServiceProvider();
+            var config = sp.GetRequiredService<IConfiguration>();
+            var connectionString = config.GetConnectionString("DefaultConnection");
+
             services.AddDbContext<FairWorklyDbContext>(options =>
             {
-                options.UseInMemoryDatabase(DatabaseName);
+                options.UseNpgsql(connectionString);
+                options.UseSnakeCaseNamingConvention();
             });
 
-            // Build service provider and seed test data (only once)
-            var sp = services.BuildServiceProvider();
-
+            // Rebuild SP with new DbContext, migrate, and seed
+            sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
             var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
-            db.Database.EnsureCreated();
+            db.Database.Migrate();
 
             lock (_seedLock)
             {
@@ -75,15 +78,19 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     private static void SeedTestData(FairWorklyDbContext db, IPasswordHasher passwordHasher)
     {
+        // Idempotent: skip if test data already exists in real PostgreSQL
+        if (db.Set<User>().Any(u => u.Email == "test@example.com"))
+            return;
+
         var now = DateTimeOffset.UtcNow;
         var organizationId = Guid.NewGuid();
 
-        // Create test organization
+        // Create test organization (unique ABN to avoid collision with DbSeeder)
         var testOrg = new Organization
         {
             Id = organizationId,
             CompanyName = "Test Corp Pty Ltd",
-            ABN = "12345678901",
+            ABN = "99999999901",
             IndustryType = "Retail",
             AddressLine1 = "123 Test St",
             Suburb = "Melbourne",

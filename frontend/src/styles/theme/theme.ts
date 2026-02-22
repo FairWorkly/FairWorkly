@@ -103,6 +103,8 @@ export const theme = createTheme({
       lineHeight: 1.4,
     },
 
+    fontWeightSemiBold: 600,
+
     button: { textTransform: 'none', fontWeight: 700 },
   },
 

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import TextField from '@mui/material/TextField'
-import MenuItem from '@mui/material/MenuItem'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import type { SignupFormData } from '../types'
 import {
@@ -62,9 +61,11 @@ export function SignupForm({
   const [companyName, setCompanyName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [employeeRange, setEmployeeRange] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const passwordStrength = getPasswordStrength(password)
-  const isActionDisabled = isSubmitting || isGoogleLoading
+  const passwordsMatch = confirmPassword !== '' && confirmPassword === password
+  const isSubmitDisabled = isSubmitting || isGoogleLoading || !passwordsMatch
+  const isGoogleDisabled = isGoogleLoading
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,13 +75,13 @@ export function SignupForm({
       companyName,
       email,
       password,
-      employeeRange,
+      confirmPassword,
     })
   }
 
   return (
     <AuthFormContainer onSubmit={handleSubmit}>
-      <GoogleButton type="button" onClick={onGoogleLogin} disabled={isActionDisabled}>
+      <GoogleButton type="button" onClick={onGoogleLogin} disabled={isGoogleDisabled}>
         <GoogleIcon />
         {isGoogleLoading ? 'Signing up...' : 'Continue with Google'}
       </GoogleButton>
@@ -150,24 +151,21 @@ export function SignupForm({
         </div>
 
         <TextField
-          label="Number of Employees"
-          select
+          label="Confirm Password"
+          type="password"
+          placeholder="Repeat your password"
           required
           fullWidth
-          value={employeeRange}
-          onChange={(e) => setEmployeeRange(e.target.value)}
-        >
-          <MenuItem value="" disabled>
-            Select range
-          </MenuItem>
-          <MenuItem value="1-50">1-50 employees</MenuItem>
-          <MenuItem value="51-150">51-150 employees</MenuItem>
-          <MenuItem value="150+">150+ employees</MenuItem>
-        </TextField>
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          error={!passwordsMatch}
+          helperText={!passwordsMatch ? 'Passwords do not match' : ' '}
+          autoComplete="new-password"
+        />
       </AuthFieldset>
 
       <FormActions>
-        <SubmitButton type="submit" disabled={isActionDisabled}>
+        <SubmitButton type="submit" disabled={isSubmitDisabled}>
           {isSubmitting ? 'Creating account...' : 'Create Account'}
           <ArrowForwardIcon fontSize="small" />
         </SubmitButton>

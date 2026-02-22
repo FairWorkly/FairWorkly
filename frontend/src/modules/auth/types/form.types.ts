@@ -10,5 +10,5 @@ export interface SignupFormData {
   companyName: string
   email: string
   password: string
-  employeeRange: string
+  confirmPassword: string
 }

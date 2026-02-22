@@ -56,11 +56,13 @@ declare module '@mui/material/styles' {
   }
 
   interface TypographyVariants {
+    fontWeightSemiBold: number
     uiBadge: React.CSSProperties
     uiLabel: React.CSSProperties
   }
 
   interface TypographyVariantsOptions {
+    fontWeightSemiBold?: number
     uiBadge?: React.CSSProperties
     uiLabel?: React.CSSProperties
   }

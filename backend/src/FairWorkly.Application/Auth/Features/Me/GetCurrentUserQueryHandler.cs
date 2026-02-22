@@ -1,6 +1,7 @@
 using FairWorkly.Application.Auth.Features.Login;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using MediatR;
 
 namespace FairWorkly.Application.Auth.Features.Me;
@@ -16,10 +17,11 @@ public class GetCurrentUserQueryHandler(IUserRepository userRepository)
         var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
         if (user == null)
         {
-            return Result<UserDto>.NotFound("User not found.");
+            return Result<UserDto>.Of404("User not found.");
         }
 
-        return Result<UserDto>.Success(
+        return Result<UserDto>.Of200(
+            "User retrieved",
             new UserDto
             {
                 Id = user.Id,

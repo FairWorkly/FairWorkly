@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  ComplianceUpload,
-  ComplianceProcessing,
-  AwardSelector,
-} from '@/shared/compliance-check'
+import { ComplianceUpload } from '@/shared/compliance-check'
 import type {
   ComplianceConfig,
   UploadedFile,
-  AwardType,
 } from '@/shared/compliance-check'
+
+// TODO: [Backend Integration] Replace mock timer with real API call.
+// When integrating with backend:
+// 1. Create payrollApi.ts with uploadPayroll() (similar to rosterApi.ts uploadRoster())
+// 2. Replace handleStartAnalysis mock timer with actual API call
+// 3. Extract error via err?.response?.data?.message and pass to ComplianceUpload error prop
+//    - ComplianceUpload already supports `error` prop with whiteSpace: 'pre-line' for multi-line errors
+// 4. See RosterUpload.tsx for reference implementation
 
 const mockConfig: ComplianceConfig = {
   title: 'Upload Payroll',
@@ -30,9 +33,9 @@ export function PayrollUpload() {
   const navigate = useNavigate()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
-  const [selectedAward, setSelectedAward] = useState<AwardType>('retail')
   const processingStartRef = useRef<number | null>(null)
   const pollingTimerRef = useRef<number | null>(null)
+
   const minProcessingMs = 2000
   const mockProcessingMs = 1200
   const pollIntervalMs = 300
@@ -102,15 +105,6 @@ export function PayrollUpload() {
     setUploadedFiles([])
   }
 
-  if (isProcessing) {
-    return (
-      <ComplianceProcessing
-        uploadedFiles={uploadedFiles}
-        awardName="General Retail Industry Award"
-      />
-    )
-  }
-
   return (
     <ComplianceUpload
       config={mockConfig}
@@ -120,12 +114,7 @@ export function PayrollUpload() {
       onStartAnalysis={handleStartAnalysis}
       onCancel={handleCancel}
       validationItems={payrollValidationItems}
-      configSection={
-        <AwardSelector
-          selectedAward={selectedAward}
-          onAwardChange={setSelectedAward}
-        />
-      }
+      isLoading={isProcessing}
     />
   )
 }

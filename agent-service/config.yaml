@@ -20,7 +20,7 @@ model_params:
 paths:
   document_faiss_path:
     local: document_faiss/local/
-    online: document_faiss/online/
+    online: document_faiss/customer_1/
   ingested_docs_file: ingested_documents.json
   log_file: app.log
   prompt_file: prompt.yaml

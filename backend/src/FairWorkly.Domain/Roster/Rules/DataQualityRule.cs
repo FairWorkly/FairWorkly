@@ -1,6 +1,7 @@
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Roster.Entities;
 using FairWorkly.Domain.Roster.Enums;
+using FairWorkly.Domain.Roster.ValueObjects;
 
 namespace FairWorkly.Domain.Roster.Rules;
 
@@ -36,14 +37,17 @@ public class DataQualityRule : IRosterComplianceRule
                         EmployeeId = shift.EmployeeId,
                         CheckType = CheckType,
                         Severity = IssueSeverity.Error,
-                        Description = "Employee data not loaded - compliance rules cannot be evaluated for this employee",
+                        Description =
+                            "Employee data not loaded - compliance rules cannot be evaluated for this employee",
+                        AffectedDates = AffectedDateSet.FromDates([shift.Date]),
                     }
                 );
                 continue;
             }
 
             // Check for break duration exceeding shift duration
-            var totalBreakMinutes = (shift.MealBreakDuration ?? 0) + (shift.RestBreaksDuration ?? 0);
+            var totalBreakMinutes =
+                (shift.MealBreakDuration ?? 0) + (shift.RestBreaksDuration ?? 0);
             if (totalBreakMinutes <= 0)
                 continue;
 
@@ -67,6 +71,7 @@ public class DataQualityRule : IRosterComplianceRule
                         $"Total break minutes {totalBreakMinutes} exceed shift duration minutes {shiftDurationMinutes:F0}",
                     ExpectedValue = shiftDurationMinutes,
                     ActualValue = totalBreakMinutes,
+                    AffectedDates = AffectedDateSet.FromDates([shift.Date]),
                 }
             );
         }

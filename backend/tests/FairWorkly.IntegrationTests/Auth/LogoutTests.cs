@@ -27,10 +27,10 @@ public class LogoutTests : AuthTestsBase
 
     #endregion
 
-    #region 4.2 Logout Failed (400)
+    #region 4.2 Logout Failed (404)
 
     [Fact]
-    public async Task Logout_ValidJwtButUserDeleted_Returns400()
+    public async Task Logout_ValidJwtButUserDeleted_Returns404()
     {
         // Arrange - Create a valid token for a user that doesn't exist in DB
         var tokenForNonExistentUser = CreateTokenForNonExistentUser();
@@ -40,13 +40,13 @@ public class LogoutTests : AuthTestsBase
         var response = await client.PostAsync("/api/auth/logout", null);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
         var json = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        root.GetProperty("message").GetString().Should().Be("Logout failed.");
+        root.GetProperty("msg").GetString().Should().Be("Logout failed.");
     }
 
     #endregion

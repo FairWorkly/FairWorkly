@@ -1211,6 +1211,16 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("organization_id");
 
+                    b.Property<string>("OriginalFileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("original_file_name");
+
+                    b.Property<string>("OriginalFileS3Key")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("original_file_s3key");
+
                     b.Property<int>("TotalEmployees")
                         .HasColumnType("integer")
                         .HasColumnName("total_employees");

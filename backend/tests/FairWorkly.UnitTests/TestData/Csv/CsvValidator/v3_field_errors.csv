@@ -1,0 +1,11 @@
+Employee ID,First Name,Last Name,Pay Period Start,Pay Period End,Pay Date,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+,Alice,,2026-01-01,2026-01-07,2026-01-10,Retail,Level 1,full-time,26.55,38,1008.90,0,,0,,0,,1008.90,121.07
+E002,,Johnson,2026-01-01,2026-01-07,01/30/2026,Retail,Level 2,part-time,27.16,20,543.20,0,,0,,0,,543.20,65.18
+E003,Carol,Davis,2026-01-01,2026-01-07,2026-01-10,Hospitality,Level 99,casual,34.48,25,862.00,0,,0,,0,,862.00,103.44
+E004,David,Brown,2026-01-01,2026-01-07,2026-01-10,Retail,Level 4,Intern,abc,38,1068.56,0,,0,,0,,1068.56,128.23
+E005,Eve,Wilson,2026-01-01,2026-01-07,2026-01-10,Retail,Level 5,full-time,0,-5,0,0,,0,,0,,0,0
+E006,Frank,Taylor,2026-01-01,2026-01-07,2026-01-10,Retail,Level 1,full-time,26.55,38,1008.90,8,,4,,0,,1008.90,121.07
+E007,Grace,Lee,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,part-time,27.16,20,N/A,0,,0,,4,,543.20,65.18
+E008,Henry,Wang,2026-01-01,2026-01-07,2026-01-10,Retail,Level 3,casual,34.48,25,862.00,0,,0,,0,,TBD,#REF!
+E009,Ivy,Chen,2026-01-01,2026-01-07,2026-01-10,Retail,Level 4,fixed-term,28.12,38,1068.56,-3,,abc,,0,,1068.56,128.23
+E010,Jack,Kim,2026-01-01,2026-01-07,2026-01-10,Retail,Level 5,full-time,29.27,38,1112.26,0,,0,,0,,1112.26,133.47

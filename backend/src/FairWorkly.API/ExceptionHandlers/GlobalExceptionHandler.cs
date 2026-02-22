@@ -20,6 +20,13 @@ public class GlobalExceptionHandler : IExceptionHandler
         CancellationToken cancellationToken
     )
     {
+        // Client disconnected — no response needed, just stop processing
+        if (exception is OperationCanceledException)
+        {
+            _logger.LogInformation("Request was cancelled (client disconnected)");
+            return true;
+        }
+
         // Map exception type to HTTP status code and details
         var (statusCode, title, detail, extensions) = exception switch
         {
@@ -37,22 +44,6 @@ public class GlobalExceptionHandler : IExceptionHandler
                             .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray())
                     },
                 }
-            ),
-
-            // Not Found (404)
-            NotFoundException => (
-                StatusCodes.Status404NotFound,
-                "Resource Not Found",
-                exception.Message,
-                null
-            ),
-
-            // Forbidden (403)
-            ForbiddenAccessException => (
-                StatusCodes.Status403Forbidden,
-                "Forbidden",
-                exception.Message,
-                null
             ),
 
             // Domain Rule Violation (422)

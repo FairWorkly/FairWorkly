@@ -10,4 +10,3 @@ public class ValidateRosterCommandValidator : AbstractValidator<ValidateRosterCo
         RuleFor(x => x.OrganizationId).NotEmpty().WithMessage("OrganizationId is required.");
     }
 }
-
