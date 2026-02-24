@@ -42,17 +42,14 @@ export async function uploadRoster(file: File): Promise<UploadRosterResponse> {
   const formData = new FormData()
   formData.append('file', file)
 
-  // Use httpClient directly for FormData upload
-  // Override default application/json Content-Type; axios will append the boundary automatically
+  // Use httpClient directly for FormData upload.
+  // Clear the default application/json Content-Type so the browser
+  // auto-sets multipart/form-data with the correct boundary.
   try {
     const response = await httpClient.post<UploadRosterResponse>(
       '/roster/upload',
       formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      { headers: { 'Content-Type': undefined } }
     )
 
     return response.data

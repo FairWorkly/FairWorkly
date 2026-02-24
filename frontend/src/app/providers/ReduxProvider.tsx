@@ -24,7 +24,7 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({ children }) => {
           withCredentials: true,
         })
 
-        const refreshData = refreshRes.data?.data ?? refreshRes.data
+        const refreshData = refreshRes.data?.data
         const accessToken = refreshData?.accessToken
         if (!accessToken) return
 
@@ -33,7 +33,7 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({ children }) => {
           headers: { Authorization: `Bearer ${accessToken}` },
         })
 
-        const u = meRes.data?.data ?? meRes.data
+        const u = meRes.data?.data
         const role =
           typeof u?.role === 'string' ? u.role.toLowerCase() : undefined
         if (!u?.id || !u?.email || !role) {

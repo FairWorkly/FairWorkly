@@ -1,55 +1,51 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ComplianceUpload } from '@/shared/compliance-check'
 import type { ComplianceConfig, UploadedFile } from '@/shared/compliance-check'
+import { uploadPayrollValidation } from '@/services/payrollApi'
+import type { ApiError } from '@/shared/types/api.types'
 
-// TODO: [Backend Integration] Replace mock timer with real API call.
-// When integrating with backend:
-// 1. Create payrollApi.ts with uploadPayroll() (similar to rosterApi.ts uploadRoster())
-// 2. Replace handleStartAnalysis mock timer with actual API call
-// 3. Extract error via err?.response?.data?.message and pass to ComplianceUpload error prop
-//    - ComplianceUpload already supports `error` prop with whiteSpace: 'pre-line' for multi-line errors
-// 4. See RosterUpload.tsx for reference implementation
-
-const mockConfig: ComplianceConfig = {
+const payrollConfig: ComplianceConfig = {
   title: 'Upload Payroll',
   fileTypes: ['CSV'],
-  maxFileSize: '50MB',
+  maxFileSize: '2MB',
   coverageAreas: ['Awards', 'Classifications', 'Allowances'],
 }
 
 const payrollValidationItems = [
-  'Base rates & award classifications',
-  'Penalty rates (weekends & public holidays)',
-  'Casual loading (25%)',
-  'Superannuation guarantee',
-  'Single Touch Payroll (STP) compliance',
+  { key: 'enableBaseRateCheck', label: 'Base rates & award classifications' },
+  {
+    key: 'enablePenaltyCheck',
+    label: 'Penalty rates (weekends & public holidays)',
+  },
+  { key: 'enableCasualLoadingCheck', label: 'Casual loading (25%)' },
+  { key: 'enableSuperCheck', label: 'Superannuation guarantee' },
+  // Future: { key: 'enableStpCheck', label: 'Single Touch Payroll(STP) compliance' }
 ]
 
 export function PayrollUpload() {
   const navigate = useNavigate()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
-  const processingStartRef = useRef<number | null>(null)
-  const pollingTimerRef = useRef<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  // ComplianceUpload exposes a synthetic ChangeEvent — keep the real File
+  // object in a ref so we can send it via FormData on submit.
+  const actualFileRef = useRef<File | null>(null)
 
-  const minProcessingMs = 2000
-  const mockProcessingMs = 1200
-  const pollIntervalMs = 300
+  const [enableChecks, setEnableChecks] = useState<Record<string, boolean>>({
+    enableBaseRateCheck: true,
+    enablePenaltyCheck: true,
+    enableCasualLoadingCheck: true,
+    enableSuperCheck: true,
+  })
 
-  useEffect(() => {
-    return () => {
-      if (pollingTimerRef.current !== null) {
-        window.clearInterval(pollingTimerRef.current)
-      }
-    }
-  }, [])
-
+  // Store the real File and build an UploadedFile preview card for the UI.
+  // ComplianceUpload only renders the card — it never touches the File itself.
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (!file) {
-      return
-    }
+    if (!file) return
+
+    actualFileRef.current = file
 
     const newFile: UploadedFile = {
       id: Date.now(),
@@ -60,58 +56,89 @@ export function PayrollUpload() {
     }
 
     setUploadedFiles([newFile])
+    setError(null)
   }
 
   const handleRemoveFile = (id: number) => {
     setUploadedFiles(prev => prev.filter(file => file.id !== id))
+    actualFileRef.current = null
+    setError(null)
   }
 
-  const handleStartAnalysis = () => {
-    setIsProcessing(true)
-    processingStartRef.current = Date.now()
-
-    const pollStatus = () => {
-      if (processingStartRef.current === null) {
-        return
-      }
-
-      const elapsedMs = Date.now() - processingStartRef.current
-      const isComplete = elapsedMs >= mockProcessingMs
-      const minTimeReached = elapsedMs >= minProcessingMs
-
-      if (isComplete && minTimeReached) {
-        if (pollingTimerRef.current !== null) {
-          window.clearInterval(pollingTimerRef.current)
-          pollingTimerRef.current = null
-        }
-        navigate('/payroll/results')
-      }
+  // Submit flow: validate file → POST /payroll/validation (multipart) →
+  // persist result to sessionStorage → navigate to results page.
+  // On failure: show error message, stay on this page.
+  const handleStartAnalysis = async () => {
+    if (!actualFileRef.current) {
+      setError('No file selected')
+      return
     }
 
-    pollStatus()
-    pollingTimerRef.current = window.setInterval(pollStatus, pollIntervalMs)
+    setIsProcessing(true)
+    setError(null)
+
+    try {
+      // TODO: awardType and state are hardcoded for MVP; will be
+      // user-selectable once multi-award support lands.
+      const result = await uploadPayrollValidation(actualFileRef.current, {
+        awardType: 'GeneralRetailIndustryAward2020',
+        state: 'VIC',
+        enableBaseRateCheck: enableChecks.enableBaseRateCheck,
+        enablePenaltyCheck: enableChecks.enablePenaltyCheck,
+        enableCasualLoadingCheck: enableChecks.enableCasualLoadingCheck,
+        enableSuperCheck: enableChecks.enableSuperCheck,
+      })
+
+      // Persist to sessionStorage so the results page survives a
+      // browser refresh (router state is lost on reload).
+      try {
+        sessionStorage.setItem(
+          'payroll-validation-result',
+          JSON.stringify(result)
+        )
+      } catch {
+        // Storage quota exceeded — current session still works via router
+        // state; F5 refresh will redirect to upload instead of restoring.
+        console.warn('sessionStorage unavailable; refresh recovery disabled')
+      }
+
+      navigate('/payroll/results', { state: { result } })
+    } catch (err) {
+      console.error('Payroll validation error:', err)
+      if (err && typeof err === 'object' && 'message' in err) {
+        const apiError = err as ApiError
+        console.error('Error details:', apiError.details)
+        setError(apiError.message ?? 'An unexpected error occurred')
+      } else {
+        setError('An unexpected error occurred')
+      }
+      setIsProcessing(false)
+    }
   }
 
   const handleCancel = () => {
-    if (pollingTimerRef.current !== null) {
-      window.clearInterval(pollingTimerRef.current)
-      pollingTimerRef.current = null
-    }
-    processingStartRef.current = null
     setIsProcessing(false)
     setUploadedFiles([])
+    actualFileRef.current = null
+    setError(null)
   }
 
   return (
     <ComplianceUpload
-      config={mockConfig}
+      config={payrollConfig}
       uploadedFiles={uploadedFiles}
       onFileUpload={handleFileUpload}
       onRemoveFile={handleRemoveFile}
       onStartAnalysis={handleStartAnalysis}
       onCancel={handleCancel}
+      acceptFileTypes=".csv"
       validationItems={payrollValidationItems}
+      validationItemStates={enableChecks}
+      onToggleValidationItem={key =>
+        setEnableChecks(prev => ({ ...prev, [key]: !prev[key] }))
+      }
       isLoading={isProcessing}
+      error={error}
     />
   )
 }
