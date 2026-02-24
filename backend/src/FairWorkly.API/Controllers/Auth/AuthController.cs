@@ -5,6 +5,7 @@ using FairWorkly.Application.Auth.Features.Login;
 using FairWorkly.Application.Auth.Features.Logout;
 using FairWorkly.Application.Auth.Features.Me;
 using FairWorkly.Application.Auth.Features.Refresh;
+using FairWorkly.Application.Auth.Features.Register;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Result;
 using MediatR;
@@ -59,6 +60,24 @@ public class AuthController(IMediator mediator) : BaseApiController
         if (result.IsSuccess)
         {
             // Update cookie with new refresh token
+            SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
+        }
+
+        return RespondResult(result);
+    }
+
+    [HttpPost("register")]
+    [AllowAnonymous]
+    [SwaggerRequestExample(
+        typeof(RegisterCommand),
+        typeof(FairWorkly.API.SwaggerExamples.RegisterCommandExample)
+    )]
+    public async Task<IActionResult> Register([FromBody] RegisterCommand command)
+    {
+        var result = await mediator.Send(command);
+
+        if (result.IsSuccess)
+        {
             SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
         }
 

@@ -59,5 +59,6 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
         builder.Property(o => o.ContactEmail).HasMaxLength(255).IsRequired();
         builder.Property(o => o.PhoneNumber).HasMaxLength(20);
         builder.Property(o => o.LogoUrl).HasMaxLength(500);
+        builder.Property(o => o.CurrentEmployeeCount);
     }
 }

@@ -4,16 +4,12 @@ import { authApi } from '@/services/authApi'
 import { setAuthData, setStatus } from '@/slices/auth'
 import { useAppDispatch } from '@/store/hooks'
 import type { LoginFormData } from '../types'
+import { DEFAULT_ROUTES, normalizeAuthUser } from './authUtils'
 
 type UseLoginResult = {
   login: (values: LoginFormData) => Promise<void>
   isSubmitting: boolean
   error: string | null
-}
-
-const DEFAULT_ROUTES: Record<string, string> = {
-  admin: '/fairbot',
-  manager: '/roster/upload',
 }
 
 export function useLogin(): UseLoginResult {
@@ -35,25 +31,14 @@ export function useLogin(): UseLoginResult {
           password: values.password,
         })
 
-        const name = [response.user.firstName, response.user.lastName]
-          .filter(Boolean)
-          .join(' ') || response.user.email
-
-        const role = response.user.role?.toLowerCase()
-        const validRole: 'admin' | 'manager' | undefined =
-          role === 'admin' || role === 'manager' ? role : undefined
+        const { normalizedUser, roleKey } = normalizeAuthUser(response.user)
 
         dispatch(setAuthData({
-          user: {
-            id: response.user.id,
-            email: response.user.email,
-            name,
-            role: validRole,
-          },
+          user: normalizedUser,
           accessToken: response.accessToken,
         }))
 
-        navigate(DEFAULT_ROUTES[role ?? ''] ?? '/403', { replace: true })
+        navigate(DEFAULT_ROUTES[roleKey] ?? '/403', { replace: true })
       } catch (err) {
         const message =
           err instanceof Error ? err.message : 'Login failed. Please try again.'
