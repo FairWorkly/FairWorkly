@@ -18,7 +18,7 @@ namespace FairWorkly.Application.Roster.Features.UploadRoster;
 /// 4. Matching parsed entries to existing employees
 /// 5. Creating Roster and Shift entities
 /// 6. Saving to database in single transaction
-/// 7. Returning response with warnings to frontend
+/// 7. Returning response with non-blocking warnings (reserved; usually empty under current policy)
 /// </summary>
 public class UploadRosterHandler(
     IAiClient aiClient,
@@ -366,6 +366,8 @@ public class UploadRosterHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         // ========== Step 9: Build response with warnings ==========
+        // This list is kept for forward compatibility with non-blocking import hints.
+        // Current import policy treats most data quality issues as blocking 422 errors.
         var warnings = parseResponse
             .Issues.Where(i => i.Severity == "warning")
             .Select(i => new ParserWarning

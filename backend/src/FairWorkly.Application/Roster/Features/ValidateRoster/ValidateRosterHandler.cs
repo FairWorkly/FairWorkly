@@ -7,11 +7,13 @@ using FairWorkly.Domain.Common.Result;
 using FairWorkly.Domain.Roster.Entities;
 using FairWorkly.Domain.Roster.ValueObjects;
 using MediatR;
+using RosterEntity = FairWorkly.Domain.Roster.Entities.Roster;
 
 namespace FairWorkly.Application.Roster.Features.ValidateRoster;
 
 /// <summary>
-/// Handles roster validation by orchestrating compliance rule execution
+/// Handles roster validation by orchestrating compliance rule execution.
+/// Idempotent: returns existing results if validation already completed.
 /// </summary>
 public class ValidateRosterHandler(
     IRosterRepository rosterRepository,
@@ -47,34 +49,94 @@ public class ValidateRosterHandler(
             return Result<ValidateRosterResponse>.Of404("Roster not found");
         }
 
-        var employeeNameById = roster
-            .Shifts.Where(s => s.EmployeeId != Guid.Empty && s.Employee != null)
-            .Select(s => new { s.EmployeeId, Name = s.Employee!.FullName })
-            .GroupBy(x => x.EmployeeId)
-            .ToDictionary(g => g.Key, g => g.First().Name);
+        // Check for existing completed validation (idempotency)
+        var existingValidation = await validationRepository.GetByRosterIdWithIssuesAsync(
+            request.RosterId,
+            request.OrganizationId,
+            cancellationToken
+        );
 
-        string? GetEmployeeName(Guid employeeId)
+        if (existingValidation != null && existingValidation.Status == ValidationStatus.Passed)
         {
-            return employeeNameById.TryGetValue(employeeId, out var name) ? name : null;
+            return Result<ValidateRosterResponse>.Of200(
+                "Roster validation completed",
+                ValidationResponseBuilder.Build(
+                    roster,
+                    existingValidation,
+                    existingValidation.Issues
+                )
+            );
         }
 
-        // Create validation record
-        var validation = new RosterValidation
+        if (
+            existingValidation != null
+            && existingValidation.Status == ValidationStatus.Failed
+            && !ValidationFailureMarker.IsExecutionFailure(existingValidation)
+        )
         {
-            Id = Guid.NewGuid(),
-            OrganizationId = request.OrganizationId,
-            RosterId = request.RosterId,
-            Status = ValidationStatus.InProgress,
-            WeekStartDate = roster.WeekStartDate,
-            WeekEndDate = roster.WeekEndDate,
-            StartedAt = DateTimeOffset.UtcNow,
-            ExecutedCheckTypes = ExecutedCheckTypeSet.FromCheckTypes(
-                complianceEngine.GetExecutedCheckTypes()
-            ),
-        };
+            return Result<ValidateRosterResponse>.Of200(
+                "Roster validation completed",
+                ValidationResponseBuilder.Build(
+                    roster,
+                    existingValidation,
+                    existingValidation.Issues
+                )
+            );
+        }
 
-        await validationRepository.CreateAsync(validation, cancellationToken);
-        // Persist InProgress record immediately so it's visible to frontend/background queries
+        var shouldReuseExisting =
+            existingValidation != null
+            && (
+                existingValidation.Status == ValidationStatus.InProgress
+                || ValidationFailureMarker.IsExecutionFailure(existingValidation)
+            );
+
+        // Reuse stale InProgress/execution-failed record or create new
+        RosterValidation validation;
+        if (shouldReuseExisting)
+        {
+            validation = existingValidation!;
+            validation.Status = ValidationStatus.InProgress;
+            validation.StartedAt = DateTimeOffset.UtcNow;
+            validation.CompletedAt = null;
+            validation.Notes = null;
+            validation.TotalShifts = 0;
+            validation.PassedShifts = 0;
+            validation.FailedShifts = 0;
+            validation.TotalIssuesCount = 0;
+            validation.CriticalIssuesCount = 0;
+            validation.AffectedEmployees = 0;
+            validation.WeekStartDate = roster.WeekStartDate;
+            validation.WeekEndDate = roster.WeekEndDate;
+            validation.ExecutedCheckTypes = ExecutedCheckTypeSet.FromCheckTypes(
+                complianceEngine.GetExecutedCheckTypes()
+            );
+            await validationRepository.UpdateAsync(validation, cancellationToken);
+            await validationRepository.SoftDeleteIssuesAsync(
+                validation.Id,
+                request.OrganizationId,
+                cancellationToken
+            );
+        }
+        else
+        {
+            validation = new RosterValidation
+            {
+                Id = Guid.NewGuid(),
+                OrganizationId = request.OrganizationId,
+                RosterId = request.RosterId,
+                Status = ValidationStatus.InProgress,
+                WeekStartDate = roster.WeekStartDate,
+                WeekEndDate = roster.WeekEndDate,
+                StartedAt = DateTimeOffset.UtcNow,
+                ExecutedCheckTypes = ExecutedCheckTypeSet.FromCheckTypes(
+                    complianceEngine.GetExecutedCheckTypes()
+                ),
+            };
+            await validationRepository.CreateAsync(validation, cancellationToken);
+        }
+
+        // Persist immediately so it's visible to frontend/background queries
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         List<RosterIssue> issues;
@@ -128,41 +190,86 @@ public class ValidateRosterHandler(
         {
             validation.Status = ValidationStatus.Failed;
             validation.CompletedAt = DateTimeOffset.UtcNow;
-            validation.Notes = ToSafeNotes($"Validation failed: {ex.Message}");
+            validation.Notes = ToSafeNotes(
+                ValidationFailureMarker.BuildExecutionFailureNote(ex.Message)
+            );
 
             await validationRepository.UpdateAsync(validation, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return Result<ValidateRosterResponse>.Of422("Roster validation failed.");
+            return Result<ValidateRosterResponse>.Of500(
+                "Roster validation failed due to an internal error. Please retry."
+            );
         }
 
         // Build response
-        var response = new ValidateRosterResponse
+        var response = ValidationResponseBuilder.Build(roster, validation, issues);
+
+        return Result<ValidateRosterResponse>.Of200("Roster validation completed", response);
+    }
+}
+
+/// <summary>
+/// Shared helper to build ValidateRosterResponse from roster, validation, and issues.
+/// Used by both ValidateRosterHandler and GetValidationResultsHandler.
+/// </summary>
+public static class ValidationResponseBuilder
+{
+    public static ValidateRosterResponse Build(
+        RosterEntity roster,
+        RosterValidation validation,
+        IEnumerable<RosterIssue> issues
+    )
+    {
+        var employeeLookup = roster
+            .Shifts.Where(s => s.EmployeeId != Guid.Empty && s.Employee != null)
+            .Select(s => new
+            {
+                s.EmployeeId,
+                Name = s.Employee!.FullName,
+                Number = s.Employee.EmployeeNumber,
+            })
+            .GroupBy(x => x.EmployeeId)
+            .ToDictionary(g => g.Key, g => (Name: g.First().Name, Number: g.First().Number));
+
+        var issueList = issues.ToList();
+
+        return new ValidateRosterResponse
         {
             ValidationId = validation.Id,
             Status = validation.Status,
             TotalShifts = validation.TotalShifts,
             PassedShifts = validation.PassedShifts,
             FailedShifts = validation.FailedShifts,
-            TotalIssues = issues.Count,
+            TotalIssues = validation.TotalIssuesCount,
             CriticalIssues = validation.CriticalIssuesCount,
-            Issues = issues
-                .Select(i => new RosterIssueSummary
+            AffectedEmployees = validation.AffectedEmployees,
+            WeekStartDate = roster.WeekStartDate,
+            WeekEndDate = roster.WeekEndDate,
+            TotalEmployees = roster.TotalEmployees,
+            ValidatedAt = validation.CompletedAt,
+            FailureType = ValidationFailureMarker.GetFailureType(validation),
+            Retriable = ValidationFailureMarker.IsRetriable(validation),
+            Issues = issueList
+                .Select(i =>
                 {
-                    Id = i.Id,
-                    ShiftId = i.ShiftId,
-                    EmployeeId = i.EmployeeId,
-                    EmployeeName = GetEmployeeName(i.EmployeeId),
-                    CheckType = i.CheckType.ToString(),
-                    Severity = i.Severity,
-                    Description = i.Description,
-                    ExpectedValue = i.ExpectedValue,
-                    ActualValue = i.ActualValue,
-                    AffectedDates = i.AffectedDates.ToStorageString(),
+                    employeeLookup.TryGetValue(i.EmployeeId, out var emp);
+                    return new RosterIssueSummary
+                    {
+                        Id = i.Id,
+                        ShiftId = i.ShiftId,
+                        EmployeeId = i.EmployeeId,
+                        EmployeeName = emp.Name,
+                        EmployeeNumber = emp.Number,
+                        CheckType = i.CheckType.ToString(),
+                        Severity = i.Severity,
+                        Description = i.Description,
+                        ExpectedValue = i.ExpectedValue,
+                        ActualValue = i.ActualValue,
+                        AffectedDates = i.AffectedDates.ToStorageString(),
+                    };
                 })
                 .ToList(),
         };
-
-        return Result<ValidateRosterResponse>.Of200("Roster validation completed", response);
     }
 }

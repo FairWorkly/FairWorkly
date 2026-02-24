@@ -53,8 +53,13 @@ export function TrustBar() {
     <TrustSection>
       <TrustContainer>
         <TrustContent>
-          {trustItems.map((item) => (
-            <TrustItem key={item.label} direction="row" spacing={1.5} alignItems="center">
+          {trustItems.map(item => (
+            <TrustItem
+              key={item.label}
+              direction="row"
+              spacing={1.5}
+              alignItems="center"
+            >
               <item.icon />
               <Typography variant="body1">{item.label}</Typography>
             </TrustItem>

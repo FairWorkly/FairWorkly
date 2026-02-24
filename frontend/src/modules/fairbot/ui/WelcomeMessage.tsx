@@ -34,7 +34,9 @@ const BulletIcon = styled(CheckCircleOutline)(({ theme }) => ({
 export const WelcomeMessage = () => {
   return (
     <MessageCard>
-      <Typography variant="subtitle1">{FAIRBOT_LABELS.WELCOME_TITLE}</Typography>
+      <Typography variant="subtitle1">
+        {FAIRBOT_LABELS.WELCOME_TITLE}
+      </Typography>
       <BulletList>
         {FAIRBOT_LABELS.WELCOME_BULLETS.map((item, index) => (
           <BulletItem key={`${item}-${index}`}>

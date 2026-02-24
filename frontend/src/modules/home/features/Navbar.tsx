@@ -181,7 +181,9 @@ export function Navbar({ onScrollToSection }: NavbarProps) {
     if (onScrollToSection) {
       onScrollToSection(sectionId)
     } else {
-      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      document
+        .getElementById(sectionId)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 
@@ -240,8 +242,12 @@ export function Navbar({ onScrollToSection }: NavbarProps) {
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         keepMounted
       >
-        <MenuItem onClick={() => handleMobileNavClick('features')}>Features</MenuItem>
-        <MenuItem onClick={() => handleMobileNavClick('pricing')}>Pricing</MenuItem>
+        <MenuItem onClick={() => handleMobileNavClick('features')}>
+          Features
+        </MenuItem>
+        <MenuItem onClick={() => handleMobileNavClick('pricing')}>
+          Pricing
+        </MenuItem>
         <MenuItem onClick={() => handleMobileNavClick('faq')}>FAQ</MenuItem>
       </Menu>
     </NavRoot>

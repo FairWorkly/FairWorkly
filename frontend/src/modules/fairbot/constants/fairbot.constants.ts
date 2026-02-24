@@ -31,7 +31,8 @@ What would you like help with today?`,
   EMPTY_RESULTS_SUBTITLE:
     "Upload a file or ask a question, and I'll display a quick summary with links to detailed reports.",
   // Helper tip under the file upload zone.
-  UPLOAD_TIP: 'Tip: Upload roster or payroll files (.xlsx, .csv) for instant analysis',
+  UPLOAD_TIP:
+    'Tip: Upload roster or payroll files (.xlsx, .csv) for instant analysis',
   // Label for ask question quick action.
   ASK_QUESTION: 'Ask a Question',
   // Typing indicator message.
@@ -170,7 +171,7 @@ const FAIRBOT_GRID_COLUMNS = {
 
 // Two-column layout: Chat (70%) + Results (30%).
 // Sidebar is provided by MainLayout, so no sidebar column needed here.
-const FAIRBOT_GRID_TEMPLATE_COLUMNS = 
+const FAIRBOT_GRID_TEMPLATE_COLUMNS =
   `${FAIRBOT_GRID_COLUMNS.CHAT} ${FAIRBOT_GRID_COLUMNS.RESULTS}` as const
 
 export const FAIRBOT_LAYOUT = {

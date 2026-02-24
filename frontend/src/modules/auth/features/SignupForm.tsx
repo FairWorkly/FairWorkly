@@ -27,7 +27,9 @@ interface SignupFormProps {
   isGoogleLoading?: boolean
 }
 
-function getPasswordStrength(password: string): 'weak' | 'medium' | 'strong' | '' {
+function getPasswordStrength(
+  password: string
+): 'weak' | 'medium' | 'strong' | '' {
   if (!password) return ''
   let strength = 0
   if (password.length >= 8) strength++
@@ -136,7 +138,11 @@ export function SignupForm({
 
   return (
     <AuthFormContainer onSubmit={handleSubmit}>
-      <GoogleButton type="button" onClick={onGoogleLogin} disabled={isGoogleDisabled}>
+      <GoogleButton
+        type="button"
+        onClick={onGoogleLogin}
+        disabled={isGoogleDisabled}
+      >
         <GoogleIcon />
         {isGoogleLoading ? 'Signing up...' : 'Continue with Google'}
       </GoogleButton>

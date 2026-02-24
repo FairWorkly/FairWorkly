@@ -13,7 +13,8 @@ interface UseResultsPanelResult {
 }
 
 const canUseSessionStorage = (): boolean =>
-  typeof window !== FAIRBOT_ENV.TYPEOF_UNDEFINED && Boolean(window.sessionStorage)
+  typeof window !== FAIRBOT_ENV.TYPEOF_UNDEFINED &&
+  Boolean(window.sessionStorage)
 
 const readResultFromSession = (): FairBotResult | null => {
   if (!canUseSessionStorage()) {
@@ -45,7 +46,7 @@ const persistResultToSession = (result: FairBotResult | null) => {
 
     window.sessionStorage.setItem(
       FAIRBOT_SESSION_KEYS.RESULTS,
-      JSON.stringify(result),
+      JSON.stringify(result)
     )
   } catch {
     return
@@ -54,7 +55,7 @@ const persistResultToSession = (result: FairBotResult | null) => {
 
 export const useResultsPanel = (): UseResultsPanelResult => {
   const [currentResult, setCurrentResult] = useState<FairBotResult | null>(
-    readResultFromSession,
+    readResultFromSession
   )
 
   useEffect(() => {
@@ -71,6 +72,6 @@ export const useResultsPanel = (): UseResultsPanelResult => {
       setCurrentResult,
       clearResult,
     }),
-    [clearResult, currentResult],
+    [clearResult, currentResult]
   )
 }

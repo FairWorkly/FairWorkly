@@ -1,70 +1,107 @@
-import type { AxiosError } from "axios";
+import { isAxiosError } from 'axios'
+
+// --- Unified API error model ---
 
 /**
- * 全项目统一的 API 错误模型
- * - 让 UI / hooks 不需要理解 axios 的内部结构
+ * Normalized error for UI / hooks consumption.
+ * Abstracts away Axios internals and backend response formats.
  */
 export interface ApiError {
-  status?: number;
-  message: string;
-  code?: string;
-  details?: unknown;
-  raw?: unknown; // 保留原始错误，方便调试
+  status?: number
+  message: string
+  details?: unknown // envelope inner data (e.g. { errors: [...] })
+  raw?: unknown
 }
 
+// --- Backend response format detection ---
+
 /**
- * 约定后端可能返回的错误结构（可按后端实际格式调整）
+ * Backend unified response envelope returned by Result<T> + ResultMappingFilter.
+ * All intentional responses (2xx, 4xx, 5xx via Handler) use this format.
  */
-export interface BackendErrorShape {
-  msg?: string;       // backend envelope: { code, msg, data }
-  message?: string;   // legacy / ProblemDetails fallback
-  code?: string;
-  details?: unknown;
+export interface BackendEnvelope<T = unknown> {
+  code: number
+  msg: string
+  data?: T
 }
 
 /**
- * 类型守卫：判断是否 axios error
+ * Type guard: checks if data matches the { code, msg } envelope shape.
+ * Used by both the success interceptor (unwrapping) and normalizeApiError.
  */
-export function isAxiosError(error: unknown): error is AxiosError {
-  return typeof error === "object" && error !== null && "isAxiosError" in error;
+export function isBackendEnvelope(data: unknown): data is BackendEnvelope {
+  if (typeof data !== 'object' || data === null) return false
+  const d = data as Record<string, unknown>
+  return typeof d.code === 'number' && typeof d.msg === 'string'
 }
 
 /**
- * 把未知错误统一转换成 ApiError
+ * RFC 7807 ProblemDetails — only produced by GlobalExceptionHandler
+ * for truly unexpected exceptions (bugs). Frontend shows a generic message.
+ */
+interface ProblemDetails {
+  status?: number
+  title?: string
+  detail?: string
+  instance?: string
+}
+
+function isProblemDetails(data: unknown): data is ProblemDetails {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'title' in data &&
+    ('status' in data || 'detail' in data)
+  )
+}
+
+// --- Error normalizer ---
+
+/**
+ * Converts any thrown error into a normalized ApiError.
+ *
+ * Handles three backend response formats:
+ * 1. Envelope { code, msg, data } — normal business responses via Result<T>
+ * 2. ProblemDetails { status, title, detail } — GlobalExceptionHandler (bugs)
+ * 3. Unknown format — falls back to Axios error message
  */
 export function normalizeApiError(error: unknown): ApiError {
-  // Axios 错误
   if (isAxiosError(error)) {
-    const status = error.response?.status;
-    const data = error.response?.data as BackendErrorShape | undefined;
+    const status = error.response?.status
+    const responseBody = error.response?.data
 
-    // 优先用后端 message，其次用 axios message
-    const message =
-      data?.msg ||
-      data?.message ||
-      error.message ||
-      "Request failed. Please try again.";
+    // Backend envelope: { code, msg, data }
+    if (isBackendEnvelope(responseBody)) {
+      return {
+        status,
+        message: responseBody.msg,
+        details: responseBody.data,
+        raw: error,
+      }
+    }
 
+    // ProblemDetails (GlobalExceptionHandler — unexpected bugs)
+    if (isProblemDetails(responseBody)) {
+      return {
+        status,
+        message: responseBody.detail || responseBody.title || 'Server error',
+        raw: error,
+      }
+    }
+
+    // Unknown format
     return {
       status,
-      message,
-      code: data?.code,
-      details: data?.details,
+      message: error.message || 'Request failed. Please try again.',
       raw: error,
-    };
+    }
   }
 
-  // 原生 Error
+  // Native Error
   if (error instanceof Error) {
-    return {
-      message: error.message || "Unexpected error.",
-      raw: error,
-    };
+    return { message: error.message || 'Unexpected error.', raw: error }
   }
 
-  // 兜底
-  return {
-    message: "Network error. Please try again.",
-    raw: error,
-  };
+  // Catch-all
+  return { message: 'An unexpected error occurred.', raw: error }
 }

@@ -71,7 +71,7 @@ const validateFile = (file: File): FairBotError | null => {
 }
 
 export const useFileUpload = (
-  options: UseFileUploadOptions = {},
+  options: UseFileUploadOptions = {}
 ): UseFileUploadResult => {
   const { onFileAccepted } = options
   const inputRef = useRef<HTMLInputElement>(null)
@@ -83,7 +83,7 @@ export const useFileUpload = (
   })
 
   const reset = useCallback(() => {
-    setState((prev) => ({
+    setState(prev => ({
       ...prev,
       isDragging: false,
       isUploading: false,
@@ -96,26 +96,26 @@ export const useFileUpload = (
       const validationError = validateFile(file)
       if (validationError) {
         // Surface validation errors through the shared upload state.
-        setState((prev) => ({ ...prev, error: validationError }))
+        setState(prev => ({ ...prev, error: validationError }))
         return
       }
 
-      setState((prev) => ({ ...prev, error: null, isUploading: false }))
+      setState(prev => ({ ...prev, error: null, isUploading: false }))
       onFileAccepted?.(file)
     },
-    [onFileAccepted],
+    [onFileAccepted]
   )
 
   const handleDragEnter = useCallback((event: DragEvent<HTMLElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    setState((prev) => ({ ...prev, isDragging: true }))
+    setState(prev => ({ ...prev, isDragging: true }))
   }, [])
 
   const handleDragLeave = useCallback((event: DragEvent<HTMLElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    setState((prev) => ({ ...prev, isDragging: false }))
+    setState(prev => ({ ...prev, isDragging: false }))
   }, [])
 
   const handleDragOver = useCallback((event: DragEvent<HTMLElement>) => {
@@ -128,10 +128,10 @@ export const useFileUpload = (
       event.preventDefault()
       event.stopPropagation()
 
-      setState((prev) => ({ ...prev, isDragging: false }))
+      setState(prev => ({ ...prev, isDragging: false }))
       const files = event.dataTransfer.files
       if (files.length < FAIRBOT_NUMBERS.ONE) {
-        setState((prev) => ({
+        setState(prev => ({
           ...prev,
           error: { message: FAIRBOT_ERRORS.FILE_REQUIRED },
         }))
@@ -141,14 +141,14 @@ export const useFileUpload = (
       const file = files[FAIRBOT_NUMBERS.ZERO]
       handleAcceptedFile(file)
     },
-    [handleAcceptedFile],
+    [handleAcceptedFile]
   )
 
   const handleFileSelect = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files
       if (!files || files.length < FAIRBOT_NUMBERS.ONE) {
-        setState((prev) => ({
+        setState(prev => ({
           ...prev,
           error: { message: FAIRBOT_ERRORS.FILE_REQUIRED },
         }))
@@ -159,7 +159,7 @@ export const useFileUpload = (
       handleAcceptedFile(file)
       event.target.value = FAIRBOT_TEXT.EMPTY
     },
-    [handleAcceptedFile],
+    [handleAcceptedFile]
   )
 
   const openFileDialog = useCallback(() => {
@@ -187,7 +187,7 @@ export const useFileUpload = (
       openFileDialog,
       reset,
       state,
-    ],
+    ]
   )
 
   return useMemo(
@@ -195,6 +195,6 @@ export const useFileUpload = (
       inputRef,
       controls,
     }),
-    [controls, inputRef],
+    [controls, inputRef]
   )
 }

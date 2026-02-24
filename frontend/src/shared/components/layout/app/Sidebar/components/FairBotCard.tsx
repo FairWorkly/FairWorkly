@@ -1,5 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import { Circle as CircleIcon, SmartToy as SmartToyOutlinedIcon } from '@mui/icons-material'
+import {
+  Circle as CircleIcon,
+  SmartToy as SmartToyOutlinedIcon,
+} from '@mui/icons-material'
 import {
   FairBotBody,
   FairBotCard as StyledFairBotCard,
@@ -40,8 +43,8 @@ export function FairBotCard() {
 
       <FairBotBody>
         <FairBotDescription variant="body2" color="text.secondary">
-          Ask FairBot about award rules, payroll, rosters, and required employment documents — or
-          upload files to start a compliance check.
+          Ask FairBot about award rules, payroll, rosters, and required
+          employment documents — or upload files to start a compliance check.
         </FairBotDescription>
       </FairBotBody>
     </StyledFairBotCard>

@@ -1,205 +1,228 @@
-import { useNavigate } from 'react-router-dom'
+// PayrollResults page — renders real PayrollValidationResult data.
+//
+// Data source priority:
+//   1. Router state (navigate from PayrollUpload)
+//   2. SessionStorage (browser refresh fallback)
+//   3. Neither → redirect to /payroll/upload
+//
+// Composes shared building blocks (ValidationHeader, SummaryCards,
+// CategoryAccordion) with payroll-specific issue rendering
+// (PayrollIssueRow) and category/severity config.
+
+import { useState } from 'react'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Box, Typography, Stack, Paper } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import { styled } from '@/styles/styled'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
 import {
-  ComplianceResults,
-  mapBackendToComplianceResults,
+  ValidationHeader,
+  SummaryCards,
+  CategoryAccordion,
+  formatMoney,
+  formatDateTime,
 } from '@/shared/compliance-check'
-import type { ComplianceApiResponse } from '@/shared/compliance-check'
+import type {
+  ValidationMetadata,
+  StatCardItem,
+} from '@/shared/compliance-check'
+import type { PayrollValidationResult } from '../types/payrollValidation.types'
+import { categoryConfig } from '../features/payrollCategoryConfig'
+import { PayrollIssueRow } from '../features/PayrollIssueRow'
+import { exportPayrollCsv } from '../features/exportPayrollCsv'
 
-// TODO: [Backend Integration] Replace mock data with real API call.
-// When integrating with backend:
-// 1. Get validation ID from route params (e.g., useParams<{ id: string }>())
-// 2. Fetch results from API (e.g., GET /api/compliance/results/:id)
-// 3. Add loading and error states
-// 4. Remove mockBackendPayload after integration
+// --- Styled components (page-level, no sx allowed in JSX) ---
 
-const mockBackendPayload: ComplianceApiResponse = {
-  metadata: {
-    award: 'General Retail Industry Award',
-    pay_period: {
-      start: '2026-01-01',
-      end: '2026-01-07',
-    },
-    validated_at: 'Jan 8, 2026',
-    validation_id: 'VAL-001',
+const AllClearContainer = styled(Paper)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: theme.spacing(6, 4),
+  borderRadius: theme.fairworkly.radius.xl,
+  backgroundColor: theme.palette.success.light,
+  border: `1px solid ${theme.palette.success.main}`,
+  textAlign: 'center',
+  gap: theme.spacing(2),
+}))
+
+const AllClearIcon = styled(CheckCircleOutlineIcon)(({ theme }) => ({
+  fontSize: 48,
+  color: theme.palette.success.main,
+}))
+
+const AllClearTitle = styled(Typography)(({ theme }) => ({
+  fontWeight: theme.typography.h6.fontWeight,
+  color: theme.palette.success.dark,
+}))
+
+const AllClearSubtitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.success.dark,
+}))
+
+const IssuesWrapper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: theme.fairworkly.radius.xl,
+  border: `1px solid ${theme.palette.divider}`,
+  boxShadow: 'none',
+  backgroundColor: theme.palette.background.paper,
+  [theme.breakpoints.up('sm')]: {
+    padding: theme.spacing(3),
   },
-  summary: {
-    employees_compliant: 12,
-    total_issues: 10,
-    total_underpayment: '$2,830.00',
-    employees_affected: 8,
+  [theme.breakpoints.up('md')]: {
+    padding: theme.spacing(1),
   },
-  categories: [
-    {
-      id: 'base-rate',
-      title: 'Base Rate Issues',
-      icon: 'attach_money',
-      color: '#ef4444',
-      employee_count: 2,
-      total_underpayment: '$480.00',
-      issues: [
-        {
-          id: 1,
-          name: 'Avery Johnson',
-          emp_id: 'EMP-001',
-          actual_value: '$650.00',
-          expected_value: '$800.00',
-          reason: 'base rate misclassified',
-          variance: '$150.00',
-          breakdown: 'Incorrect level applied for 20 hours.',
-        },
-        {
-          id: 2,
-          name: 'Jordan Lee',
-          emp_id: 'EMP-002',
-          actual_value: '$720.00',
-          expected_value: '$1,050.00',
-          reason: 'base rate below minimum',
-          variance: '$330.00',
-          breakdown: 'Hourly rate $22.50 below award minimum $26.75.',
-        },
-      ],
-    },
-    {
-      id: 'penalty-rates',
-      title: 'Penalty Rates',
-      icon: 'gavel',
-      color: '#f97316',
-      employee_count: 2,
-      total_underpayment: '$620.00',
-      issues: [
-        {
-          id: 3,
-          name: 'Samantha Williams',
-          emp_id: 'EMP-003',
-          actual_value: '$380.00',
-          expected_value: '$570.00',
-          reason: 'weekend penalties missing',
-          variance: '$190.00',
-          breakdown:
-            'Saturday 150% and Sunday 200% rates not applied for 8 hours.',
-        },
-        {
-          id: 4,
-          name: 'Michael Chen',
-          emp_id: 'EMP-004',
-          actual_value: '$420.00',
-          expected_value: '$850.00',
-          reason: 'public holiday rate missing',
-          variance: '$430.00',
-          breakdown:
-            'Public holiday 250% rate not applied for 6 hours on Jan 1.',
-        },
-      ],
-    },
-    {
-      id: 'overtime',
-      title: 'Overtime Issues',
-      icon: 'schedule',
-      color: '#eab308',
-      employee_count: 2,
-      total_underpayment: '$545.00',
-      issues: [
-        {
-          id: 5,
-          name: 'Emily Rodriguez',
-          emp_id: 'EMP-005',
-          actual_value: '$1,200.00',
-          expected_value: '$1,450.00',
-          reason: 'overtime not calculated',
-          variance: '$250.00',
-          breakdown:
-            'Worked 48 hours but overtime (150%) not applied for 10 hours.',
-        },
-        {
-          id: 6,
-          name: 'David Kim',
-          emp_id: 'EMP-006',
-          actual_value: '$980.00',
-          expected_value: '$1,275.00',
-          reason: 'double time missing',
-          variance: '$295.00',
-          breakdown:
-            'Hours beyond 10hrs/day should be 200%, only paid at 150%.',
-        },
-      ],
-    },
-    {
-      id: 'allowances',
-      title: 'Allowances',
-      icon: 'card_giftcard',
-      color: '#22c55e',
-      employee_count: 2,
-      total_underpayment: '$385.00',
-      issues: [
-        {
-          id: 7,
-          name: 'Sarah Thompson',
-          emp_id: 'EMP-007',
-          actual_value: '$850.00',
-          expected_value: '$1,010.00',
-          reason: 'meal allowance missing',
-          variance: '$160.00',
-          breakdown:
-            'Worked 5 shifts over 6 hours without meal allowance ($32 each).',
-        },
-        {
-          id: 8,
-          name: 'James Wilson',
-          emp_id: 'EMP-008',
-          actual_value: '$920.00',
-          expected_value: '$1,145.00',
-          reason: 'uniform allowance missing',
-          variance: '$225.00',
-          breakdown: 'Weekly uniform allowance of $45 not paid for 5 weeks.',
-        },
-      ],
-    },
-    {
-      id: 'leave',
-      title: 'Leave Entitlements',
-      icon: 'beach_access',
-      color: '#3b82f6',
-      employee_count: 2,
-      total_underpayment: '$800.00',
-      issues: [
-        {
-          id: 9,
-          name: 'Christopher Martinez',
-          emp_id: 'EMP-009',
-          actual_value: '$0.00',
-          expected_value: '$450.00',
-          reason: 'annual leave underpaid',
-          variance: '$450.00',
-          breakdown:
-            '3 days annual leave paid at base rate instead of leave loading (17.5%).',
-        },
-        {
-          id: 10,
-          name: 'Jessica Brown',
-          emp_id: 'EMP-010',
-          actual_value: '$200.00',
-          expected_value: '$550.00',
-          reason: 'sick leave not paid',
-          variance: '$350.00',
-          breakdown: '2 days sick leave not paid at full rate.',
-        },
-      ],
-    },
-  ],
-}
+}))
+
+const IssuesHeader = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1.5),
+  marginBottom: theme.spacing(3),
+  [theme.breakpoints.up('md')]: {
+    marginBottom: theme.spacing(2),
+  },
+}))
+
+const IssuesHeaderIcon = styled(FactCheckOutlinedIcon)(({ theme }) => ({
+  color: theme.palette.text.primary,
+}))
+
+const CategoriesStack = styled(Stack)(({ theme }) => ({
+  gap: theme.spacing(2),
+}))
+
+// --- Component ---
 
 export function PayrollResults() {
+  const location = useLocation()
   const navigate = useNavigate()
-  const { metadata, summary, categories } =
-    mapBackendToComplianceResults(mockBackendPayload)
+  const theme = useTheme()
+
+  // Router state (from upload page) or sessionStorage (refresh fallback)
+  const result: PayrollValidationResult | null =
+    location.state?.result ??
+    (() => {
+      try {
+        const cached = sessionStorage.getItem('payroll-validation-result')
+        return cached ? JSON.parse(cached) : null
+      } catch {
+        sessionStorage.removeItem('payroll-validation-result')
+        return null
+      }
+    })()
+
+  // Expand/collapse state — first category open by default.
+  // Must be declared before any early return to satisfy Rules of Hooks.
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
+    const firstKey = result?.categories[0]?.key
+    return firstKey ? { [firstKey]: true } : {}
+  })
+
+  const toggleCategory = (key: string) => {
+    setExpanded(prev => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  // No data → redirect to upload
+  if (!result) {
+    return <Navigate to="/payroll/upload" replace />
+  }
+
+  // ValidationHeader metadata
+  const metadata: ValidationMetadata = {
+    weekStarting: result.payPeriodStart,
+    weekEnding: result.payPeriodEnd,
+    validatedAt: formatDateTime(result.timestamp),
+    validationId: result.validationId,
+  }
+
+  // SummaryCards stats
+  const stats: StatCardItem[] = [
+    {
+      value: result.summary.passedCount,
+      label: 'Employees Compliant',
+      variant: 'success',
+      valueColor: theme.palette.success.main,
+    },
+    {
+      value: result.summary.totalIssues,
+      label: 'Total Issues Found',
+      variant: 'error',
+      valueColor: theme.palette.error.main,
+    },
+    {
+      value: formatMoney(result.summary.totalUnderpayment),
+      label: 'Total Underpayment',
+      variant: 'warning',
+      valueColor: theme.palette.warning.main,
+    },
+    {
+      value: result.summary.affectedEmployees,
+      label: 'Employees Affected',
+      variant: 'info',
+      valueColor: theme.palette.primary.main,
+    },
+  ]
+
+  const isPassed = result.status === 'Passed'
 
   return (
-    <ComplianceResults
-      metadata={metadata}
-      summary={summary}
-      categories={categories}
-      onNewValidation={() => navigate('/payroll/upload')}
-      onNavigateBack={() => navigate('/payroll/upload')}
-    />
+    <Box>
+      <ValidationHeader
+        metadata={metadata}
+        onNewValidation={() => navigate('/payroll/upload')}
+        onExport={() => exportPayrollCsv(result)}
+        onNavigateBack={() => navigate('/payroll/upload')}
+      />
+
+      <SummaryCards items={stats} />
+
+      {isPassed ? (
+        <AllClearContainer elevation={0}>
+          <AllClearIcon />
+          <AllClearTitle variant="h6">All Clear</AllClearTitle>
+          <AllClearSubtitle variant="body1">
+            All employees are compliant. No issues found.
+          </AllClearSubtitle>
+        </AllClearContainer>
+      ) : (
+        <IssuesWrapper>
+          <IssuesHeader>
+            <IssuesHeaderIcon />
+            <Typography variant="h6">Issues by Category</Typography>
+          </IssuesHeader>
+
+          <CategoriesStack>
+            {result.categories
+              .filter(cat => cat.affectedEmployeeCount > 0)
+              .map(cat => {
+                const config = categoryConfig[cat.key]
+                if (!config) return null
+                const Icon = config.icon
+                const catIssues = result.issues.filter(
+                  i => i.categoryType === cat.key
+                )
+                return (
+                  <CategoryAccordion
+                    key={cat.key}
+                    title={config.title}
+                    icon={<Icon fontSize="small" />}
+                    iconColor={config.color}
+                    employeeCount={cat.affectedEmployeeCount}
+                    amountLabel={`${formatMoney(cat.totalUnderpayment)} underpayment`}
+                    expanded={!!expanded[cat.key]}
+                    onToggle={() => toggleCategory(cat.key)}
+                  >
+                    {catIssues.map(issue => (
+                      <PayrollIssueRow key={issue.issueId} issue={issue} />
+                    ))}
+                  </CategoryAccordion>
+                )
+              })}
+          </CategoriesStack>
+        </IssuesWrapper>
+      )}
+    </Box>
   )
 }

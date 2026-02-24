@@ -1,6 +1,8 @@
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Roster.Features.GetRosterDetails;
+using FairWorkly.Application.Roster.Features.GetValidationResults;
 using FairWorkly.Application.Roster.Features.UploadRoster;
+using FairWorkly.Application.Roster.Features.ValidateRoster;
 using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Result;
@@ -125,6 +127,56 @@ public class RosterController(
         var contentType = GetContentType(fileName);
 
         return File(fileStream, contentType, fileName);
+    }
+
+    /// <summary>
+    /// Trigger compliance validation for a roster.
+    /// Idempotent: returns existing results if validation already completed.
+    /// </summary>
+    [HttpPost("{rosterId}/validate")]
+    public async Task<IActionResult> Validate(Guid rosterId)
+    {
+        if (_currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
+        {
+            return RespondResult(
+                Result<ValidateRosterResponse>.Of401("Organization context not found in token")
+            );
+        }
+
+        var command = new ValidateRosterCommand
+        {
+            RosterId = rosterId,
+            OrganizationId = organizationId,
+        };
+
+        var result = await _mediator.Send(command);
+
+        return RespondResult(result);
+    }
+
+    /// <summary>
+    /// Get existing validation results for a roster.
+    /// Returns 404 if no validation has been run yet.
+    /// </summary>
+    [HttpGet("{rosterId}/validation")]
+    public async Task<IActionResult> GetValidation(Guid rosterId)
+    {
+        if (_currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
+        {
+            return RespondResult(
+                Result<ValidateRosterResponse>.Of401("Organization context not found in token")
+            );
+        }
+
+        var query = new GetValidationResultsQuery
+        {
+            RosterId = rosterId,
+            OrganizationId = organizationId,
+        };
+
+        var result = await _mediator.Send(query);
+
+        return RespondResult(result);
     }
 
     private static string GetContentType(string fileName)

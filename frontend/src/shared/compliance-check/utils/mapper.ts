@@ -60,7 +60,9 @@ export const mapBackendToComplianceResults = (
         color: category.color ?? DEFAULT_COLOR,
         employeeCount: category.employee_count ?? issues.length,
         totalUnderpayment:
-          category.total_underpayment ?? category.total_variance ?? DEFAULT_VALUE,
+          category.total_underpayment ??
+          category.total_variance ??
+          DEFAULT_VALUE,
         issues,
       }
     }

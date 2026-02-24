@@ -37,9 +37,11 @@ export const MessageList = ({ messages, isTyping }: MessageListProps) => {
 
   return (
     <ListContainer aria-label={FAIRBOT_ARIA.MESSAGE_LIST}>
-      <ListHeader variant="caption">{FAIRBOT_LABELS.MESSAGE_LIST_HEADING}</ListHeader>
+      <ListHeader variant="caption">
+        {FAIRBOT_LABELS.MESSAGE_LIST_HEADING}
+      </ListHeader>
       <MessageStack>
-        {messages.map((message) => (
+        {messages.map(message => (
           <MessageBubble key={message.id} message={message} />
         ))}
         <TypingIndicator isVisible={isTyping && hasMessages} />

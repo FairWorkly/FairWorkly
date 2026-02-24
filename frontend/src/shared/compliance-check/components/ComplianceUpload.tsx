@@ -88,7 +88,9 @@ const FileIconContainer = styled(Box)(({ theme }) => ({
   color: theme.palette.primary.main,
 }))
 
-const ValidationListItem = styled(Box)(({ theme }) => ({
+const ValidationListItem = styled(Box, {
+  shouldForwardProp: prop => prop !== 'interactive',
+})<{ interactive?: boolean }>(({ theme, interactive }) => ({
   display: 'flex',
   alignItems: 'center',
   padding: theme.spacing(2, 2.5),
@@ -99,10 +101,13 @@ const ValidationListItem = styled(Box)(({ theme }) => ({
   transition: theme.transitions.create(['border-color', 'background-color'], {
     duration: theme.transitions.duration.shortest,
   }),
-  '&:hover': {
-    borderColor: theme.palette.divider,
-    backgroundColor: theme.palette.background.default,
-  },
+  ...(interactive && {
+    cursor: 'pointer',
+    '&:hover': {
+      borderColor: theme.palette.divider,
+      backgroundColor: theme.palette.background.default,
+    },
+  }),
   '&:last-child': {
     marginBottom: 0,
   },
@@ -227,7 +232,13 @@ interface ComplianceUploadProps {
   onStartAnalysis: () => void
   onCancel: () => void
   acceptFileTypes?: string
-  validationItems?: string[]
+  validationItems?: { key: string; label: string }[]
+  // Optional toggle support — when provided, validation items become
+  // clickable switches (e.g. payroll lets users disable individual checks).
+  // Keys must match the keys used in validationItems entries.
+  // Omit both props to keep items as a static read-only list (roster).
+  validationItemStates?: Record<string, boolean>
+  onToggleValidationItem?: (key: string) => void
   isLoading?: boolean
   error?: string | null
 }
@@ -252,6 +263,8 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
   onCancel,
   acceptFileTypes = '.csv',
   validationItems = [],
+  validationItemStates,
+  onToggleValidationItem,
   isLoading = false,
   error = null,
 }) => {
@@ -272,7 +285,9 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
       .map(ext => ext.trim().toLowerCase())
     const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase()
     if (!allowed.includes(ext)) {
-      setFileError(`Unsupported file type. Please upload ${allowed.join(', ')} files.`)
+      setFileError(
+        `Unsupported file type. Please upload ${allowed.join(', ')} files.`
+      )
       return
     }
 
@@ -284,6 +299,8 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
 
     setFileError(null)
 
+    // Wrap in a synthetic ChangeEvent so the parent handler has a
+    // uniform signature for both <input> change and drag-and-drop.
     const event = {
       target: { files },
     } as React.ChangeEvent<HTMLInputElement>
@@ -306,7 +323,11 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
       <PageTitle variant="h4">{config.title}</PageTitle>
 
       {fileError && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setFileError(null)}>
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+          onClose={() => setFileError(null)}
+        >
           {fileError}
         </Alert>
       )}
@@ -385,16 +406,47 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
             <ValidationCoverageIcon>
               <SettingsOutlinedIcon />
             </ValidationCoverageIcon>
-            <ValidationCoverageTitle>Validation Coverage</ValidationCoverageTitle>
+            <ValidationCoverageTitle>
+              Validation Coverage
+            </ValidationCoverageTitle>
           </ValidationCoverageHeader>
           {validationItems.length > 0 && (
             <Box>
-              {validationItems.map((item, index) => (
-                <ValidationListItem key={index}>
-                  <CoverageCheckIcon>
+              {validationItems.map(item => (
+                <ValidationListItem
+                  key={item.key}
+                  interactive={!!onToggleValidationItem}
+                  onClick={
+                    onToggleValidationItem
+                      ? () => onToggleValidationItem(item.key)
+                      : undefined
+                  }
+                  {...(onToggleValidationItem && {
+                    role: 'switch',
+                    tabIndex: 0,
+                    'aria-checked': validationItemStates?.[item.key] ?? false,
+                    onKeyDown: (e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onToggleValidationItem(item.key)
+                      }
+                    },
+                  })}
+                >
+                  <CoverageCheckIcon
+                    sx={
+                      validationItemStates
+                        ? {
+                            color: validationItemStates[item.key]
+                              ? 'primary.main'
+                              : 'text.disabled',
+                          }
+                        : undefined
+                    }
+                  >
                     <FiberManualRecordIcon />
                   </CoverageCheckIcon>
-                  <ValidationItemText>{item}</ValidationItemText>
+                  <ValidationItemText>{item.label}</ValidationItemText>
                 </ValidationListItem>
               ))}
             </Box>
@@ -412,7 +464,13 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
           <PrimaryButton
             variant="contained"
             disabled={uploadedFiles.length === 0 || isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <CheckCircleOutlinedIcon />}
+            startIcon={
+              isLoading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <CheckCircleOutlinedIcon />
+              )
+            }
             onClick={onStartAnalysis}
           >
             {isLoading ? 'Validating...' : 'Start Validation'}

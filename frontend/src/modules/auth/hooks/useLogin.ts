@@ -48,7 +48,7 @@ export function useLogin(): UseLoginResult {
         setIsSubmitting(false)
       }
     },
-    [dispatch, isSubmitting, navigate],
+    [dispatch, isSubmitting, navigate]
   )
 
   return { login, isSubmitting, error }
