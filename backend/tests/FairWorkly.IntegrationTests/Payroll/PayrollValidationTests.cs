@@ -1,5 +1,9 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
+using FairWorkly.Application.Common.Interfaces;
+using FairWorkly.Domain.Auth.Entities;
+using FairWorkly.Domain.Auth.Enums;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Employees.Entities;
 using FairWorkly.Infrastructure.Persistence;
@@ -270,5 +274,74 @@ public class PayrollValidationTests : IntegrationTestBase
         employees[0].FirstName.Should().Be("Updated");
         employees[0].LastName.Should().Be("Name");
         employees[0].AwardLevelNumber.Should().Be(2);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Case 7: Authorization — Manager role gets 403
+    // ═══════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task Post_ManagerRole_Returns403Forbidden()
+    {
+        // Arrange: create a Manager user in the same organization
+        var managerId = Guid.NewGuid();
+        var managerEmail = $"manager-{managerId:N}@integrationtest.com";
+
+        using (var scope = Factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
+            var passwordHasher =
+                scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+
+            db.Set<User>().Add(
+                new User
+                {
+                    Id = managerId,
+                    Email = managerEmail,
+                    FirstName = "Manager",
+                    LastName = "Test",
+                    Role = UserRole.Manager,
+                    IsActive = true,
+                    OrganizationId = TestOrganizationId,
+                    PasswordHash = passwordHasher.Hash("TestPassword123"),
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    IsDeleted = false,
+                }
+            );
+            await db.SaveChangesAsync();
+        }
+
+        // Login as Manager
+        var loginResponse = await Client.PostAsJsonAsync(
+            "/api/auth/login",
+            new { email = managerEmail, password = "TestPassword123" }
+        );
+        loginResponse.EnsureSuccessStatusCode();
+        var loginJson = await loginResponse.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(loginJson);
+        var token = doc.RootElement
+            .GetProperty("data")
+            .GetProperty("accessToken")
+            .GetString()!;
+
+        var client = Factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        var csvPath = Path.Combine(CsvDir, "compliant.csv");
+        using var content = new MultipartFormDataContent();
+        content.Add(
+            new StreamContent(File.OpenRead(csvPath)),
+            "file",
+            "compliant.csv"
+        );
+        content.Add(new StringContent("GeneralRetailIndustryAward2020"), "awardType");
+        content.Add(new StringContent("VIC"), "state");
+
+        var response = await client.PostAsync("/api/payroll/validation", content);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }
