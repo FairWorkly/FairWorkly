@@ -19,7 +19,9 @@ export function NavItem({ to, icon, label, end = true }: NavItemProps) {
       as={NavLink}
       to={to}
       end={end}
-      className={({ isActive }: { isActive: boolean }) => (isActive ? 'active' : undefined)}
+      className={({ isActive }: { isActive: boolean }) =>
+        isActive ? 'active' : undefined
+      }
       aria-label={label}
     >
       <ListItemIcon>{icon}</ListItemIcon>

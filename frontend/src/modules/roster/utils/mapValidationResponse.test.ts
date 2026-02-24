@@ -3,7 +3,7 @@ import { mapValidationToComplianceResults } from './mapValidationResponse'
 import type { ValidateRosterResponse } from '@/services/rosterApi'
 
 function createBaseResponse(
-  overrides: Partial<ValidateRosterResponse> = {},
+  overrides: Partial<ValidateRosterResponse> = {}
 ): ValidateRosterResponse {
   return {
     validationId: 'aaaa-bbbb-cccc-dddd',
@@ -133,7 +133,7 @@ describe('mapValidationToComplianceResults', () => {
     expect(result.categories).toHaveLength(2)
 
     const minHoursCategory = result.categories.find(
-      c => c.id === 'minimum-hours',
+      c => c.id === 'minimum-hours'
     )
     expect(minHoursCategory).toBeDefined()
     expect(minHoursCategory!.title).toBe('Minimum Shift Hours')
@@ -144,7 +144,7 @@ describe('mapValidationToComplianceResults', () => {
     expect(minHoursCategory!.totalUnderpayment).toBe('2 violations')
 
     const mealBreakCategory = result.categories.find(
-      c => c.id === 'meal-breaks',
+      c => c.id === 'meal-breaks'
     )
     expect(mealBreakCategory).toBeDefined()
     expect(mealBreakCategory!.title).toBe('Meal Break Requirements')

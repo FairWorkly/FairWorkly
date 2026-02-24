@@ -25,30 +25,44 @@ export const QuickSummary = ({ result }: QuickSummaryProps) => {
   // Switch on result type to render the appropriate summary card.
   switch (result.type) {
     case FAIRBOT_RESULTS.TYPES.PAYROLL:
-      return <PayrollSummary data={result.data} detailsUrl={result.detailsUrl} />
+      return (
+        <PayrollSummary data={result.data} detailsUrl={result.detailsUrl} />
+      )
     case FAIRBOT_RESULTS.TYPES.ROSTER:
       return <RosterSummary data={result.data} detailsUrl={result.detailsUrl} />
     case FAIRBOT_RESULTS.TYPES.EMPLOYEE:
       return (
         <SummaryContainer>
-          <Typography variant="h6">{FAIRBOT_LABELS.EMPLOYEE_SUMMARY_TITLE}</Typography>
+          <Typography variant="h6">
+            {FAIRBOT_LABELS.EMPLOYEE_SUMMARY_TITLE}
+          </Typography>
           <Divider />
-          <Typography variant="body2">{FAIRBOT_LABELS.EMPLOYEE_ISSUES_SUMMARY}</Typography>
+          <Typography variant="body2">
+            {FAIRBOT_LABELS.EMPLOYEE_ISSUES_SUMMARY}
+          </Typography>
         </SummaryContainer>
       )
     case FAIRBOT_RESULTS.TYPES.DOCUMENT:
       return (
         <SummaryContainer>
-          <Typography variant="h6">{FAIRBOT_LABELS.DOCUMENT_SUMMARY_TITLE}</Typography>
+          <Typography variant="h6">
+            {FAIRBOT_LABELS.DOCUMENT_SUMMARY_TITLE}
+          </Typography>
           <Divider />
-          <Typography variant="body2">{FAIRBOT_LABELS.DOCUMENTS_SUMMARY}</Typography>
+          <Typography variant="body2">
+            {FAIRBOT_LABELS.DOCUMENTS_SUMMARY}
+          </Typography>
         </SummaryContainer>
       )
     default:
       return (
         <Stack spacing={1.5}>
-          <Typography variant="h6">{FAIRBOT_LABELS.RESULTS_PANEL_TITLE}</Typography>
-          <Typography variant="body2">{FAIRBOT_LABELS.RESULTS_PANEL_SUBTITLE}</Typography>
+          <Typography variant="h6">
+            {FAIRBOT_LABELS.RESULTS_PANEL_TITLE}
+          </Typography>
+          <Typography variant="body2">
+            {FAIRBOT_LABELS.RESULTS_PANEL_SUBTITLE}
+          </Typography>
         </Stack>
       )
   }

@@ -64,7 +64,7 @@ describe('rosterApi', () => {
         expect.any(FormData),
         expect.objectContaining({
           headers: { 'Content-Type': 'multipart/form-data' },
-        }),
+        })
       )
       expect(result).toEqual(mockResponse)
     })
@@ -140,7 +140,7 @@ describe('rosterApi', () => {
       const result = await validateRoster('test-roster-id')
 
       expect(mockClient.post).toHaveBeenCalledWith(
-        '/roster/test-roster-id/validate',
+        '/roster/test-roster-id/validate'
       )
       expect(result).toEqual(mockResponse)
     })
@@ -200,7 +200,7 @@ describe('rosterApi', () => {
       const result = await getValidationResults('test-roster-id')
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        '/roster/test-roster-id/validation',
+        '/roster/test-roster-id/validation'
       )
       expect(result).toEqual(mockResponse)
     })
@@ -216,12 +216,12 @@ describe('rosterApi', () => {
       }
       mockClient.get.mockRejectedValue(axiosError)
 
-      await expect(
-        getValidationResults('no-validation'),
-      ).rejects.toMatchObject({
-        status: 404,
-        message: 'No validation found for this roster',
-      })
+      await expect(getValidationResults('no-validation')).rejects.toMatchObject(
+        {
+          status: 404,
+          message: 'No validation found for this roster',
+        }
+      )
     })
   })
 })

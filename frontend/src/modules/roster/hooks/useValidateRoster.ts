@@ -14,7 +14,9 @@ import {
 /**
  * Try GET first (cheap read); fall back to POST (triggers validation) on 404.
  */
-async function getOrValidate(rosterId: string): Promise<ValidateRosterResponse> {
+async function getOrValidate(
+  rosterId: string
+): Promise<ValidateRosterResponse> {
   try {
     return await getValidationResults(rosterId)
   } catch (err) {
@@ -26,7 +28,10 @@ async function getOrValidate(rosterId: string): Promise<ValidateRosterResponse> 
 }
 
 export function useValidateRoster(rosterId: string | undefined) {
-  const query = useApiQuery<ValidateRosterResponse, readonly [string, string, string | undefined]>({
+  const query = useApiQuery<
+    ValidateRosterResponse,
+    readonly [string, string, string | undefined]
+  >({
     queryKey: ['roster', 'validate', rosterId] as const,
     queryFn: () => getOrValidate(rosterId!),
     enabled: !!rosterId,
@@ -34,12 +39,12 @@ export function useValidateRoster(rosterId: string | undefined) {
 
   const complianceData: RosterComplianceResults | null = useMemo(
     () => (query.data ? mapValidationToComplianceResults(query.data) : null),
-    [query.data],
+    [query.data]
   )
 
   const errorMessage = !rosterId
     ? 'No roster ID provided. Please upload a roster first.'
-    : query.error?.message ?? 'Validation failed. Please try again.'
+    : (query.error?.message ?? 'Validation failed. Please try again.')
 
   return {
     complianceData,

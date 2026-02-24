@@ -25,7 +25,10 @@ export const authApi = {
    * Returns access token and user info. Refresh token is set as HttpOnly cookie.
    */
   async login(payload: LoginRequest): Promise<LoginResponse> {
-    const response = await httpClient.post<LoginResponse>('/auth/login', payload)
+    const response = await httpClient.post<LoginResponse>(
+      '/auth/login',
+      payload
+    )
     return response.data
   },
 

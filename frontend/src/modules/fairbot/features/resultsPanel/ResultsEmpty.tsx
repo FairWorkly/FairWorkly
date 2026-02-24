@@ -35,7 +35,9 @@ export const ResultsEmpty = () => {
         <AutoAwesomeOutlined fontSize="large" />
       </EmptyIcon>
       <Typography variant="h6">{FAIRBOT_LABELS.EMPTY_RESULTS_TITLE}</Typography>
-      <Typography variant="body2">{FAIRBOT_LABELS.EMPTY_RESULTS_SUBTITLE}</Typography>
+      <Typography variant="body2">
+        {FAIRBOT_LABELS.EMPTY_RESULTS_SUBTITLE}
+      </Typography>
     </EmptyStateContainer>
   )
 }

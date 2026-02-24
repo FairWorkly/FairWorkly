@@ -15,7 +15,7 @@ export function useUploadRoster() {
     error: uploadError,
     reset,
   } = useApiMutation<UploadRosterResponse, File>({
-    mutationFn: (file) => uploadRoster(file),
+    mutationFn: file => uploadRoster(file),
   })
 
   const handleFileUpload = useCallback(
@@ -36,16 +36,16 @@ export function useUploadRoster() {
       setUploadedFiles([newFile])
       reset()
     },
-    [reset],
+    [reset]
   )
 
   const handleRemoveFile = useCallback(
     (id: number) => {
-      setUploadedFiles((prev) => prev.filter((file) => file.id !== id))
+      setUploadedFiles(prev => prev.filter(file => file.id !== id))
       actualFileRef.current = null
       reset()
     },
-    [reset],
+    [reset]
   )
 
   const handleStartAnalysis = useCallback(() => {
@@ -54,7 +54,7 @@ export function useUploadRoster() {
     reset()
 
     upload(actualFileRef.current, {
-      onSuccess: (response) => {
+      onSuccess: response => {
         navigate(`/roster/results/${response.rosterId}`)
       },
     })

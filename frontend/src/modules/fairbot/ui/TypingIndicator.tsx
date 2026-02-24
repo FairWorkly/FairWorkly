@@ -44,7 +44,9 @@ export const TypingIndicator = ({ isVisible }: TypingIndicatorProps) => {
 
   return (
     <TypingContainer aria-live="polite">
-      <Typography variant="caption">{FAIRBOT_LABELS.LOADING_MESSAGE}</Typography>
+      <Typography variant="caption">
+        {FAIRBOT_LABELS.LOADING_MESSAGE}
+      </Typography>
       <Dots>
         <Dot delay={0} />
         <Dot delay={FAIRBOT_TYPING_UI.DELAY_SHORT_MS} />

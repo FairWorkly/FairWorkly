@@ -174,13 +174,16 @@ export const IssueRow: React.FC<IssueRowProps> = ({
           </HeaderRow>
           <IssueDetails variant="body2" color="text.primary">
             Actual: <strong>{issue.actualValue}</strong>, expected:{' '}
-            <ExpectedValue>{issue.expectedValue}</ExpectedValue> — {issue.reason}
+            <ExpectedValue>{issue.expectedValue}</ExpectedValue> —{' '}
+            {issue.reason}
           </IssueDetails>
 
           <IssueAlert>
             <IssueAlertIcon />
             <IssueAlertText variant="body2">
-              <VarianceLabel>{varianceLabel}: {issue.variance}</VarianceLabel>
+              <VarianceLabel>
+                {varianceLabel}: {issue.variance}
+              </VarianceLabel>
               {issue.breakdown}
             </IssueAlertText>
           </IssueAlert>

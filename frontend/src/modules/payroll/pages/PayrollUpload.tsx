@@ -1,10 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ComplianceUpload } from '@/shared/compliance-check'
-import type {
-  ComplianceConfig,
-  UploadedFile,
-} from '@/shared/compliance-check'
+import type { ComplianceConfig, UploadedFile } from '@/shared/compliance-check'
 
 // TODO: [Backend Integration] Replace mock timer with real API call.
 // When integrating with backend:

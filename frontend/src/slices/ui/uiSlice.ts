@@ -1,44 +1,40 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit'
 
-export type ThemeMode = "light" | "dark";
+export type ThemeMode = 'light' | 'dark'
 
 export interface UiState {
-  sidebarOpen: boolean;
-  globalLoading: boolean;
-  themeMode: ThemeMode; // placeholder for future theme toggle
+  sidebarOpen: boolean
+  globalLoading: boolean
+  themeMode: ThemeMode // placeholder for future theme toggle
 }
 
 const initialState: UiState = {
   sidebarOpen: true,
   globalLoading: false,
-  themeMode: "light",
-};
+  themeMode: 'light',
+}
 
 const uiSlice = createSlice({
-  name: "ui",
+  name: 'ui',
   initialState,
   reducers: {
     toggleSidebar(state) {
-      state.sidebarOpen = !state.sidebarOpen;
+      state.sidebarOpen = !state.sidebarOpen
     },
     setSidebarOpen(state, action: PayloadAction<boolean>) {
-      state.sidebarOpen = action.payload;
+      state.sidebarOpen = action.payload
     },
     setGlobalLoading(state, action: PayloadAction<boolean>) {
-      state.globalLoading = action.payload;
+      state.globalLoading = action.payload
     },
     setThemeMode(state, action: PayloadAction<ThemeMode>) {
-      state.themeMode = action.payload;
+      state.themeMode = action.payload
     },
   },
-});
+})
 
-export const {
-  toggleSidebar,
-  setSidebarOpen,
-  setGlobalLoading,
-  setThemeMode,
-} = uiSlice.actions;
+export const { toggleSidebar, setSidebarOpen, setGlobalLoading, setThemeMode } =
+  uiSlice.actions
 
-export default uiSlice.reducer;
+export default uiSlice.reducer
