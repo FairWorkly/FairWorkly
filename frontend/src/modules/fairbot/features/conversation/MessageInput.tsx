@@ -73,7 +73,7 @@ export const MessageInput = ({
         id={FAIRBOT_IDS.MESSAGE_INPUT}
         placeholder={FAIRBOT_LABELS.INPUT_PLACEHOLDER}
         value={value}
-        onChange={(event) => setValue(event.target.value)}
+        onChange={event => setValue(event.target.value)}
         size="small"
         disabled={disabled}
         aria-label={FAIRBOT_LABELS.MESSAGE_INPUT_LABEL}

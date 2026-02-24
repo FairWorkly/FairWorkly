@@ -1,17 +1,27 @@
 import { List } from '@mui/material'
 import { NavContainer, SectionLabel, SectionTitle } from '../Sidebar.styles'
-import { mainNavItems, settingsNavItems, type NavItemConfig } from '../config/navigation.config.tsx'
+import {
+  mainNavItems,
+  settingsNavItems,
+  type NavItemConfig,
+} from '../config/navigation.config.tsx'
 import { NavItem } from './NavItem'
 
 export interface SidebarNavProps {
   userRole?: string
 }
 
-function canAccess(allowedRoles: readonly string[], userRole?: string): boolean {
+function canAccess(
+  allowedRoles: readonly string[],
+  userRole?: string
+): boolean {
   return userRole ? allowedRoles.includes(userRole) : false
 }
 
-function filterByRole(items: NavItemConfig[], userRole?: string): NavItemConfig[] {
+function filterByRole(
+  items: NavItemConfig[],
+  userRole?: string
+): NavItemConfig[] {
   return items.filter(item => canAccess(item.allowedRoles, userRole))
 }
 
@@ -30,7 +40,13 @@ export function SidebarNav({ userRole }: SidebarNavProps) {
 
             <List disablePadding>
               {visibleMainItems.map(item => (
-                <NavItem key={item.to} to={item.to} icon={item.icon} label={item.label} end />
+                <NavItem
+                  key={item.to}
+                  to={item.to}
+                  icon={item.icon}
+                  label={item.label}
+                  end
+                />
               ))}
             </List>
           </>
@@ -44,7 +60,13 @@ export function SidebarNav({ userRole }: SidebarNavProps) {
 
             <List disablePadding>
               {visibleSettingsItems.map(item => (
-                <NavItem key={item.to} to={item.to} icon={item.icon} label={item.label} end />
+                <NavItem
+                  key={item.to}
+                  to={item.to}
+                  icon={item.icon}
+                  label={item.label}
+                  end
+                />
               ))}
             </List>
           </>

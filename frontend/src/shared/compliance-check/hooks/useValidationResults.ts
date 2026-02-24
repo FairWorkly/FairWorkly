@@ -13,7 +13,9 @@ type StartOptions = {
   onComplete?: () => void
 }
 
-export function useValidationLifecycle(initialStatus: ValidationStatus = 'idle') {
+export function useValidationLifecycle(
+  initialStatus: ValidationStatus = 'idle'
+) {
   const [status, setStatus] = useState<ValidationStatus>(initialStatus)
 
   const startProcessing = useCallback((options: StartOptions = {}) => {

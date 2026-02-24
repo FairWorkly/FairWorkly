@@ -27,7 +27,7 @@ describe('checkTypeDisplayMap', () => {
       expect(display.title).toBeTruthy()
       expect(display.icon).toBeTruthy()
       expect(display.color).toMatch(/^#[0-9a-f]{6}$/i)
-    },
+    }
   )
 
   it('has unique ids for each check type', () => {

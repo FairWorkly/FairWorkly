@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
+  const actual =
+    await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
   return { ...actual, useNavigate: () => mockNavigate }
 })
 
@@ -34,21 +35,32 @@ vi.mock('react', async () => {
     useState: (init: unknown) => {
       const key = `state-${callIndex++}`
       if (!(key in stateStore)) stateStore[key] = init
-      return [stateStore[key], (val: unknown) => {
-        stateStore[key] = typeof val === 'function' ? (val as (prev: unknown) => unknown)(stateStore[key]) : val
-      }]
+      return [
+        stateStore[key],
+        (val: unknown) => {
+          stateStore[key] =
+            typeof val === 'function'
+              ? (val as (prev: unknown) => unknown)(stateStore[key])
+              : val
+        },
+      ]
     },
     useRef: (init: unknown) => ({ current: init }),
     useCallback: (fn: unknown) => fn,
     // Reset state between tests
-    __resetStateStore: () => { stateStore = {}; callIndex = 0 },
+    __resetStateStore: () => {
+      stateStore = {}
+      callIndex = 0
+    },
   }
 })
 
 import { useUploadRoster } from './useUploadRoster'
 
 // Access the reset helper
-const { __resetStateStore } = await import('react') as unknown as { __resetStateStore: () => void }
+const { __resetStateStore } = (await import('react')) as unknown as {
+  __resetStateStore: () => void
+}
 
 describe('useUploadRoster', () => {
   beforeEach(() => {
@@ -95,22 +107,29 @@ describe('useUploadRoster', () => {
 
     // Simulate file selection by calling handleFileUpload
     const file = new File(['data'], 'roster.xlsx')
-    const event = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>
+    const event = {
+      target: { files: [file] },
+    } as unknown as React.ChangeEvent<HTMLInputElement>
     result.handleFileUpload(event)
 
     result.handleStartAnalysis()
 
     expect(mockReset).toHaveBeenCalled()
-    expect(mockMutate).toHaveBeenCalledWith(file, expect.objectContaining({
-      onSuccess: expect.any(Function),
-    }))
+    expect(mockMutate).toHaveBeenCalledWith(
+      file,
+      expect.objectContaining({
+        onSuccess: expect.any(Function),
+      })
+    )
   })
 
   it('onSuccess navigates to results page', () => {
     const result = useUploadRoster()
 
     const file = new File(['data'], 'roster.xlsx')
-    const event = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>
+    const event = {
+      target: { files: [file] },
+    } as unknown as React.ChangeEvent<HTMLInputElement>
     result.handleFileUpload(event)
     result.handleStartAnalysis()
 
@@ -132,7 +151,9 @@ describe('useUploadRoster', () => {
   it('handleFileUpload ignores empty file input', () => {
     const result = useUploadRoster()
 
-    const event = { target: { files: [] } } as unknown as React.ChangeEvent<HTMLInputElement>
+    const event = {
+      target: { files: [] },
+    } as unknown as React.ChangeEvent<HTMLInputElement>
     result.handleFileUpload(event)
 
     expect(mockReset).not.toHaveBeenCalled()

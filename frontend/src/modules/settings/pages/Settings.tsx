@@ -58,14 +58,16 @@ export function Settings() {
 
       <SettingsLayout>
         <SettingsNav>
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <SettingsNavItem
               key={item.id}
               onClick={() => setActiveSection(item.id)}
               className={activeSection === item.id ? 'active' : ''}
             >
               {item.icon}
-              <SettingsNavItemText variant="body2">{item.label}</SettingsNavItemText>
+              <SettingsNavItemText variant="body2">
+                {item.label}
+              </SettingsNavItemText>
             </SettingsNavItem>
           ))}
         </SettingsNav>

@@ -1,4 +1,4 @@
-import { post } from "./baseApi";
+import { post } from './baseApi'
 
 /**
  * Payroll 合规检查 API 骨架
@@ -8,21 +8,21 @@ import { post } from "./baseApi";
  */
 
 export interface PayrollComplianceCheckRequest {
-  fileId: string;
-  awardCode?: string;
-  payPeriodStart?: string;
-  payPeriodEnd?: string;
+  fileId: string
+  awardCode?: string
+  payPeriodStart?: string
+  payPeriodEnd?: string
 }
 
 export interface PayrollComplianceCheckResponse {
-  runId: string;
+  runId: string
 }
 
 export function startPayrollComplianceCheck(
-  payload: PayrollComplianceCheckRequest,
+  payload: PayrollComplianceCheckRequest
 ): Promise<PayrollComplianceCheckResponse> {
   return post<PayrollComplianceCheckResponse, PayrollComplianceCheckRequest>(
-    "/payroll/compliance/check",
-    payload,
-  );
+    '/payroll/compliance/check',
+    payload
+  )
 }

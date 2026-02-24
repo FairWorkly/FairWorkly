@@ -26,6 +26,6 @@ export const useConversation = (): UseConversationResult => {
       hasMessages: messages.length > 0,
       sendMessage,
     }),
-    [error?.message, isLoading, isTyping, messages, sendMessage],
+    [error?.message, isLoading, isTyping, messages, sendMessage]
   )
 }

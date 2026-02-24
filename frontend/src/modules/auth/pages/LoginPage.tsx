@@ -44,19 +44,23 @@ export function LoginPage() {
       </AuthHeader>
 
       <AuthTabList role="tablist">
-        <AuthTabButton type="button" active={activeTab === 'login'} onClick={() => setActiveTab('login')}>
+        <AuthTabButton
+          type="button"
+          active={activeTab === 'login'}
+          onClick={() => setActiveTab('login')}
+        >
           Sign In
         </AuthTabButton>
-        <AuthTabButton type="button" active={activeTab === 'signup'} onClick={() => setActiveTab('signup')}>
+        <AuthTabButton
+          type="button"
+          active={activeTab === 'signup'}
+          onClick={() => setActiveTab('signup')}
+        >
           Create Account
         </AuthTabButton>
       </AuthTabList>
 
-      {error && (
-        <AuthErrorAlert severity="error">
-          {error}
-        </AuthErrorAlert>
-      )}
+      {error && <AuthErrorAlert severity="error">{error}</AuthErrorAlert>}
 
       {activeTab === 'login' ? (
         <LoginForm

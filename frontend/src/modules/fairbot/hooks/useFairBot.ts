@@ -41,7 +41,8 @@ const createWelcomeMessage = (): FairBotMessage => ({
 const INITIAL_MESSAGES: FairBotMessage[] = [createWelcomeMessage()]
 
 const canUseSessionStorage = (): boolean =>
-  typeof window !== FAIRBOT_ENV.TYPEOF_UNDEFINED && Boolean(window.sessionStorage)
+  typeof window !== FAIRBOT_ENV.TYPEOF_UNDEFINED &&
+  Boolean(window.sessionStorage)
 
 const readMessagesFromSession = (): FairBotMessage[] => {
   if (!canUseSessionStorage()) {
@@ -49,7 +50,9 @@ const readMessagesFromSession = (): FairBotMessage[] => {
   }
 
   try {
-    const stored = window.sessionStorage.getItem(FAIRBOT_SESSION_KEYS.CONVERSATION)
+    const stored = window.sessionStorage.getItem(
+      FAIRBOT_SESSION_KEYS.CONVERSATION
+    )
     if (!stored) {
       return INITIAL_MESSAGES
     }
@@ -71,13 +74,13 @@ const persistMessagesToSession = (messages: FairBotMessage[]) => {
 
   try {
     // Strip File objects before persistence to keep session storage serializable.
-    const serialized = messages.map((message) => ({
+    const serialized = messages.map(message => ({
       ...message,
       file: undefined,
     }))
     window.sessionStorage.setItem(
       FAIRBOT_SESSION_KEYS.CONVERSATION,
-      JSON.stringify(serialized),
+      JSON.stringify(serialized)
     )
   } catch {
     return
@@ -96,7 +99,7 @@ const createFileMeta = (file: File): FairBotFileMeta => ({
 const createMessage = (
   role: FairBotMessage['role'],
   text: string,
-  file?: File,
+  file?: File
 ): FairBotMessage => ({
   id: createMessageId(),
   role,
@@ -171,7 +174,8 @@ const buildQuickSummary = (resultType: FairBotResultType): FairBotResult => {
 const buildMockResponse = (text: string, file?: File): FairBotAgentResponse => {
   // Mock response for UI scaffolding; replace with agent-service integration.
   const detectedType =
-    getResultTypeFromText(text) ?? (file ? getResultTypeFromText(file.name) : null)
+    getResultTypeFromText(text) ??
+    (file ? getResultTypeFromText(file.name) : null)
 
   return {
     textResponse: file
@@ -185,7 +189,7 @@ export const useFairBot = (): UseFairBotResult => {
   const { setCurrentResult } = useResultsPanel()
 
   const [messages, setMessages] = useState<FairBotMessage[]>(
-    readMessagesFromSession,
+    readMessagesFromSession
   )
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<FairBotError | null>(null)
@@ -205,12 +209,8 @@ export const useFairBot = (): UseFairBotResult => {
 
       setError(null)
 
-      const userMessage = createMessage(
-        FAIRBOT_ROLES.USER,
-        trimmedText,
-        file,
-      )
-      setMessages((prev) => [...prev, userMessage])
+      const userMessage = createMessage(FAIRBOT_ROLES.USER, trimmedText, file)
+      setMessages(prev => [...prev, userMessage])
       setIsLoading(true)
 
       try {
@@ -218,10 +218,10 @@ export const useFairBot = (): UseFairBotResult => {
         const response = buildMockResponse(trimmedText, file)
         const assistantMessage = createMessage(
           FAIRBOT_ROLES.ASSISTANT,
-          response.textResponse,
+          response.textResponse
         )
 
-        setMessages((prev) => [...prev, assistantMessage])
+        setMessages(prev => [...prev, assistantMessage])
 
         if (response.quickSummary) {
           setCurrentResult(response.quickSummary)
@@ -232,7 +232,7 @@ export const useFairBot = (): UseFairBotResult => {
         setIsLoading(false)
       }
     },
-    [setCurrentResult],
+    [setCurrentResult]
   )
 
   return useMemo(
@@ -242,6 +242,6 @@ export const useFairBot = (): UseFairBotResult => {
       isLoading,
       error,
     }),
-    [messages, sendMessage, isLoading, error],
+    [messages, sendMessage, isLoading, error]
   )
 }

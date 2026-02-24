@@ -34,19 +34,23 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({ children }) => {
         })
 
         const u = meRes.data?.data ?? meRes.data
-        const role = typeof u?.role === 'string' ? u.role.toLowerCase() : undefined
+        const role =
+          typeof u?.role === 'string' ? u.role.toLowerCase() : undefined
         if (!u?.id || !u?.email || !role) {
           throw new Error('/auth/me returned incomplete user data')
         }
-        store.dispatch(setAuthData({
-          user: {
-            id: u.id,
-            email: u.email,
-            name: [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email,
-            role,
-          },
-          accessToken,
-        }))
+        store.dispatch(
+          setAuthData({
+            user: {
+              id: u.id,
+              email: u.email,
+              name:
+                [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email,
+              role,
+            },
+            accessToken,
+          })
+        )
       } catch {
         // No valid refresh token, user needs to login
       } finally {

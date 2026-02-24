@@ -1,24 +1,18 @@
-import {
-  Box,
-  Typography,
-  Link as MuiLink,
-  styled,
-  alpha,
-} from '@mui/material';
-import { LinkedIn, Bolt } from '@mui/icons-material';
+import { Box, Typography, Link as MuiLink, styled, alpha } from '@mui/material'
+import { LinkedIn, Bolt } from '@mui/icons-material'
 
 const PageSection = styled('footer')(({ theme }) => ({
   position: 'relative',
   backgroundColor: theme.fairworkly.surface.navDark,
   color: alpha(theme.palette.common.white, 0.7),
   padding: theme.spacing(8, 0, 4),
-}));
+}))
 
 const ContentContainer = styled(Box)(({ theme }) => ({
   maxWidth: theme.fairworkly.layout.containerMaxWidth,
   margin: '0 auto',
   padding: theme.spacing(0, 4),
-}));
+}))
 
 const FooterGrid = styled(Box)(({ theme }) => ({
   display: 'grid',
@@ -31,9 +25,9 @@ const FooterGrid = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     gridTemplateColumns: '1fr',
   },
-}));
+}))
 
-const BrandColumn = styled(Box)({});
+const BrandColumn = styled(Box)({})
 
 const LogoLink = styled('a')(({ theme }) => ({
   display: 'flex',
@@ -42,7 +36,7 @@ const LogoLink = styled('a')(({ theme }) => ({
   textDecoration: 'none',
   marginBottom: theme.spacing(2),
   cursor: 'pointer',
-}));
+}))
 
 const LogoIcon = styled(Box)(({ theme }) => ({
   width: theme.spacing(5),
@@ -53,7 +47,7 @@ const LogoIcon = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   color: theme.palette.common.white,
-}));
+}))
 
 const LogoText = styled(Typography)(({ theme }) => ({
   fontSize: theme.typography.h6.fontSize,
@@ -62,19 +56,19 @@ const LogoText = styled(Typography)(({ theme }) => ({
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
   backgroundClip: 'text',
-}));
+}))
 
 const BrandDescription = styled(Typography)(({ theme }) => ({
   fontSize: theme.typography.body2.fontSize,
   lineHeight: 1.7,
   color: alpha(theme.palette.common.white, 0.6),
   marginBottom: theme.spacing(2),
-}));
+}))
 
 const SupportLine = styled(Typography)(({ theme }) => ({
   fontSize: theme.typography.body2.fontSize,
   color: alpha(theme.palette.common.white, 0.6),
-}));
+}))
 
 const SupportEmail = styled(MuiLink)(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -82,7 +76,7 @@ const SupportEmail = styled(MuiLink)(({ theme }) => ({
   '&:hover': {
     textDecoration: 'underline',
   },
-}));
+}))
 
 const ColumnTitle = styled('h4')(({ theme }) => ({
   fontSize: theme.typography.caption.fontSize,
@@ -92,13 +86,13 @@ const ColumnTitle = styled('h4')(({ theme }) => ({
   letterSpacing: theme.typography.caption.letterSpacing,
   margin: 0,
   marginBlockEnd: theme.spacing(3),
-}));
+}))
 
 const NavList = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing(1.5),
-}));
+}))
 
 const FooterLink = styled(MuiLink)(({ theme }) => ({
   color: alpha(theme.palette.common.white, 0.6),
@@ -110,7 +104,7 @@ const FooterLink = styled(MuiLink)(({ theme }) => ({
   '&:hover': {
     color: theme.palette.common.white,
   },
-}));
+}))
 
 const BottomBar = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -125,12 +119,12 @@ const BottomBar = styled(Box)(({ theme }) => ({
     gap: theme.spacing(2),
     textAlign: 'center',
   },
-}));
+}))
 
 const SocialLinks = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(2),
-}));
+}))
 
 const SocialButton = styled('a')(({ theme }) => ({
   display: 'inline-flex',
@@ -148,7 +142,7 @@ const SocialButton = styled('a')(({ theme }) => ({
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.common.white,
   },
-}));
+}))
 
 export function Footer() {
   return (
@@ -179,7 +173,9 @@ export function Footer() {
               <FooterLink href="#features">Features</FooterLink>
               <FooterLink href="#pricing">Pricing</FooterLink>
               <FooterLink href="#faq">FAQ</FooterLink>
-              <FooterLink href="mailto:support@fairworkly.com">Contact</FooterLink>
+              <FooterLink href="mailto:support@fairworkly.com">
+                Contact
+              </FooterLink>
             </NavList>
           </Box>
 
@@ -222,5 +218,5 @@ export function Footer() {
         </BottomBar>
       </ContentContainer>
     </PageSection>
-  );
+  )
 }

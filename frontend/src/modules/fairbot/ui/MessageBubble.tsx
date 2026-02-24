@@ -21,7 +21,7 @@ interface BubbleProps {
 }
 
 const MessageRow = styled('div', {
-  shouldForwardProp: (prop) => prop !== 'isUser',
+  shouldForwardProp: prop => prop !== 'isUser',
 })<BubbleProps>(({ theme, isUser }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -30,7 +30,7 @@ const MessageRow = styled('div', {
 }))
 
 const Bubble = styled('div', {
-  shouldForwardProp: (prop) => prop !== 'isUser',
+  shouldForwardProp: prop => prop !== 'isUser',
 })<BubbleProps>(({ theme, isUser }) => ({
   maxWidth: `${FAIRBOT_MESSAGE_UI.BUBBLE_MAX_WIDTH}px`,
   borderRadius: theme.fairworkly.radius.lg,
@@ -38,11 +38,13 @@ const Bubble = styled('div', {
   backgroundColor: isUser
     ? theme.palette.primary.main
     : theme.palette.action.hover,
-  color: isUser ? theme.palette.primary.contrastText : theme.palette.text.primary,
+  color: isUser
+    ? theme.palette.primary.contrastText
+    : theme.palette.text.primary,
 }))
 
 const MetaRow = styled('div', {
-  shouldForwardProp: (prop) => prop !== 'isUser',
+  shouldForwardProp: prop => prop !== 'isUser',
 })<BubbleProps>(({ theme, isUser }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -81,7 +83,7 @@ const formatFileSize = (bytes: number): string => {
 
   if (bytes >= FAIRBOT_FILE_SIZE.MEGA_THRESHOLD) {
     return `${(bytes / FAIRBOT_FILE_SIZE.MEGA_THRESHOLD).toFixed(
-      FAIRBOT_FILE_SIZE.MEGA_DECIMALS,
+      FAIRBOT_FILE_SIZE.MEGA_DECIMALS
     )} ${FAIRBOT_FILE_SIZE.MEGA_SUFFIX}`
   }
 
@@ -92,14 +94,17 @@ const formatFileSize = (bytes: number): string => {
 
 export const MessageBubble = ({ message }: MessageBubbleProps) => {
   const isUser = message.role === FAIRBOT_ROLES.USER
-  const senderLabel = isUser ? FAIRBOT_LABELS.USER_LABEL : FAIRBOT_LABELS.ASSISTANT_LABEL
+  const senderLabel = isUser
+    ? FAIRBOT_LABELS.USER_LABEL
+    : FAIRBOT_LABELS.ASSISTANT_LABEL
 
   return (
     <MessageRow isUser={isUser}>
       <MetaRow isUser={isUser}>
         <Typography variant="caption">{senderLabel}</Typography>
         <Typography variant="caption">
-          {FAIRBOT_LABELS.MESSAGE_TIME_PREFIX} {formatTimestamp(message.timestamp)}
+          {FAIRBOT_LABELS.MESSAGE_TIME_PREFIX}{' '}
+          {formatTimestamp(message.timestamp)}
         </Typography>
       </MetaRow>
       <Bubble isUser={isUser}>
@@ -109,9 +114,13 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
         <FileBadge>
           <AttachFileOutlined fontSize="small" />
           <Stack spacing={FAIRBOT_NUMBERS.ZERO}>
-            <Typography variant="caption">{FAIRBOT_LABELS.ATTACHMENT_LABEL}</Typography>
+            <Typography variant="caption">
+              {FAIRBOT_LABELS.ATTACHMENT_LABEL}
+            </Typography>
             <Typography variant="caption">{message.fileMeta.name}</Typography>
-            <Typography variant="caption">{formatFileSize(message.fileMeta.size)}</Typography>
+            <Typography variant="caption">
+              {formatFileSize(message.fileMeta.size)}
+            </Typography>
           </Stack>
         </FileBadge>
       ) : null}

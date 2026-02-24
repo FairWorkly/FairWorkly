@@ -157,7 +157,8 @@ export const ComplianceResults: React.FC<ComplianceResultsProps> = ({
   periodLabel = 'Pay period',
   resultType = 'payroll',
 }) => {
-  const exportFn = resultType === 'roster' ? exportComplianceXlsx : exportComplianceCsv
+  const exportFn =
+    resultType === 'roster' ? exportComplianceXlsx : exportComplianceCsv
   const handleExport = () => {
     exportFn(metadata, categories)
   }

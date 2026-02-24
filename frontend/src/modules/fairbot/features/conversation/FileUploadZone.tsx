@@ -24,8 +24,7 @@ interface UploadContainerProps {
 
 // Drop zone styling is driven by state props, so keep them off the DOM.
 const UploadContainer = styled('div', {
-  shouldForwardProp: (prop) =>
-    prop !== 'isDragging' && prop !== 'isDisabled',
+  shouldForwardProp: prop => prop !== 'isDragging' && prop !== 'isDisabled',
 })<UploadContainerProps>(({ theme, isDragging, isDisabled }) => ({
   border: FAIRBOT_UPLOAD.BORDER_NONE,
   borderRadius: theme.fairworkly.radius.lg,
@@ -100,7 +99,9 @@ export const FileUploadZone = ({
       />
       <UploadSurface htmlFor={FAIRBOT_IDS.FILE_INPUT}>{children}</UploadSurface>
       {helperText ? <HelperText>{helperText}</HelperText> : null}
-      {upload.error ? <ErrorText role="alert">{upload.error.message}</ErrorText> : null}
+      {upload.error ? (
+        <ErrorText role="alert">{upload.error.message}</ErrorText>
+      ) : null}
     </UploadContainer>
   )
 }

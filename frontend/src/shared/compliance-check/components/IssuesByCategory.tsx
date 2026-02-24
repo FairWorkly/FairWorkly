@@ -359,7 +359,6 @@ export const IssuesByCategory: React.FC<IssuesByCategoryProps> = ({
                       </EmptyStateText>
                     </EmptyState>
                   )}
-
                 </CategoryBody>
               </StyledCollapse>
             </CategoryPanel>

@@ -5,7 +5,9 @@ interface UseMessageStreamResult {
   isTyping: boolean
 }
 
-export const useMessageStream = (isLoading: boolean): UseMessageStreamResult => {
+export const useMessageStream = (
+  isLoading: boolean
+): UseMessageStreamResult => {
   const [isTyping, setIsTyping] = useState(false)
 
   useEffect(() => {

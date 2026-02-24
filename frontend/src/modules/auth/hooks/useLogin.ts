@@ -35,23 +35,26 @@ export function useLogin(): UseLoginResult {
           password: values.password,
         })
 
-        const name = [response.user.firstName, response.user.lastName]
-          .filter(Boolean)
-          .join(' ') || response.user.email
+        const name =
+          [response.user.firstName, response.user.lastName]
+            .filter(Boolean)
+            .join(' ') || response.user.email
 
         const role = response.user.role?.toLowerCase()
         const validRole: 'admin' | 'manager' | undefined =
           role === 'admin' || role === 'manager' ? role : undefined
 
-        dispatch(setAuthData({
-          user: {
-            id: response.user.id,
-            email: response.user.email,
-            name,
-            role: validRole,
-          },
-          accessToken: response.accessToken,
-        }))
+        dispatch(
+          setAuthData({
+            user: {
+              id: response.user.id,
+              email: response.user.email,
+              name,
+              role: validRole,
+            },
+            accessToken: response.accessToken,
+          })
+        )
 
         navigate(DEFAULT_ROUTES[role ?? ''] ?? '/403', { replace: true })
       } catch (err) {
@@ -63,7 +66,7 @@ export function useLogin(): UseLoginResult {
         setIsSubmitting(false)
       }
     },
-    [dispatch, isSubmitting, navigate],
+    [dispatch, isSubmitting, navigate]
   )
 
   return { login, isSubmitting, error }

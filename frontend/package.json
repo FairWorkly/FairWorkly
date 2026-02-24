@@ -10,7 +10,11 @@
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "prepare": "cd .. && husky"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": "prettier --write"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -53,7 +57,9 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "eslint-plugin-storybook": "^10.1.10",
     "globals": "^16.5.0",
+    "husky": "^9.1.7",
     "jest": "^30.2.0",
+    "lint-staged": "^16.2.7",
     "playwright": "^1.57.0",
     "prettier": "3.6.2",
     "storybook": "^10.1.10",

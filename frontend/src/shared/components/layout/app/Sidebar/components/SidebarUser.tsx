@@ -1,5 +1,12 @@
 import { Logout as LogoutIcon } from '@mui/icons-material'
-import { BottomRow, LogoutButton, UserAvatar, UserMeta, UserName, UserRole } from '../Sidebar.styles'
+import {
+  BottomRow,
+  LogoutButton,
+  UserAvatar,
+  UserMeta,
+  UserName,
+  UserRole,
+} from '../Sidebar.styles'
 import { makeInitials } from '../utils/helpers'
 
 export interface SidebarUserProps {
@@ -9,7 +16,12 @@ export interface SidebarUserProps {
   onLogout?: () => void
 }
 
-export function SidebarUser({ name, role, initials, onLogout }: SidebarUserProps) {
+export function SidebarUser({
+  name,
+  role,
+  initials,
+  onLogout,
+}: SidebarUserProps) {
   const displayInitials = initials ?? makeInitials(name)
 
   return (

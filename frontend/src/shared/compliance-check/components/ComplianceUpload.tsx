@@ -272,7 +272,9 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
       .map(ext => ext.trim().toLowerCase())
     const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase()
     if (!allowed.includes(ext)) {
-      setFileError(`Unsupported file type. Please upload ${allowed.join(', ')} files.`)
+      setFileError(
+        `Unsupported file type. Please upload ${allowed.join(', ')} files.`
+      )
       return
     }
 
@@ -306,7 +308,11 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
       <PageTitle variant="h4">{config.title}</PageTitle>
 
       {fileError && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setFileError(null)}>
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+          onClose={() => setFileError(null)}
+        >
           {fileError}
         </Alert>
       )}
@@ -385,7 +391,9 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
             <ValidationCoverageIcon>
               <SettingsOutlinedIcon />
             </ValidationCoverageIcon>
-            <ValidationCoverageTitle>Validation Coverage</ValidationCoverageTitle>
+            <ValidationCoverageTitle>
+              Validation Coverage
+            </ValidationCoverageTitle>
           </ValidationCoverageHeader>
           {validationItems.length > 0 && (
             <Box>
@@ -412,7 +420,13 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
           <PrimaryButton
             variant="contained"
             disabled={uploadedFiles.length === 0 || isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <CheckCircleOutlinedIcon />}
+            startIcon={
+              isLoading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <CheckCircleOutlinedIcon />
+              )
+            }
             onClick={onStartAnalysis}
           >
             {isLoading ? 'Validating...' : 'Start Validation'}

@@ -25,7 +25,9 @@ interface SignupFormProps {
   isGoogleLoading?: boolean
 }
 
-function getPasswordStrength(password: string): 'weak' | 'medium' | 'strong' | '' {
+function getPasswordStrength(
+  password: string
+): 'weak' | 'medium' | 'strong' | '' {
   if (!password) return ''
   let strength = 0
   if (password.length >= 8) strength++
@@ -81,7 +83,11 @@ export function SignupForm({
 
   return (
     <AuthFormContainer onSubmit={handleSubmit}>
-      <GoogleButton type="button" onClick={onGoogleLogin} disabled={isGoogleDisabled}>
+      <GoogleButton
+        type="button"
+        onClick={onGoogleLogin}
+        disabled={isGoogleDisabled}
+      >
         <GoogleIcon />
         {isGoogleLoading ? 'Signing up...' : 'Continue with Google'}
       </GoogleButton>
@@ -99,7 +105,7 @@ export function SignupForm({
             fullWidth
             autoComplete="given-name"
             value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            onChange={e => setFirstName(e.target.value)}
           />
           <TextField
             label="Last Name"
@@ -108,7 +114,7 @@ export function SignupForm({
             fullWidth
             autoComplete="family-name"
             value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            onChange={e => setLastName(e.target.value)}
           />
         </FormRow>
 
@@ -119,7 +125,7 @@ export function SignupForm({
           fullWidth
           autoComplete="organization"
           value={companyName}
-          onChange={(e) => setCompanyName(e.target.value)}
+          onChange={e => setCompanyName(e.target.value)}
         />
 
         <TextField
@@ -130,7 +136,7 @@ export function SignupForm({
           fullWidth
           autoComplete="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
         />
 
         <div>
@@ -141,7 +147,7 @@ export function SignupForm({
             required
             fullWidth
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             autoComplete="new-password"
           />
           <StrengthBar>
@@ -157,7 +163,7 @@ export function SignupForm({
           required
           fullWidth
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          onChange={e => setConfirmPassword(e.target.value)}
           error={!passwordsMatch}
           helperText={!passwordsMatch ? 'Passwords do not match' : ' '}
           autoComplete="new-password"
