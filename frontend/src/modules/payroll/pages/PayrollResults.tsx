@@ -62,12 +62,14 @@ const AllClearSubtitle = styled(Typography)(({ theme }) => ({
 }))
 
 const IssuesWrapper = styled(Paper)(({ theme }) => ({
+  marginTop: theme.spacing(2),
   padding: theme.spacing(2),
   borderRadius: theme.fairworkly.radius.xl,
   border: `1px solid ${theme.palette.divider}`,
   boxShadow: 'none',
   backgroundColor: theme.palette.background.paper,
   [theme.breakpoints.up('sm')]: {
+    marginTop: theme.spacing(3),
     padding: theme.spacing(3),
   },
   [theme.breakpoints.up('md')]: {

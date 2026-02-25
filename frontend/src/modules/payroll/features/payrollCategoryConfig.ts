@@ -43,11 +43,17 @@ export interface SeverityDisplayConfig {
   label: string
   paletteKey: 'info' | 'warning' | 'error'
   paletteTone: 'main' | 'dark'
+  color?: string
 }
 
 export const severityConfig: Record<Severity, SeverityDisplayConfig> = {
   1: { label: 'Info', paletteKey: 'info', paletteTone: 'main' },
-  2: { label: 'Warning', paletteKey: 'warning', paletteTone: 'main' },
-  3: { label: 'Error', paletteKey: 'error', paletteTone: 'main' },
-  4: { label: 'Critical', paletteKey: 'error', paletteTone: 'dark' },
+  2: {
+    label: 'Warning',
+    paletteKey: 'warning',
+    paletteTone: 'main',
+    color: '#eab308',
+  },
+  3: { label: 'Error', paletteKey: 'warning', paletteTone: 'main' },
+  4: { label: 'Critical', paletteKey: 'error', paletteTone: 'main' },
 }
