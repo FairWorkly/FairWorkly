@@ -31,8 +31,12 @@ export function useAuth(): AuthState {
     } catch {
       // Clear local state even if backend call fails
     }
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.removeItem('fairbot_conversation')
+    try {
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.removeItem('fairbot_conversation')
+      }
+    } catch {
+      // Storage may be unavailable in restricted contexts (e.g. Safari private mode)
     }
     dispatch(logoutAction())
   }, [dispatch])

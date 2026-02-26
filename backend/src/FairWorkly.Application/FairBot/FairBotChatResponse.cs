@@ -54,7 +54,7 @@ public class FairBotSource
     public string Source { get; init; } = string.Empty;
 
     [JsonPropertyName("page")]
-    public int Page { get; init; }
+    public int? Page { get; init; }
 
     [JsonPropertyName("content")]
     public string Content { get; init; } = string.Empty;

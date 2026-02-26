@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useRef, type FormEvent } from 'react'
 import { styled } from '@/styles/styled'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
@@ -35,16 +35,22 @@ export const MessageInput = ({
   disabled = false,
 }: MessageInputProps) => {
   const [value, setValue] = useState('')
+  const submittingRef = useRef(false)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!value.trim()) {
+    if (!value.trim() || submittingRef.current) {
       return
     }
 
-    const success = await onSendMessage(value)
-    if (success) {
-      setValue('')
+    submittingRef.current = true
+    try {
+      const success = await onSendMessage(value)
+      if (success) {
+        setValue('')
+      }
+    } finally {
+      submittingRef.current = false
     }
   }
 

@@ -244,6 +244,18 @@ public class FairBotController(
                 return StatusCode(401, new { code = 401, msg = "Unauthorized" });
             }
 
+            if (ex.StatusCode is HttpStatusCode.GatewayTimeout or HttpStatusCode.RequestTimeout)
+            {
+                return StatusCode(
+                    504,
+                    new
+                    {
+                        code = 504,
+                        msg = $"This analysis timed out ({_agentTimeoutSeconds}s), so we couldn't get a complete result. Please try again. If it still fails, narrow your question or contact support.",
+                    }
+                );
+            }
+
             return StatusCode(
                 500,
                 new { code = 500, msg = "Unable to reach the AI service. Please try again later." }
