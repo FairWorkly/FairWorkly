@@ -31,4 +31,21 @@ public interface IAiClient
         string message,
         CancellationToken cancellationToken = default
     );
+
+    /// <summary>
+    /// Sends multipart/form-data POST request with text fields only (no file).
+    /// Used for proxying FairBot chat requests to Agent Service.
+    /// </summary>
+    /// <typeparam name="TResponse">Type of response from AI service</typeparam>
+    /// <param name="route">API route (e.g., "/api/agent/chat")</param>
+    /// <param name="formFields">Key-value pairs to send as form fields</param>
+    /// <param name="headers">Optional per-request headers (e.g., X-Request-Id)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Parsed response from AI service</returns>
+    Task<TResponse> PostFormAsync<TResponse>(
+        string route,
+        Dictionary<string, string> formFields,
+        Dictionary<string, string>? headers = null,
+        CancellationToken cancellationToken = default
+    );
 }
