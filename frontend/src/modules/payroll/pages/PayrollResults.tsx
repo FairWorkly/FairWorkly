@@ -11,7 +11,7 @@
 
 import { useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { Box, Typography, Stack, Paper } from '@mui/material'
+import { Box, Typography, Stack, Paper, alpha } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { styled } from '@/styles/styled'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
@@ -41,7 +41,7 @@ const AllClearContainer = styled(Paper)(({ theme }) => ({
   justifyContent: 'center',
   padding: theme.spacing(6, 4),
   borderRadius: theme.fairworkly.radius.xl,
-  backgroundColor: theme.palette.success.light,
+  backgroundColor: alpha(theme.palette.success.main, 0.04),
   border: `1px solid ${theme.palette.success.main}`,
   textAlign: 'center',
   gap: theme.spacing(2),
@@ -58,16 +58,18 @@ const AllClearTitle = styled(Typography)(({ theme }) => ({
 }))
 
 const AllClearSubtitle = styled(Typography)(({ theme }) => ({
-  color: theme.palette.success.dark,
+  color: theme.palette.text.secondary,
 }))
 
 const IssuesWrapper = styled(Paper)(({ theme }) => ({
+  marginTop: theme.spacing(2),
   padding: theme.spacing(2),
   borderRadius: theme.fairworkly.radius.xl,
   border: `1px solid ${theme.palette.divider}`,
   boxShadow: 'none',
   backgroundColor: theme.palette.background.paper,
   [theme.breakpoints.up('sm')]: {
+    marginTop: theme.spacing(3),
     padding: theme.spacing(3),
   },
   [theme.breakpoints.up('md')]: {
