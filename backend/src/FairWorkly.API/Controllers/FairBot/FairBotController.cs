@@ -30,6 +30,7 @@ public class FairBotController(
 ) : BaseApiController
 {
     private const int MaxMessageLength = 10_000;
+    private const int MaxContextPayloadLength = 500_000;
     private const int MaxRequestIdLength = 128;
     private static readonly Regex ValidRequestIdPattern = new(
         @"^[\w\-:.]+$",
@@ -160,6 +161,17 @@ public class FairBotController(
         }
         else if (!string.IsNullOrWhiteSpace(resolvedContextPayload))
         {
+            if (resolvedContextPayload.Length > MaxContextPayloadLength)
+            {
+                return StatusCode(
+                    413,
+                    new
+                    {
+                        code = 413,
+                        msg = $"Context payload is too large ({resolvedContextPayload.Length} chars). Maximum is {MaxContextPayloadLength}.",
+                    }
+                );
+            }
             formFields["context_payload"] = resolvedContextPayload;
         }
 
