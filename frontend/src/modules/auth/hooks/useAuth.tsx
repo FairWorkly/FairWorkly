@@ -31,6 +31,9 @@ export function useAuth(): AuthState {
     } catch {
       // Clear local state even if backend call fails
     }
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem('fairbot_conversation')
+    }
     dispatch(logoutAction())
   }, [dispatch])
 

@@ -1,10 +1,6 @@
 import { styled } from '@/styles/styled'
 import { keyframes } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-import {
-  FAIRBOT_LABELS,
-  FAIRBOT_TYPING_UI,
-} from '../constants/fairbot.constants'
 
 interface TypingIndicatorProps {
   isVisible: boolean
@@ -21,19 +17,17 @@ const TypingContainer = styled('div')(({ theme }) => ({
   gap: theme.spacing(1),
 }))
 
-const Dots = styled('div')({
+const Dots = styled('div')(({ theme }) => ({
   display: 'flex',
-  gap: `${FAIRBOT_TYPING_UI.DOT_GAP}px`,
-})
+  gap: theme.spacing(0.5),
+}))
 
-const Dot = styled('span')<{
-  delay: number
-}>(({ theme, delay }) => ({
-  width: `${FAIRBOT_TYPING_UI.DOT_SIZE}px`,
-  height: `${FAIRBOT_TYPING_UI.DOT_SIZE}px`,
+const Dot = styled('span')<{ delay: number }>(({ theme, delay }) => ({
+  width: theme.spacing(0.75),
+  height: theme.spacing(0.75),
   borderRadius: '50%',
   backgroundColor: theme.palette.text.secondary,
-  animation: `${bounce} ${FAIRBOT_TYPING_UI.DOT_ANIMATION_MS}ms infinite`,
+  animation: `${bounce} 1200ms infinite`,
   animationDelay: `${delay}ms`,
 }))
 
@@ -44,13 +38,11 @@ export const TypingIndicator = ({ isVisible }: TypingIndicatorProps) => {
 
   return (
     <TypingContainer aria-live="polite">
-      <Typography variant="caption">
-        {FAIRBOT_LABELS.LOADING_MESSAGE}
-      </Typography>
+      <Typography variant="caption">FairBot is thinking...</Typography>
       <Dots>
         <Dot delay={0} />
-        <Dot delay={FAIRBOT_TYPING_UI.DELAY_SHORT_MS} />
-        <Dot delay={FAIRBOT_TYPING_UI.DELAY_LONG_MS} />
+        <Dot delay={120} />
+        <Dot delay={240} />
       </Dots>
     </TypingContainer>
   )
