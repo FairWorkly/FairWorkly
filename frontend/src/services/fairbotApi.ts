@@ -130,7 +130,7 @@ export async function sendChatMessage(
       status: 'error',
       elapsedMs: Math.round(elapsedMs),
       intentHint: options?.intentHint ?? null,
-      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
     })
     throw error
   }

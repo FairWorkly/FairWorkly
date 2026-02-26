@@ -11,7 +11,7 @@ interface UseConversationResult {
   errorMessage: string | null
   contextLabel: string | null
   hasMessages: boolean
-  sendMessage: (text: string) => Promise<void>
+  sendMessage: (text: string) => Promise<boolean>
 }
 
 export const useConversation = (): UseConversationResult => {

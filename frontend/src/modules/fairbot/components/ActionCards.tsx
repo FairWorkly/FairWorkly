@@ -72,7 +72,12 @@ export const ActionCards = () => {
         onClick={() => navigate(FAIRBOT_ACTION_CARDS.ROSTER.route)}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && navigate(FAIRBOT_ACTION_CARDS.ROSTER.route)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            navigate(FAIRBOT_ACTION_CARDS.ROSTER.route)
+          }
+        }}
       >
         <RosterIconBox>
           <ShieldOutlinedIcon />
@@ -91,7 +96,12 @@ export const ActionCards = () => {
         onClick={() => navigate(FAIRBOT_ACTION_CARDS.PAYROLL.route)}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && navigate(FAIRBOT_ACTION_CARDS.PAYROLL.route)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            navigate(FAIRBOT_ACTION_CARDS.PAYROLL.route)
+          }
+        }}
       >
         <PayrollIconBox>
           <PaymentsOutlinedIcon />

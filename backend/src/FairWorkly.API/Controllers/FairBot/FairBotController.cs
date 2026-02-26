@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.FairBot;
 using FairWorkly.Application.Roster.Features.GetValidationResults;
@@ -28,6 +29,13 @@ public class FairBotController(
     ILogger<FairBotController> logger
 ) : BaseApiController
 {
+    private const int MaxMessageLength = 10_000;
+    private const int MaxRequestIdLength = 128;
+    private static readonly Regex ValidRequestIdPattern = new(
+        @"^[\w\-:.]+$",
+        RegexOptions.Compiled
+    );
+
     private static readonly JsonSerializerOptions ContextPayloadSerializerOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -59,9 +67,7 @@ public class FairBotController(
         CancellationToken cancellationToken = default
     )
     {
-        var requestId = string.IsNullOrWhiteSpace(requestIdHeader)
-            ? HttpContext.TraceIdentifier
-            : requestIdHeader.Trim();
+        var requestId = SanitizeRequestId(requestIdHeader) ?? HttpContext.TraceIdentifier;
         Response.Headers["X-Request-Id"] = requestId;
         var stopwatch = Stopwatch.StartNew();
 
@@ -79,6 +85,23 @@ public class FairBotController(
             intentHint ?? intentHintLegacy,
             message?.Length ?? 0
         );
+
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return StatusCode(400, new { code = 400, msg = "Message is required." });
+        }
+
+        if (message.Length > MaxMessageLength)
+        {
+            return StatusCode(
+                400,
+                new
+                {
+                    code = 400,
+                    msg = $"Message is too long ({message.Length} chars). Maximum is {MaxMessageLength}.",
+                }
+            );
+        }
 
         if (_currentUser.UserId is not { } userId || userId == Guid.Empty)
         {
@@ -180,7 +203,7 @@ public class FairBotController(
                 new
                 {
                     code = 504,
-                    msg = $"This analysis timed out ({_agentTimeoutSeconds}s), so we couldn't get a complete result. Please try again. If it still fails, narrow your question or contact support with Request ID {requestId}.",
+                    msg = $"This analysis timed out ({_agentTimeoutSeconds}s), so we couldn't get a complete result. Please try again. If it still fails, narrow your question or contact support.",
                 }
             );
         }
@@ -341,6 +364,22 @@ public class FairBotController(
 
         var raw = element.GetString();
         return Guid.TryParse(raw, out value);
+    }
+
+    private static string? SanitizeRequestId(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
+        var trimmed = raw.Trim();
+        if (trimmed.Length > MaxRequestIdLength)
+        {
+            return null;
+        }
+
+        return ValidRequestIdPattern.IsMatch(trimmed) ? trimmed : null;
     }
 
     private sealed record RosterContextReference(Guid? RosterId, Guid? ValidationId);

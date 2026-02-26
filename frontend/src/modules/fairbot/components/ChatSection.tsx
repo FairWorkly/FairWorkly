@@ -44,8 +44,11 @@ export const ChatSection = () => {
 
   useEffect(() => {
     const el = scrollRef.current
-    if (el) {
-      el.scrollTop = el.scrollHeight
+    if (!el) return
+    const threshold = 80
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold
+    if (isNearBottom) {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
     }
   }, [conversation.messages, conversation.isTyping])
 

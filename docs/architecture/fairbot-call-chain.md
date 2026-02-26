@@ -39,14 +39,14 @@ The "Ask FairBot to Explain" button on the roster results page navigates with UR
 /fairbot?intent=roster&rosterId={GUID}&validationId={GUID}
 ```
 
-- **File**: `frontend/src/modules/roster/pages/RosterResults.tsx:52`
+- **File**: `frontend/src/modules/roster/pages/RosterResults.tsx` (role check + Button)
 - Only visible to users with `admin` role
 
 #### 2. Context Loading (Frontend)
 
-`useFairBotChat` reads URL search params and silently loads the roster context into state.
+`useFairBotChat` reads URL search params and loads the roster validation context via API call.
 
-- **File**: `frontend/src/modules/fairbot/hooks/useFairBotChat.ts:93-133`
+- **File**: `frontend/src/modules/fairbot/hooks/useFairBotChat.ts` (context-loading `useEffect`)
 
 ```typescript
 const intent = searchParams.get('intent')       // 'roster'
@@ -54,7 +54,21 @@ const rosterId = searchParams.get('rosterId')   // UUID
 const validationId = searchParams.get('validationId') // UUID
 const isRosterExplainMode = intent === 'roster' // true
 
-// useEffect sets context:
+// useEffect calls getValidationResults(rosterId) and on success:
+setContext({
+  intentHint: 'roster_explain',
+  rosterId,
+  payload: {
+    kind: 'roster_validation',
+    rosterId,
+    validation,   // full validation data from API
+  },
+})
+```
+
+**Fallback**: If `getValidationResults` fails (e.g., 404), the context falls back to a lightweight reference:
+
+```typescript
 setContext({
   intentHint: 'roster',
   rosterId,
@@ -62,15 +76,15 @@ setContext({
 })
 ```
 
-A small info Chip ("Roster context loaded") appears in the chat UI. No errors are shown if context is missing — the user can always send messages.
+A small info Chip ("Roster context loaded" or "Roster context unavailable") appears in the chat UI.
 
-- **File**: `frontend/src/modules/fairbot/components/ChatSection.tsx:55-62`
+- **File**: `frontend/src/modules/fairbot/components/ChatSection.tsx`
 
 #### 3. Send Message (Frontend)
 
 When the user submits a message, `sendMessage` attaches the context (if available) and calls the API service.
 
-- **File**: `frontend/src/modules/fairbot/hooks/useFairBotChat.ts:145-197`
+- **File**: `frontend/src/modules/fairbot/hooks/useFairBotChat.ts` (`sendMessage` callback)
 
 ```typescript
 const response = await sendChatMessage(
@@ -85,14 +99,23 @@ const response = await sendChatMessage(
 
 `sendChatMessage` builds a `FormData` payload and POSTs to the backend.
 
-- **File**: `frontend/src/services/fairbotApi.ts:31-54`
+- **File**: `frontend/src/services/fairbotApi.ts`
 
+**Primary path** (full validation loaded successfully):
 ```
 POST /api/fairbot/chat
 Content-Type: multipart/form-data (browser-set boundary)
-Timeout: 30s
 Authorization: Bearer <JWT>
+X-Request-Id: <UUID>
 
+FormData:
+  message:        "Why is this shift failing?"
+  intentHint:     "roster_explain"
+  contextPayload: '{"kind":"roster_validation","rosterId":"...","validation":{...full data...}}'
+```
+
+**Fallback path** (validation API failed):
+```
 FormData:
   message:        "Why is this shift failing?"
   intentHint:     "roster"
@@ -107,18 +130,21 @@ Uses the shared `httpClient` (base URL `/api`, credentials included).
 
 `FairBotController.Chat()` receives the multipart form.
 
-- **File**: `backend/src/FairWorkly.API/Controllers/FairBot/FairBotController.cs:39-46`
+- **File**: `backend/src/FairWorkly.API/Controllers/FairBot/FairBotController.cs`
 - **Auth**: `[Authorize(Policy = "RequireAdmin")]` — JWT validated, user extracted
 
 Parameters: `message`, `intentHint`, `contextPayload` (with snake_case legacy fallbacks).
 
-#### 6. Roster Context Enrichment (Backend)
+#### 6. Backend Processing
 
-Because `intentHint == "roster"`, the controller enriches the lightweight frontend reference with full validation data from the database.
+**Primary path** (`intentHint == "roster_explain"`): The backend does NOT match this against the `"roster"` enrichment branch (case-insensitive check for `"roster"` only). The `contextPayload` is forwarded to the Agent Service as-is — no database query is needed since the frontend already embedded the full validation data.
 
-- **File**: `backend/src/FairWorkly.API/Controllers/FairBot/FairBotController.cs:69-97`
+**Fallback path** (`intentHint == "roster"`): The controller enriches the lightweight reference with full validation data from the database.
+
+- **File**: `backend/src/FairWorkly.API/Controllers/FairBot/FairBotController.cs` (roster context enrichment block)
 
 ```csharp
+// Only triggered when intentHint == "roster" (fallback path)
 // 1. Parse contextPayload JSON → extract rosterId, validationId
 // 2. Query database via MediatR:
 //    GetValidationResultsQuery { RosterId, OrganizationId }
@@ -127,82 +153,79 @@ Because `intentHint == "roster"`, the controller enriches the lightweight fronte
 {
   "kind": "roster_validation",
   "rosterId": "...",
-  "validation": {
-    "validationId": "...",
-    "status": "Failed",
-    "totalShifts": 20,
-    "failedShifts": 5,
-    "totalIssues": 8,
-    "criticalIssues": 2,
-    "affectedEmployees": 3,
-    "issues": [ ...full issue array... ]
-  }
+  "validation": { ...full issue array... }
 }
 ```
 
 **Graceful fallback**: If context resolution fails (missing data, stale validation, no org context), the controller drops the `intent_hint` field entirely. The agent then routes to compliance Q&A instead of returning an error.
 
-- **File**: `backend/src/FairWorkly.API/Controllers/FairBot/FairBotController.cs:84-96`
-
 #### 7. Forward to Agent Service (Backend)
 
 `PythonAiClient.PostFormAsync()` rebuilds the form fields as multipart and POSTs to the agent.
 
-- **File**: `backend/src/FairWorkly.Infrastructure/AI/PythonServices/PythonAiClient.cs:98-124`
+- **File**: `backend/src/FairWorkly.Infrastructure/AI/PythonServices/PythonAiClient.cs`
 
 ```
 POST http://localhost:8000/api/agent/chat
 Headers: X-Service-Key: <configured key>
-Timeout: 60s
 
 MultipartFormData:
   message:         "Why is this shift failing?"
-  intent_hint:     "roster"
-  context_payload: '{"kind":"roster_validation","rosterId":"...","validation":{...full data...}}'
+  intent_hint:     "roster_explain" (or "roster" in fallback)
+  context_payload: '{"kind":"roster_validation",...}'
 ```
 
 #### 8. Agent Entry Point
 
 FastAPI endpoint receives the request. Service key is verified, rate limit is enforced.
 
-- **File**: `agent-service/master_agent/main.py:140-149`
+- **File**: `agent-service/master_agent/main.py`
 
 #### 9. Intent Routing (Agent)
 
 `IntentRouter.route()` checks the explicit `intent_hint` first.
 
-- **File**: `agent-service/master_agent/intent_router.py:10-16`
+- **File**: `agent-service/master_agent/intent_router.py`
 
+**Primary path**:
+```python
+hint = "roster_explain"
+# Rule: hint == "roster_explain" → return "roster_explain"
+return "roster_explain"
+```
+
+**Fallback path** (backend enriched with `intent_hint="roster"`):
 ```python
 hint = "roster"
-file_name = None
 # Rule: hint == "roster" and no file → "roster_explain"
 return "roster_explain"
 ```
 
+Both paths end up at the same feature.
+
 #### 10. RosterExplainFeature.process() (Agent)
 
-- **File**: `agent-service/master_agent/features/roster_explain_feature.py:129-196`
+- **File**: `agent-service/master_agent/features/roster_explain_feature.py`
 
 ```
-a. Extract validation from context_payload["validation"]        (line 138-148)
-b. Trim to 25 issues for token budget                           (line 36-56)
-c. Build system prompt:                                          (line 154-159)
+a. Extract validation from context_payload["validation"]
+b. Trim to 25 issues for token budget
+c. Build system prompt:
    "You are FairWorkly's roster explanation assistant.
     Explain existing roster validation outcomes in plain language..."
-d. Build user prompt:                                            (line 160-167)
+d. Build user prompt:
    "User question:\n{message}\n\n
     Roster validation context (JSON):\n{trimmed_context}\n\n
     Please provide: 1) explanation 2) checks involved 3) next steps"
-e. Create LLM provider via factory                               (line 170)
-f. Call LLM: temperature=0.2, max_tokens=800                     (line 171-178)
+e. Create LLM provider via factory
+f. Call LLM: temperature=0.2, max_tokens=800
 ```
 
 #### 11. LLM Call (Agent)
 
 `LLMProviderFactory.create()` instantiates the configured provider (OpenAI or Anthropic).
 
-- **File**: `agent-service/shared/llm/factory.py:27-42`
+- **File**: `agent-service/shared/llm/factory.py`
 
 The provider calls the external API and returns:
 
@@ -211,8 +234,6 @@ The provider calls the external API and returns:
 ```
 
 If the LLM call fails, a fallback summary is generated from the validation stats (totals, issue counts) with an error classification note.
-
-- **File**: `agent-service/master_agent/features/roster_explain_feature.py:189-196`
 
 #### 12. Response (Agent → Backend → Frontend)
 
@@ -264,7 +285,7 @@ FormData:
 
 No explicit hint → fall through to keyword matching and default.
 
-- **File**: `agent-service/master_agent/intent_router.py:30-36`
+- **File**: `agent-service/master_agent/intent_router.py`
 
 ```python
 # No intent_hint, no file_name
@@ -275,32 +296,32 @@ No explicit hint → fall through to keyword matching and default.
 
 #### 8. ComplianceFeature.process() (Agent)
 
-- **File**: `agent-service/master_agent/features/compliance_feature.py:18-47`
+- **File**: `agent-service/master_agent/features/compliance_feature.py`
 
 ```
-a. Build system prompt via CompliancePromptBuilder                (line 31)
+a. Build system prompt via CompliancePromptBuilder
    "You are FairWorkly's compliance assistant specialising in
     Australian Fair Work regulations..."
-b. Call run_rag(message, system_prompt, config)                   (line 33-38)
+b. Call run_rag(message, system_prompt, config)
 ```
 
 #### 9. RAG Pipeline (Agent)
 
-- **File**: `agent-service/shared/rag/rag_client.py:23-84`
+- **File**: `agent-service/shared/rag/rag_client.py`
 
 ```
-a. ensure_retriever() → load FAISS vector store                   (line 40-58)
+a. ensure_retriever() → load FAISS vector store
    Vector store built from AWARD.pdf (273 chunks)
 
-b. retriever.retrieve(message, top_k=3)                           (line 49)
+b. retriever.retrieve(message, top_k=3)
    → Embed query via OpenAI embeddings
    → Search FAISS for 3 most similar document chunks
    ← docs_text = formatted context with source/page/content
 
-c. Augment system prompt with retrieved documents                  (line 60-64)
+c. Augment system prompt with retrieved documents
    rag_system_prompt = system_prompt + "\n\nRelevant Documents:\n" + docs_text
 
-d. Call LLM with augmented prompt                                  (line 70-78)
+d. Call LLM with augmented prompt
    messages = [
      { role: "system", content: rag_system_prompt },
      { role: "user",   content: message }
@@ -337,11 +358,11 @@ Frontend renders the answer with source citations displayed below the message bu
 | Aspect | Roster Explain | Compliance Q&A |
 |--------|---------------|----------------|
 | **Trigger** | Button on roster results page (URL params) | Direct navigation to `/fairbot` |
-| **Frontend context** | `{intentHint, rosterId, payload}` | `null` |
+| **Frontend context** | `{intentHint: 'roster_explain', rosterId, payload}` | `null` |
 | **Payload to backend** | `message + intentHint + contextPayload` | `message` only |
-| **Backend processing** | Query DB, enrich with full validation data | Pass-through |
-| **Backend fallback** | On failure → drop intent, route to compliance Q&A | N/A |
-| **Agent routing** | `intent_hint="roster"` → `roster_explain` | Keyword match / default → `compliance_qa` |
+| **Backend processing** | Primary: pass-through (full data from frontend). Fallback: query DB, enrich. | Pass-through |
+| **Backend fallback** | On enrichment failure → drop intent, route to compliance Q&A | N/A |
+| **Agent routing** | `intent_hint="roster_explain"` → `roster_explain` | Keyword match / default → `compliance_qa` |
 | **Knowledge source** | Roster validation data from DB (injected in user prompt) | FAISS vector store / AWARD.pdf (injected in system prompt) |
 | **LLM temperature** | 0.2 (more deterministic) | 0.3 |
 | **Response sources** | None | RAG document citations |
@@ -349,11 +370,26 @@ Frontend renders the answer with source citations displayed below the message bu
 
 ## Data Transformations
 
+**Primary path** (frontend loads full validation successfully):
+```
+Frontend contextPayload (full data):
+  { kind: "roster_validation", rosterId: "...", validation: { ...all fields + issues... } }
+                    │
+                    ▼  Backend passes through as-is (intentHint != "roster")
+Agent context_payload:
+  { kind: "roster_validation", rosterId: "...", validation: { ...all fields + issues... } }
+                    │
+                    ▼  Agent trims for token budget
+Agent trimmed_context (LLM-ready):
+  { validation_id, status, totals: {...}, issues_preview: [...max 25...] }
+```
+
+**Fallback path** (frontend validation API fails):
 ```
 Frontend contextPayload (lightweight reference):
   { kind: "roster_reference", rosterId: "...", validationId: "..." }
                     │
-                    ▼  Backend enriches from DB
+                    ▼  Backend enriches from DB (intentHint == "roster")
 Backend context_payload (full data):
   { kind: "roster_validation", rosterId: "...", validation: { ...all fields + issues... } }
                     │

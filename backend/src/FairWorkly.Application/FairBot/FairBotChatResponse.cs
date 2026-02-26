@@ -9,53 +9,53 @@ namespace FairWorkly.Application.FairBot;
 public class FairBotChatResponse
 {
     [JsonPropertyName("status")]
-    public string Status { get; set; } = string.Empty;
+    public string Status { get; init; } = string.Empty;
 
     [JsonPropertyName("message")]
-    public string? Message { get; set; }
+    public string? Message { get; init; }
 
     [JsonPropertyName("request_id")]
-    public string? RequestId { get; set; }
+    public string? RequestId { get; init; }
 
     [JsonPropertyName("file_name")]
-    public string? FileName { get; set; }
+    public string? FileName { get; init; }
 
     [JsonPropertyName("routed_to")]
-    public string? RoutedTo { get; set; }
+    public string? RoutedTo { get; init; }
 
     [JsonPropertyName("result")]
-    public FairBotChatResult? Result { get; set; }
+    public FairBotChatResult? Result { get; init; }
 }
 
 public class FairBotChatResult
 {
     [JsonPropertyName("type")]
-    public string Type { get; set; } = string.Empty;
+    public string Type { get; init; } = string.Empty;
 
     [JsonPropertyName("message")]
-    public string Message { get; set; } = string.Empty;
+    public string Message { get; init; } = string.Empty;
 
     [JsonPropertyName("file_name")]
-    public string? FileName { get; set; }
+    public string? FileName { get; init; }
 
     [JsonPropertyName("model")]
-    public string? Model { get; set; }
+    public string? Model { get; init; }
 
     [JsonPropertyName("sources")]
-    public List<FairBotSource>? Sources { get; set; }
+    public List<FairBotSource>? Sources { get; init; }
 
     [JsonPropertyName("note")]
-    public string? Note { get; set; }
+    public string? Note { get; init; }
 }
 
 public class FairBotSource
 {
     [JsonPropertyName("source")]
-    public string Source { get; set; } = string.Empty;
+    public string Source { get; init; } = string.Empty;
 
     [JsonPropertyName("page")]
-    public int Page { get; set; }
+    public int Page { get; init; }
 
     [JsonPropertyName("content")]
-    public string Content { get; set; } = string.Empty;
+    public string Content { get; init; } = string.Empty;
 }

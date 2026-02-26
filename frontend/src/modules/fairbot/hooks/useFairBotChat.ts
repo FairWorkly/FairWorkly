@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { FAIRBOT_ROLES } from '../constants/fairbot.constants'
 import { FAIRBOT_TIMEOUT_SECONDS, sendChatMessage } from '@/services/fairbotApi'
@@ -12,7 +12,7 @@ import type {
 } from '../types/fairbot.types'
 
 interface UseFairBotChatResult extends FairBotConversationState {
-  sendMessage: (text: string) => Promise<void>
+  sendMessage: (text: string) => Promise<boolean>
   contextLabel: string | null
   isContextLoading: boolean
 }
@@ -27,7 +27,8 @@ const createWelcomeMessage = (): FairBotMessage => ({
 const createInitialMessages = (): FairBotMessage[] => [createWelcomeMessage()]
 
 const createMessageId = (): string =>
-  globalThis.crypto?.randomUUID?.() ?? String(Date.now())
+  globalThis.crypto?.randomUUID?.() ??
+  `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
 const createMessage = (
   role: FairBotMessage['role'],
@@ -161,6 +162,7 @@ export const useFairBotChat = (): UseFairBotChatResult => {
   const [error, setError] = useState<FairBotError | null>(null)
   const [context, setContext] = useState<RosterExplainContext | null>(null)
   const [isContextLoading, setIsContextLoading] = useState(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const intent = searchParams.get('intent')
   const rosterId = searchParams.get('rosterId')
@@ -175,16 +177,18 @@ export const useFairBotChat = (): UseFairBotChatResult => {
   }, [])
 
   // Each entry/task starts a fresh conversation to avoid stale context bleed.
+  // Also resets on account change (logout/switch user).
   useEffect(() => {
     setMessages(createInitialMessages())
     setError(null)
-  }, [intent, rosterId, validationId])
+  }, [intent, rosterId, validationId, user?.id])
 
-  // Defensive reset on account change (logout/switch user).
+  // Abort in-flight chat request on unmount.
   useEffect(() => {
-    setMessages(createInitialMessages())
-    setError(null)
-  }, [user?.id])
+    return () => {
+      abortControllerRef.current?.abort()
+    }
+  }, [])
 
   // Load roster validation context for explain mode.
   // Prefer full validation payload (works even when backend resolver is stale).
@@ -242,10 +246,10 @@ export const useFairBotChat = (): UseFairBotChatResult => {
   }, [isRosterExplainMode, rosterId, validationId, user?.id])
 
   const sendMessage = useCallback(
-    async (text: string) => {
+    async (text: string): Promise<boolean> => {
       const trimmedText = text.trim()
       if (!trimmedText) {
-        return
+        return true
       }
 
       setError(null)
@@ -253,6 +257,10 @@ export const useFairBotChat = (): UseFairBotChatResult => {
       const userMessage = createMessage(FAIRBOT_ROLES.USER, trimmedText)
       setMessages(prev => [...prev, userMessage])
       setIsLoading(true)
+
+      abortControllerRef.current?.abort()
+      const controller = new AbortController()
+      abortControllerRef.current = controller
 
       try {
         // Attach roster context when available; otherwise plain compliance Q&A.
@@ -266,11 +274,19 @@ export const useFairBotChat = (): UseFairBotChatResult => {
             : undefined
         )
 
+        if (controller.signal.aborted) {
+          return false
+        }
+
         // Safety net: if explain context is missing upstream, retry once as general Q&A.
         if (response.result?.note === 'ROSTER_CONTEXT_REQUIRED') {
           response = await sendChatMessage(trimmedText, {
             intentHint: 'compliance',
           })
+        }
+
+        if (controller.signal.aborted) {
+          return false
         }
 
         const replyText =
@@ -286,10 +302,14 @@ export const useFairBotChat = (): UseFairBotChatResult => {
         )
 
         setMessages(prev => [...prev, assistantMessage])
+        return true
       } catch (caughtError) {
+        if (controller.signal.aborted) {
+          return false
+        }
         const normalized = createError(caughtError)
         setError(normalized)
-        throw new Error(normalized.message)
+        return false
       } finally {
         setIsLoading(false)
       }

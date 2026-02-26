@@ -6,7 +6,7 @@ import SendRounded from '@mui/icons-material/SendRounded'
 import { FAIRBOT_ARIA } from '../constants/fairbot.constants'
 
 interface MessageInputProps {
-  onSendMessage: (message: string) => Promise<void>
+  onSendMessage: (message: string) => Promise<boolean>
   disabled?: boolean
 }
 
@@ -42,11 +42,9 @@ export const MessageInput = ({
       return
     }
 
-    try {
-      await onSendMessage(value)
+    const success = await onSendMessage(value)
+    if (success) {
       setValue('')
-    } catch {
-      return
     }
   }
 

@@ -121,18 +121,21 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
                 <Typography variant="caption" color="text.secondary">
                   Sources:
                 </Typography>
-                {sources.map((source, index) => (
-                  <SourceItem key={`${source.source}-${source.page ?? 'na'}-${index}`}>
-                    <Typography variant="caption" color="text.secondary">
-                      {index + 1}. {source.source}{formatPage(source.page)}
-                    </Typography>
-                    {truncate(source.content) && (
-                      <Typography variant="caption" display="block">
-                        {truncate(source.content) as string}
+                {sources.map((source, index) => {
+                  const snippet = truncate(source.content)
+                  return (
+                    <SourceItem key={`${source.source}-${source.page ?? 'na'}-${index}`}>
+                      <Typography variant="caption" color="text.secondary">
+                        {index + 1}. {source.source}{formatPage(source.page)}
                       </Typography>
-                    )}
-                  </SourceItem>
-                ))}
+                      {snippet && (
+                        <Typography variant="caption" display="block">
+                          {snippet}
+                        </Typography>
+                      )}
+                    </SourceItem>
+                  )
+                })}
               </SourceList>
             )}
           </DetailSection>

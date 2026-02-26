@@ -122,7 +122,15 @@ public class PythonAiClient : IAiClient
         }
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException(
+                $"Agent Service returned {(int)response.StatusCode}: {errorBody}",
+                null,
+                response.StatusCode
+            );
+        }
 
         var result = await response.Content.ReadFromJsonAsync<TResponse>(
             cancellationToken: cancellationToken
