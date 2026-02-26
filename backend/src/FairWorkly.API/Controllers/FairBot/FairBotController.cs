@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -30,7 +31,7 @@ public class FairBotController(
 ) : BaseApiController
 {
     private const int MaxMessageLength = 10_000;
-    private const int MaxContextPayloadLength = 500_000;
+    private const int MaxContextPayloadBytes = 512_000; // 500 KB
     private const int MaxRequestIdLength = 128;
     private static readonly Regex ValidRequestIdPattern = new(
         @"^[\w\-:.]+$",
@@ -146,6 +147,10 @@ public class FairBotController(
 
             if (contextResolution is { IsSuccess: true })
             {
+                if (ExceedsPayloadLimit(contextResolution.ContextPayload!, out var rosterBytes))
+                {
+                    return PayloadTooLargeResponse(rosterBytes);
+                }
                 _logger.LogInformation("FairBot roster context resolved successfully");
                 formFields["context_payload"] = contextResolution.ContextPayload!;
             }
@@ -161,16 +166,9 @@ public class FairBotController(
         }
         else if (!string.IsNullOrWhiteSpace(resolvedContextPayload))
         {
-            if (resolvedContextPayload.Length > MaxContextPayloadLength)
+            if (ExceedsPayloadLimit(resolvedContextPayload, out var payloadBytes))
             {
-                return StatusCode(
-                    413,
-                    new
-                    {
-                        code = 413,
-                        msg = $"Context payload is too large ({resolvedContextPayload.Length} chars). Maximum is {MaxContextPayloadLength}.",
-                    }
-                );
+                return PayloadTooLargeResponse(payloadBytes);
             }
             formFields["context_payload"] = resolvedContextPayload;
         }
@@ -404,6 +402,26 @@ public class FairBotController(
         }
 
         return ValidRequestIdPattern.IsMatch(trimmed) ? trimmed : null;
+    }
+
+    private static bool ExceedsPayloadLimit(string payload, out int byteCount)
+    {
+        byteCount = Encoding.UTF8.GetByteCount(payload);
+        return byteCount > MaxContextPayloadBytes;
+    }
+
+    private static ObjectResult PayloadTooLargeResponse(int byteCount)
+    {
+        return new ObjectResult(
+            new
+            {
+                code = 413,
+                msg = $"Context payload is too large ({byteCount} bytes). Maximum is {MaxContextPayloadBytes}.",
+            }
+        )
+        {
+            StatusCode = 413,
+        };
     }
 
     private sealed record RosterContextReference(Guid? RosterId, Guid? ValidationId);
