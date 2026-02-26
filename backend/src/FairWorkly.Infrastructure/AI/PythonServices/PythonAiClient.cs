@@ -16,6 +16,20 @@ public class PythonAiClient : IAiClient
         // Default address for Python service
         var baseUrl = configuration["AiSettings:BaseUrl"] ?? "http://localhost:8000";
         _httpClient.BaseAddress = new Uri(baseUrl);
+        // Keep FairBot chain timeout configurable and aligned with frontend/agent defaults.
+        var timeoutSeconds = configuration.GetValue<int?>("AiSettings:TimeoutSeconds") ?? 120;
+        if (timeoutSeconds <= 0)
+        {
+            timeoutSeconds = 120;
+        }
+        _httpClient.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
+
+        // Service-to-service authentication header for Agent Service.
+        var serviceKey = configuration["AiSettings:ServiceKey"];
+        if (!string.IsNullOrWhiteSpace(serviceKey))
+        {
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("X-Service-Key", serviceKey);
+        }
     }
 
     public async Task<TResponse> PostAsync<TRequest, TResponse>(
@@ -72,6 +86,52 @@ public class PythonAiClient : IAiClient
         response.EnsureSuccessStatusCode();
 
         // Read JSON response
+        var result = await response.Content.ReadFromJsonAsync<TResponse>(
+            cancellationToken: cancellationToken
+        );
+
+        if (result == null)
+        {
+            throw new InvalidOperationException("AI service returned null response.");
+        }
+
+        return result;
+    }
+
+    public async Task<TResponse> PostFormAsync<TResponse>(
+        string route,
+        Dictionary<string, string> formFields,
+        Dictionary<string, string>? headers = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        using var content = new MultipartFormDataContent();
+
+        foreach (var (key, value) in formFields)
+        {
+            content.Add(new StringContent(value), key);
+        }
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, route) { Content = content };
+        if (headers != null)
+        {
+            foreach (var (key, value) in headers)
+            {
+                request.Headers.TryAddWithoutValidation(key, value);
+            }
+        }
+
+        var response = await _httpClient.SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException(
+                $"Agent Service returned {(int)response.StatusCode}: {errorBody}",
+                null,
+                response.StatusCode
+            );
+        }
+
         var result = await response.Content.ReadFromJsonAsync<TResponse>(
             cancellationToken: cancellationToken
         );

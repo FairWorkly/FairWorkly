@@ -164,6 +164,16 @@ public class Result<T> : IResultBase
     public static Result<T> Of422<TError>(string message, List<TError> errors) =>
         new(422, default, message, errors);
 
+    // ── 413 Payload Too Large ─────────────────────────────────────────
+
+    /// <summary>Creates a <b>413 Payload Too Large</b> result with a custom message.</summary>
+    public static Result<T> Of413(string message) => new(413, default, message, null);
+
+    // ── 429 Too Many Requests ─────────────────────────────────────────
+
+    /// <summary>Creates a <b>429 Too Many Requests</b> result with a custom message.</summary>
+    public static Result<T> Of429(string message) => new(429, default, message, null);
+
     // ── 500 Internal Server Error ─────────────────────────────────────
 
     /// <summary>
@@ -176,4 +186,9 @@ public class Result<T> : IResultBase
     /// <param name="message">Frontend-facing summary (e.g., "Failed to save roster. Please try again or contact support.").</param>
     /// <example><code>return Result&lt;RosterDto&gt;.Of500("Failed to save roster. Please try again or contact support.");</code></example>
     public static Result<T> Of500(string message) => new(500, default, message, null);
+
+    // ── 504 Gateway Timeout ───────────────────────────────────────────
+
+    /// <summary>Creates a <b>504 Gateway Timeout</b> result with a custom message.</summary>
+    public static Result<T> Of504(string message) => new(504, default, message, null);
 }
