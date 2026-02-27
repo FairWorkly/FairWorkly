@@ -42,6 +42,14 @@ export const ChatSection = () => {
   const conversation = useConversation()
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  const handleQuickFollowUp = (prompt: string) => {
+    if (!prompt.trim()) {
+      return
+    }
+    console.info('[FairBot][action_follow_up_clicked]', { prompt })
+    void conversation.sendMessage(prompt)
+  }
+
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
@@ -72,6 +80,10 @@ export const ChatSection = () => {
         <MessageList
           messages={conversation.messages}
           isTyping={conversation.isTyping}
+          onQuickFollowUp={handleQuickFollowUp}
+          quickFollowUpDisabled={
+            conversation.isLoading || conversation.isContextLoading
+          }
         />
       </ScrollArea>
       <Divider />

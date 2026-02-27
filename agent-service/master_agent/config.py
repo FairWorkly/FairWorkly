@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import os
 from pathlib import Path
 from typing import Any, Dict
 
@@ -9,8 +10,10 @@ from dotenv import load_dotenv
 
 CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.yaml"
 
-# Load .env once when the module is imported so os.getenv works everywhere.
-load_dotenv(dotenv_path=CONFIG_PATH.parent / ".env", override=False)
+# Security default: do NOT auto-load repo .env for secrets.
+# Set FAIRWORKLY_ENABLE_DOTENV=1 only when you intentionally want dotenv behavior.
+if os.getenv("FAIRWORKLY_ENABLE_DOTENV", "").lower() in {"1", "true", "yes"}:
+    load_dotenv(dotenv_path=CONFIG_PATH.parent / ".env", override=False)
 
 
 @functools.lru_cache(maxsize=1)

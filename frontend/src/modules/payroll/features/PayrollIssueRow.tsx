@@ -4,13 +4,11 @@
 //   - description: rich text line + alert card built from category templates
 // The backend guarantees these are mutually exclusive per issue.
 
-import React, { useState } from 'react'
-import { Box, Typography, Chip, Button, alpha } from '@mui/material'
+import React from 'react'
+import { Box, Typography, Chip, alpha } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import WarningAmberRounded from '@mui/icons-material/WarningAmberRounded'
 import { styled } from '@/styles/styled'
-import { GuidanceModal } from '@/shared/compliance-check'
 import type { ValidationIssue } from '../types/payrollValidation.types'
 import { severityConfig } from './payrollCategoryConfig'
 import { buildDescriptionLines } from './payrollDescriptionTemplates'
@@ -52,30 +50,6 @@ const SeverityChip = styled(Chip, {
   backgroundColor: alpha(chipColor, 0.1),
   borderColor: alpha(chipColor, 0.3),
   '& .MuiChip-label': { color: chipColor },
-}))
-
-const ActionButton = styled(Button)(({ theme }) => ({
-  marginLeft: 'auto',
-  color: theme.palette.text.primary,
-  border: `1px solid ${theme.palette.divider}`,
-  borderRadius: theme.fairworkly.radius.sm,
-  padding: theme.spacing(0.75, 2),
-  fontSize: theme.typography.caption.fontSize,
-  fontWeight: theme.typography.button.fontWeight,
-  whiteSpace: 'nowrap',
-  flexShrink: 0,
-  [theme.breakpoints.between('sm', 'md')]: {
-    padding: theme.spacing(0.5, 1),
-    fontSize: '0.7rem',
-  },
-  [theme.breakpoints.down('sm')]: {
-    width: '100%',
-    marginLeft: 0,
-  },
-  '&:hover': {
-    backgroundColor: theme.palette.background.default,
-    borderColor: theme.palette.text.disabled,
-  },
 }))
 
 const DescriptionLine = styled(Typography)(({ theme }) => ({
@@ -171,7 +145,6 @@ interface PayrollIssueRowProps {
 
 export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
   const theme = useTheme()
-  const [fixModalOpen, setFixModalOpen] = useState(false)
 
   const sev = severityConfig[issue.severity]
   const severityColor =
@@ -195,12 +168,6 @@ export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
             variant="outlined"
             chipColor={severityColor}
           />
-          <ActionButton
-            startIcon={<HelpOutlineOutlinedIcon />}
-            onClick={() => setFixModalOpen(true)}
-          >
-            How to Fix
-          </ActionButton>
         </HeaderRow>
 
         {d && descLines && (
@@ -226,10 +193,6 @@ export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
         )}
       </RowContainer>
 
-      <GuidanceModal
-        open={fixModalOpen}
-        onClose={() => setFixModalOpen(false)}
-      />
     </>
   )
 }

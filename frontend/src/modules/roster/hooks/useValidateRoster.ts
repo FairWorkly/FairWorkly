@@ -48,6 +48,7 @@ export function useValidateRoster(rosterId: string | undefined) {
 
   return {
     complianceData,
+    validationId: query.data?.validationId ?? null,
     isLoading: query.isLoading,
     isError: query.isError || !rosterId,
     errorMessage,

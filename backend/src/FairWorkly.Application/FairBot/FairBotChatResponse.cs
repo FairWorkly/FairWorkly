@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace FairWorkly.Application.FairBot;
@@ -46,6 +47,9 @@ public class FairBotChatResult
 
     [JsonPropertyName("note")]
     public string? Note { get; init; }
+
+    [JsonPropertyName("data")]
+    public JsonElement? Data { get; init; }
 }
 
 public class FairBotSource

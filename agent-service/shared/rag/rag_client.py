@@ -1,10 +1,24 @@
 """Shared RAG execution entrypoint."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 from shared.llm.factory import LLMProvider
-from shared.rag_retriever import RetrievalResult
+from shared.llm.history_utils import normalize_chat_history
 from shared.rag.retriever_manager import ensure_retriever
+
+
+def _build_fallback_response(reason: str, note: str) -> Dict[str, Any]:
+    return {
+        "content": (
+            "I cannot provide a compliance answer right now.\n"
+            f"Reason: {reason}\n"
+            "Next steps:\n"
+            "1) Retry in a few minutes.\n"
+            "2) Check AI service configuration (API key, model, and vector store).\n"
+            "3) Contact support if the issue persists."
+        ),
+        "note": note,
+    }
 
 
 async def run(
@@ -13,38 +27,29 @@ async def run(
     system_prompt: str,
     config: Dict[str, Any],
     logger,
+    history_messages: Any = None,
 ) -> Dict[str, Any]:
     """Run retrieval + LLM generation with a shared prompt template."""
     try:
         llm = LLMProvider()
     except Exception as exc:
         logger.warning("LLM provider unavailable: %s", exc)
-        return {
-            "content": f"Compliance Feature placeholder - Received message: {message}",
-            "note": "LLM provider not configured",
-        }
+        return _build_fallback_response(
+            reason="AI provider is not configured.",
+            note="LLM provider not configured",
+        )
 
     retriever = None
-    vectorstore = None
     try:
-        retriever, vectorstore = ensure_retriever(config, logger)
+        retriever, _ = ensure_retriever(config, logger)
     except FileNotFoundError as exc:
         logger.warning("Vector store unavailable: %s", exc, exc_info=True)
     except Exception as exc:
         logger.error("Failed to initialize retriever: %s", exc, exc_info=True)
 
-    retrieval: RetrievalResult | None = None
-    docs_text = "Retriever unavailable - please run the ingestion script."
     metadata_sources: list[Dict[str, Any]] = []
+    docs_text: str | None = None
     top_k = config.get("faiss", {}).get("similarity_search_k_docs", 3)
-
-    if not retriever:
-        try:
-            retriever, vectorstore = ensure_retriever(config, logger)
-        except FileNotFoundError as exc:
-            logger.warning("Vector store unavailable: %s", exc, exc_info=True)
-        except Exception as exc:
-            logger.error("Failed to initialize retriever: %s", exc, exc_info=True)
 
     if retriever:
         try:
@@ -53,24 +58,25 @@ async def run(
             docs_text = retriever.format_context_for_llm(retrieval)
         except Exception as exc:
             logger.error("Document retrieval failed: %s", exc, exc_info=True)
-            docs_text = "Document retrieval failed. Proceeding without context."
 
-    rag_system_prompt = f"{system_prompt}\n\nRelevant Documents:\n{docs_text}"
+    if docs_text:
+        rag_system_prompt = f"{system_prompt}\n\nRelevant Documents:\n{docs_text}"
+    else:
+        rag_system_prompt = system_prompt
 
-    messages = [
-        {"role": "system", "content": rag_system_prompt},
-        {"role": "user", "content": message},
-    ]
+    messages = [{"role": "system", "content": rag_system_prompt}]
+    messages.extend(normalize_chat_history(history_messages))
+    messages.append({"role": "user", "content": message})
 
     try:
         llm_response = await llm.generate(messages, temperature=0.3, max_tokens=800)
         answer = llm_response.get("content", "").strip()
     except Exception as exc:
         logger.error("LLM call failed: %s", exc, exc_info=True)
-        return {
-            "content": f"Compliance Feature placeholder - Received message: {message}",
-            "note": "LLM invocation failed",
-        }
+        return _build_fallback_response(
+            reason="AI provider request failed.",
+            note="LLM invocation failed",
+        )
 
     return {
         "content": answer or "No answer generated.",

@@ -20,9 +20,9 @@ import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined'
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined'
 import CardGiftcardOutlinedIcon from '@mui/icons-material/CardGiftcardOutlined'
 import BeachAccessOutlinedIcon from '@mui/icons-material/BeachAccessOutlined'
-import type { IssueCategory, IssueItem } from '../types/complianceCheck.type'
+import type { IssueCategory } from '../types/complianceCheck.type'
 import { formatMoney } from '../utils/formatters'
-import { IssueRow, type GuidanceContent } from './IssueRow'
+import { IssueRow } from './IssueRow'
 import { CategoryAccordion } from './CategoryAccordion'
 
 // Roster icon mapping: backend mock data uses Material icon string keys.
@@ -139,13 +139,11 @@ const CategoriesStack = styled(Stack)(({ theme }) => ({
 interface IssuesByCategoryProps {
   categories: IssueCategory[]
   onExport?: () => void
-  guidanceForIssue?: (issue: IssueItem) => GuidanceContent | undefined
   resultType?: 'payroll' | 'roster'
 }
 
 export const IssuesByCategory: React.FC<IssuesByCategoryProps> = ({
   categories,
-  guidanceForIssue,
   resultType = 'roster',
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<
@@ -232,7 +230,6 @@ export const IssuesByCategory: React.FC<IssuesByCategoryProps> = ({
                       issue={issue}
                       isSelected={selectedIssueIds.includes(issue.id)}
                       onToggleSelection={() => toggleIssueSelection(issue.id)}
-                      guidance={guidanceForIssue?.(issue)}
                     />
                   ))
                 ) : (

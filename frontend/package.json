@@ -11,6 +11,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test:e2e": "playwright test",
+    "test:e2e:fairbot": "playwright test e2e/fairbot-chat.spec.ts",
     "prepare": "cd .. && husky"
   },
   "lint-staged": {
