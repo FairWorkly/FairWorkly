@@ -640,7 +640,7 @@ features:
 |---|---|---|
 | `OPENAI_API_KEY` | — | Required for OpenAI provider |
 | `ANTHROPIC_API_KEY` | — | Required for Anthropic provider |
-| `AGENT_SERVICE_KEY` | `change-me-dev-agent-key` | Shared secret with backend |
+| `AGENT_SERVICE_KEY` | — | **Required.** Shared secret with backend |
 | `ALLOWED_ORIGINS` | `http://localhost:5680` | CORS origins (comma-separated) |
 | `MAX_REQUEST_BYTES` | `52428800` (50 MB) | Max request body size |
 | `RATE_LIMIT_REQUESTS` | `60` | Requests per window |

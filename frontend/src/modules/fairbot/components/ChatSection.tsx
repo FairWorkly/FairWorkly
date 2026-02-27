@@ -46,7 +46,7 @@ export const ChatSection = () => {
     if (!prompt.trim()) {
       return
     }
-    console.info('[FairBot][action_follow_up_clicked]', { prompt })
+    console.info('[FairBot][action_follow_up_clicked]')
     void conversation.sendMessage(prompt)
   }
 

@@ -182,7 +182,7 @@ export const MessageBubble = ({
                 })}
               </SourceList>
             )}
-            {actionPlan && actionPlan.actions.length > 0 && (
+            {actionPlan && Array.isArray(actionPlan.actions) && actionPlan.actions.length > 0 && (
               <ActionPlanSection>
                 <Typography variant="caption" color="text.secondary">
                   {actionPlan.title}
@@ -213,7 +213,7 @@ export const MessageBubble = ({
                     )}
                   </ActionCard>
                 ))}
-                {actionPlan.quickFollowUps.length > 0 && onQuickFollowUp && (
+                {Array.isArray(actionPlan.quickFollowUps) && actionPlan.quickFollowUps.length > 0 && onQuickFollowUp && (
                   <FollowUpRow>
                     {actionPlan.quickFollowUps.slice(0, 3).map((item) => (
                       <FollowUpButton

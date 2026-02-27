@@ -23,12 +23,16 @@ def normalize_chat_history(
             continue
 
         role_value = item.get("role", item.get("Role", ""))
-        role = str(role_value).strip().lower()
+        if not isinstance(role_value, str):
+            continue
+        role = role_value.strip().lower()
         if role not in ALLOWED_ROLES:
             continue
 
         content_value = item.get("content", item.get("Content", ""))
-        content = str(content_value).strip()
+        if not isinstance(content_value, str):
+            continue
+        content = content_value.strip()
         if not content:
             continue
 

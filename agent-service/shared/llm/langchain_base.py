@@ -25,6 +25,8 @@ class LangChainProviderBase(LLMProviderBase):
         for message in messages:
             role = message.get("role", "user")
             content = message.get("content", "")
+            if not isinstance(role, str) or not isinstance(content, str):
+                continue
             if role == "system":
                 lc_messages.append(SystemMessage(content=content))
             elif role == "assistant":

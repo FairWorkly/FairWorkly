@@ -33,7 +33,12 @@ def _parse_allowed_origins(raw: str) -> list[str]:
 ALLOWED_ORIGINS = _parse_allowed_origins(
     os.getenv("ALLOWED_ORIGINS", "http://localhost:5680")
 )
-AGENT_SERVICE_KEY = os.getenv("AGENT_SERVICE_KEY", "change-me-dev-agent-key")
+AGENT_SERVICE_KEY = os.getenv("AGENT_SERVICE_KEY", "")
+if not AGENT_SERVICE_KEY:
+    raise RuntimeError(
+        "AGENT_SERVICE_KEY env var is required. "
+        "Set it in .env or pass it via docker-compose."
+    )
 MAX_REQUEST_BYTES = int(os.getenv("MAX_REQUEST_BYTES", "52428800"))
 RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "60"))
 RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
@@ -63,9 +68,10 @@ def verify_service_key(
 
 
 def _resolve_client_id(request: Request) -> str:
-    forwarded_for = request.headers.get("x-forwarded-for", "")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
+    # Use direct connection IP only.  X-Forwarded-For is trivially spoofable
+    # and this service sits behind the .NET backend (authenticated via service
+    # key), so the caller IP is the backend instance — which is the correct
+    # granularity for service-to-service rate limiting.
     return request.client.host if request.client else "unknown"
 
 
@@ -87,6 +93,13 @@ async def _enforce_rate_limit(client_id: str) -> None:
             for k in stale:
                 del _RATE_LIMIT_BUCKETS[k]
 
+        # If still over cap after eviction, reject unknown clients
+        if client_id not in _RATE_LIMIT_BUCKETS and len(_RATE_LIMIT_BUCKETS) >= _MAX_TRACKED_CLIENTS:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many tracked clients, please retry later",
+            )
+
         bucket = _RATE_LIMIT_BUCKETS.setdefault(client_id, deque())
         while bucket and bucket[0] <= lower_bound:
             bucket.popleft()
@@ -104,22 +117,29 @@ async def _enforce_rate_limit(client_id: str) -> None:
 async def enforce_request_size_limit(request: Request, call_next):
     if request.method == "POST" and request.url.path == "/api/agent/chat":
         content_length = request.headers.get("content-length")
-        if content_length:
-            try:
-                request_size = int(content_length)
-            except ValueError:
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"detail": "Invalid Content-Length header"},
-                )
+        if not content_length:
+            # Reject requests without Content-Length (e.g. chunked transfers)
+            # to prevent unbounded body reads.
+            return JSONResponse(
+                status_code=status.HTTP_411_LENGTH_REQUIRED,
+                content={"detail": "Content-Length header is required"},
+            )
 
-            if request_size > MAX_REQUEST_BYTES:
-                return JSONResponse(
-                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    content={
-                        "detail": f"Request body too large (max {MAX_REQUEST_BYTES} bytes)"
-                    },
-                )
+        try:
+            request_size = int(content_length)
+        except ValueError:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "Invalid Content-Length header"},
+            )
+
+        if request_size > MAX_REQUEST_BYTES:
+            return JSONResponse(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                content={
+                    "detail": f"Request body too large (max {MAX_REQUEST_BYTES} bytes)"
+                },
+            )
 
     return await call_next(request)
 
@@ -172,9 +192,9 @@ async def chat(
             parsed_context_payload = json.loads(context_payload)
         except json.JSONDecodeError:
             _LOGGER.warning(
-                "Agent chat parse failed: request_id=%s, context_payload_prefix=%s",
+                "Agent chat context_payload parse failed: request_id=%s, length=%d",
                 request_id,
-                context_payload[:200],
+                len(context_payload),
             )
             parsed_context_payload = None
 
@@ -184,9 +204,9 @@ async def chat(
             parsed_history_payload = json.loads(history_payload)
         except json.JSONDecodeError:
             _LOGGER.warning(
-                "Agent chat parse failed: request_id=%s, history_payload_prefix=%s",
+                "Agent chat history_payload parse failed: request_id=%s, length=%d",
                 request_id,
-                history_payload[:200],
+                len(history_payload),
             )
             parsed_history_payload = None
 

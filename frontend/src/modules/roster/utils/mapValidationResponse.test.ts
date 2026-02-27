@@ -75,10 +75,10 @@ describe('mapValidationToComplianceResults', () => {
     const result = mapValidationToComplianceResults(response)
 
     expect(result.summary).toBeDefined()
-    // totalIssues is recalculated from filtered issues.
-    // criticalIssuesCount should stay aligned with backend summary.
+    // Both counts are derived from the filtered compliance issues only,
+    // so they stay consistent (DataQuality issues excluded from both).
     expect(result.summary.totalIssues).toBe(2)
-    expect(result.summary.criticalIssuesCount).toBe(3)
+    expect(result.summary.criticalIssuesCount).toBe(2)
     expect(result.summary.employeesAffected).toBe(2)
     // 10 total - 2 affected = 8 compliant
     expect(result.summary.employeesCompliant).toBe(8)

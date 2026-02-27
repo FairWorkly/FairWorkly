@@ -27,6 +27,6 @@ class AnthropicProvider(LangChainProviderBase):
 
         self.chat = ChatAnthropic(
             model=self.model,
-            temperature=temperature or 0.3,
+            temperature=temperature if temperature is not None else 0.3,
             anthropic_api_key=self.api_key,
         )

@@ -192,6 +192,8 @@ export const useFairBotChat = (): UseFairBotChatResult => {
   // Each entry/task starts a fresh conversation to avoid stale context bleed.
   // Also resets on account change (logout/switch user).
   useEffect(() => {
+    runtimeRef.current.abortController?.abort()
+    runtimeRef.current.abortController = null
     setMessages(createInitialMessages())
     setError(null)
     runtimeRef.current.conversationId = createConversationId()

@@ -29,7 +29,7 @@ class OpenAIProvider(LangChainProviderBase):
 
         self.chat = ChatOpenAI(
             model=self.model,
-            temperature=temperature or float(os.getenv("OPENAI_TEMPERATURE", 0.3)),
+            temperature=temperature if temperature is not None else float(os.getenv("OPENAI_TEMPERATURE", "0.3")),
             openai_api_key=self.api_key,
             openai_api_base=self.api_base,
         )

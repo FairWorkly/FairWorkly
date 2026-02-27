@@ -26,10 +26,14 @@ public class PythonAiClient : IAiClient
 
         // Service-to-service authentication header for Agent Service.
         var serviceKey = configuration["AiSettings:ServiceKey"];
-        if (!string.IsNullOrWhiteSpace(serviceKey))
+        if (string.IsNullOrWhiteSpace(serviceKey))
         {
-            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("X-Service-Key", serviceKey);
+            throw new InvalidOperationException(
+                "AiSettings:ServiceKey is required. "
+                    + "Set it in appsettings.json or via environment variable AiSettings__ServiceKey."
+            );
         }
+        _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("X-Service-Key", serviceKey);
     }
 
     public async Task<TResponse> PostAsync<TRequest, TResponse>(
