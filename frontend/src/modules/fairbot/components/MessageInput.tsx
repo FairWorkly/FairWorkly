@@ -62,7 +62,7 @@ export const MessageInput = ({
         onChange={(event) => setValue(event.target.value)}
         size="small"
         disabled={disabled}
-        aria-label="Message"
+        slotProps={{ htmlInput: { 'aria-label': 'Message' } }}
       />
       <SendButton
         type="submit"

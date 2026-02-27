@@ -14,6 +14,25 @@ async function mockAuthenticatedAdmin(page: Page) {
       }),
     })
   })
+
+  await page.route('**/api/auth/me', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        code: 200,
+        msg: 'OK',
+        data: {
+          id: 'e2e-user-id',
+          email: 'admin@fairworkly.test',
+          firstName: 'E2E',
+          lastName: 'Admin',
+          role: 'Admin',
+          organizationId: 'e2e-org-id',
+        },
+      }),
+    })
+  })
 }
 
 const asFairBotEnvelope = (message: string, note?: string | null) => ({
@@ -36,7 +55,7 @@ const asFairBotEnvelope = (message: string, note?: string | null) => ({
 })
 
 function messageInput(page: Page) {
-  return page.getByLabel('Message')
+  return page.getByRole('textbox', { name: 'Message' })
 }
 
 test.describe('FairBot chat critical flows', () => {
