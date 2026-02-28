@@ -6,6 +6,7 @@ import asyncio
 from typing import Any, Dict, List
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.runnables import ConfigurableField
 
 from .provider_base import LLMProviderBase
 
@@ -46,12 +47,24 @@ class LangChainProviderBase(LLMProviderBase):
         lc_messages = self._to_langchain_messages(messages)
         if not lc_messages:
             raise ValueError("No valid messages to send to LLM provider")
-        # Use bind() for per-call overrides; passing kwargs directly to
-        # ainvoke() does not override init-time model parameters.
-        bound = self.chat.bind(temperature=temperature, max_tokens=max_tokens)
+        # temperature and max_tokens are init-only on LangChain chat
+        # models; .bind() only forwards call options (tools, stop, etc.).
+        # configurable_fields() lets us override init-time params per call.
+        configurable = self.chat.configurable_fields(
+            temperature=ConfigurableField(id="temperature"),
+            max_tokens=ConfigurableField(id="max_tokens"),
+        )
         try:
             response = await asyncio.wait_for(
-                bound.ainvoke(lc_messages),
+                configurable.ainvoke(
+                    lc_messages,
+                    config={
+                        "configurable": {
+                            "temperature": temperature,
+                            "max_tokens": max_tokens,
+                        }
+                    },
+                ),
                 timeout=self.timeout_seconds,
             )
         except asyncio.TimeoutError as exc:
