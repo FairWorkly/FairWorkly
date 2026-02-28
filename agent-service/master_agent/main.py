@@ -127,6 +127,8 @@ async def enforce_request_size_limit(request: Request, call_next):
 
         try:
             request_size = int(content_length)
+            if request_size < 0:
+                raise ValueError("negative")
         except ValueError:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,

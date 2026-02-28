@@ -51,7 +51,11 @@ read_env_value() {
   if [[ -z "${line:-}" ]]; then
     echo ""
   else
-    echo "${line#*=}"
+    local val="${line#*=}"
+    # Strip surrounding quotes (single or double) that .env files may use.
+    val="${val#\"}" ; val="${val%\"}"
+    val="${val#\'}" ; val="${val%\'}"
+    echo "$val"
   fi
 }
 

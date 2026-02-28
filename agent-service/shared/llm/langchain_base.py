@@ -23,6 +23,8 @@ class LangChainProviderBase(LLMProviderBase):
     def _to_langchain_messages(messages: List[Dict[str, str]]) -> list:
         lc_messages = []
         for message in messages:
+            if not isinstance(message, dict):
+                continue
             role = message.get("role", "user")
             content = message.get("content", "")
             if not isinstance(role, str) or not isinstance(content, str):
@@ -42,6 +44,8 @@ class LangChainProviderBase(LLMProviderBase):
         max_tokens: int = 4096,
     ) -> Dict[str, Any]:
         lc_messages = self._to_langchain_messages(messages)
+        if not lc_messages:
+            raise ValueError("No valid messages to send to LLM provider")
         try:
             response = await asyncio.wait_for(
                 self.chat.ainvoke(
