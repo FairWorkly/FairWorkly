@@ -55,8 +55,10 @@ class TestAnthropicProvider:
 
         mock_response = MagicMock()
         mock_response.content = "This is Claude's response."
+        bound_mock = MagicMock()
+        bound_mock.ainvoke = AsyncMock(return_value=mock_response)
         mock_chat = MagicMock()
-        mock_chat.ainvoke = AsyncMock(return_value=mock_response)
+        mock_chat.bind.return_value = bound_mock
         mock_chat_cls.return_value = mock_chat
 
         provider = AnthropicProvider()
@@ -72,7 +74,8 @@ class TestAnthropicProvider:
         assert result["content"] == "This is Claude's response."
         assert result["model"] == "claude-sonnet-4-20250514"
         assert "usage" in result
-        mock_chat.ainvoke.assert_called_once()
+        mock_chat.bind.assert_called_once()
+        bound_mock.ainvoke.assert_called_once()
 
     @patch("shared.llm.anthropic_provider.ChatAnthropic")
     def test_count_tokens(self, mock_chat_cls, monkeypatch):

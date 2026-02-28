@@ -46,11 +46,12 @@ class LangChainProviderBase(LLMProviderBase):
         lc_messages = self._to_langchain_messages(messages)
         if not lc_messages:
             raise ValueError("No valid messages to send to LLM provider")
+        # Use bind() for per-call overrides; passing kwargs directly to
+        # ainvoke() does not override init-time model parameters.
+        bound = self.chat.bind(temperature=temperature, max_tokens=max_tokens)
         try:
             response = await asyncio.wait_for(
-                self.chat.ainvoke(
-                    lc_messages, temperature=temperature, max_tokens=max_tokens
-                ),
+                bound.ainvoke(lc_messages),
                 timeout=self.timeout_seconds,
             )
         except asyncio.TimeoutError as exc:
