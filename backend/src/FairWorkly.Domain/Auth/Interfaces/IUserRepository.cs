@@ -13,8 +13,12 @@ public interface IUserRepository
     // Retrieve a user by the stored refresh token hash
     Task<User?> GetByRefreshTokenHashAsync(string refreshTokenHash, CancellationToken ct = default);
 
-    // Checks if the email is already taken by another user.
-    Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct = default);
+    // Checks if the email is already taken within an organization (matches composite unique index).
+    Task<bool> IsEmailUniqueAsync(
+        Guid organizationId,
+        string email,
+        CancellationToken ct = default
+    );
 
     // Registers a new user in the context.
     void Add(User user);

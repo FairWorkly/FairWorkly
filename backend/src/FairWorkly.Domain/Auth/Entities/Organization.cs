@@ -115,12 +115,6 @@ public class Organization : AuditableEntity
         };
 
     /// <summary>
-    /// Current number of active employees for this organization.
-    /// Stored in DB for quick limits/analytics.
-    /// </summary>
-    public int CurrentEmployeeCount { get; set; } = 0;
-
-    /// <summary>
     /// Users in this organization
     /// </summary>
     public virtual ICollection<User> Users { get; set; } = new List<User>();

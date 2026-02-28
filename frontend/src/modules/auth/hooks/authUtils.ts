@@ -11,6 +11,10 @@ export function normalizeAuthUser(user: UserDto) {
   const validRole: 'admin' | 'manager' | undefined =
     role === 'admin' || role === 'manager' ? role : undefined
 
+  if (!validRole) {
+    throw new Error('Your account has no valid role assigned. Please contact support.')
+  }
+
   return {
     normalizedUser: {
       id: user.id,
@@ -18,6 +22,6 @@ export function normalizeAuthUser(user: UserDto) {
       name,
       role: validRole,
     },
-    roleKey: role ?? '',
+    roleKey: validRole,
   }
 }

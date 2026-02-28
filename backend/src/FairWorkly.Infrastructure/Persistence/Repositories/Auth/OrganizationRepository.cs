@@ -23,7 +23,7 @@ public class OrganizationRepository : IOrganizationRepository
     public async Task<bool> IsAbnUniqueAsync(string abn, CancellationToken ct = default)
     {
         var normalized = abn.Trim();
-        return !await _context.Organizations.AnyAsync(o => o.ABN == normalized, ct);
+        return !await _context.Organizations.AnyAsync(o => o.ABN == normalized && !o.IsDeleted, ct);
     }
 
     // Adds a new organisation to the context.

@@ -30,6 +30,8 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .WithMessage("Address line 1 is required.")
             .MaximumLength(200);
 
+        RuleFor(x => x.AddressLine2).MaximumLength(200);
+
         RuleFor(x => x.Suburb).NotEmpty().WithMessage("Suburb is required.").MaximumLength(100);
 
         RuleFor(x => x.State)

@@ -45,10 +45,8 @@ public class RegisterCommandHandler(
             ]);
         }
 
-        if (!await userRepository.IsEmailUniqueAsync(email, cancellationToken))
-        {
-            return Result<LoginResponse>.Of409("Email already exists.");
-        }
+        // Email uniqueness is per-org (composite index). Since we're creating a new org,
+        // there can't be an email conflict within it — no check needed here.
 
         if (!await organizationRepository.IsAbnUniqueAsync(abn, cancellationToken))
         {
@@ -71,7 +69,6 @@ public class RegisterCommandHandler(
             SubscriptionTier = SubscriptionTier.Tier1,
             SubscriptionStartDate = DateTime.UtcNow,
             IsSubscriptionActive = true,
-            CurrentEmployeeCount = 0,
         };
 
         var user = new User
@@ -99,16 +96,7 @@ public class RegisterCommandHandler(
         organizationRepository.Add(organization);
         userRepository.Add(user);
 
-        try
-        {
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-        }
-        catch (Exception)
-        {
-            // Race condition: another request inserted the same email/ABN
-            // between our uniqueness checks and SaveChanges.
-            return Result<LoginResponse>.Of409("An account with this email or ABN already exists.");
-        }
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<LoginResponse>.Of201(
             "Registration successful",

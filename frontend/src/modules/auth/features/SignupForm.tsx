@@ -106,7 +106,7 @@ export function SignupForm({
     confirmPassword.trim() !== '' &&
     passwordsMatch
   const isSubmitDisabled = isSubmitting || isGoogleLoading || !canSubmit
-  const isGoogleDisabled = isGoogleLoading
+  const isGoogleDisabled = isGoogleLoading || isSubmitting
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
