@@ -198,8 +198,8 @@ else
   fail "OPENAI_API_KEY is missing"
 fi
 
-if [[ "$AGENT_SERVICE_KEY_EFFECTIVE" == "change-me-dev-agent-key" || "$BACKEND_AI_KEY" == "change-me-dev-agent-key" ]]; then
-  warn "using default development service key; replace with a unique local value"
+if [[ "$AGENT_SERVICE_KEY_EFFECTIVE" == change-me-* || "$BACKEND_AI_KEY" == change-me-* ]]; then
+  warn "using placeholder service key; replace with a unique local value"
 fi
 
 if [[ -n "$AGENT_SERVICE_KEY_FILE" ]]; then

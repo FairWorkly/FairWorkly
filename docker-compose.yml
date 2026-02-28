@@ -85,7 +85,7 @@ services:
       JwtSettings__Secret: ${JWT_SECRET:-change-me-dev-secret-at-least-32-chars}
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=FairWorklyDb;Username=postgres;Password=postgres
       AiSettings__BaseUrl: http://agent-service:8000
-      AiSettings__ServiceKey: ${AGENT_SERVICE_KEY:-change-me-dev-agent-key}
+      AiSettings__ServiceKey: ${AGENT_SERVICE_KEY:?Set AGENT_SERVICE_KEY in .env}
       AiSettings__TimeoutSeconds: ${FAIRBOT_TIMEOUT_SECONDS:-120}
     ports:
       - "5680:5680"

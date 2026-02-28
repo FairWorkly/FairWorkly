@@ -37,7 +37,7 @@ AGENT_SERVICE_KEY = os.getenv("AGENT_SERVICE_KEY", "")
 if not AGENT_SERVICE_KEY:
     raise RuntimeError(
         "AGENT_SERVICE_KEY env var is required. "
-        "Set it in .env or pass it via docker-compose."
+        "Export it in your shell or set it in docker-compose."
     )
 MAX_REQUEST_BYTES = int(os.getenv("MAX_REQUEST_BYTES", "52428800"))
 RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "60"))
