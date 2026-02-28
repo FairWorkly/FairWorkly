@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { LoginForm, SignupForm, ForgotPasswordModal } from '../features'
 import type { SignupFormData } from '../types'
-import { useLogin } from '../hooks'
+import { useLogin, useRegister } from '../hooks'
 import {
   AuthErrorAlert,
   AuthHeader,
@@ -16,15 +16,23 @@ type TabType = 'login' | 'signup'
 
 export function LoginPage() {
   const [searchParams] = useSearchParams()
-  const { login, isSubmitting, error } = useLogin()
+  const {
+    login,
+    isSubmitting: isLoginSubmitting,
+    error: loginError,
+  } = useLogin()
+  const {
+    register,
+    isSubmitting: isRegisterSubmitting,
+    error: registerError,
+  } = useRegister()
   const initialTab = searchParams.get('signup') === 'true' ? 'signup' : 'login'
   const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
   const isGoogleLoading = false
 
   const handleSignup = (values: SignupFormData) => {
-    // TODO: Implement actual signup logic
-    console.log('Signup not yet implemented:', values)
+    void register(values)
   }
 
   const handleGoogleLogin = () => {
@@ -60,21 +68,25 @@ export function LoginPage() {
         </AuthTabButton>
       </AuthTabList>
 
-      {error && <AuthErrorAlert severity="error">{error}</AuthErrorAlert>}
+      {(activeTab === 'login' ? loginError : registerError) && (
+        <AuthErrorAlert severity="error">
+          {activeTab === 'login' ? loginError : registerError}
+        </AuthErrorAlert>
+      )}
 
       {activeTab === 'login' ? (
         <LoginForm
           onSubmit={login}
           onGoogleLogin={handleGoogleLogin}
           onForgotPassword={() => setForgotModalOpen(true)}
-          isSubmitting={isSubmitting}
+          isSubmitting={isLoginSubmitting}
           isGoogleLoading={isGoogleLoading}
         />
       ) : (
         <SignupForm
           onSubmit={handleSignup}
           onGoogleLogin={handleGoogleLogin}
-          isSubmitting={isSubmitting}
+          isSubmitting={isRegisterSubmitting}
           isGoogleLoading={isGoogleLoading}
         />
       )}

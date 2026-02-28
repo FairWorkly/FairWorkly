@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { alpha } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
@@ -118,12 +119,14 @@ const features = [
 export function AuthBranding() {
   return (
     <>
-      <LogoSection>
-        <LogoIcon>
-          <LogoIconContent />
-        </LogoIcon>
-        <LogoText>FairWorkly</LogoText>
-      </LogoSection>
+      <Link to="/" style={{ textDecoration: 'none' }}>
+        <LogoSection>
+          <LogoIcon>
+            <LogoIconContent />
+          </LogoIcon>
+          <LogoText>FairWorkly</LogoText>
+        </LogoSection>
+      </Link>
 
       <BrandingContent>
         <BrandingTitle>

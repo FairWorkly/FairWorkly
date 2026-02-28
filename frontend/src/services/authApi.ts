@@ -5,6 +5,22 @@ export interface LoginRequest {
   password: string
 }
 
+export interface RegisterRequest {
+  companyName: string
+  abn: string
+  industryType: string
+  addressLine1: string
+  addressLine2?: string
+  suburb: string
+  state: string
+  postcode: string
+  contactEmail: string
+  email: string
+  password: string
+  firstName: string
+  lastName: string
+}
+
 export interface UserDto {
   id: string
   email: string
@@ -29,6 +45,14 @@ export const authApi = {
       '/auth/login',
       payload
     )
+    return response.data
+  },
+
+  /**
+   * Register a new organization + first admin user
+   */
+  async register(payload: RegisterRequest): Promise<LoginResponse> {
+    const response = await httpClient.post<LoginResponse>('/auth/register', payload)
     return response.data
   },
 
