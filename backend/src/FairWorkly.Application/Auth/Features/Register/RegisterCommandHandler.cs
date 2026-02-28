@@ -37,8 +37,9 @@ public class RegisterCommandHandler(
         var postcode = request.Postcode.Trim();
         var firstName = request.FirstName.Trim();
         var lastName = request.LastName.Trim();
+        var stateInput = request.State.Trim();
 
-        if (!Enum.TryParse<AustralianState>(request.State, true, out var state))
+        if (!Enum.TryParse<AustralianState>(stateInput, true, out var state))
         {
             return Result<LoginResponse>.Of400([
                 new Validation400Error { Field = "state", Message = "Invalid Australian state." },
