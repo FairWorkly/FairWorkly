@@ -1,90 +1,66 @@
-import { useState, useCallback, useRef } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import { authApi } from '@/services/authApi'
-import { setAuthData, setStatus } from '@/slices/auth'
+import { normalizeApiError } from '@/shared/types/api.types'
+import { useApiMutation } from '@/shared/hooks/useApiMutation'
+import { setAuthData, setStatus, type AuthUser } from '@/slices/auth'
 import { useAppDispatch } from '@/store/hooks'
 import type { SignupFormData } from '../types'
 import { DEFAULT_ROUTES, normalizeAuthUser } from './authUtils'
 
-type UseRegisterResult = {
-  register: (values: SignupFormData) => Promise<void>
-  isSubmitting: boolean
-  error: string | null
+type AuthResult = {
+  normalizedUser: AuthUser
+  roleKey: string
+  accessToken: string
 }
 
-type ApiValidationError = {
-  field?: string
-  message?: string
-}
-
-type ApiErrorEnvelope = {
-  msg?: string
-  data?: {
-    errors?: ApiValidationError[]
-  }
-}
-
-export function useRegister(): UseRegisterResult {
+export function useRegister() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const isSubmittingRef = useRef(false)
-  const [error, setError] = useState<string | null>(null)
 
-  const register = useCallback(
-    async (values: SignupFormData) => {
-      if (isSubmittingRef.current) return
-      isSubmittingRef.current = true
-      setIsSubmitting(true)
-      setError(null)
-      dispatch(setStatus('authenticating'))
-
-      try {
-        const response = await authApi.register({
-          companyName: values.companyName,
-          abn: values.abn,
-          industryType: values.industryType,
-          addressLine1: values.addressLine1,
-          addressLine2: values.addressLine2,
-          suburb: values.suburb,
-          state: values.state,
-          postcode: values.postcode,
-          contactEmail: values.contactEmail,
-          email: values.email,
-          password: values.password,
-          firstName: values.firstName,
-          lastName: values.lastName,
-        })
-
-        const { normalizedUser, roleKey } = normalizeAuthUser(response.user)
-
-        dispatch(setAuthData({
-          user: normalizedUser,
-          accessToken: response.accessToken,
-        }))
-
-        navigate(DEFAULT_ROUTES[roleKey] ?? '/403', { replace: true })
-      } catch (err) {
-        let message = 'Registration failed. Please try again.'
-
-        if (axios.isAxiosError<ApiErrorEnvelope>(err)) {
-          const validationMessage = err.response?.data?.data?.errors?.[0]?.message
-          const backendMessage = err.response?.data?.msg
-          message = validationMessage ?? backendMessage ?? err.message ?? message
-        } else if (err instanceof Error) {
-          message = err.message
-        }
-
-        setError(message)
-        dispatch(setStatus('unauthenticated'))
-      } finally {
-        isSubmittingRef.current = false
-        setIsSubmitting(false)
-      }
+  const { mutate, isPending, error } = useApiMutation<AuthResult, SignupFormData>({
+    mutationFn: async (values) => {
+      const response = await authApi.register({
+        companyName: values.companyName,
+        abn: values.abn,
+        industryType: values.industryType,
+        addressLine1: values.addressLine1,
+        addressLine2: values.addressLine2,
+        suburb: values.suburb,
+        state: values.state,
+        postcode: values.postcode,
+        contactEmail: values.contactEmail,
+        email: values.email,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName,
+      })
+      // Validate role inside mutationFn so throw → proper error state
+      const { normalizedUser, roleKey } = normalizeAuthUser(response.user)
+      return { normalizedUser, roleKey, accessToken: response.accessToken }
     },
-    [dispatch, navigate],
-  )
+    onMutate: () => {
+      dispatch(setStatus('authenticating'))
+    },
+    onSuccess: ({ normalizedUser, roleKey, accessToken }) => {
+      dispatch(setAuthData({ user: normalizedUser, accessToken }))
+      navigate(DEFAULT_ROUTES[roleKey] ?? '/403', { replace: true })
+    },
+    onError: () => {
+      dispatch(setStatus('unauthenticated'))
+    },
+  })
 
-  return { register, isSubmitting, error }
+  // Normalize error: runtime error is AxiosError, normalizeApiError extracts
+  // backend envelope msg and validation details
+  const errorMessage = useMemo(() => {
+    if (!error) return null
+    const normalized = normalizeApiError(error)
+    const details = normalized.details as
+      | { errors?: { message?: string }[] }
+      | undefined
+    return details?.errors?.[0]?.message ?? normalized.message
+  }, [error])
+
+  return { register: mutate, isSubmitting: isPending, error: errorMessage }
 }
