@@ -329,7 +329,7 @@ export function SignupForm({
 
       <FormActions>
         {step === 1 ? (
-          <SubmitButton type="button" onClick={handleNextStep}>
+          <SubmitButton type="button" onClick={handleNextStep} disabled={!canProceedToUserStep}>
             Next
             <ArrowForwardIcon fontSize="small" />
           </SubmitButton>
