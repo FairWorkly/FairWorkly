@@ -14,6 +14,7 @@ import {
   StrengthBar,
   StrengthFill,
   StrengthText,
+  StepIndicator,
   FormActions,
   SubmitButton,
   FormLink,
@@ -154,7 +155,7 @@ export function SignupForm({
       <AuthFieldset aria-label="Account details">
         {step === 1 ? (
           <>
-            <StrengthText>Step 1 of 2 - Organization details</StrengthText>
+            <StepIndicator>Step 1 of 2 — Organization details</StepIndicator>
 
             <TextField
               label="Company Name"
@@ -257,7 +258,7 @@ export function SignupForm({
           </>
         ) : (
           <>
-            <StrengthText>Step 2 of 2 - User details</StrengthText>
+            <StepIndicator>Step 2 of 2 — User details</StepIndicator>
 
             <FormRow>
               <TextField

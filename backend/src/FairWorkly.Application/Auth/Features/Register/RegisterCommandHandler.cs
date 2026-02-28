@@ -38,7 +38,12 @@ public class RegisterCommandHandler(
         var firstName = request.FirstName.Trim();
         var lastName = request.LastName.Trim();
 
-        var state = Enum.Parse<AustralianState>(request.State, true);
+        if (!Enum.TryParse<AustralianState>(request.State, true, out var state))
+        {
+            return Result<LoginResponse>.Of400([
+                new Validation400Error { Field = "state", Message = "Invalid Australian state." },
+            ]);
+        }
 
         if (!await userRepository.IsEmailUniqueAsync(email, cancellationToken))
         {
@@ -94,7 +99,16 @@ public class RegisterCommandHandler(
         organizationRepository.Add(organization);
         userRepository.Add(user);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            // Race condition: another request inserted the same email/ABN
+            // between our uniqueness checks and SaveChanges.
+            return Result<LoginResponse>.Of409("An account with this email or ABN already exists.");
+        }
 
         return Result<LoginResponse>.Of201(
             "Registration successful",

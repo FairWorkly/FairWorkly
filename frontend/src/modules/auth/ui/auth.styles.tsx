@@ -152,6 +152,13 @@ export const StrengthText = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.disabled,
 }))
 
+export const StepIndicator = styled(Typography)(({ theme }) => ({
+  fontSize: theme.typography.body2.fontSize,
+  fontWeight: theme.typography.fontWeightMedium,
+  color: theme.palette.text.secondary,
+  textAlign: 'center',
+}))
+
 export const ModalContent = styled(Box)(({ theme }) => ({
   padding: theme.spacing(5),
   position: 'relative',

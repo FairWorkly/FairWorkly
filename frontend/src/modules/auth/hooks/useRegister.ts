@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { authApi } from '@/services/authApi'
@@ -29,11 +29,13 @@ export function useRegister(): UseRegisterResult {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isSubmittingRef = useRef(false)
   const [error, setError] = useState<string | null>(null)
 
   const register = useCallback(
     async (values: SignupFormData) => {
-      if (isSubmitting) return
+      if (isSubmittingRef.current) return
+      isSubmittingRef.current = true
       setIsSubmitting(true)
       setError(null)
       dispatch(setStatus('authenticating'))
@@ -77,10 +79,11 @@ export function useRegister(): UseRegisterResult {
         setError(message)
         dispatch(setStatus('unauthenticated'))
       } finally {
+        isSubmittingRef.current = false
         setIsSubmitting(false)
       }
     },
-    [dispatch, isSubmitting, navigate],
+    [dispatch, navigate],
   )
 
   return { register, isSubmitting, error }
