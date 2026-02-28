@@ -88,10 +88,6 @@ export function mapValidationToComplianceResults(
     0,
     response.totalEmployees - affectedEmployeeIds.size
   )
-  const criticalCount = complianceIssues.filter(
-    i => i.severity === 'Critical' || i.severity === 'Error'
-  ).length
-
   const metadata: ValidationMetadata = {
     award: 'Australian Workplace Award',
     payPeriod: 'Pending',
@@ -110,7 +106,7 @@ export function mapValidationToComplianceResults(
   const summary: ValidationSummary = {
     employeesCompliant: compliantEmployees,
     totalIssues: complianceIssues.length,
-    criticalIssuesCount: criticalCount,
+    criticalIssuesCount: complianceIssues.filter(i => i.severity === 'Error').length,
     totalUnderpayment: 'N/A',
     employeesAffected: affectedEmployeeIds.size,
   }

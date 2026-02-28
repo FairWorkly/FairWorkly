@@ -7,11 +7,12 @@
 #   Reset DB:    docker compose down -v && docker compose up
 #
 # Environment Setup:
-#   1. Copy agent-service/.env.example to agent-service/.env
-#   2. Fill in your API keys in agent-service/.env:
+#   1. Export secrets in your local shell:
 #      - OPENAI_API_KEY (for Roster Agent)
-#      - ANTHROPIC_API_KEY (for Payroll Agent)
-#   3. (Optional) Create .env in repo root for overrides
+#      - AGENT_SERVICE_KEY (shared backend<->agent secret)
+#      - AiSettings__ServiceKey (set equal to AGENT_SERVICE_KEY)
+#   2. (Optional) export ANTHROPIC_API_KEY for Anthropic flows
+#   3. (Optional) create .env in repo root for non-secret overrides
 #
 # Connection Info:
 #   - Local dev (outside Docker): DB port 5433, API port 5680
@@ -49,12 +50,18 @@ services:
       context: ./agent-service
       dockerfile: Dockerfile
     container_name: fairworkly-agent
-    env_file:
-      - ./agent-service/.env
     environment:
-      # env_file values can be overridden here or via shell
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      LLM_TIMEOUT_SECONDS: ${FAIRBOT_TIMEOUT_SECONDS:-120}
       HOST: 0.0.0.0
       PORT: 8000
+      AGENT_SERVICE_KEY: ${AGENT_SERVICE_KEY:?Set AGENT_SERVICE_KEY in .env}
+      ALLOWED_ORIGINS: ${AGENT_ALLOWED_ORIGINS:-http://localhost:5680}
+      MAX_REQUEST_BYTES: ${AGENT_MAX_REQUEST_BYTES:-52428800}
+      RATE_LIMIT_REQUESTS: ${AGENT_RATE_LIMIT_REQUESTS:-60}
+      RATE_LIMIT_WINDOW_SECONDS: ${AGENT_RATE_LIMIT_WINDOW_SECONDS:-60}
     ports:
       - "8000:8000"
     healthcheck:
@@ -78,7 +85,8 @@ services:
       JwtSettings__Secret: ${JWT_SECRET:-change-me-dev-secret-at-least-32-chars}
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=FairWorklyDb;Username=postgres;Password=postgres
       AiSettings__BaseUrl: http://agent-service:8000
-      AiSettings__UseMockAi: ${USE_MOCK_AI:-true}
+      AiSettings__ServiceKey: ${AGENT_SERVICE_KEY:?Set AGENT_SERVICE_KEY in .env}
+      AiSettings__TimeoutSeconds: ${FAIRBOT_TIMEOUT_SECONDS:-120}
     ports:
       - "5680:5680"
     depends_on:

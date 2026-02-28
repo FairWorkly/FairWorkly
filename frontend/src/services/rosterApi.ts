@@ -49,7 +49,7 @@ export async function uploadRoster(file: File): Promise<UploadRosterResponse> {
     const response = await httpClient.post<UploadRosterResponse>(
       '/roster/upload',
       formData,
-      { headers: { 'Content-Type': undefined } }
+      { headers: { 'Content-Type': undefined }, timeout: 120_000 }
     )
 
     return response.data
@@ -164,7 +164,9 @@ export async function validateRoster(
 ): Promise<ValidateRosterResponse> {
   try {
     const response = await httpClient.post<ValidateRosterResponse>(
-      `/roster/${rosterId}/validate`
+      `/roster/${rosterId}/validate`,
+      null,
+      { timeout: 120_000 }
     )
     return response.data
   } catch (err) {

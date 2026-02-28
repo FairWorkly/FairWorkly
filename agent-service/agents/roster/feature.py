@@ -3,8 +3,8 @@ import logging
 import tempfile
 from pathlib import Path
 
-from master_agent.feature_registry import FeatureBase
-from agents.roster.services.roster_import import RosterExcelParser, ParseMode
+from master_agent.feature_registry import FeatureBase, feature_response
+from .services.roster_import import RosterExcelParser, ParseMode
 
 
 class RosterFeature(FeatureBase):
@@ -21,11 +21,11 @@ class RosterFeature(FeatureBase):
 
         # Check if file has required attributes (duck typing instead of isinstance)
         if not file_upload or not hasattr(file_upload, 'read') or not hasattr(file_upload, 'filename'):
-            return {
-                "type": "error",
-                "message": "Roster file is required",
-                "file_name": file_name,
-            }
+            return feature_response(
+                type="roster",
+                message="Roster file is required",
+                note="FILE_REQUIRED",
+            )
 
         return await self._parse_roster_file(file_upload, file_name)
 
@@ -48,16 +48,26 @@ class RosterFeature(FeatureBase):
                 file_path=temp_file_path, mode=ParseMode.LENIENT
             )
 
-            # Convert ParseResponse to dict using model_dump()
-            return parse_response.model_dump()
+            # Return model_dump() at top level — the .NET backend deserializes
+            # this directly as ParseResponse (result, issues, summary).
+            # Standard fields (type, message, etc.) are merged alongside.
+            result = parse_response.model_dump()
+            result.update({
+                "type": "roster",
+                "message": f"Roster file '{file_name}' parsed successfully.",
+                "model": None,
+                "sources": [],
+                "note": None,
+            })
+            return result
 
         except Exception as exc:
             self.logger.error(f"Failed to parse roster file: {exc}", exc_info=True)
-            return {
-                "type": "error",
-                "message": f"Failed to parse roster file: {str(exc)}",
-                "file_name": file_name,
-            }
+            return feature_response(
+                type="roster",
+                message=f"Failed to parse roster file: {str(exc)}",
+                note="PARSE_ERROR",
+            )
         finally:
             # Clean up temporary file
             if temp_file_path and Path(temp_file_path).exists():

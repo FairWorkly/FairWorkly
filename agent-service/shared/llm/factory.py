@@ -5,7 +5,7 @@ from typing import Optional, List, Dict, Any
 
 from master_agent.config import load_config
 from .provider_base import LLMProviderBase
-from .langchain_provider import LangChainOpenAIProvider
+from .openai_provider import OpenAIProvider
 
 
 class LLMProviderFactory:
@@ -33,11 +33,13 @@ class LLMProviderFactory:
                 )
             api_base = model_params.get("openai_api_base") or os.getenv("OPENAI_API_BASE")
             temperature = model_params.get("temperature")
-            return LangChainOpenAIProvider(model=model, api_base=api_base, temperature=temperature)
+            return OpenAIProvider(model=model, api_base=api_base, temperature=temperature)
 
-        if provider_type == "local":
-            from .local_provider import LocalHuggingFaceProvider
-            return LocalHuggingFaceProvider(config)
+        if provider_type == "anthropic":
+            from .anthropic_provider import AnthropicProvider
+            model = model_params.get("anthropic_model_name") or os.getenv("ANTHROPIC_MODEL")
+            temperature = model_params.get("temperature")
+            return AnthropicProvider(model=model, temperature=temperature)
 
         raise ValueError(f"Unknown provider type: {provider_type}")
 

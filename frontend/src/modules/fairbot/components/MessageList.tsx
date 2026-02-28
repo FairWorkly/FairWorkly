@@ -7,6 +7,8 @@ import { TypingIndicator } from './TypingIndicator'
 interface MessageListProps {
   messages: FairBotMessage[]
   isTyping: boolean
+  onQuickFollowUp?: (prompt: string) => void
+  quickFollowUpDisabled?: boolean
 }
 
 const ListContainer = styled('section')(({ theme }) => ({
@@ -22,14 +24,35 @@ const MessageStack = styled('div')(({ theme }) => ({
   gap: theme.spacing(2),
 }))
 
-export const MessageList = ({ messages, isTyping }: MessageListProps) => {
+export const MessageList = ({
+  messages,
+  isTyping,
+  onQuickFollowUp,
+  quickFollowUpDisabled = false,
+}: MessageListProps) => {
   const hasMessages = messages.length > 0
+  const latestActionPlanIndex = [...messages]
+    .reverse()
+    .findIndex(message => {
+      const actions = message.metadata?.actionPlan?.actions
+      return Array.isArray(actions) && actions.length > 0
+    })
+  const latestActionPlanMessageIndex =
+    latestActionPlanIndex === -1
+      ? -1
+      : messages.length - 1 - latestActionPlanIndex
 
   return (
     <ListContainer aria-label={FAIRBOT_ARIA.MESSAGE_LIST}>
       <MessageStack>
-        {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
+        {messages.map((message, index) => (
+          <MessageBubble
+            key={message.id}
+            message={message}
+            onQuickFollowUp={onQuickFollowUp}
+            quickFollowUpDisabled={quickFollowUpDisabled}
+            showActionPlan={index === latestActionPlanMessageIndex}
+          />
         ))}
         <TypingIndicator isVisible={isTyping && hasMessages} />
       </MessageStack>

@@ -7,6 +7,42 @@ export interface AgentChatSource {
   content: string
 }
 
+export interface AgentActionShift {
+  employee?: string
+  dates?: string
+  description?: string
+}
+
+export interface AgentActionPlanItem {
+  id: string
+  priority: string
+  title: string
+  owner: string
+  check_type?: string
+  issue_count?: number
+  critical_count?: number
+  affected_shifts?: AgentActionShift[]
+  what_to_change: string
+  why: string
+  expected_outcome: string
+  risk_if_ignored: string
+  focus_examples?: string
+}
+
+export interface AgentActionFollowUp {
+  id: string
+  label: string
+  prompt: string
+  action_id?: string
+}
+
+export interface AgentActionPlanData {
+  title?: string
+  validation_id?: string
+  actions?: AgentActionPlanItem[]
+  quick_follow_ups?: AgentActionFollowUp[]
+}
+
 export interface AgentChatResult {
   type: string
   message: string
@@ -14,6 +50,14 @@ export interface AgentChatResult {
   model?: string
   sources?: AgentChatSource[]
   note?: string | null
+  data?: {
+    action_plan?: AgentActionPlanData | null
+  } | null
+}
+
+export interface AgentChatHistoryItem {
+  role: 'user' | 'assistant'
+  content: string
 }
 
 export interface AgentChatResponse {
@@ -33,6 +77,8 @@ export interface SendChatMessageOptions {
     | 'payroll_explain'
     | 'compliance'
   contextPayload?: unknown
+  historyPayload?: AgentChatHistoryItem[]
+  conversationId?: string
 }
 
 const parseFairBotTimeoutMs = (): number => {
@@ -81,6 +127,12 @@ export async function sendChatMessage(
   }
   if (options?.contextPayload) {
     formData.append('contextPayload', JSON.stringify(options.contextPayload))
+  }
+  if (options?.historyPayload && options.historyPayload.length > 0) {
+    formData.append('historyPayload', JSON.stringify(options.historyPayload))
+  }
+  if (options?.conversationId) {
+    formData.append('conversationId', options.conversationId)
   }
 
   try {
