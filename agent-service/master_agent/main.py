@@ -10,13 +10,15 @@ from master_agent.feature_registry import FeatureRegistry
 from master_agent.features.compliance_feature import ComplianceFeature
 from master_agent.features.demo_feature import DemoPayrollFeature
 from master_agent.features.roster_feature import RosterFeature
+from agents.payroll.feature import PayrollFeature
+from agents.payroll.models import PayrollExplainRequest
 
 app = FastAPI(title="FairWorkly Master Agent")
 
 #  add CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,6 +32,8 @@ registry = FeatureRegistry()
 registry.register("compliance_qa", ComplianceFeature())
 registry.register("payroll_verify", DemoPayrollFeature())
 registry.register("roster", RosterFeature())
+
+payroll_feature = PayrollFeature()
 
 
 
@@ -62,7 +66,7 @@ async def chat(
         'file_name': file_name,
         'file': file  # Also pass the file object if provided
     })
-    
+
     return {
         "status": "success",
         "message": message,
@@ -70,6 +74,12 @@ async def chat(
         "routed_to": feature_type,
         "result": result
     }
+
+
+@app.post("/api/agent/payroll/explain")
+async def payroll_explain(request: PayrollExplainRequest):
+    result = await payroll_feature.process(request.model_dump())
+    return result
 
 
 if __name__ == "__main__":
