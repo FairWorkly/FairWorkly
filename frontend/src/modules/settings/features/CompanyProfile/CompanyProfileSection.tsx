@@ -9,7 +9,7 @@ import {
 import type { BusinessInfo, ContactInfo, AddressInfo } from '../../types/companyProfile.types'
 import type { UpdateOrganizationProfileRequest } from '@/services/settingsApi'
 import { useNotification } from '@/shared/hooks'
-import { SectionWrapper, CardSkeleton } from './CompanyProfile.styles'
+import { SectionWrapper, CardSkeleton } from './CompanyProfileSection.styles'
 
 export function CompanyProfileSection() {
   const { data: profile, isLoading, error: loadError } = useOrganizationProfile()
