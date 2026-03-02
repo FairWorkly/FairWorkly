@@ -78,7 +78,6 @@ services:
       JwtSettings__Secret: ${JWT_SECRET:-change-me-dev-secret-at-least-32-chars}
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=FairWorklyDb;Username=postgres;Password=postgres
       AiSettings__BaseUrl: http://agent-service:8000
-      AiSettings__UseMockAi: ${USE_MOCK_AI:-true}
     ports:
       - "5680:5680"
     depends_on:

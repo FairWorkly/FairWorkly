@@ -171,27 +171,14 @@ This project follows Clean Architecture, and dependency injection registration l
 
 > **Note**: `Program.cs` in the API layer is only responsible for calling these two extension methods. **It is strictly forbidden to register business services directly in `Program.cs`**.
 
-### 2. AI Service Configuration (Mock vs Real)
-
-The backend depends on a Python AI Service (`agent-service`). During the development phase, **Mock Mode** is enabled by default (does not depend on the real Python service) for easier debugging.
-
-Configuration location: `src/FairWorkly.API/appsettings.Development.json` (or user secrets), with defaults in `src/FairWorkly.API/appsettings.Development.example.json`.
-
-```json
-"AiSettings": {
-  "BaseUrl": "http://localhost:8000",
-  "UseMockAi": true  // true = Use local mock data; false = Call Python interface
-}
-```
-
-### 3. Time Handling Standards (Time Provider)
+### 2. Time Handling Standards (Time Provider)
 
 To ensure the testability of business logic (such as "determining if it is within rostered hours"), **it is strictly forbidden to use `DateTime.Now` or `DateTimeOffset.Now` directly in the code**.
 
 - **Correct Approach**: Inject `IDateTimeProvider` via the constructor.
 - **Usage**: `_dateTimeProvider.Now`.
 
-### 4. Current User Service
+### 3. Current User Service
 
 To access the authenticated user's identity in Handlers or Services, inject `ICurrentUserService`. It reads JWT claims from the current HTTP request automatically.
 
@@ -212,7 +199,7 @@ public class MyHandler(ICurrentUserService currentUser)
 - **Interface**: `src/FairWorkly.Application/Common/Interfaces/ICurrentUserService.cs`
 - **Implementation**: `src/FairWorkly.Infrastructure/Services/CurrentUserService.cs`
 
-### 5. File Storage Strategy
+### 4. File Storage Strategy
 
 This project uses the Adapter Pattern to handle file storage, with the core interface being `IFileStorageService`.
 
@@ -221,7 +208,7 @@ This project uses the Adapter Pattern to handle file storage, with the core inte
   - Physical Path: `src/FairWorkly.API/wwwroot/uploads/`.
   - **Note**: This directory is ignored in `.gitignore`.
 
-### 6. Entity Configuration Standards
+### 5. Entity Configuration Standards
 
 Entity configuration (table mapping, relationships, constraints) must be placed in dedicated Configuration classes, **not in DbContext**.
 
@@ -230,7 +217,7 @@ Entity configuration (table mapping, relationships, constraints) must be placed 
 
 > **Forbidden**: Writing `modelBuilder.Entity<T>()` directly in `FairWorklyDbContext.OnModelCreating()`.
 
-### 7. Result<T> Pattern
+### 6. Result<T> Pattern
 
 All MediatR Handlers return `Result<T>` using `Of{code}` factory methods. Controllers inherit `BaseApiController` and call `RespondResult(result)` — no manual status code mapping needed.
 
