@@ -200,7 +200,9 @@ const BadgeSubtitle = styled(Typography)(({ theme }) => ({
 
 export function Hero() {
   const scrollToPricing = () => {
-    document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    document
+      .getElementById('pricing')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
@@ -244,7 +246,9 @@ export function Hero() {
               </BadgeIcon>
               <BadgeContent>
                 <BadgeTitle variant="subtitle1">Compliant</BadgeTitle>
-                <BadgeSubtitle variant="caption">All checks passed</BadgeSubtitle>
+                <BadgeSubtitle variant="caption">
+                  All checks passed
+                </BadgeSubtitle>
               </BadgeContent>
             </ImageBadge>
           </HeroImageWrapper>

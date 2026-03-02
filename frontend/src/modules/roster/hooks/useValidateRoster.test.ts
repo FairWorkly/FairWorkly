@@ -31,7 +31,9 @@ import { useValidateRoster } from './useValidateRoster'
 const mockUseApiQuery = useApiQuery as ReturnType<typeof vi.fn>
 const mockGetValidation = getValidationResults as ReturnType<typeof vi.fn>
 const mockValidateRoster = validateRoster as ReturnType<typeof vi.fn>
-const mockMapValidation = mapValidationToComplianceResults as ReturnType<typeof vi.fn>
+const mockMapValidation = mapValidationToComplianceResults as ReturnType<
+  typeof vi.fn
+>
 
 describe('useValidateRoster', () => {
   beforeEach(() => {
@@ -52,7 +54,7 @@ describe('useValidateRoster', () => {
       expect.objectContaining({
         queryKey: ['roster', 'validate', 'test-roster-id'],
         enabled: true,
-      }),
+      })
     )
   })
 
@@ -69,7 +71,7 @@ describe('useValidateRoster', () => {
     expect(mockUseApiQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         enabled: false,
-      }),
+      })
     )
   })
 
@@ -85,7 +87,7 @@ describe('useValidateRoster', () => {
 
     expect(result.isError).toBe(true)
     expect(result.errorMessage).toBe(
-      'No roster ID provided. Please upload a roster first.',
+      'No roster ID provided. Please upload a roster first.'
     )
     expect(result.complianceData).toBeNull()
   })
@@ -179,11 +181,18 @@ describe('useValidateRoster', () => {
       const mockResponse = { validationId: 'existing' }
       mockGetValidation.mockResolvedValue(mockResponse)
 
-      mockUseApiQuery.mockImplementation(({ queryFn }: { queryFn: () => Promise<unknown> }) => {
-        // Capture and invoke the queryFn
-        queryFn()
-        return { data: undefined, isLoading: true, isError: false, error: null }
-      })
+      mockUseApiQuery.mockImplementation(
+        ({ queryFn }: { queryFn: () => Promise<unknown> }) => {
+          // Capture and invoke the queryFn
+          queryFn()
+          return {
+            data: undefined,
+            isLoading: true,
+            isError: false,
+            error: null,
+          }
+        }
+      )
 
       useValidateRoster('roster-123')
 
@@ -197,10 +206,17 @@ describe('useValidateRoster', () => {
       mockValidateRoster.mockResolvedValue(mockResponse)
 
       let capturedQueryFn: (() => Promise<unknown>) | undefined
-      mockUseApiQuery.mockImplementation(({ queryFn }: { queryFn: () => Promise<unknown> }) => {
-        capturedQueryFn = queryFn
-        return { data: undefined, isLoading: true, isError: false, error: null }
-      })
+      mockUseApiQuery.mockImplementation(
+        ({ queryFn }: { queryFn: () => Promise<unknown> }) => {
+          capturedQueryFn = queryFn
+          return {
+            data: undefined,
+            isLoading: true,
+            isError: false,
+            error: null,
+          }
+        }
+      )
 
       useValidateRoster('roster-456')
 
@@ -216,10 +232,17 @@ describe('useValidateRoster', () => {
       mockGetValidation.mockRejectedValue(serverError)
 
       let capturedQueryFn: (() => Promise<unknown>) | undefined
-      mockUseApiQuery.mockImplementation(({ queryFn }: { queryFn: () => Promise<unknown> }) => {
-        capturedQueryFn = queryFn
-        return { data: undefined, isLoading: true, isError: false, error: null }
-      })
+      mockUseApiQuery.mockImplementation(
+        ({ queryFn }: { queryFn: () => Promise<unknown> }) => {
+          capturedQueryFn = queryFn
+          return {
+            data: undefined,
+            isLoading: true,
+            isError: false,
+            error: null,
+          }
+        }
+      )
 
       useValidateRoster('roster-789')
 

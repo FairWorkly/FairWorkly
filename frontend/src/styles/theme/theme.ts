@@ -195,10 +195,13 @@ export const theme = createTheme({
         root: ({ theme }) => ({
           borderRadius: theme.shape.borderRadius,
           padding: theme.spacing(1.25, 2),
-          transition: theme.transitions.create(['transform', 'box-shadow', 'background'], {
-            duration: theme.transitions.duration.short,
-            easing: theme.transitions.easing.easeInOut,
-          }),
+          transition: theme.transitions.create(
+            ['transform', 'box-shadow', 'background'],
+            {
+              duration: theme.transitions.duration.short,
+              easing: theme.transitions.easing.easeInOut,
+            }
+          ),
         }),
       },
     },

@@ -20,12 +20,12 @@ export interface RosterComplianceResults {
  * directly into the component props shape (camelCase) used by ComplianceResults.
  */
 export function mapValidationToComplianceResults(
-  response: ValidateRosterResponse,
+  response: ValidateRosterResponse
 ): RosterComplianceResults {
   // Filter out DataQuality issues — these are data problems, not compliance violations.
   // They belong in the upload stage, not the compliance results page.
   const complianceIssues = response.issues.filter(
-    i => i.checkType !== 'DataQuality',
+    i => i.checkType !== 'DataQuality'
   )
 
   // Group issues by checkType
@@ -49,7 +49,7 @@ export function mapValidationToComplianceResults(
 
   // Build categories from grouped issues
   const categories: IssueCategory[] = Array.from(
-    issuesByCheckType.entries(),
+    issuesByCheckType.entries()
   ).map(([checkType, issues]) => {
     const display = checkTypeDisplayMap[checkType] ?? {
       id: checkType.toLowerCase(),
@@ -83,17 +83,11 @@ export function mapValidationToComplianceResults(
   })
 
   // Calculate stats from filtered compliance issues only
-  const affectedEmployeeIds = new Set(
-    complianceIssues.map(i => i.employeeId),
-  )
+  const affectedEmployeeIds = new Set(complianceIssues.map(i => i.employeeId))
   const compliantEmployees = Math.max(
     0,
-    response.totalEmployees - affectedEmployeeIds.size,
+    response.totalEmployees - affectedEmployeeIds.size
   )
-  const criticalCount = complianceIssues.filter(
-    i => i.severity === 'Critical' || i.severity === 'Error',
-  ).length
-
   const metadata: ValidationMetadata = {
     award: 'Australian Workplace Award',
     payPeriod: 'Pending',
@@ -112,7 +106,7 @@ export function mapValidationToComplianceResults(
   const summary: ValidationSummary = {
     employeesCompliant: compliantEmployees,
     totalIssues: complianceIssues.length,
-    criticalIssuesCount: criticalCount,
+    criticalIssuesCount: complianceIssues.filter(i => i.severity === 'Error').length,
     totalUnderpayment: 'N/A',
     employeesAffected: affectedEmployeeIds.size,
   }
@@ -120,10 +114,7 @@ export function mapValidationToComplianceResults(
   return { metadata, summary, categories }
 }
 
-function formatIssueValue(
-  value: number | null,
-  checkType: string,
-): string {
+function formatIssueValue(value: number | null, checkType: string): string {
   if (value === null || value === undefined) return 'N/A'
 
   switch (checkType) {

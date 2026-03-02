@@ -39,12 +39,19 @@ public class UserRepository : IUserRepository
         );
     }
 
-    // Checks if the email is already taken by another user.
-    // Note: Emails are stored normalized (lowercase) via DbContext.SaveChangesAsync
-    public async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct = default)
+    // Checks if the email is already taken within an organization.
+    // Scoped to (OrganizationId, Email) to match the composite unique index.
+    public async Task<bool> IsEmailUniqueAsync(
+        Guid organizationId,
+        string email,
+        CancellationToken ct = default
+    )
     {
         var normalized = email.Trim().ToLowerInvariant();
-        return !await _context.Users.AnyAsync(u => u.Email == normalized, ct);
+        return !await _context.Users.AnyAsync(
+            u => u.OrganizationId == organizationId && u.Email == normalized && !u.IsDeleted,
+            ct
+        );
     }
 
     // Registers a new user in the context.

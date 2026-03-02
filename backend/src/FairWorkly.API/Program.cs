@@ -157,6 +157,7 @@ try
         {
             options.RequireHttpsMetadata = false;
             options.SaveToken = true;
+            options.MapInboundClaims = false; // Keep JWT claim names as-is (e.g. "role" not the long URI)
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -167,6 +168,7 @@ try
                 ValidAudience = jwtAudience,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromSeconds(30),
+                RoleClaimType = "role", // Match the custom "role" claim in our JWT
             };
         });
 

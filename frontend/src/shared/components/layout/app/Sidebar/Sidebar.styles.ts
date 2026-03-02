@@ -7,38 +7,39 @@ import { styled } from '@/styles/styled'
 
 export const SidebarDrawer = styled(Drawer)(
   ({ theme, ownerState }: { theme: Theme; ownerState?: DrawerProps }) => ({
-  width:
-    ownerState?.variant === 'temporary'
-      ? 0
-      : theme.fairworkly.layout.sidebarWidth,
-  flexShrink: 0,
+    width:
+      ownerState?.variant === 'temporary'
+        ? 0
+        : theme.fairworkly.layout.sidebarWidth,
+    flexShrink: 0,
 
-  // sm-md 断点下收窄 sidebar 占位宽度
-  [theme.breakpoints.between('sm', 'md')]: {
-    width: ownerState?.variant === 'temporary' ? 0 : theme.spacing(30),
-  },
-
-  '& .MuiDrawer-paper': {
-    width: theme.fairworkly.layout.sidebarWidth,
-    boxSizing: 'border-box',
-    borderRight: `1px solid ${theme.palette.divider}`,
-    background: theme.palette.background.paper,
-
+    // sm-md 断点下收窄 sidebar 占位宽度
     [theme.breakpoints.between('sm', 'md')]: {
-      width: theme.spacing(30),
+      width: ownerState?.variant === 'temporary' ? 0 : theme.spacing(30),
     },
 
-    [theme.breakpoints.down('sm')]: {
-      width: '80vw',
-      maxWidth: theme.spacing(40),
-    },
-  },
+    '& .MuiDrawer-paper': {
+      width: theme.fairworkly.layout.sidebarWidth,
+      boxSizing: 'border-box',
+      borderRight: `1px solid ${theme.palette.divider}`,
+      background: theme.palette.background.paper,
 
-  // permanent/docked 模式下使用相对定位
-  '&.MuiDrawer-docked .MuiDrawer-paper': {
-    position: 'relative',
-  },
-}))
+      [theme.breakpoints.between('sm', 'md')]: {
+        width: theme.spacing(30),
+      },
+
+      [theme.breakpoints.down('sm')]: {
+        width: '80vw',
+        maxWidth: theme.spacing(40),
+      },
+    },
+
+    // permanent/docked 模式下使用相对定位
+    '&.MuiDrawer-docked .MuiDrawer-paper': {
+      position: 'relative',
+    },
+  })
+)
 
 export const SidebarPaper = styled(Box)(({ theme }) => ({
   height: '100%',

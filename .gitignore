@@ -10,6 +10,7 @@
 
 # Claude Code CLI local configuration
 .claude/
+CLAUDE.md
 AGENTS.md
 .playwright-mcp/
 
@@ -99,3 +100,6 @@ nul
 con
 prn
 aux
+
+# Local dev runner artifacts
+.dev/

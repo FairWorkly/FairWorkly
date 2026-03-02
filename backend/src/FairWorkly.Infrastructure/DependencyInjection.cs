@@ -4,7 +4,6 @@ using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Application.Roster.Interfaces;
 using FairWorkly.Domain.Auth.Interfaces;
-using FairWorkly.Infrastructure.AI.Mocks;
 using FairWorkly.Infrastructure.AI.PythonServices;
 using FairWorkly.Infrastructure.Identity;
 using FairWorkly.Infrastructure.Persistence;
@@ -27,17 +26,7 @@ public static class DependencyInjection
         IConfiguration configuration
     )
     {
-        // true: use real AI service; false: use mock AI service
-        var useMockAi = configuration.GetValue<bool>("AiSettings:UseMockAi");
-
-        if (useMockAi)
-        {
-            services.AddSingleton<IAiClient, MockAiClient>();
-        }
-        else
-        {
-            services.AddHttpClient<IAiClient, PythonAiClient>();
-        }
+        services.AddHttpClient<IAiClient, PythonAiClient>();
 
         // Register DbContext (PostgreSQL)
         var connectionString = configuration.GetConnectionString("DefaultConnection");

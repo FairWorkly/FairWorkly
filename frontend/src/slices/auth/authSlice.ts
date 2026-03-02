@@ -1,65 +1,70 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit'
 
 export interface AuthUser {
-  id: string;
-  name?: string;
-  email?: string;
-  role?: "admin" | "manager";
+  id: string
+  name?: string
+  email?: string
+  role?: 'admin' | 'manager'
 }
 
 export type AuthStatus =
-  | "initializing"
-  | "authenticating"
-  | "authenticated"
-  | "unauthenticated";
+  | 'initializing'
+  | 'authenticating'
+  | 'authenticated'
+  | 'unauthenticated'
 
 export interface AuthState {
-  user: AuthUser | null;
-  accessToken: string | null;
-  status: AuthStatus;
+  user: AuthUser | null
+  accessToken: string | null
+  status: AuthStatus
 }
 
 const initialState: AuthState = {
   user: null,
   accessToken: null,
-  status: "initializing",
-};
+  status: 'initializing',
+}
 
 const authSlice = createSlice({
-  name: "auth",
+  name: 'auth',
   initialState,
   reducers: {
     setAuthData(
       state,
       action: PayloadAction<{ user: AuthUser; accessToken: string }>
     ) {
-      state.user = action.payload.user;
-      state.accessToken = action.payload.accessToken;
-      state.status = "authenticated";
+      state.user = action.payload.user
+      state.accessToken = action.payload.accessToken
+      state.status = 'authenticated'
     },
     setAccessToken(state, action: PayloadAction<string>) {
-      state.accessToken = action.payload;
+      state.accessToken = action.payload
       if (action.payload) {
-        state.status = "authenticated";
+        state.status = 'authenticated'
       }
     },
     logout(state) {
-      state.user = null;
-      state.accessToken = null;
-      state.status = "unauthenticated";
+      state.user = null
+      state.accessToken = null
+      state.status = 'unauthenticated'
     },
     setInitialized(state) {
       state.status =
-        state.user && state.accessToken ? "authenticated" : "unauthenticated";
+        state.user && state.accessToken ? 'authenticated' : 'unauthenticated'
     },
     setStatus(state, action: PayloadAction<AuthStatus>) {
-      state.status = action.payload;
+      state.status = action.payload
     },
   },
-});
+})
 
-export const { setAuthData, setAccessToken, logout, setInitialized, setStatus } =
-  authSlice.actions;
+export const {
+  setAuthData,
+  setAccessToken,
+  logout,
+  setInitialized,
+  setStatus,
+} = authSlice.actions
 
-export default authSlice.reducer;
+export default authSlice.reducer

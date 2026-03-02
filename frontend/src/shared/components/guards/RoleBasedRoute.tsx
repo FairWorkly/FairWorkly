@@ -5,7 +5,7 @@ import { useAppSelector } from '@/store/hooks'
 type Role = 'admin' | 'manager'
 
 export function RoleBasedRoute({ allow }: { allow: Role[] }) {
-  const { status, user } = useAppSelector((state) => state.auth)
+  const { status, user } = useAppSelector(state => state.auth)
 
   if (status === 'initializing') {
     return <LoadingSpinner />

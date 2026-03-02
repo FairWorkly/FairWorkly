@@ -44,7 +44,11 @@ export function LoginForm({
 
   return (
     <AuthFormContainer onSubmit={handleSubmit}>
-      <GoogleButton type="button" onClick={onGoogleLogin} disabled={isActionDisabled}>
+      <GoogleButton
+        type="button"
+        onClick={onGoogleLogin}
+        disabled={isActionDisabled}
+      >
         <GoogleIcon />
         {isGoogleLoading ? 'Signing in...' : 'Continue with Google'}
       </GoogleButton>
@@ -62,7 +66,7 @@ export function LoginForm({
           fullWidth
           autoComplete="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
         />
         <TextField
           label="Password"
@@ -72,7 +76,7 @@ export function LoginForm({
           fullWidth
           autoComplete="current-password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={e => setPassword(e.target.value)}
         />
       </AuthFieldset>
 
@@ -81,7 +85,7 @@ export function LoginForm({
           control={
             <Checkbox
               checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
+              onChange={e => setRememberMe(e.target.checked)}
               size="small"
             />
           }

@@ -3,7 +3,7 @@ import { mapValidationToComplianceResults } from './mapValidationResponse'
 import type { ValidateRosterResponse } from '@/services/rosterApi'
 
 function createBaseResponse(
-  overrides: Partial<ValidateRosterResponse> = {},
+  overrides: Partial<ValidateRosterResponse> = {}
 ): ValidateRosterResponse {
   return {
     validationId: 'aaaa-bbbb-cccc-dddd',
@@ -75,9 +75,10 @@ describe('mapValidationToComplianceResults', () => {
     const result = mapValidationToComplianceResults(response)
 
     expect(result.summary).toBeDefined()
-    // total_issues and critical_issues_count are recalculated from filtered issues
+    // Both counts are derived from the filtered compliance issues only,
+    // so they stay consistent (DataQuality issues excluded from both).
     expect(result.summary.totalIssues).toBe(2)
-    expect(result.summary.criticalIssuesCount).toBe(2) // both are 'Error' severity
+    expect(result.summary.criticalIssuesCount).toBe(2)
     expect(result.summary.employeesAffected).toBe(2)
     // 10 total - 2 affected = 8 compliant
     expect(result.summary.employeesCompliant).toBe(8)
@@ -133,7 +134,7 @@ describe('mapValidationToComplianceResults', () => {
     expect(result.categories).toHaveLength(2)
 
     const minHoursCategory = result.categories.find(
-      c => c.id === 'minimum-hours',
+      c => c.id === 'minimum-hours'
     )
     expect(minHoursCategory).toBeDefined()
     expect(minHoursCategory!.title).toBe('Minimum Shift Hours')
@@ -144,7 +145,7 @@ describe('mapValidationToComplianceResults', () => {
     expect(minHoursCategory!.totalUnderpayment).toBe('2 violations')
 
     const mealBreakCategory = result.categories.find(
-      c => c.id === 'meal-breaks',
+      c => c.id === 'meal-breaks'
     )
     expect(mealBreakCategory).toBeDefined()
     expect(mealBreakCategory!.title).toBe('Meal Break Requirements')

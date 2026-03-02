@@ -1,4 +1,27 @@
-from typing import Dict, Any
+from typing import Any, Dict, Optional
+
+
+def feature_response(
+    type: str,
+    message: str,
+    *,
+    model: Optional[str] = None,
+    sources: Optional[list] = None,
+    note: Optional[str] = None,
+    data: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Standard feature response constructor — ensures consistent shape."""
+    resp: Dict[str, Any] = {
+        "type": type,
+        "message": message,
+        "model": model,
+        "sources": sources or [],
+        "note": note,
+    }
+    if data is not None:
+        resp["data"] = data
+    return resp
+
 
 class FeatureBase:
     """

@@ -173,14 +173,13 @@ This project follows Clean Architecture, and dependency injection registration l
 
 ### 2. AI Service Configuration (Mock vs Real)
 
-The backend depends on a Python AI Service (`agent-service`). During the development phase, **Mock Mode** is enabled by default (does not depend on the real Python service) for easier debugging.
+The backend depends on a Python AI Service (`agent-service`). The Agent Service must be running for AI-powered features (roster parsing, FairBot chat) to work.
 
 Configuration location: `src/FairWorkly.API/appsettings.Development.json` (or user secrets), with defaults in `src/FairWorkly.API/appsettings.Development.example.json`.
 
 ```json
 "AiSettings": {
-  "BaseUrl": "http://localhost:8000",
-  "UseMockAi": true  // true = Use local mock data; false = Call Python interface
+  "BaseUrl": "http://localhost:8000"
 }
 ```
 

@@ -1,4 +1,4 @@
-import { post } from "./baseApi";
+import { post } from './baseApi'
 
 /**
  * Documents 模块 API 骨架
@@ -8,16 +8,16 @@ import { post } from "./baseApi";
  */
 
 export interface DocumentsPlaceholderRequest {
-  ping: true;
+  ping: true
 }
 
 export interface DocumentsPlaceholderResponse {
-  ok: boolean;
+  ok: boolean
 }
 
 export function documentsHealthCheck(): Promise<DocumentsPlaceholderResponse> {
   return post<DocumentsPlaceholderResponse, DocumentsPlaceholderRequest>(
-    "/documents/health",
-    { ping: true },
-  );
+    '/documents/health',
+    { ping: true }
+  )
 }

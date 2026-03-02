@@ -2,7 +2,7 @@ import { type RouteObject } from 'react-router-dom'
 import { ProtectedRoute } from '@/shared/components/guards/ProtectedRoute'
 import { RoleBasedRoute } from '@/shared/components/guards/RoleBasedRoute'
 import { MainLayout } from '@/shared/components/layout/app/MainLayout'
-import { FairBotChat } from '@/modules/fairbot/pages/FairBotChat'
+import { FairBotPage } from '@/modules/fairbot/pages/FairBotPage'
 
 export const fairbotRoutes: RouteObject[] = [
   {
@@ -17,7 +17,7 @@ export const fairbotRoutes: RouteObject[] = [
             children: [
               {
                 path: '/fairbot',
-                element: <FairBotChat />,
+                element: <FairBotPage />,
               },
             ],
           },

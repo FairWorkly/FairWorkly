@@ -1,5 +1,8 @@
 import { useState, useCallback, useRef } from 'react'
-import type { UploadedFile, ValidationStatus } from '../types/complianceCheck.type'
+import type {
+  UploadedFile,
+  ValidationStatus,
+} from '../types/complianceCheck.type'
 
 // TODO: [Backend Integration] This hook currently uses mock data and setTimeout.
 // When integrating with backend:

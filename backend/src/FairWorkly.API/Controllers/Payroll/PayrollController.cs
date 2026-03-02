@@ -16,7 +16,7 @@ public class PayrollController : BaseApiController
     }
 
     [HttpPost("validation")]
-    [Authorize(Policy = "RequireManager")]
+    [Authorize(Policy = "RequireAdmin")]
     [RequestSizeLimit(2_097_152)] // 2MB
     public async Task<IActionResult> Validate(
         IFormFile file,

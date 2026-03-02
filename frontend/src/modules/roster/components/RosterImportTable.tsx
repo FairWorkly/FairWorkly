@@ -37,13 +37,13 @@ interface RosterImportTableProps {
 
 const EXCEL_ROW_KEYS = new Set(['excelRow', 'excel_row'])
 
-const worstSeverity = (issues: ImportIssue[]): 'error' | 'warning' | undefined =>
+const worstSeverity = (
+  issues: ImportIssue[]
+): 'error' | 'warning' | undefined =>
   issues.some(i => i.severity === 'error') ? 'error' : issues[0]?.severity
 
 const humanizeHeader = (key: string) =>
-  key
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, letter => letter.toUpperCase())
+  key.replace(/_/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase())
 
 export const RosterImportTable: React.FC<RosterImportTableProps> = ({
   rawRows,
@@ -53,7 +53,9 @@ export const RosterImportTable: React.FC<RosterImportTableProps> = ({
 
   const { columns, issueMap, rowIssueMap } = useMemo(() => {
     const firstRow = rawRows[0] ?? {}
-    const columns = Object.keys(firstRow).filter(key => !EXCEL_ROW_KEYS.has(key))
+    const columns = Object.keys(firstRow).filter(
+      key => !EXCEL_ROW_KEYS.has(key)
+    )
     const issueMap = new Map<string, ImportIssue[]>()
     const rowIssueMap = new Map<string | number, ImportIssue[]>()
     for (const issue of issues) {
@@ -132,7 +134,9 @@ export const RosterImportTable: React.FC<RosterImportTableProps> = ({
                         <Tooltip title={rowTooltip}>
                           <ReportProblemOutlinedIcon
                             fontSize="small"
-                            color={rowSeverity === 'error' ? 'error' : 'warning'}
+                            color={
+                              rowSeverity === 'error' ? 'error' : 'warning'
+                            }
                           />
                         </Tooltip>
                       )}
@@ -155,13 +159,17 @@ export const RosterImportTable: React.FC<RosterImportTableProps> = ({
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                        >
                           <Box component="span">{String(content)}</Box>
                           {hasIssue && (
                             <Tooltip title={tooltipText}>
                               <ReportProblemOutlinedIcon
                                 fontSize="small"
-                                color={severity === 'error' ? 'error' : 'warning'}
+                                color={
+                                  severity === 'error' ? 'error' : 'warning'
+                                }
                               />
                             </Tooltip>
                           )}

@@ -1,19 +1,19 @@
-import httpClient from "./httpClient";
-import { normalizeApiError } from "@/shared/types/api.types";
+import httpClient from './httpClient'
+import { normalizeApiError } from '@/shared/types/api.types'
 
 /**
  * Response from roster upload endpoint.
  * Backend returns roster ID and summary after successful parsing and storage.
  */
 export interface UploadRosterResponse {
-  rosterId: string;
-  weekStartDate: string; // ISO date string
-  weekEndDate: string; // ISO date string
-  totalShifts: number;
-  totalHours: number;
-  totalEmployees: number;
+  rosterId: string
+  weekStartDate: string // ISO date string
+  weekEndDate: string // ISO date string
+  totalShifts: number
+  totalHours: number
+  totalEmployees: number
   // Reserved for future non-blocking import hints; usually empty under current policy.
-  warnings: ParserWarning[];
+  warnings: ParserWarning[]
 }
 
 /**
@@ -21,12 +21,12 @@ export interface UploadRosterResponse {
  * Examples: missing break duration, employee not found, data quality concerns.
  */
 export interface ParserWarning {
-  code: string;
-  message: string;
-  row: number;
-  column?: string;
-  value?: string;
-  hint?: string;
+  code: string
+  message: string
+  row: number
+  column?: string
+  value?: string
+  hint?: string
 }
 
 /**
@@ -39,25 +39,22 @@ export interface ParserWarning {
  * @throws ApiError with normalized error structure
  */
 export async function uploadRoster(file: File): Promise<UploadRosterResponse> {
-  const formData = new FormData();
-  formData.append("file", file);
+  const formData = new FormData()
+  formData.append('file', file)
 
-  // Use httpClient directly for FormData upload
-  // Override default application/json Content-Type; axios will append the boundary automatically
+  // Use httpClient directly for FormData upload.
+  // Clear the default application/json Content-Type so the browser
+  // auto-sets multipart/form-data with the correct boundary.
   try {
     const response = await httpClient.post<UploadRosterResponse>(
-      "/roster/upload",
+      '/roster/upload',
       formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
+      { headers: { 'Content-Type': undefined }, timeout: 120_000 }
+    )
 
-    return response.data;
+    return response.data
   } catch (err) {
-    throw normalizeApiError(err);
+    throw normalizeApiError(err)
   }
 }
 
@@ -104,9 +101,13 @@ export interface RosterDetailsResponse {
  * Fetch roster details by ID.
  * Returns roster metadata and shifts grouped by employee.
  */
-export async function getRosterDetails(rosterId: string): Promise<RosterDetailsResponse> {
+export async function getRosterDetails(
+  rosterId: string
+): Promise<RosterDetailsResponse> {
   try {
-    const response = await httpClient.get<RosterDetailsResponse>(`/roster/${rosterId}`)
+    const response = await httpClient.get<RosterDetailsResponse>(
+      `/roster/${rosterId}`
+    )
     return response.data
   } catch (err) {
     throw normalizeApiError(err)
@@ -158,10 +159,14 @@ export interface ValidateRosterResponse {
  * Trigger compliance validation for a roster (idempotent).
  * Returns existing results if validation already completed.
  */
-export async function validateRoster(rosterId: string): Promise<ValidateRosterResponse> {
+export async function validateRoster(
+  rosterId: string
+): Promise<ValidateRosterResponse> {
   try {
     const response = await httpClient.post<ValidateRosterResponse>(
-      `/roster/${rosterId}/validate`
+      `/roster/${rosterId}/validate`,
+      null,
+      { timeout: 120_000 }
     )
     return response.data
   } catch (err) {
@@ -173,7 +178,9 @@ export async function validateRoster(rosterId: string): Promise<ValidateRosterRe
  * Get existing validation results for a roster.
  * Returns 404 if no validation has been run yet.
  */
-export async function getValidationResults(rosterId: string): Promise<ValidateRosterResponse> {
+export async function getValidationResults(
+  rosterId: string
+): Promise<ValidateRosterResponse> {
   try {
     const response = await httpClient.get<ValidateRosterResponse>(
       `/roster/${rosterId}/validation`

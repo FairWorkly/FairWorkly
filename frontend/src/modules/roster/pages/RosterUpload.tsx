@@ -10,11 +10,11 @@ const mockConfig: ComplianceConfig = {
 }
 
 const rosterValidationItems = [
-  'Minimum shift hours compliance',
-  'Maximum consecutive days worked',
-  'Meal break requirements',
-  'Rest period between shifts',
-  'Weekly hours limit',
+  { key: 'minShift', label: 'Minimum shift hours compliance' },
+  { key: 'maxConsecutive', label: 'Maximum consecutive days worked' },
+  { key: 'mealBreak', label: 'Meal break requirements' },
+  { key: 'restPeriod', label: 'Rest period between shifts' },
+  { key: 'weeklyHours', label: 'Weekly hours limit' },
 ]
 
 export function RosterUpload() {
