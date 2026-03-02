@@ -1,9 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using FairWorkly.API.ExceptionHandlers;
-using FairWorkly.API.Services;
 using FairWorkly.Application;
-using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Infrastructure;
 using FairWorkly.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -46,11 +44,8 @@ try
 
     builder.Host.UseSerilog();
 
-    // Register CurrentUserService
-    builder.Services.AddHttpContextAccessor();
-    builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
     // Register Application and Infrastructure services (DependencyInjection.cs)
+    // Note: IHttpContextAccessor + ICurrentUserService registered in Infrastructure/DependencyInjection.cs
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
 

@@ -94,6 +94,6 @@ public class UpdateOrganizationProfileRequestValidator
     {
         if (string.IsNullOrWhiteSpace(state))
             return false;
-        return Enum.IsDefined(typeof(AustralianState), state.ToUpper());
+        return Enum.TryParse<AustralianState>(state, ignoreCase: true, out _);
     }
 }

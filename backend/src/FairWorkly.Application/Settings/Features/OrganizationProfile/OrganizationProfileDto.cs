@@ -1,4 +1,6 @@
-namespace FairWorkly.Application.Settings.Features.OrganizationProfile.GetOrganizationProfile;
+using FairWorkly.Domain.Auth.Entities;
+
+namespace FairWorkly.Application.Settings.Features.OrganizationProfile;
 
 public class OrganizationProfileDto
 {
@@ -32,4 +34,19 @@ public class OrganizationProfileDto
     public string Postcode { get; set; } = string.Empty;
 
     public string? LogoUrl { get; set; }
+
+    public static OrganizationProfileDto FromEntity(Organization organization) => new()
+    {
+        CompanyName = organization.CompanyName,
+        ABN = organization.ABN,
+        IndustryType = organization.IndustryType,
+        ContactEmail = organization.ContactEmail,
+        PhoneNumber = organization.PhoneNumber,
+        AddressLine1 = organization.AddressLine1,
+        AddressLine2 = organization.AddressLine2,
+        Suburb = organization.Suburb,
+        State = organization.State.ToString(),
+        Postcode = organization.Postcode,
+        LogoUrl = organization.LogoUrl,
+    };
 }
