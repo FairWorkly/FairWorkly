@@ -1,29 +1,3 @@
-
-export interface CompanyProfile {
-    companyName: string
-    abn: string
-    industryType: string
-    contactEmail: string
-    phoneNumber: string
-    addressLine1: string
-    addressLine2?: string
-    suburb: string
-    state: string
-    postcode: string
-    logoUrl: string | null
-    awards: Award[]
-}
-
-
-export interface Award {
-    id: string
-    awardType: string
-    isPrimary: boolean
-    employeeCount: number
-    addedAt: string
-}
-
-
 export interface BusinessInfo {
     companyName: string
     abn: string

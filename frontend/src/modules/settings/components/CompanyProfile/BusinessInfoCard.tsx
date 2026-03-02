@@ -1,107 +1,58 @@
-import { useState } from 'react'
 import { TextField, MenuItem } from '@mui/material'
-import { Business as BusinessIcon } from '@mui/icons-material'
 import { CompanyProfileCard } from './CompanyProfileCard'
 import {
   FormRow,
   FieldLabel,
   FieldValue,
-  LogoPlaceholder,
   ErrorText,
   FormField,
 } from './CompanyProfile.styles'
 import type { BusinessInfo, ValidationErrors } from '../../types/companyProfile.types'
 import { INDUSTRY_TYPES } from '../../types/companyProfile.types'
+import { useEditableCard } from '../../hooks/useEditableCard'
 
 interface BusinessInfoCardProps {
   data: BusinessInfo
-  onSave: (data: BusinessInfo) => void
+  onSave: (data: BusinessInfo) => Promise<boolean>
+  isSaving?: boolean
 }
 
-export function BusinessInfoCard({ data, onSave }: BusinessInfoCardProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  
-  const [formData, setFormData] = useState<BusinessInfo>(data)
-  
-  const [errors, setErrors] = useState<ValidationErrors>({})
+function validate(formData: BusinessInfo): ValidationErrors {
+  const errors: ValidationErrors = {}
 
-
-
-  const validateABN = (abn: string): string => {
-    if (!abn) return 'ABN is required'
-    if (!/^\d{11}$/.test(abn)) return 'ABN must be exactly 11 digits'
-    return ''
+  if (!formData.companyName.trim()) {
+    errors.companyName = 'Company name is required'
   }
 
-
-  const validateForm = (): boolean => {
-    const newErrors: ValidationErrors = {}
-
-    if (!formData.companyName.trim()) {
-      newErrors.companyName = 'Company name is required'
-    }
-
-    const abnError = validateABN(formData.abn)
-    if (abnError) {
-      newErrors.abn = abnError
-    }
-
-    if (!formData.industryType) {
-      newErrors.industryType = 'Industry type is required'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  if (!formData.abn) {
+    errors.abn = 'ABN is required'
+  } else if (!/^\d{11}$/.test(formData.abn)) {
+    errors.abn = 'ABN must be exactly 11 digits'
   }
 
-
-  const handleEdit = () => {
-    setFormData(data)
-    setErrors({})
-    setIsEditing(true)
+  if (!formData.industryType) {
+    errors.industryType = 'Industry type is required'
   }
 
+  return errors
+}
 
-  const handleSave = () => {
-    if (validateForm()) {
-      onSave(formData)
-      setIsEditing(false)
-    }
-  }
-
-
-  const handleCancel = () => {
-    setFormData(data)
-    setErrors({})
-    setIsEditing(false)
-  }
-
-
-  const handleChange = (field: keyof BusinessInfo, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
-    }
-  }
+export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInfoCardProps) {
+  const {
+    isEditing, formData, errors, hasErrors,
+    handleEdit, handleSave, handleCancel, handleChange,
+  } = useEditableCard({ data, onSave, validate })
 
   return (
     <CompanyProfileCard
       title="Business Info"
-      description="Your company's basic information"
       isEditing={isEditing}
+      isSaving={isSaving}
       onEdit={handleEdit}
       onSave={handleSave}
       onCancel={handleCancel}
-      isSaveDisabled={Object.keys(errors).length > 0}
+      isSaveDisabled={hasErrors}
     >
-      <FormRow>
-        <FieldLabel>Logo</FieldLabel>
-        <LogoPlaceholder>
-          <BusinessIcon/>
-        </LogoPlaceholder>
-      </FormRow>
-
-
       <FormRow>
         <FieldLabel>Company Name</FieldLabel>
         {isEditing ? (
@@ -113,6 +64,7 @@ export function BusinessInfoCard({ data, onSave }: BusinessInfoCardProps) {
               onChange={(e) => handleChange('companyName', e.target.value)}
               error={!!errors.companyName}
               placeholder="Enter company name"
+              disabled={isSaving}
             />
             {errors.companyName && (
               <ErrorText>{errors.companyName}</ErrorText>
@@ -123,7 +75,6 @@ export function BusinessInfoCard({ data, onSave }: BusinessInfoCardProps) {
         )}
       </FormRow>
 
-  
       <FormRow>
         <FieldLabel>ABN</FieldLabel>
         {isEditing ? (
@@ -136,7 +87,8 @@ export function BusinessInfoCard({ data, onSave }: BusinessInfoCardProps) {
               error={!!errors.abn}
               placeholder="12345678901"
               helperText="Must be 11 digits"
-              inputProps={{ maxLength: 11 }}
+              disabled={isSaving}
+              slotProps={{ htmlInput: { maxLength: 11, inputMode: 'numeric' } }}
             />
             {errors.abn && (
               <ErrorText>{errors.abn}</ErrorText>
@@ -158,6 +110,7 @@ export function BusinessInfoCard({ data, onSave }: BusinessInfoCardProps) {
               value={formData.industryType}
               onChange={(e) => handleChange('industryType', e.target.value)}
               error={!!errors.industryType}
+              disabled={isSaving}
             >
               {INDUSTRY_TYPES.map((type) => (
                 <MenuItem key={type} value={type}>

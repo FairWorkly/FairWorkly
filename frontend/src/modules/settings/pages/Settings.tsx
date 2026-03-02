@@ -16,7 +16,7 @@ import {
   PageHeader,
   SectionContent,
 } from './Settings.styles'
-import { CompanyProfile } from '../components/CompanyProfile/CompanyProfile'
+import { CompanyProfileSection } from '../features/CompanyProfile/CompanyProfileSection'
 
 type SettingsSection = 'company' | 'team' | 'billing' | 'security'
 
@@ -74,11 +74,7 @@ export function Settings() {
         </SettingsNav>
 
         <SettingsContent>
-          {activeSection === 'company' && (
-            <SectionContent>
-              <CompanyProfile />
-            </SectionContent>)
-          }
+          {activeSection === 'company' && <CompanyProfileSection />}
 
           {activeSection === 'team' && (
             <SectionContent>

@@ -1,22 +1,21 @@
+import { CircularProgress } from '@mui/material'
 import { Edit as EditIcon } from '@mui/icons-material'
 import {
   ProfileCard,
   CardHeader,
   CardContent,
   ButtonContainer,
-  CardHeaderContent,
   CancelButton,
   EditButton,
   SaveButton,
-  CardDescription,
   CardTitle,
 } from './CompanyProfile.styles'
 import type { ReactNode } from 'react'
 
 interface CompanyProfileCardProps {
   title: string
-  description?: string
   isEditing: boolean
+  isSaving?: boolean
   onEdit: () => void
   onSave: () => void
   onCancel: () => void
@@ -27,8 +26,8 @@ interface CompanyProfileCardProps {
 
 export function CompanyProfileCard({
   title,
-  description,
   isEditing,
+  isSaving = false,
   onEdit,
   onSave,
   onCancel,
@@ -38,31 +37,26 @@ export function CompanyProfileCard({
   return (
     <ProfileCard>
       <CardHeader>
-        <CardHeaderContent>
-          <CardTitle>
-            {title}
-          </CardTitle>
-          {description && (
-            <CardDescription>
-              {description}
-            </CardDescription>
-          )}
-        </CardHeaderContent>
+        <CardTitle>
+          {title}
+        </CardTitle>
 
         {isEditing ? (
           <ButtonContainer>
             <CancelButton
               variant="outlined"
               onClick={onCancel}
+              disabled={isSaving}
             >
               Cancel
             </CancelButton>
             <SaveButton
               variant="contained"
               onClick={onSave}
-              disabled={isSaveDisabled}
+              disabled={isSaveDisabled || isSaving}
+              startIcon={isSaving ? <CircularProgress size={16} /> : undefined}
             >
-              Save
+              {isSaving ? 'Saving...' : 'Save'}
             </SaveButton>
           </ButtonContainer>
         ) : (

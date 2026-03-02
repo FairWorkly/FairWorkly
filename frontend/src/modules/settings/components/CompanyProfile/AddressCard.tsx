@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { TextField, MenuItem } from '@mui/material'
 import { CompanyProfileCard } from './CompanyProfileCard'
 import {
@@ -10,86 +9,54 @@ import {
 } from './CompanyProfile.styles'
 import type { AddressInfo, ValidationErrors } from '../../types/companyProfile.types'
 import { AUSTRALIAN_STATES } from '../../types/companyProfile.types'
+import { useEditableCard } from '../../hooks/useEditableCard'
 
 interface AddressCardProps {
   data: AddressInfo
-  onSave: (data: AddressInfo) => void
+  onSave: (data: AddressInfo) => Promise<boolean>
+  isSaving?: boolean
 }
 
+function validate(formData: AddressInfo): ValidationErrors {
+  const errors: ValidationErrors = {}
 
-export function AddressCard({ data, onSave }: AddressCardProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState<AddressInfo>(data)
-  const [errors, setErrors] = useState<ValidationErrors>({})
-
-
-  const validatePostcode = (postcode: string): string => {
-    if (!postcode) return 'Postcode is required'
-    if (!/^\d{4}$/.test(postcode)) return 'Postcode must be exactly 4 digits'
-    return ''
+  if (!formData.addressLine1.trim()) {
+    errors.addressLine1 = 'Address line 1 is required'
   }
 
-  const validateForm = (): boolean => {
-    const newErrors: ValidationErrors = {}
-
-    if (!formData.addressLine1.trim()) {
-      newErrors.addressLine1 = 'Address line 1 is required'
-    }
-
-    if (!formData.suburb.trim()) {
-      newErrors.suburb = 'Suburb is required'
-    }
-
-    if (!formData.state) {
-      newErrors.state = 'State is required'
-    }
-
-    const postcodeError = validatePostcode(formData.postcode)
-    if (postcodeError) {
-      newErrors.postcode = postcodeError
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  if (!formData.suburb.trim()) {
+    errors.suburb = 'Suburb is required'
   }
 
-  const handleEdit = () => {
-    setFormData(data)
-    setErrors({})
-    setIsEditing(true)
+  if (!formData.state) {
+    errors.state = 'State is required'
   }
 
-  const handleSave = () => {
-    if (validateForm()) {
-      onSave(formData)
-      setIsEditing(false)
-    }
+  if (!formData.postcode) {
+    errors.postcode = 'Postcode is required'
+  } else if (!/^\d{4}$/.test(formData.postcode)) {
+    errors.postcode = 'Postcode must be exactly 4 digits'
   }
 
-  const handleCancel = () => {
-    setFormData(data)
-    setErrors({})
-    setIsEditing(false)
-  }
+  return errors
+}
 
-  const handleChange = (field: keyof AddressInfo, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
-    }
-  }
+export function AddressCard({ data, onSave, isSaving = false }: AddressCardProps) {
+  const {
+    isEditing, formData, errors, hasErrors,
+    handleEdit, handleSave, handleCancel, handleChange,
+  } = useEditableCard({ data, onSave, validate })
 
   return (
     <CompanyProfileCard
       title="Address"
-      description="Your business location"
       isEditing={isEditing}
+      isSaving={isSaving}
       onEdit={handleEdit}
       onSave={handleSave}
       onCancel={handleCancel}
-      isSaveDisabled={Object.keys(errors).length > 0}
+      isSaveDisabled={hasErrors}
     >
-
       <FormRow>
         <FieldLabel>Address Line 1</FieldLabel>
         {isEditing ? (
@@ -101,6 +68,7 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
               onChange={(e) => handleChange('addressLine1', e.target.value)}
               error={!!errors.addressLine1}
               placeholder="123 Main Street"
+              disabled={isSaving}
             />
             {errors.addressLine1 && (
               <ErrorText>{errors.addressLine1}</ErrorText>
@@ -120,13 +88,13 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
             value={formData.addressLine2}
             onChange={(e) => handleChange('addressLine2', e.target.value)}
             placeholder="Suite 100 (optional)"
+            disabled={isSaving}
           />
         ) : (
           <FieldValue>{data.addressLine2 || '—'}</FieldValue>
         )}
       </FormRow>
 
-  
       <FormRow>
         <FieldLabel>Suburb</FieldLabel>
         {isEditing ? (
@@ -138,6 +106,7 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
               onChange={(e) => handleChange('suburb', e.target.value)}
               error={!!errors.suburb}
               placeholder="Melbourne"
+              disabled={isSaving}
             />
             {errors.suburb && (
               <ErrorText>{errors.suburb}</ErrorText>
@@ -147,7 +116,6 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
           <FieldValue>{data.suburb}</FieldValue>
         )}
       </FormRow>
-
 
       <FormRow>
         <FieldLabel>State</FieldLabel>
@@ -160,6 +128,7 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
               value={formData.state}
               onChange={(e) => handleChange('state', e.target.value)}
               error={!!errors.state}
+              disabled={isSaving}
             >
               {AUSTRALIAN_STATES.map((state) => (
                 <MenuItem key={state.value} value={state.value}>
@@ -178,7 +147,6 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
         )}
       </FormRow>
 
-
       <FormRow>
         <FieldLabel>Postcode</FieldLabel>
         {isEditing ? (
@@ -191,7 +159,8 @@ export function AddressCard({ data, onSave }: AddressCardProps) {
               error={!!errors.postcode}
               placeholder="3000"
               helperText="Must be 4 digits"
-              inputProps={{ maxLength: 4 }}
+              disabled={isSaving}
+              slotProps={{ htmlInput: { maxLength: 4, inputMode: 'numeric' } }}
             />
             {errors.postcode && (
               <ErrorText>{errors.postcode}</ErrorText>
