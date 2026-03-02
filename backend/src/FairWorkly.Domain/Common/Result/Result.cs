@@ -187,6 +187,26 @@ public class Result<T> : IResultBase
     /// <example><code>return Result&lt;RosterDto&gt;.Of500("Failed to save roster. Please try again or contact support.");</code></example>
     public static Result<T> Of500(string message) => new(500, default, message, null);
 
+    // ── 502 Bad Gateway ──────────────────────────────────────────────────
+
+    /// <summary>
+    /// Creates a <b>502 Bad Gateway</b> result with a user-facing message.
+    /// Used when an upstream service returns a response that cannot be understood
+    /// or processed (e.g., LLM returned unparseable output).
+    /// </summary>
+    /// <param name="message">Frontend-facing summary (e.g., "AI service returned an invalid response. Please try again.").</param>
+    public static Result<T> Of502(string message) => new(502, default, message, null);
+
+    // ── 503 Service Unavailable ──────────────────────────────────────────
+
+    /// <summary>
+    /// Creates a <b>503 Service Unavailable</b> result with a user-facing message.
+    /// Used when an upstream service is unreachable, overloaded, or explicitly
+    /// reports unavailability (e.g., agent-service down, LLM API rate-limited).
+    /// </summary>
+    /// <param name="message">Frontend-facing summary (e.g., "AI service is temporarily unavailable. Please try again later.").</param>
+    public static Result<T> Of503(string message) => new(503, default, message, null);
+
     // ── 504 Gateway Timeout ───────────────────────────────────────────
 
     /// <summary>Creates a <b>504 Gateway Timeout</b> result with a custom message.</summary>
