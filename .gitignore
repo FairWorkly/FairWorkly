@@ -10,7 +10,6 @@
 
 # Claude Code CLI local configuration
 .claude/
-CLAUDE.md
 AGENTS.md
 .playwright-mcp/
 
@@ -37,7 +36,6 @@ logs/
 
 # Database and Logs
 *.db
-*.lock
 *.log
 
 # .NET Compiled Files
