@@ -16,6 +16,7 @@ import {
   PageHeader,
   SectionContent,
 } from './Settings.styles'
+import { CompanyProfileSection } from '../features/CompanyProfile/CompanyProfileSection'
 
 type SettingsSection = 'company' | 'team' | 'billing' | 'security'
 
@@ -73,14 +74,7 @@ export function Settings() {
         </SettingsNav>
 
         <SettingsContent>
-          {activeSection === 'company' && (
-            <SectionContent>
-              <Typography variant="h5">Company Profile</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Coming soon...
-              </Typography>
-            </SectionContent>
-          )}
+          {activeSection === 'company' && <CompanyProfileSection />}
 
           {activeSection === 'team' && (
             <SectionContent>

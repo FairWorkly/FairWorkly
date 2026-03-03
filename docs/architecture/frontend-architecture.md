@@ -68,36 +68,77 @@ Examples:
 A module owns everything needed to deliver its feature.
 
 Typical Module Structure
+
+```txt
 modules/<module>/
 ├── pages/
+├── features/
 ├── components/
 ├── hooks/
 ├── types/
 └── index.ts
+```
 
 Not all folders are required, but the separation is intentional.
 
 pages/
 
 - Route-level screens
-- Compose components and hooks
+- Compose features or components
 - No direct API calls
+- No business logic
 
-Pages should remain thin.
+Pages should remain thin. A page renders one or more features.
+
+features/
+
+- Business feature orchestrators
+- Call hooks to fetch and mutate data
+- Compose multiple components into a cohesive feature
+- Contain business logic (data transformation, save strategies)
+- Own feature-level styles (layout wrappers, loading skeletons)
+
+Each feature gets its own subdirectory with co-located styles:
+
+```txt
+features/CompanyProfile/
+├── CompanyProfileSection.tsx      # orchestrator
+└── CompanyProfile.styles.ts       # feature-level styles
+```
+
+A feature knows **what data to fetch** and **which components to compose**. It does not care about how individual components render.
 
 components/
 
-- UI components specific to the module
-- May use module hooks
-- Should not be reused across unrelated modules
+- Props-driven UI components specific to the module
+- Receive data and callbacks via props
+- Do not call API hooks directly
+- Own component-level styles
+
+```txt
+components/CompanyProfile/
+├── BusinessInfoCard.tsx
+├── ContactCard.tsx
+├── CompanyProfileCard.tsx         # shared card shell
+└── CompanyProfile.styles.ts       # component-level styles
+```
 
 If a component becomes reusable across modules, move it to shared/.
+
+Key distinction: features vs components
+
+| | Feature | Component |
+| --- | --- | --- |
+| Knows about APIs (via hooks) | Yes | No |
+| Contains business logic | Yes | No |
+| Driven by props | No, self-contained | Yes |
+| Composes other pieces | Yes (components) | Rarely |
 
 hooks/
 
 - Module-level logic
-- TanStack Query hooks
-- State and orchestration logic
+- TanStack Query hooks (data fetching and mutations)
+- Shared stateful logic (e.g. useEditableCard)
 
 This is where most frontend logic should live.
 
@@ -161,6 +202,7 @@ If state belongs to a single module, keep it inside the module.
 ## 8. Data Flow (Canonical Pattern)
 
 Page
+→ feature (orchestrates hooks + components)
 → module hook (TanStack Query)
 → services API
 → backend
