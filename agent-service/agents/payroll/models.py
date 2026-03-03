@@ -18,7 +18,7 @@ class PayrollExplainRequest(BaseModel):
     categoryType: str
     employeeName: str
     employeeId: str
-    severity: int
+    severity: str
     impactAmount: float
     description: IssueDescription
     warning: Optional[str] = None

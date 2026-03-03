@@ -2,6 +2,7 @@ using System.Diagnostics;
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Payroll.Features.ExplainIssue.Dtos;
 using FairWorkly.Application.Payroll.Interfaces;
+using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Common.Result;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -84,7 +85,7 @@ public class ExplainPayrollIssueHandler(
             CategoryType = command.CategoryType,
             EmployeeName = command.EmployeeName,
             EmployeeId = command.EmployeeId,
-            Severity = command.Severity,
+            Severity = ((IssueSeverity)command.Severity).ToString(),
             ImpactAmount = command.ImpactAmount,
             Description =
                 command.Description != null

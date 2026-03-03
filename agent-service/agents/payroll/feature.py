@@ -73,6 +73,7 @@ class PayrollFeature(FeatureBase):
         result = await self._call_llm_with_retry(
             messages,
             retrieval_result.metadatas,
+            retrieval_result.documents,
             logger,
         )
 
@@ -87,6 +88,7 @@ class PayrollFeature(FeatureBase):
         self,
         messages: List[Dict[str, str]],
         sources: List[Dict[str, Any]],
+        documents: List[str],
         logger: logging.Logger,
         max_attempts: int = 3,
     ) -> Dict[str, Any]:
@@ -134,7 +136,10 @@ class PayrollFeature(FeatureBase):
                         "detailedExplanation": detailed,
                         "recommendation": recommendation,
                         "model": llm_response.get("model"),
-                        "sources": sources,
+                        "sources": [
+                            {**meta, "content": doc}
+                            for meta, doc in zip(sources, documents)
+                        ],
                         "note": None,
                     },
                 }

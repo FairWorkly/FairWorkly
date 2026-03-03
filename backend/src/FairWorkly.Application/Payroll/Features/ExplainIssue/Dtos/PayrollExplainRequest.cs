@@ -6,7 +6,7 @@ public class PayrollExplainRequest
     public required string CategoryType { get; init; }
     public required string EmployeeName { get; init; }
     public required string EmployeeId { get; init; }
-    public required int Severity { get; init; }
+    public required string Severity { get; init; }
     public required decimal ImpactAmount { get; init; }
     public PayrollExplainDescription? Description { get; init; }
     public string? Warning { get; init; }
