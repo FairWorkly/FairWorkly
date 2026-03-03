@@ -1,3 +1,4 @@
+using FairWorkly.Application.Payroll.Features.ExplainIssue;
 using FairWorkly.Application.Payroll.Features.ValidatePayroll;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -45,6 +46,14 @@ public class PayrollController : BaseApiController
 
         var result = await _mediator.Send(command);
 
+        return RespondResult(result);
+    }
+
+    [HttpPost("explain")]
+    [Authorize(Policy = "RequireAdmin")]
+    public async Task<IActionResult> Explain([FromBody] ExplainPayrollIssueCommand command)
+    {
+        var result = await _mediator.Send(command);
         return RespondResult(result);
     }
 }
