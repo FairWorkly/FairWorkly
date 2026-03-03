@@ -20,10 +20,12 @@ public class TeamMembersController(IMediator mediator, ICurrentUserService curre
     [HttpGet]
     public async Task<IActionResult> GetTeamMembers(CancellationToken cancellationToken)
     {
-        if (currentUser.UserId is not { } userId || userId == Guid.Empty)
-            return RespondResult(Result<List<TeamMemberDto>>.Of401("User ID not found in token"));
+        if (currentUser.OrganizationId is not { } orgId || orgId == Guid.Empty)
+            return RespondResult(
+                Result<List<TeamMemberDto>>.Of401("Organization ID not found in token")
+            );
 
-        var query = new GetTeamMembersQuery { CurrentUserId = userId };
+        var query = new GetTeamMembersQuery { OrganizationId = orgId };
         var result = await mediator.Send(query, cancellationToken);
         return RespondResult(result);
     }
@@ -41,9 +43,15 @@ public class TeamMembersController(IMediator mediator, ICurrentUserService curre
         if (currentUser.UserId is not { } userId || userId == Guid.Empty)
             return RespondResult(Result<TeamMemberUpdatedDto>.Of401("User ID not found in token"));
 
+        if (currentUser.OrganizationId is not { } orgId || orgId == Guid.Empty)
+            return RespondResult(
+                Result<TeamMemberUpdatedDto>.Of401("Organization ID not found in token")
+            );
+
         var command = new UpdateTeamMemberCommand
         {
             CurrentUserId = userId,
+            OrganizationId = orgId,
             TargetUserId = id,
             Role = request.Role,
             IsActive = request.IsActive,
@@ -52,13 +60,4 @@ public class TeamMembersController(IMediator mediator, ICurrentUserService curre
         var result = await mediator.Send(command, cancellationToken);
         return RespondResult(result);
     }
-}
-
-/// <summary>
-/// Request body for PATCH /api/settings/team/{id}
-/// </summary>
-public class UpdateTeamMemberRequest
-{
-    public string? Role { get; set; }
-    public bool? IsActive { get; set; }
 }

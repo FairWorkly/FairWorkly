@@ -12,21 +12,13 @@ public class GetTeamMembersQueryHandler(IUserRepository userRepository)
         CancellationToken cancellationToken
     )
     {
-        // 1. Get current user to find their organization
-        var currentUser = await userRepository.GetByIdAsync(
-            request.CurrentUserId,
-            cancellationToken
-        );
-        if (currentUser == null)
-            return Result<List<TeamMemberDto>>.Of401("User not found");
-
-        // 2. Get all team members in the same organization
+        // 1. Get all team members in the organization
         var teamMembers = await userRepository.GetByOrganizationIdAsync(
-            currentUser.OrganizationId,
+            request.OrganizationId,
             cancellationToken
         );
 
-        // 3. Map to DTOs
+        // 2. Map to DTOs
         var dtos = teamMembers
             .Select(u => new TeamMemberDto
             {

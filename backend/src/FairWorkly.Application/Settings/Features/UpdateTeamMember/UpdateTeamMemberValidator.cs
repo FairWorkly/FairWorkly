@@ -1,3 +1,4 @@
+using FairWorkly.Domain.Auth.Enums;
 using FluentValidation;
 
 namespace FairWorkly.Application.Settings.Features.UpdateTeamMember;
@@ -9,8 +10,14 @@ public class UpdateTeamMemberValidator : AbstractValidator<UpdateTeamMemberComma
         RuleFor(x => x.TargetUserId).NotEmpty().WithMessage("User ID is required");
 
         RuleFor(x => x.Role)
-            .Must(role => string.IsNullOrWhiteSpace(role) || role == "Admin" || role == "Manager")
-            .WithMessage("Role must be Admin or Manager");
+            .Must(role =>
+                string.IsNullOrWhiteSpace(role)
+                || (
+                    Enum.TryParse<UserRole>(role, ignoreCase: true, out var parsed)
+                    && parsed != UserRole.Unknown
+                )
+            )
+            .WithMessage("Role must be a valid role (e.g. Admin, Manager)");
 
         // At least one field must be provided
         RuleFor(x => x)
