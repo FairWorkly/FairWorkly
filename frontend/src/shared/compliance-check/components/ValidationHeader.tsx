@@ -158,6 +158,7 @@ interface ValidationHeaderProps {
   onNavigateBack: () => void
   breadcrumbLabel?: string
   periodLabel?: string
+  exportLabel?: string
 }
 
 export const ValidationHeader: React.FC<ValidationHeaderProps> = ({
@@ -167,6 +168,7 @@ export const ValidationHeader: React.FC<ValidationHeaderProps> = ({
   onNavigateBack,
   breadcrumbLabel = 'Payroll',
   periodLabel = 'Pay period',
+  exportLabel = 'Export CSV',
 }) => {
   return (
     <HeaderContainer>
@@ -223,7 +225,7 @@ export const ValidationHeader: React.FC<ValidationHeaderProps> = ({
             startIcon={<FileDownloadOutlinedIcon />}
             onClick={onExport}
           >
-            Export CSV
+            {exportLabel}
           </ExportAction>
           <NewValidationAction
             variant="outlined"

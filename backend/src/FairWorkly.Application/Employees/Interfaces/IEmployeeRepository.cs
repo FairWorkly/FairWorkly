@@ -3,17 +3,15 @@ using FairWorkly.Domain.Employees.Entities;
 namespace FairWorkly.Application.Employees.Interfaces;
 
 /// <summary>
-/// Repository interface for Employee entity operations
+/// Repository interface for Employee entity operations.
+/// Note: Add() only tracks the entity. Handler calls unitOfWork.SaveChangesAsync() at the end.
+/// Updates are handled by EF Core change tracking (no explicit Update method needed).
 /// </summary>
 public interface IEmployeeRepository
 {
     /// <summary>
     /// Gets employees by a list of employee numbers within an organization
     /// </summary>
-    /// <param name="organizationId">Organization ID</param>
-    /// <param name="employeeNumbers">List of employee numbers to search for</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of matching employees</returns>
     Task<List<Employee>> GetByEmployeeNumbersAsync(
         Guid organizationId,
         List<string> employeeNumbers,
@@ -21,17 +19,20 @@ public interface IEmployeeRepository
     );
 
     /// <summary>
-    /// Creates a new employee
+    /// Gets employees by a list of email addresses within an organization
     /// </summary>
-    /// <param name="employee">Employee entity to create</param>
+    /// <param name="organizationId">Organization ID</param>
+    /// <param name="emails">List of email addresses to search for (case-insensitive)</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Created employee with generated Id</returns>
-    Task<Employee> CreateAsync(Employee employee, CancellationToken cancellationToken = default);
+    /// <returns>List of matching employees</returns>
+    Task<List<Employee>> GetByEmailsAsync(
+        Guid organizationId,
+        List<string> emails,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
-    /// Updates an existing employee
+    /// Adds a new employee to the EF change tracker (does not call SaveChanges)
     /// </summary>
-    /// <param name="employee">Employee entity with updated values</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    Task UpdateAsync(Employee employee, CancellationToken cancellationToken = default);
+    void Add(Employee employee);
 }

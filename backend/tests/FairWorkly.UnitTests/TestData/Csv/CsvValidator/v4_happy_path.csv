@@ -1,0 +1,7 @@
+Employee ID,First Name,Last Name,Pay Period Start,Pay Period End,Pay Date,Award Type,Classification,Employment Type,Hourly Rate,Ordinary Hours,Ordinary Pay,Saturday Hours,Saturday Pay,Sunday Hours,Sunday Pay,Public Holiday Hours,Public Holiday Pay,Gross Pay,Superannuation Paid
+H001,Alice,Smith,2026-01-01,2026-01-07,2026-01-10,Retail,Level 1,full-time,26.55,38,1008.90,,,,,,,1008.90,121.07
+H002,Bob,Jones,2026-01-01,2026-01-07,2026-01-10,Retail,Level 2,part-time,27.16,20,543.20,4,135.80,,,,,679.00,81.48
+H003,Carol,Lee,2026-01-01,2026-01-07,2026-01-10,Retail,Level 3,casual,34.48,25,862.00,8,344.80,4,172.40,,,1379.20,165.50
+H004,David,Wang,2026-01-01,2026-01-07,2026-01-10,Retail,Level 4,fixed-term,28.12,38,1068.56,,,,,8,280.96,1349.52,161.94
+H005,Eve,Brown,2026-01-01,2026-01-07,2026-01-10,Retail,Level 5,full-time,29.27,38,1112.26,4,146.35,4,146.35,8,292.70,1697.66,203.72
+H006,Frank,Chen,2026-01-01,2026-01-07,2026-01-10,Retail,Level 1,casual,33.19,20,663.80,,,,,,,663.80,79.66

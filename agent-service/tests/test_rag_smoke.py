@@ -4,7 +4,7 @@ import logging
 import pytest
 
 import shared.rag.rag_client as rag_client
-from agents.compliance.compliance_feature import ComplianceFeature
+from agents.compliance.feature import ComplianceFeature
 
 
 def test_empty_message_short_circuits():
@@ -42,7 +42,7 @@ def test_missing_vectorstore_still_uses_llm(monkeypatch):
     assert result.get("note") is None
 
 
-def test_llm_unavailable_returns_placeholder(monkeypatch):
+def test_llm_unavailable_returns_structured_fallback(monkeypatch):
     def _llm_unavailable():
         raise RuntimeError("LLM unavailable")
 
@@ -62,4 +62,6 @@ def test_llm_unavailable_returns_placeholder(monkeypatch):
     )
 
     assert result["note"] == "LLM provider not configured"
-    assert "Compliance Feature placeholder" in result["content"]
+    assert "I cannot provide a compliance answer right now." in result["content"]
+    assert "Reason: AI provider is not configured." in result["content"]
+    assert "Next steps:" in result["content"]

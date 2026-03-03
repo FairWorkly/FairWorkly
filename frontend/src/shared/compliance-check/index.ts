@@ -1,14 +1,14 @@
 // Components
 export { ComplianceUpload } from './components/ComplianceUpload'
-export { ComplianceProcessing } from './components/ComplianceProcessing'
 export { ComplianceResults } from './components/ComplianceResults'
 export { IssuesByCategory } from './components/IssuesByCategory'
 export { IssueRow } from './components/IssueRow'
-export { GuidanceModal } from './components/GuidanceModal'
 export { ExportButton } from './components/ExportButton'
 export { ValidationHeader } from './components/ValidationHeader'
-export { AwardSelector } from './components/AwardSelector'
-export type { AwardType } from './components/AwardSelector'
+export { SummaryCards } from './components/SummaryCards'
+export type { StatCardItem } from './components/SummaryCards'
+export { CategoryAccordion } from './components/CategoryAccordion'
+export type { CategoryAccordionProps } from './components/CategoryAccordion'
 
 // Hooks
 export { useValidationRun } from './hooks/useValidationRun'
@@ -22,6 +22,7 @@ export {
   formatDateTime,
   generateValidationId,
   formatFileSize,
+  exportComplianceXlsx,
   exportComplianceCsv,
 } from './utils/formatters'
 export { mapBackendToComplianceResults } from './utils/mapper'

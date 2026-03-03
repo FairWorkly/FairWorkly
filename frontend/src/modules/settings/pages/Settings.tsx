@@ -16,6 +16,7 @@ import {
   PageHeader,
   SectionContent,
 } from './Settings.styles'
+import { CompanyProfileSection } from '../features/CompanyProfile/CompanyProfileSection'
 
 type SettingsSection = 'company' | 'team' | 'billing' | 'security'
 
@@ -58,27 +59,22 @@ export function Settings() {
 
       <SettingsLayout>
         <SettingsNav>
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <SettingsNavItem
               key={item.id}
               onClick={() => setActiveSection(item.id)}
               className={activeSection === item.id ? 'active' : ''}
             >
               {item.icon}
-              <SettingsNavItemText variant="body2">{item.label}</SettingsNavItemText>
+              <SettingsNavItemText variant="body2">
+                {item.label}
+              </SettingsNavItemText>
             </SettingsNavItem>
           ))}
         </SettingsNav>
 
         <SettingsContent>
-          {activeSection === 'company' && (
-            <SectionContent>
-              <Typography variant="h5">Company Profile</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Coming soon...
-              </Typography>
-            </SectionContent>
-          )}
+          {activeSection === 'company' && <CompanyProfileSection />}
 
           {activeSection === 'team' && (
             <SectionContent>

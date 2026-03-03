@@ -25,7 +25,10 @@ interface ForgotPasswordModalProps {
   onClose: () => void
 }
 
-export function ForgotPasswordModal({ open, onClose }: ForgotPasswordModalProps) {
+export function ForgotPasswordModal({
+  open,
+  onClose,
+}: ForgotPasswordModalProps) {
   const [step, setStep] = useState<'email' | 'success'>('email')
   const [email, setEmail] = useState('')
 
@@ -72,7 +75,7 @@ export function ForgotPasswordModal({ open, onClose }: ForgotPasswordModalProps)
                 required
                 fullWidth
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
               />
 
               <FormActions>

@@ -76,7 +76,8 @@ export function ForbiddenPage() {
         <ErrorTitle variant="h5">Access Forbidden</ErrorTitle>
 
         <ErrorMessage variant="body1">
-          You don't have permission to access this page. Please contact your administrator if you believe this is an error.
+          You don't have permission to access this page. Please contact your
+          administrator if you believe this is an error.
         </ErrorMessage>
 
         <ErrorButton to="/">Back to Home</ErrorButton>

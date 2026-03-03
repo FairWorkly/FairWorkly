@@ -62,7 +62,10 @@ namespace FairWorkly.Infrastructure.Persistence
                     parameter,
                     Expression.Constant(nameof(BaseEntity.IsDeleted))
                 );
-                var filter = Expression.Lambda(Expression.Equal(property, Expression.Constant(false)), parameter);
+                var filter = Expression.Lambda(
+                    Expression.Equal(property, Expression.Constant(false)),
+                    parameter
+                );
                 modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filter);
             }
         }

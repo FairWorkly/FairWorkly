@@ -9,4 +9,7 @@ public interface IFileStorageService
 
     // Get file read stream
     Task<Stream?> GetFileStreamAsync(string filePath, CancellationToken ct = default);
+
+    // Delete file from storage
+    Task DeleteAsync(string filePath, CancellationToken ct = default);
 }

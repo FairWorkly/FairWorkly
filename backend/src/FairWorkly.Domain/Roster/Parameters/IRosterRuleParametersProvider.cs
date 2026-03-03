@@ -6,4 +6,3 @@ public interface IRosterRuleParametersProvider
 {
     RosterRuleParameterSet Get(AwardType awardType);
 }
-

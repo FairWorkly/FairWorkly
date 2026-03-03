@@ -1,7 +1,7 @@
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Roster.Entities;
-using FairWorkly.Domain.Roster.Parameters;
 using FairWorkly.Domain.Roster.Enums;
+using FairWorkly.Domain.Roster.Parameters;
 using FairWorkly.Domain.Roster.ValueObjects;
 
 namespace FairWorkly.Domain.Roster.Rules;
@@ -9,7 +9,8 @@ namespace FairWorkly.Domain.Roster.Rules;
 /// <summary>
 /// Validates minimum rest period between consecutive shifts
 /// </summary>
-public class RestPeriodRule(IRosterRuleParametersProvider parametersProvider) : IRosterComplianceRule
+public class RestPeriodRule(IRosterRuleParametersProvider parametersProvider)
+    : IRosterComplianceRule
 {
     private readonly IRosterRuleParametersProvider _parametersProvider = parametersProvider;
 
@@ -42,9 +43,10 @@ public class RestPeriodRule(IRosterRuleParametersProvider parametersProvider) : 
                 if (restHours >= parameters.StandardRestPeriodHours)
                     continue;
 
-                var minimumAllowedRestHours = restHours < parameters.ReducedRestPeriodHours
-                    ? parameters.ReducedRestPeriodHours
-                    : parameters.StandardRestPeriodHours;
+                var minimumAllowedRestHours =
+                    restHours < parameters.ReducedRestPeriodHours
+                        ? parameters.ReducedRestPeriodHours
+                        : parameters.StandardRestPeriodHours;
 
                 issues.Add(
                     new RosterIssue
@@ -54,14 +56,18 @@ public class RestPeriodRule(IRosterRuleParametersProvider parametersProvider) : 
                         ShiftId = null,
                         EmployeeId = employeeId,
                         CheckType = CheckType,
-                        Severity = restHours < parameters.ReducedRestPeriodHours
-                            ? IssueSeverity.Error
-                            : IssueSeverity.Warning,
+                        Severity =
+                            restHours < parameters.ReducedRestPeriodHours
+                                ? IssueSeverity.Error
+                                : IssueSeverity.Warning,
                         Description =
                             $"Only {restHours:F2} hours rest between shifts, minimum is {minimumAllowedRestHours} hours",
                         ExpectedValue = minimumAllowedRestHours,
                         ActualValue = (decimal)restHours,
-                        AffectedDates = AffectedDateSet.FromDates([currentShift.Date, nextShift.Date]),
+                        AffectedDates = AffectedDateSet.FromDates([
+                            currentShift.Date,
+                            nextShift.Date,
+                        ]),
                         AffectedShiftsCount = 2,
                     }
                 );

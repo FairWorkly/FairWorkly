@@ -64,8 +64,23 @@ public static class DbSeeder
             IsDeleted = false,
         };
 
+        var managerUser = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = "manager@fairworkly.com.au",
+            FirstName = "Manager",
+            LastName = "User",
+            Role = UserRole.Manager,
+            IsActive = true,
+            OrganizationId = organizationId,
+            PasswordHash = passwordHasher.Hash("fairworkly123"),
+            CreatedAt = now,
+            IsDeleted = false,
+        };
+
         organizations.Add(demoOrg);
         users.Add(adminUser);
+        users.Add(managerUser);
 
         await context.SaveChangesAsync();
     }

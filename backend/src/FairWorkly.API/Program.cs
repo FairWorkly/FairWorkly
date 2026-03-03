@@ -45,14 +45,15 @@ try
     builder.Host.UseSerilog();
 
     // Register Application and Infrastructure services (DependencyInjection.cs)
+    // Note: IHttpContextAccessor + ICurrentUserService registered in Infrastructure/DependencyInjection.cs
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
-    // Add controllers with JSON options
-    builder.Services.AddControllers()
+    // Add controllers with JSON enum-as-string serialization
+    builder
+        .Services.AddControllers()
         .AddJsonOptions(options =>
         {
-            // Serialize enums as strings (e.g., "Admin" instead of 1)
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
 
@@ -107,19 +108,27 @@ try
     builder.Services.AddCors(options =>
     {
         options.AddPolicy(
-            "AllowAll",
+            "AllowFrontend",
             policy =>
             {
                 if (builder.Environment.IsDevelopment())
                 {
-                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    policy
+                        .WithOrigins("http://localhost:5173")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 }
                 else
                 {
                     var allowedOrigins =
                         builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
                         ?? Array.Empty<string>();
-                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
+                    policy
+                        .WithOrigins(allowedOrigins)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 }
             }
         );
@@ -149,6 +158,7 @@ try
         {
             options.RequireHttpsMetadata = false;
             options.SaveToken = true;
+            options.MapInboundClaims = false; // Keep JWT claim names as-is (e.g. "role" not the long URI)
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -159,13 +169,14 @@ try
                 ValidAudience = jwtAudience,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromSeconds(30),
+                RoleClaimType = "role", // Match the custom "role" claim in our JWT
             };
         });
 
     builder.Services.AddAuthorization(options =>
     {
         options.AddPolicy("RequireAdmin", policy => policy.RequireRole("Admin"));
-        options.AddPolicy("RequireManager", policy => policy.RequireRole("Admin", "HrManager"));
+        options.AddPolicy("RequireManager", policy => policy.RequireRole("Admin", "Manager"));
         options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Employee"));
     });
 
@@ -199,7 +210,7 @@ try
     }
 
     // Must before UseAuthorization
-    app.UseCors("AllowAll");
+    app.UseCors("AllowFrontend");
 
     app.UseHttpsRedirection();
 

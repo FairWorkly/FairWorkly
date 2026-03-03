@@ -1,5 +1,5 @@
 using FairWorkly.Domain.Auth.Interfaces;
-using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using MediatR;
 
 namespace FairWorkly.Application.Settings.Features.GetTeamMembers;
@@ -18,7 +18,7 @@ public class GetTeamMembersQueryHandler(IUserRepository userRepository)
             cancellationToken
         );
         if (currentUser == null)
-            return Result<List<TeamMemberDto>>.Unauthorized("User not found");
+            return Result<List<TeamMemberDto>>.Of401("User not found");
 
         // 2. Get all team members in the same organization
         var teamMembers = await userRepository.GetByOrganizationIdAsync(
@@ -39,6 +39,6 @@ public class GetTeamMembersQueryHandler(IUserRepository userRepository)
             })
             .ToList();
 
-        return Result<List<TeamMemberDto>>.Success(dtos);
+        return Result<List<TeamMemberDto>>.Of200("Team members retrieved", dtos);
     }
 }

@@ -1,10 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using FairWorkly.Application.Auth.Features.ForgotPassword;
 using FairWorkly.Application.Auth.Features.Login;
 using FairWorkly.Application.Auth.Features.Logout;
 using FairWorkly.Application.Auth.Features.Me;
 using FairWorkly.Application.Auth.Features.Refresh;
+using FairWorkly.Application.Auth.Features.Register;
 using FairWorkly.Domain.Common;
+using FairWorkly.Domain.Common.Result;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,46 +15,35 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace FairWorkly.API.Controllers.Auth;
 
-[ApiController]
+// TODO: [Refactor] Migrate manual JWT claim extraction (User.FindFirstValue) to ICurrentUserService.
+// ICurrentUserService is already registered in DI and used by RosterController.
+// AuthController is special (has AllowAnonymous endpoints), so only migrate Me() and Logout().
+// Other controllers needing userId/orgId should inject ICurrentUserService directly.
+// See: Infrastructure/Services/CurrentUserService.cs, RosterController.cs for reference.
 [Route("api/[controller]")]
-public class AuthController(IMediator mediator, IWebHostEnvironment env) : ControllerBase
+public class AuthController(IMediator mediator) : BaseApiController
 {
     [SwaggerRequestExample(
         typeof(LoginCommand),
         typeof(FairWorkly.API.SwaggerExamples.LoginCommandExample)
     )]
     [HttpPost("login")]
-    [AllowAnonymous] // Allow anonymous access for the login endpoint
-    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginCommand command)
+    [AllowAnonymous]
+    public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
         var result = await mediator.Send(command);
 
-        // Handle validation failures (from ValidationBehavior)
-        if (result.Type == ResultType.ValidationFailure)
+        if (result.IsSuccess)
         {
-            return await HandleValidationFailureAsync(result);
+            SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
         }
 
-        if (result.IsFailure)
-        {
-            if (result.Type == ResultType.Forbidden)
-            {
-                return StatusCode(403, new { message = result.ErrorMessage });
-            }
-
-            return Unauthorized(new { message = result.ErrorMessage });
-        }
-
-        // Put the RefreshToken into an HttpOnly cookie
-        SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
-
-        // Return the AccessToken and user info (excluding the RefreshToken)
-        return Ok(result.Value);
+        return RespondResult(result);
     }
 
     [HttpPost("refresh")]
     [AllowAnonymous]
-    public async Task<ActionResult> Refresh()
+    public async Task<IActionResult> Refresh()
     {
         // Read refresh token from HttpOnly cookie
         if (
@@ -59,53 +51,62 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
             || string.IsNullOrWhiteSpace(refreshTokenPlain)
         )
         {
-            return Unauthorized();
+            return RespondResult(Result<RefreshResponse>.Of401("Missing refresh token"));
         }
 
         var cmd = new RefreshCommand { RefreshTokenPlain = refreshTokenPlain };
         var result = await mediator.Send(cmd);
 
-        if (result.IsFailure)
+        if (result.IsSuccess)
         {
-            if (result.Type == ResultType.Forbidden)
-            {
-                return StatusCode(403, new { message = result.ErrorMessage });
-            }
-
-            return Unauthorized(new { message = result.ErrorMessage });
+            // Update cookie with new refresh token
+            SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
         }
 
-        // Update cookie with new refresh token
-        SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
+        return RespondResult(result);
+    }
 
-        // Return new access token
-        return Ok(new { accessToken = result.Value.AccessToken });
+    [HttpPost("register")]
+    [AllowAnonymous]
+    [SwaggerRequestExample(
+        typeof(RegisterCommand),
+        typeof(FairWorkly.API.SwaggerExamples.RegisterCommandExample)
+    )]
+    public async Task<IActionResult> Register([FromBody] RegisterCommand command)
+    {
+        var result = await mediator.Send(command);
+
+        if (result.IsSuccess)
+        {
+            SetRefreshTokenCookie(result.Value!.RefreshToken, result.Value.RefreshTokenExpiration);
+        }
+
+        return RespondResult(result);
+    }
+
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+    {
+        var result = await mediator.Send(command);
+        return RespondResult(result);
     }
 
     [HttpGet("me")]
     [Authorize]
-    public async Task<ActionResult> Me()
+    public async Task<IActionResult> Me()
     {
         // Extract user id from claims (sub)
         var sub =
             User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(sub, out var userId) || userId == Guid.Empty)
-            return Unauthorized();
+            return RespondResult(Result<UserDto>.Of401());
 
         var query = new GetCurrentUserQuery { UserId = userId };
         var result = await mediator.Send(query);
 
-        if (result.IsFailure)
-        {
-            if (result.Type == ResultType.NotFound)
-            {
-                return NotFound();
-            }
-            return BadRequest(new { message = result.ErrorMessage });
-        }
-
-        return Ok(result.Value);
+        return RespondResult(result);
     }
 
     [HttpPost("logout")]
@@ -124,18 +125,12 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
             userId = parsed;
 
         var cmd = new LogoutCommand { UserId = userId, RefreshTokenPlain = refreshTokenPlain };
-
         var result = await mediator.Send(cmd);
 
         // Remove cookie from client regardless of DB result (options must match original cookie)
         Response.Cookies.Delete("refreshToken", GetRefreshTokenCookieOptions(DateTime.UtcNow));
 
-        if (result.IsFailure)
-        {
-            return BadRequest(new { message = result.ErrorMessage });
-        }
-
-        return NoContent();
+        return RespondResult(result);
     }
 
     // --- Private helper: centralize cookie policy ---
@@ -154,39 +149,12 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         {
             HttpOnly = true, // prevent JS access (XSS protection)
             Expires = expires,
+            Path = "/",
 
-            // Local development (http) -> Secure=false
-            // Production (https) -> Secure=true
-            Secure = env.IsProduction(),
-
-            // Set cross-domain to None in production environment, and Lax in development environment
-            SameSite = env.IsProduction() ? SameSiteMode.None : SameSiteMode.Lax,
+            // Use Secure cookies and SameSite=None to allow cross-site refresh in dev
+            // (required for 5173 -> 7075 when using HttpOnly refresh cookies)
+            Secure = true,
+            SameSite = SameSiteMode.None,
         };
-    }
-
-    /// <summary>
-    /// Handle validation failures from ValidationBehavior - return ProblemDetails format
-    /// matching the original GlobalExceptionHandler response format exactly
-    /// </summary>
-    private async Task<ActionResult> HandleValidationFailureAsync<T>(Result<T> result)
-    {
-        var errors =
-            result
-                .ValidationErrors?.GroupBy(e => e.Field)
-                .ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray())
-            ?? new Dictionary<string, string[]>();
-
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Validation Failed",
-            Detail = "One or more validation errors occurred.",
-            Instance = HttpContext.Request.Path,
-        };
-        problemDetails.Extensions.Add("errors", errors);
-
-        Response.StatusCode = StatusCodes.Status400BadRequest;
-        await Response.WriteAsJsonAsync(problemDetails);
-        return new EmptyResult();
     }
 }

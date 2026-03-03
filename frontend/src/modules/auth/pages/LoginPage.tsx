@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { LoginForm, SignupForm, ForgotPasswordModal } from '../features'
-import type { LoginFormData, SignupFormData } from '../types'
+import type { SignupFormData } from '../types'
+import { useLogin, useRegister } from '../hooks'
 import {
+  AuthErrorAlert,
   AuthHeader,
   AuthTitle,
   AuthSubtitle,
@@ -11,47 +13,31 @@ import {
 } from '../ui'
 
 type TabType = 'login' | 'signup'
-const DEV_USER_NAME_STORAGE_KEY = 'dev:user-name'
-const AUTH_SIMULATED_DELAY_MS = 900
 
 export function LoginPage() {
   const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
+  const {
+    login,
+    isSubmitting: isLoginSubmitting,
+    error: loginError,
+  } = useLogin()
+  const {
+    register,
+    isSubmitting: isRegisterSubmitting,
+    error: registerError,
+  } = useRegister()
   const initialTab = searchParams.get('signup') === 'true' ? 'signup' : 'login'
   const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
-
-  const simulateAuth = (options: { name: string; provider: 'email' | 'google' }) => {
-    if (isSubmitting || isGoogleLoading) return
-    const setLoading = options.provider === 'google' ? setIsGoogleLoading : setIsSubmitting
-    setLoading(true)
-
-    setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(DEV_USER_NAME_STORAGE_KEY, options.name)
-      }
-      setLoading(false)
-      navigate('/fairbot')
-    }, AUTH_SIMULATED_DELAY_MS)
-  }
-
-  const handleLogin = (values: LoginFormData) => {
-    // TODO: Implement actual login logic
-    const name = values.email ? values.email.split('@')[0] : 'Demo User'
-    simulateAuth({ name, provider: 'email' })
-  }
+  const isGoogleLoading = false
 
   const handleSignup = (values: SignupFormData) => {
-    // TODO: Implement actual signup logic
-    const name = values.firstName || values.email || 'New User'
-    simulateAuth({ name, provider: 'email' })
+    void register(values)
   }
 
   const handleGoogleLogin = () => {
     // TODO: Backend-driven Google OAuth (redirect to server auth endpoint).
-    simulateAuth({ name: 'Google User', provider: 'google' })
+    console.log('Google login not yet implemented')
   }
 
   return (
@@ -66,27 +52,41 @@ export function LoginPage() {
       </AuthHeader>
 
       <AuthTabList role="tablist">
-        <AuthTabButton type="button" active={activeTab === 'login'} onClick={() => setActiveTab('login')}>
+        <AuthTabButton
+          type="button"
+          active={activeTab === 'login'}
+          onClick={() => setActiveTab('login')}
+        >
           Sign In
         </AuthTabButton>
-        <AuthTabButton type="button" active={activeTab === 'signup'} onClick={() => setActiveTab('signup')}>
+        <AuthTabButton
+          type="button"
+          active={activeTab === 'signup'}
+          onClick={() => setActiveTab('signup')}
+        >
           Create Account
         </AuthTabButton>
       </AuthTabList>
 
+      {(activeTab === 'login' ? loginError : registerError) && (
+        <AuthErrorAlert severity="error">
+          {activeTab === 'login' ? loginError : registerError}
+        </AuthErrorAlert>
+      )}
+
       {activeTab === 'login' ? (
         <LoginForm
-          onSubmit={handleLogin}
+          onSubmit={login}
           onGoogleLogin={handleGoogleLogin}
           onForgotPassword={() => setForgotModalOpen(true)}
-          isSubmitting={isSubmitting}
+          isSubmitting={isLoginSubmitting}
           isGoogleLoading={isGoogleLoading}
         />
       ) : (
         <SignupForm
           onSubmit={handleSignup}
           onGoogleLogin={handleGoogleLogin}
-          isSubmitting={isSubmitting}
+          isSubmitting={isRegisterSubmitting}
           isGoogleLoading={isGoogleLoading}
         />
       )}

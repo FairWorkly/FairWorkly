@@ -1,24 +1,31 @@
 class IntentRouter:
-    """
-    Simple Router - Determines destination based on message content
-    """
-    
-    def route(self, message: str, file_name: str = None) -> str:
+    """Routes incoming requests to the appropriate feature based on intent_hint."""
+
+    _HINT_MAP = {
+        "roster_explain": "roster_explain",
+        "roster": "roster",
+        "payroll": "payroll_verify",
+        "payroll_explain": "payroll_verify",
+        "compliance": "compliance_qa",
+        "compliance_qa": "compliance_qa",
+    }
+
+    def route(self, message: str, file_name: str = None, intent_hint: str = None) -> str:
+        """Determine which feature handles this request.
+
+        Primary: explicit intent_hint from the client.
+        Fallback: file upload → roster, otherwise → compliance_qa.
         """
-       Returns which function to use
-        """
-       # Rule 1: If the filename contains payroll -> payroll feature
-        if file_name and 'payroll' in file_name.lower():
-            return "payroll_verify"
-        
-        # Rule 2: If the filename contains roster -> compliance feature
-        if file_name and 'roster' in file_name.lower():
-            return "compliance_roster"
-        
-        # Rule 3: If the message contains keywords -> compliance Q&A
-        keywords = ['penalty rate', 'overtime', 'award', 'break']
-        if any(kw in message.lower() for kw in keywords):
-            return "compliance_qa"
-        
-        # Default: compliance Q&A
+        if intent_hint:
+            hint = intent_hint.lower().strip()
+            resolved = self._HINT_MAP.get(hint)
+            if resolved:
+                # roster hint without a file means the user wants to explain results
+                if hint == "roster" and not file_name:
+                    return "roster_explain"
+                return resolved
+
+        # Fallback: file upload → roster, no file → compliance_qa
+        if file_name:
+            return "roster"
         return "compliance_qa"

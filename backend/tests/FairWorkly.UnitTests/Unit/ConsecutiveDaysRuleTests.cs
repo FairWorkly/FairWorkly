@@ -1,9 +1,9 @@
-using FairWorkly.Domain.Roster.Rules;
-using FairWorkly.Domain.Roster.Parameters;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Employees.Entities;
 using FairWorkly.Domain.Roster.Entities;
 using FairWorkly.Domain.Roster.Enums;
+using FairWorkly.Domain.Roster.Parameters;
+using FairWorkly.Domain.Roster.Rules;
 using FluentAssertions;
 
 namespace FairWorkly.UnitTests.Unit;
@@ -136,7 +136,7 @@ public class ConsecutiveDaysRuleTests
         for (var i = 0; i < 7; i++)
         {
             var date = new DateTime(2026, 1, 1).AddDays(i);
-            shifts.Add(CreateShiftForEmployee(employee, date, 9, 13));  // Morning shift
+            shifts.Add(CreateShiftForEmployee(employee, date, 9, 13)); // Morning shift
             shifts.Add(CreateShiftForEmployee(employee, date, 14, 18)); // Afternoon shift
         }
 
@@ -197,7 +197,12 @@ public class ConsecutiveDaysRuleTests
         };
     }
 
-    private static Shift CreateShiftForEmployee(Employee employee, DateTime date, int startHour, int endHour)
+    private static Shift CreateShiftForEmployee(
+        Employee employee,
+        DateTime date,
+        int startHour,
+        int endHour
+    )
     {
         return new Shift
         {

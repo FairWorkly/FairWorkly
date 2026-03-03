@@ -12,12 +12,15 @@ cd agent-service
 poetry install
 ```
 
+Set secrets via shell environment variables (recommended):
 
 ```bash
-cp .env.example .env
-# edit .env so OPENAI_API_KEY has a real value
-# optional: set OPENAI_API_BASE if you use a non-default endpoint
+export OPENAI_API_KEY="your-openai-key"
+export AGENT_SERVICE_KEY="your-shared-service-key"
 ```
+
+Optional: keep non-secret defaults in `.env` by copying `.env.example`.
+If you intentionally want dotenv auto-load, set `FAIRWORKLY_ENABLE_DOTENV=1`.
 
 
 ## Build the FAISS index (required for RAG)
@@ -37,7 +40,15 @@ Loading the FAISS store uses `allow_dangerous_deserialization=True`. Only load `
 ## Run
 
 Start the FastAPI server with Uvicorn via Poetry (after the FAISS index exists).  
-`config.yaml` defaults to the OpenAI “online” mode for both embeddings and LLM calls, so ensure `.env` has a valid `OPENAI_API_KEY`. To fall back to a local model, change `model_params.deployment_mode_llm` / `deployment_mode_embedding` back to `local` **and re-run** `scripts/ingest_assets_to_faiss.py` so the FAISS index matches the embedding model in use.
+`config.yaml` defaults to the OpenAI “online” mode for both embeddings and LLM calls, so ensure your shell has a valid `OPENAI_API_KEY`. To fall back to a local model, change `model_params.deployment_mode_llm` / `deployment_mode_embedding` back to `local` **and re-run** `scripts/ingest_assets_to_faiss.py` so the FAISS index matches the embedding model in use.
+
+Security-related env vars:
+
+- `AGENT_SERVICE_KEY` (required): shared secret validated via `X-Service-Key`
+- `ALLOWED_ORIGINS` (optional): comma-separated CORS origins, default `http://localhost:5680`
+- `MAX_REQUEST_BYTES` (optional): request body size limit for `/api/agent/chat`, default `52428800`
+- `RATE_LIMIT_REQUESTS` (optional): request count per window, default `60`
+- `RATE_LIMIT_WINDOW_SECONDS` (optional): window size, default `60`
 
 ```bash
 poetry run uvicorn master_agent.main:app --port 8000
@@ -66,7 +77,8 @@ http://localhost:8000/docs
 1. In Swagger, expand **POST /api/agent/chat**.
 2. Click **Try it out**.
 3. Provide a message and (optionally) upload a file.
-4. Execute and verify that the payload is routed to the compliance placeholder feature (the response shows which feature handled the request).
+4. Add request header `X-Service-Key` with your `AGENT_SERVICE_KEY` value.
+5. Execute and verify that the payload is routed to the expected feature.
 
 ## Directory structure
 

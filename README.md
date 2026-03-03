@@ -51,15 +51,46 @@ fairworkly/
 ### Option 1: Docker (Recommended)
 
 ```bash
-# 1. Copy environment files
+# 1. Copy non-secret environment file
 cp frontend/.env.example frontend/.env
-cp agent-service/.env.example agent-service/.env
 
-# 2. Start all services
+# 2. Export secrets in your local shell (do NOT commit into .env)
+export OPENAI_API_KEY="your-openai-key"
+export AGENT_SERVICE_KEY="your-shared-service-key"
+export AiSettings__ServiceKey="$AGENT_SERVICE_KEY"
+
+# 3. Start all services
 docker compose up --build
 ```
 
 ### Option 2: Manual Setup
+
+**Quick start (recommended):**
+
+```bash
+# 1. Copy non-secret environment files
+cp frontend/.env.example frontend/.env
+cp backend/src/FairWorkly.API/appsettings.Development.example.json backend/src/FairWorkly.API/appsettings.Development.json
+
+# 2. Export secrets in your local shell
+export OPENAI_API_KEY="your-openai-key"
+export AGENT_SERVICE_KEY="your-shared-service-key"
+export AiSettings__ServiceKey="$AGENT_SERVICE_KEY"
+
+# 3. Validate local config consistency
+make doctor
+
+# 4. Start frontend + backend + agent-service
+make dev-up
+```
+
+Stop all services started by `make dev-up`:
+
+```bash
+make dev-down
+```
+
+**Start each service manually:**
 
 **Frontend:**
 
@@ -76,7 +107,7 @@ cd backend && dotnet restore && dotnet run --project src/FairWorkly.API
 **Agent Service:**
 
 ```bash
-cd agent-service && poetry install && poetry run uvicorn main:app --reload
+cd agent-service && poetry install && poetry run uvicorn master_agent.main:app --reload
 ```
 
 ### Ports
@@ -86,6 +117,29 @@ cd agent-service && poetry install && poetry run uvicorn main:app --reload
 | Frontend      | http://localhost:5173 |
 | Backend API   | http://localhost:5680 |
 | Agent Service | http://localhost:8000 |
+
+### Local Secret Injection (Recommended)
+
+Use shell startup files for local-only secrets:
+
+```bash
+# ~/.zshrc or ~/.zprofile
+export OPENAI_API_KEY="your-openai-key"
+export AGENT_SERVICE_KEY="your-shared-service-key"
+export AiSettings__ServiceKey="$AGENT_SERVICE_KEY"
+```
+
+Then reload and verify:
+
+```bash
+source ~/.zshrc
+make doctor
+```
+
+Do not place secrets in:
+- `frontend/.env`
+- `agent-service/.env`
+- any tracked `appsettings*.json`
 
 ## 📚 Documentation
 

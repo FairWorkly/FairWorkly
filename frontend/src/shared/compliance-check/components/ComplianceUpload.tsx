@@ -1,11 +1,13 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import {
+  Alert,
+  AlertTitle,
   Box,
+  CircularProgress,
   Typography,
   Button,
   IconButton,
   Paper,
-  Divider,
   styled,
 } from '@mui/material'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
@@ -13,8 +15,9 @@ import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutl
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined'
 import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined'
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined'
-import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined'
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import type {
   UploadedFile,
   ComplianceConfig,
@@ -85,14 +88,9 @@ const FileIconContainer = styled(Box)(({ theme }) => ({
   color: theme.palette.primary.main,
 }))
 
-const ConfigHeader = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing(1.5),
-  marginBottom: theme.spacing(4),
-}))
-
-const ValidationListItem = styled(Box)(({ theme }) => ({
+const ValidationListItem = styled(Box, {
+  shouldForwardProp: prop => prop !== 'interactive',
+})<{ interactive?: boolean }>(({ theme, interactive }) => ({
   display: 'flex',
   alignItems: 'center',
   padding: theme.spacing(2, 2.5),
@@ -103,10 +101,13 @@ const ValidationListItem = styled(Box)(({ theme }) => ({
   transition: theme.transitions.create(['border-color', 'background-color'], {
     duration: theme.transitions.duration.shortest,
   }),
-  '&:hover': {
-    borderColor: theme.palette.divider,
-    backgroundColor: theme.palette.background.default,
-  },
+  ...(interactive && {
+    cursor: 'pointer',
+    '&:hover': {
+      borderColor: theme.palette.divider,
+      backgroundColor: theme.palette.background.default,
+    },
+  }),
   '&:last-child': {
     marginBottom: 0,
   },
@@ -117,7 +118,10 @@ const CoverageCheckIcon = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   marginRight: theme.spacing(2),
-  color: theme.palette.success.main,
+  color: theme.palette.text.disabled,
+  '& .MuiSvgIcon-root': {
+    fontSize: 8,
+  },
 }))
 
 const ConfigPaper = styled(Paper)(({ theme }) => ({
@@ -188,33 +192,31 @@ const IconLarge = styled(Box)(({ theme }) => ({
   },
 }))
 
-const IconMedium = styled(Box)(({ theme }) => ({
-  '& .MuiSvgIcon-root': {
-    fontSize: theme.spacing(3),
-  },
-}))
-
 const IconSmall = styled(Box)(({ theme }) => ({
   '& .MuiSvgIcon-root': {
     fontSize: theme.spacing(2.5),
   },
 }))
 
-const ConfigDivider = styled(Divider)(({ theme }) => ({
-  marginTop: theme.spacing(5),
-  marginBottom: theme.spacing(5),
-  borderStyle: 'dashed',
+const ValidationCoverageHeader = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1.5),
+  marginBottom: theme.spacing(2),
 }))
 
-const ConfigHeaderTitle = styled(Typography)(({ theme }) => ({
-  ...theme.typography.h6,
-  fontWeight: theme.typography.fontWeightBold,
+const ValidationCoverageIcon = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  color: theme.palette.primary.main,
+  '& .MuiSvgIcon-root': {
+    fontSize: theme.spacing(3),
+  },
 }))
 
 const ValidationCoverageTitle = styled(Typography)(({ theme }) => ({
   ...theme.typography.h6,
   fontWeight: theme.typography.fontWeightBold,
-  marginBottom: theme.spacing(2),
 }))
 
 const ValidationItemText = styled(Typography)(({ theme }) => ({
@@ -230,8 +232,26 @@ interface ComplianceUploadProps {
   onStartAnalysis: () => void
   onCancel: () => void
   acceptFileTypes?: string
-  configSection?: React.ReactNode
-  validationItems?: string[]
+  validationItems?: { key: string; label: string }[]
+  // Optional toggle support — when provided, validation items become
+  // clickable switches (e.g. payroll lets users disable individual checks).
+  // Keys must match the keys used in validationItems entries.
+  // Omit both props to keep items as a static read-only list (roster).
+  validationItemStates?: Record<string, boolean>
+  onToggleValidationItem?: (key: string) => void
+  isLoading?: boolean
+  error?: string | null
+}
+
+function parseMaxFileSize(label: string): number {
+  const match = label.match(/^(\d+(?:\.\d+)?)\s*(KB|MB|GB)$/i)
+  if (!match) return Infinity
+  const value = parseFloat(match[1])
+  const unit = match[2].toUpperCase()
+  if (unit === 'KB') return value * 1024
+  if (unit === 'MB') return value * 1024 * 1024
+  if (unit === 'GB') return value * 1024 * 1024 * 1024
+  return Infinity
 }
 
 export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
@@ -242,15 +262,45 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
   onStartAnalysis,
   onCancel,
   acceptFileTypes = '.csv',
-  configSection,
   validationItems = [],
+  validationItemStates,
+  onToggleValidationItem,
+  isLoading = false,
+  error = null,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [fileError, setFileError] = useState<string | null>(null)
+  const maxBytes = parseMaxFileSize(config.maxFileSize)
+
   const handleFileSelection = (files: FileList | null) => {
     if (!files?.length) {
       return
     }
 
+    const file = files[0]
+
+    // Validate file extension against acceptFileTypes (e.g. ".xlsx", ".csv,.xlsx")
+    const allowed = acceptFileTypes
+      .split(',')
+      .map(ext => ext.trim().toLowerCase())
+    const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase()
+    if (!allowed.includes(ext)) {
+      setFileError(
+        `Unsupported file type. Please upload ${allowed.join(', ')} files.`
+      )
+      return
+    }
+
+    // Validate file size against config.maxFileSize
+    if (file.size > maxBytes) {
+      setFileError(`File is too large. Maximum size is ${config.maxFileSize}.`)
+      return
+    }
+
+    setFileError(null)
+
+    // Wrap in a synthetic ChangeEvent so the parent handler has a
+    // uniform signature for both <input> change and drag-and-drop.
     const event = {
       target: { files },
     } as React.ChangeEvent<HTMLInputElement>
@@ -271,6 +321,23 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
   return (
     <Box>
       <PageTitle variant="h4">{config.title}</PageTitle>
+
+      {fileError && (
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+          onClose={() => setFileError(null)}
+        >
+          {fileError}
+        </Alert>
+      )}
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3, whiteSpace: 'pre-line' }}>
+          <AlertTitle>Error</AlertTitle>
+          {error}
+        </Alert>
+      )}
 
       {uploadedFiles.length > 0 ? (
         <FileListContainer>
@@ -334,29 +401,52 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
       )}
 
       <ConfigPaper>
-        <ConfigHeader>
-          <IconMedium>
-            <TuneOutlinedIcon />
-          </IconMedium>
-          <ConfigHeaderTitle>Configuration</ConfigHeaderTitle>
-        </ConfigHeader>
-
-        {configSection}
-
-        <ConfigDivider />
-
         <CoverageSection>
-          <ValidationCoverageTitle>Validation Coverage</ValidationCoverageTitle>
+          <ValidationCoverageHeader>
+            <ValidationCoverageIcon>
+              <SettingsOutlinedIcon />
+            </ValidationCoverageIcon>
+            <ValidationCoverageTitle>
+              Validation Coverage
+            </ValidationCoverageTitle>
+          </ValidationCoverageHeader>
           {validationItems.length > 0 && (
             <Box>
-              {validationItems.map((item, index) => (
-                <ValidationListItem key={index}>
-                  <CoverageCheckIcon>
-                    <IconSmall>
-                      <CheckCircleOutlinedIcon />
-                    </IconSmall>
+              {validationItems.map(item => (
+                <ValidationListItem
+                  key={item.key}
+                  interactive={!!onToggleValidationItem}
+                  onClick={
+                    onToggleValidationItem
+                      ? () => onToggleValidationItem(item.key)
+                      : undefined
+                  }
+                  {...(onToggleValidationItem && {
+                    role: 'switch',
+                    tabIndex: 0,
+                    'aria-checked': validationItemStates?.[item.key] ?? false,
+                    onKeyDown: (e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onToggleValidationItem(item.key)
+                      }
+                    },
+                  })}
+                >
+                  <CoverageCheckIcon
+                    sx={
+                      validationItemStates
+                        ? {
+                            color: validationItemStates[item.key]
+                              ? 'primary.main'
+                              : 'text.disabled',
+                          }
+                        : undefined
+                    }
+                  >
+                    <FiberManualRecordIcon />
                   </CoverageCheckIcon>
-                  <ValidationItemText>{item}</ValidationItemText>
+                  <ValidationItemText>{item.label}</ValidationItemText>
                 </ValidationListItem>
               ))}
             </Box>
@@ -373,11 +463,17 @@ export const ComplianceUpload: React.FC<ComplianceUploadProps> = ({
           </CancelButton>
           <PrimaryButton
             variant="contained"
-            disabled={uploadedFiles.length === 0}
-            startIcon={<CheckCircleOutlinedIcon />}
+            disabled={uploadedFiles.length === 0 || isLoading}
+            startIcon={
+              isLoading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <CheckCircleOutlinedIcon />
+              )
+            }
             onClick={onStartAnalysis}
           >
-            Start Validation
+            {isLoading ? 'Validating...' : 'Start Validation'}
           </PrimaryButton>
         </ActionButtonGroup>
       </ConfigPaper>

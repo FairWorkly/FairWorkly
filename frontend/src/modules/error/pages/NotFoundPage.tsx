@@ -75,7 +75,9 @@ export default function NotFoundPage() {
 
         <ErrorTitle variant="h5">Page Not Found</ErrorTitle>
 
-        <ErrorMessage variant="body1">The page you're looking for doesn't exist.</ErrorMessage>
+        <ErrorMessage variant="body1">
+          The page you're looking for doesn't exist.
+        </ErrorMessage>
 
         <ErrorButton to="/">Back to Home</ErrorButton>
       </ErrorContainer>

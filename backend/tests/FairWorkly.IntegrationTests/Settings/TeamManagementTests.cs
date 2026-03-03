@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using FairWorkly.Application.Settings.Features.GetTeamMembers;
 using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Auth.Enums;
@@ -28,11 +29,15 @@ public class TeamManagementTests : AuthTestsBase
 
         // Assert
         response.EnsureSuccessStatusCode();
-        var members = await response.Content.ReadFromJsonAsync<List<TeamMemberDto>>();
+        var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
 
-        Assert.NotNull(members);
-        Assert.NotEmpty(members);
-        Assert.Contains(members, m => m.Email == "test@example.com");
+        Assert.Equal(200, json.GetProperty("code").GetInt32());
+        var data = json.GetProperty("data");
+        Assert.True(data.GetArrayLength() > 0);
+        Assert.Contains(
+            data.EnumerateArray(),
+            m => m.GetProperty("email").GetString() == "test@example.com"
+        );
     }
 
     [Fact]
@@ -112,7 +117,7 @@ public class TeamManagementTests : AuthTestsBase
         );
 
         // Assert
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode); // Or BadRequest, depends on implementation. Controller says 403 (Forbidden) for result.Type == Forbidden
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
@@ -161,10 +166,9 @@ public class TeamManagementTests : AuthTestsBase
     }
 
     [Fact]
-    public async Task GetTeamMembers_ShouldReturnMembers_WhenManager()
+    public async Task GetTeamMembers_ShouldReturnForbidden_WhenManager()
     {
-        // Arrange
-        // 1. Create a Manager user
+        // Arrange - Only Admin can access Settings
         var managerEmail = $"manager_{Guid.NewGuid()}@example.com";
         var password = "TestPassword123";
 
@@ -174,7 +178,6 @@ public class TeamManagementTests : AuthTestsBase
             var hasher =
                 scope.ServiceProvider.GetRequiredService<FairWorkly.Application.Common.Interfaces.IPasswordHasher>();
 
-            // Get valid org
             var adminUser = await db.Users.FirstAsync(u => u.Email == "test@example.com");
 
             var manager = new User
@@ -193,25 +196,21 @@ public class TeamManagementTests : AuthTestsBase
             await db.SaveChangesAsync();
         }
 
-        // 2. Login as Manager
+        // Login as Manager
         var accessToken = await GetAccessTokenAsync(managerEmail, password);
         var client = CreateAuthenticatedClient(accessToken);
 
         // Act
         var response = await client.GetAsync("/api/settings/team");
 
-        // Assert
-        response.EnsureSuccessStatusCode();
-        var members = await response.Content.ReadFromJsonAsync<List<TeamMemberDto>>();
-        Assert.NotNull(members);
-        Assert.NotEmpty(members);
+        // Assert - Manager should be forbidden from Settings
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task UpdateTeamMember_ShouldReturnForbidden_WhenManager()
     {
         // Arrange
-        // 1. Create a Manager user
         var managerEmail = $"manager_upd_{Guid.NewGuid()}@example.com";
         var password = "TestPassword123";
 
@@ -223,9 +222,8 @@ public class TeamManagementTests : AuthTestsBase
             var hasher =
                 scope.ServiceProvider.GetRequiredService<FairWorkly.Application.Common.Interfaces.IPasswordHasher>();
 
-            // Get valid org and a target user
             var adminUser = await db.Users.FirstAsync(u => u.Email == "test@example.com");
-            targetUserId = adminUser.Id; // Try to update the admin
+            targetUserId = adminUser.Id;
 
             var manager = new User
             {
@@ -243,21 +241,16 @@ public class TeamManagementTests : AuthTestsBase
             await db.SaveChangesAsync();
         }
 
-        // 2. Login as Manager
+        // Login as Manager
         var accessToken = await GetAccessTokenAsync(managerEmail, password);
         var client = CreateAuthenticatedClient(accessToken);
 
-        var request = new
-        {
-            Role = UserRole.Admin.ToString(), // Try to promote self or change other
-            IsActive = true,
-        };
+        var request = new { Role = UserRole.Admin.ToString(), IsActive = true };
 
         // Act
         var response = await client.PatchAsJsonAsync($"/api/settings/team/{targetUserId}", request);
 
-        // Assert
-        // Should be 403 because of [Authorize(Policy = "RequireAdmin")]
+        // Assert - Manager should be forbidden from Settings
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 }
