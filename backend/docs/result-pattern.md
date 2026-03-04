@@ -364,6 +364,11 @@ Rules:
 | Processing error (simple) | `Of422(msg)` | `{ code, msg }` |
 | Processing error (with list) | `Of422(msg, errors)` | `{ code, msg, data: { errors } }` |
 | Infrastructure failure | `Of500(msg)` | `{ code, msg }` |
+| Upstream response unparseable | `Of502(msg)` | `{ code, msg }` |
+| Upstream service unavailable | `Of503(msg)` | `{ code, msg }` |
+| Upstream service timeout | `Of504(msg)` | `{ code, msg }` |
+| Payload too large | `Of413(msg)` | `{ code, msg }` |
+| Too many requests | `Of429(msg)` | `{ code, msg }` |
 | Input validation failed | No code needed — Validator handles it | `{ code: 400, msg, data: { errors } }` |
 
 ---

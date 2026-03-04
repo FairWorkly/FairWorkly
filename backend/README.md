@@ -1,6 +1,6 @@
 # FairWorkly Backend
 
-The core backend service for FairWorkly, built on .NET 8. The backend adopts a **Hybrid Architecture** to balance the needs of complex business logic with simple data management.
+The core backend service for FairWorkly, built on .NET 8. The backend adopts **Vertical Slicing** architecture, splitting code by business feature into independent Features.
 
 ## Tech Stack
 
@@ -12,25 +12,16 @@ The core backend service for FairWorkly, built on .NET 8. The backend adopts a *
 - **Task Orchestration**: MediatR (CQRS)
 - **Code Formatting**: CSharpier (Enforced)
 
-## Project Architecture (Hybrid Architecture)
+## Project Architecture (Vertical Slicing)
 
-### 1. Core Business: Vertical Slicing
+All modules use the **CQRS + MediatR** pattern, vertically slicing functionality into independent Features.
 
-For Agent modules with complex logic involving AI Orchestration, we use the **CQRS + MediatR** pattern, vertically slicing functionality into independent Features.
-
-- **Applicable Modules**:
-  - `src/FairWorkly.Application/Compliance/` (Compliance Agent)
+- **Modules**:
+  - `src/FairWorkly.Application/Roster/` (Roster Agent)
   - `src/FairWorkly.Application/Payroll/` (Payroll Agent)
+  - `src/FairWorkly.Application/FairBot/` (FairBot Chat)
 - **Code Structure**: Each Feature contains independent `Command`, `Handler`, `Validator`, and `DTO`.
-
-### 2. Basic Operations: Traditional N-Layer
-
-For management modules that are primarily CRUD-based with relatively linear logic, we retain the traditional **Service-Repository** pattern.
-
-- **Applicable Modules**:
-  - `src/FairWorkly.Application/Documents/` (Document Management)
-  - `src/FairWorkly.Application/Employees/` (Employee Profiles)
-- **Code Structure**: `Controller` -> `Service` (Business Logic) -> `Repository` (Data Access).
+- **AI Integration**: External AI services are called via **Refit** typed interfaces, registered per target service in DI.
 
 ## Prerequisites
 
@@ -285,9 +276,9 @@ Test with `reset-database.ps1` or `update-database.ps1` depending on your situat
 
 ## Advanced Development Guide
 
-For details on how to develop new Features, write AI Orchestrators, and interface with the Python Agent, please refer to:
+For details on how to develop new Features, use Refit interfaces to call the Python Agent, and write tests, please refer to:
 
-- [Backend Development Guide](../docs/guides/backend/development.md) - Comprehensive guide with code examples
-- [Result<T> Pattern Guide](../docs/guides/backend/result-pattern.md) - How to use Result pattern in Handlers
+- [Backend Development Guide](docs/backend-development-guide.md) - Comprehensive guide with code examples
+- [Result<T> Pattern Guide](docs/result-pattern.md) - How to use Result pattern in Handlers
 
 > These documents are also available on the team's Google Drive.
