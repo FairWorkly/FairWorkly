@@ -1,0 +1,59 @@
+name: Build and Push Agent Service Image
+
+on:
+  push:
+    branches: [ main, devops/eric-ECS-ECR-FARGATE ]
+    paths:
+      - "agent-service/**"
+      - ".github/workflows/build-push-agent-ey.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image tags
+        id: vars
+        run: |
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+          if [ "$GITHUB_REF_NAME" = "main" ]; then ENV_PREFIX="prod"; else ENV_PREFIX="uat"; fi
+          FULL_TAG="${ENV_PREFIX}-${SHORT_SHA}"
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+          echo "full_tag=$FULL_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-ecs-backend-deploy-oidc
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_AGENT }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+        run: |
+          docker build -f agent-service/Dockerfile \
+            -t $REGISTRY/$REPOSITORY:$SHORT_SHA .
+
+      - name: Push image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_AGENT }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+          FULL_TAG: ${{ steps.vars.outputs.full_tag }}
+        run: |
+          IMAGE="$REGISTRY/$REPOSITORY"
+          docker push "$IMAGE:$SHORT_SHA"
+          docker tag "$IMAGE:$SHORT_SHA" "$IMAGE:$FULL_TAG"
+          docker push "$IMAGE:$FULL_TAG"

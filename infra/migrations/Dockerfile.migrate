@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY backend ./backend
+WORKDIR /src/backend
+RUN dotnet tool restore
+RUN dotnet tool run dotnet-ef migrations bundle \
+  --project src/FairWorkly.Infrastructure \
+  --startup-project src/FairWorkly.API \
+  --runtime linux-x64 \
+  --self-contained true \
+  -o /out/migrate
+
+FROM debian:bookworm-slim
+WORKDIR /app
+COPY --from=build /out/migrate /app/migrate
+ENTRYPOINT ["/app/migrate"]
