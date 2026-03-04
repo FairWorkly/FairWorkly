@@ -1,6 +1,1 @@
-export { StatusBadge } from './StatusBadge'
-export { RoleDropdown } from './RoleDropdown'
-export { DeactivateDialog } from './DeactivateDialog'
-export { InviteMemberModal } from './InviteMemberModal'
-export { TeamMembersTable } from './TeamMembersTable'
 export * from './Settings.styles'

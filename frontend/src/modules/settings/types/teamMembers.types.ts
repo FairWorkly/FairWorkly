@@ -5,6 +5,9 @@ export type {
   InviteTeamMemberRequest,
   InviteTeamMemberResponse,
   ResendInvitationResponse,
-} from './teamMembers.types'
+} from '@/services/settingsApi'
 
-export { ROLE_OPTIONS } from './teamMembers.types'
+export const ROLE_OPTIONS = [
+  { value: 'Admin', label: 'Admin' },
+  { value: 'Manager', label: 'Manager' },
+] as const

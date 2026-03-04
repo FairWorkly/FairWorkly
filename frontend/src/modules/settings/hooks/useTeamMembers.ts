@@ -1,64 +1,58 @@
-import { useState, useCallback } from 'react'
-import type { TeamMember, TeamMemberRole, InviteMemberFormData } from '@/modules/settings/types'
+import { useQueryClient } from '@tanstack/react-query'
+import { useApiQuery } from '@/shared/hooks/useApiQuery'
+import { useApiMutation } from '@/shared/hooks/useApiMutation'
+import {
+  settingsApi,
+  type TeamMemberDto,
+  type TeamMemberUpdatedDto,
+  type UpdateTeamMemberRequest,
+  type InviteTeamMemberRequest,
+  type InviteTeamMemberResponse,
+  type ResendInvitationResponse,
+} from '@/services/settingsApi'
 
-// Mock data - local to this hook
-const initialMockData: TeamMember[] = [
-  {
-    id: '1',
-    name: 'Alice Chen',
-    email: 'alice@demo.com',
-    role: 'Admin',
-    status: 'Active',
-    lastLogin: '2024-02-01 09:12',
-  },
-  {
-    id: '2',
-    name: 'Ben Lee',
-    email: 'ben@demo.com',
-    role: 'Manager',
-    status: 'Inactive',
-    lastLogin: '2024-01-28 17:40',
-  },
-]
+const QUERY_KEY = ['settings', 'team'] as const
 
 export function useTeamMembers() {
-  const [members, setMembers] = useState<TeamMember[]>(initialMockData)
+  return useApiQuery<TeamMemberDto[]>({
+    queryKey: QUERY_KEY,
+    queryFn: settingsApi.getTeamMembers,
+  })
+}
 
-  const updateRole = useCallback((id: string, role: TeamMemberRole) => {
-    setMembers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, role } : m))
-    )
-  }, [])
+export function useUpdateTeamMember() {
+  const queryClient = useQueryClient()
 
-  const deactivateMember = useCallback((id: string) => {
-    setMembers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, status: 'Inactive' as const } : m))
-    )
-  }, [])
+  return useApiMutation<
+    TeamMemberUpdatedDto,
+    { userId: string; payload: UpdateTeamMemberRequest }
+  >({
+    mutationFn: ({ userId, payload }) =>
+      settingsApi.updateTeamMember(userId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
+  })
+}
 
-  const activateMember = useCallback((id: string) => {
-    setMembers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, status: 'Active' as const } : m))
-    )
-  }, [])
+export function useInviteTeamMember() {
+  const queryClient = useQueryClient()
 
-  const inviteMember = useCallback((data: InviteMemberFormData) => {
-    const newMember: TeamMember = {
-      id: String(Date.now()),
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      status: 'Active',
-      lastLogin: 'Never',
-    }
-    setMembers((prev) => [...prev, newMember])
-  }, [])
+  return useApiMutation<InviteTeamMemberResponse, InviteTeamMemberRequest>({
+    mutationFn: (payload) => settingsApi.inviteTeamMember(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
+  })
+}
 
-  return {
-    members,
-    updateRole,
-    deactivateMember,
-    activateMember,
-    inviteMember,
-  }
+export function useResendInvitation() {
+  const queryClient = useQueryClient()
+
+  return useApiMutation<ResendInvitationResponse, string>({
+    mutationFn: (userId) => settingsApi.resendInvitation(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
+  })
 }
