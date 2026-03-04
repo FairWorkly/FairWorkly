@@ -35,18 +35,19 @@ public class OrganizationProfileDto
 
     public string? LogoUrl { get; set; }
 
-    public static OrganizationProfileDto FromEntity(Organization organization) => new()
-    {
-        CompanyName = organization.CompanyName,
-        ABN = organization.ABN,
-        IndustryType = organization.IndustryType,
-        ContactEmail = organization.ContactEmail,
-        PhoneNumber = organization.PhoneNumber,
-        AddressLine1 = organization.AddressLine1,
-        AddressLine2 = organization.AddressLine2,
-        Suburb = organization.Suburb,
-        State = organization.State.ToString(),
-        Postcode = organization.Postcode,
-        LogoUrl = organization.LogoUrl,
-    };
+    public static OrganizationProfileDto FromEntity(Organization organization) =>
+        new()
+        {
+            CompanyName = organization.CompanyName,
+            ABN = organization.ABN,
+            IndustryType = organization.IndustryType,
+            ContactEmail = organization.ContactEmail,
+            PhoneNumber = organization.PhoneNumber,
+            AddressLine1 = organization.AddressLine1,
+            AddressLine2 = organization.AddressLine2,
+            Suburb = organization.Suburb,
+            State = organization.State.ToString(),
+            Postcode = organization.Postcode,
+            LogoUrl = organization.LogoUrl,
+        };
 }

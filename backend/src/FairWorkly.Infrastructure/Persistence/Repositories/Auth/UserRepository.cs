@@ -39,6 +39,19 @@ public class UserRepository : IUserRepository
         );
     }
 
+    // Retrieves all users belonging to a specific organization
+    public async Task<List<User>> GetByOrganizationIdAsync(
+        Guid organizationId,
+        CancellationToken ct = default
+    )
+    {
+        return await _context
+            .Users.Where(u => u.OrganizationId == organizationId && !u.IsDeleted)
+            .OrderBy(u => u.FirstName)
+            .ThenBy(u => u.LastName)
+            .ToListAsync(ct);
+    }
+
     // Checks if the email is already taken within an organization.
     // Scoped to (OrganizationId, Email) to match the composite unique index.
     public async Task<bool> IsEmailUniqueAsync(
