@@ -10,8 +10,10 @@ import { useTheme } from '@mui/material/styles'
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import WarningAmberRounded from '@mui/icons-material/WarningAmberRounded'
 import { styled } from '@/styles/styled'
-import { GuidanceModal } from '@/shared/compliance-check'
-import type { ValidationIssue } from '../types/payrollValidation.types'
+import { ExplainModal } from './ExplainModal'
+import { explainPayrollIssue } from '@/services/payrollApi'
+import type { ValidationIssue, ExplainResult } from '../types'
+import type { ApiError } from '@/shared/types/api.types'
 import { severityConfig } from './payrollCategoryConfig'
 import { buildDescriptionLines } from './payrollDescriptionTemplates'
 
@@ -172,6 +174,9 @@ interface PayrollIssueRowProps {
 export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
   const theme = useTheme()
   const [fixModalOpen, setFixModalOpen] = useState(false)
+  const [explainResult, setExplainResult] = useState<ExplainResult | null>(null)
+  const [isExplaining, setIsExplaining] = useState(false)
+  const [explainError, setExplainError] = useState<string | null>(null)
 
   const sev = severityConfig[issue.severity]
   const severityColor =
@@ -182,6 +187,49 @@ export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
   const warnSev = severityConfig[2]
   const warningColor =
     warnSev.color ?? theme.palette[warnSev.paletteKey][warnSev.paletteTone]
+
+  const handleHowToFix = async () => {
+    // Guard: if already requesting, just re-open the modal
+    if (isExplaining) {
+      setFixModalOpen(true)
+      return
+    }
+
+    // Check sessionStorage cache
+    const cacheKey = `payroll-explain-${issue.issueId}`
+    const cached = sessionStorage.getItem(cacheKey)
+    if (cached) {
+      try {
+        setExplainResult(JSON.parse(cached))
+        setFixModalOpen(true)
+        return
+      } catch {
+        /* corrupted cache, fall through to API */
+      }
+    }
+
+    // Call API
+    setIsExplaining(true)
+    setExplainError(null)
+    setFixModalOpen(true)
+
+    try {
+      const result = await explainPayrollIssue(issue)
+      setExplainResult(result)
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify(result))
+      } catch {
+        /* quota exceeded — ignore */
+      }
+    } catch (err) {
+      const apiErr = err as ApiError
+      setExplainError(
+        apiErr.message ?? 'Unable to generate explanation. Please try again.'
+      )
+    } finally {
+      setIsExplaining(false)
+    }
+  }
 
   return (
     <>
@@ -195,12 +243,14 @@ export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
             variant="outlined"
             chipColor={severityColor}
           />
-          <ActionButton
-            startIcon={<HelpOutlineOutlinedIcon />}
-            onClick={() => setFixModalOpen(true)}
-          >
-            How to Fix
-          </ActionButton>
+          {!issue.warning && (
+            <ActionButton
+              startIcon={<HelpOutlineOutlinedIcon />}
+              onClick={handleHowToFix}
+            >
+              How to Fix
+            </ActionButton>
+          )}
         </HeaderRow>
 
         {d && descLines && (
@@ -226,9 +276,14 @@ export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
         )}
       </RowContainer>
 
-      <GuidanceModal
+      <ExplainModal
         open={fixModalOpen}
         onClose={() => setFixModalOpen(false)}
+        onRetry={handleHowToFix}
+        result={explainResult}
+        isLoading={isExplaining}
+        error={explainError}
+        employeeName={issue.employeeName}
       />
     </>
   )

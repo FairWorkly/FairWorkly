@@ -1,8 +1,11 @@
 import httpClient from './httpClient'
+import { post } from './baseApi'
 import { normalizeApiError } from '@/shared/types/api.types'
 import type {
   PayrollValidationRequest,
   PayrollValidationResult,
+  ValidationIssue,
+  ExplainResult,
 } from '@/modules/payroll/types'
 
 /**
@@ -42,4 +45,16 @@ export async function uploadPayrollValidation(
   } catch (err) {
     throw normalizeApiError(err)
   }
+}
+
+/**
+ * Request AI explanation for a single payroll issue.
+ * Timeout is extended because AI calls can take 30s+.
+ */
+export function explainPayrollIssue(
+  issue: ValidationIssue
+): Promise<ExplainResult> {
+  return post<ExplainResult, ValidationIssue>('/payroll/explain', issue, {
+    timeout: 60_000,
+  })
 }

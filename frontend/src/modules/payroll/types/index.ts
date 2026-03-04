@@ -12,4 +12,6 @@ export type {
   PayrollRequestValidationError,
   PayrollCsvError,
   PayrollServerError,
+  ExplainSource,
+  ExplainResult,
 } from './payrollValidation.types'
