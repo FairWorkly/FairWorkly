@@ -89,8 +89,8 @@ const SourcesStack = styled(Box)(({ theme }) => ({
 }))
 
 const ModalActions = styled(DialogActions)(({ theme }) => ({
-  padding: theme.spacing(3),
-  paddingTop: 0,
+  padding: theme.spacing(1, 3, 3),
+  paddingRight: theme.spacing(5),
 }))
 
 const ActionBtn = styled(Button)(({ theme }) => ({

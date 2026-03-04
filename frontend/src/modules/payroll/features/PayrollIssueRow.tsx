@@ -105,10 +105,26 @@ const AlertBoldText = styled('span')(({ theme }) => ({
 
 const ActionButton = styled(Button)(({ theme }) => ({
   marginLeft: 'auto',
-  textTransform: 'none',
+  color: theme.palette.text.primary,
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: theme.fairworkly.radius.sm,
+  padding: theme.spacing(0.75, 2),
   fontSize: theme.typography.caption.fontSize,
-  padding: theme.spacing(0.25, 1),
-  minHeight: 28,
+  fontWeight: theme.typography.button.fontWeight,
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
+  [theme.breakpoints.between('sm', 'md')]: {
+    padding: theme.spacing(0.5, 1),
+    fontSize: '0.7rem',
+  },
+  [theme.breakpoints.down('sm')]: {
+    width: '100%',
+    marginLeft: 0,
+  },
+  '&:hover': {
+    backgroundColor: theme.palette.background.default,
+    borderColor: theme.palette.text.disabled,
+  },
 }))
 
 // --- Helpers ---
