@@ -1,10 +1,14 @@
 import asyncio
+import os
 
 import pytest
 from fastapi.testclient import TestClient
 
 import agents.payroll.feature as feature_module
 import master_agent.main as main_module
+
+# Header for endpoint integration tests (must match AGENT_SERVICE_KEY env var)
+_AUTH_HEADERS = {"X-Service-Key": os.environ.get("AGENT_SERVICE_KEY", "")}
 
 # ---------------------------------------------------------------------------
 # Shared test payload
@@ -207,6 +211,7 @@ def test_pydantic_422():
     response = client.post(
         "/api/agent/payroll/explain",
         json={"categoryType": "PenaltyRate"},
+        headers=_AUTH_HEADERS,
     )
     assert response.status_code == 422
 
@@ -218,8 +223,21 @@ def test_endpoint_catches_unexpected_exception(monkeypatch):
 
     monkeypatch.setattr(main_module, "payroll_feature", BrokenFeature())
     client = TestClient(main_module.app)
-    response = client.post("/api/agent/payroll/explain", json=VALID_PAYLOAD)
+    response = client.post(
+        "/api/agent/payroll/explain",
+        json=VALID_PAYLOAD,
+        headers=_AUTH_HEADERS,
+    )
 
     assert response.status_code == 500
     assert response.json()["code"] == 500
     assert response.json()["msg"] == "Internal processing error"
+
+
+def test_payroll_explain_rejects_missing_service_key():
+    client = TestClient(main_module.app)
+    response = client.post(
+        "/api/agent/payroll/explain",
+        json=VALID_PAYLOAD,
+    )
+    assert response.status_code == 401

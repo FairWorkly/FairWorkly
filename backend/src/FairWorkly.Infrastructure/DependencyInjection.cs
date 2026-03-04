@@ -4,7 +4,6 @@ using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Employees.Interfaces;
 using FairWorkly.Application.Payroll.Interfaces;
 using FairWorkly.Application.Roster.Interfaces;
-using Refit;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Infrastructure.AI.PythonServices;
 using FairWorkly.Infrastructure.Identity;
@@ -18,6 +17,7 @@ using FairWorkly.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Refit;
 
 namespace FairWorkly.Infrastructure;
 
@@ -33,25 +33,35 @@ public static class DependencyInjection
         // Refit: Payroll Agent Service
         var aiBaseUrl = configuration["AiSettings:BaseUrl"] ?? "http://localhost:8000";
         var aiTimeoutSeconds = configuration.GetValue<int?>("AiSettings:TimeoutSeconds") ?? 120;
-        if (aiTimeoutSeconds <= 0) aiTimeoutSeconds = 120;
+        if (aiTimeoutSeconds <= 0)
+            aiTimeoutSeconds = 120;
 
-        services.AddRefitClient<IPayrollAgentService>(new RefitSettings
-            {
-                ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+        services
+            .AddRefitClient<IPayrollAgentService>(
+                new RefitSettings
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                })
-            })
+                    ContentSerializer = new SystemTextJsonContentSerializer(
+                        new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        }
+                    ),
+                }
+            )
             .ConfigureHttpClient(c =>
             {
                 c.BaseAddress = new Uri(aiBaseUrl);
                 c.Timeout = TimeSpan.FromSeconds(aiTimeoutSeconds);
 
                 var serviceKey = configuration["AiSettings:ServiceKey"];
-                if (!string.IsNullOrWhiteSpace(serviceKey))
+                if (string.IsNullOrWhiteSpace(serviceKey))
                 {
-                    c.DefaultRequestHeaders.TryAddWithoutValidation("X-Service-Key", serviceKey);
+                    throw new InvalidOperationException(
+                        "AiSettings:ServiceKey is required. "
+                            + "Set it in appsettings.json or via environment variable AiSettings__ServiceKey."
+                    );
                 }
+                c.DefaultRequestHeaders.TryAddWithoutValidation("X-Service-Key", serviceKey);
             });
 
         // Register DbContext (PostgreSQL)

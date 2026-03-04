@@ -281,7 +281,10 @@ async def chat(
 
 
 @app.post("/api/agent/payroll/explain")
-async def payroll_explain(request: PayrollExplainRequest):
+async def payroll_explain(
+    request: PayrollExplainRequest,
+    _: None = Depends(verify_service_key),
+):
     try:
         result = await payroll_feature.process(request.model_dump())
         return JSONResponse(content=result, status_code=result.get("code", 500))
