@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { Button, Chip, CircularProgress, MenuItem, Table, TableBody, TableContainer, TableHead, Typography } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
@@ -52,23 +52,6 @@ export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendIn
   const isDeactivating = !!deactivateTarget && updatingUserId === deactivateTarget.userId
   const isChangingRole = !!roleChangeTarget && updatingUserId === roleChangeTarget.member.userId
 
-  // Auto-close deactivate dialog when mutation settles
-  const wasDeactivating = useRef(false)
-  useEffect(() => {
-    if (wasDeactivating.current && !isDeactivating) {
-      setDeactivateTarget(null)
-    }
-    wasDeactivating.current = isDeactivating
-  }, [isDeactivating])
-
-  // Auto-close role change dialog when mutation settles
-  const wasChangingRole = useRef(false)
-  useEffect(() => {
-    if (wasChangingRole.current && !isChangingRole) {
-      setRoleChangeTarget(null)
-    }
-    wasChangingRole.current = isChangingRole
-  }, [isChangingRole])
 
   const handleRoleChange = (member: TeamMemberDto, event: SelectChangeEvent<unknown>) => {
     const newRole = event.target.value as 'Admin' | 'Manager'
@@ -88,12 +71,14 @@ export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendIn
   const handleConfirmDeactivate = () => {
     if (deactivateTarget) {
       onUpdate(deactivateTarget.userId, { isActive: false })
+      setDeactivateTarget(null)
     }
   }
 
   const handleConfirmRoleChange = () => {
     if (roleChangeTarget) {
       onUpdate(roleChangeTarget.member.userId, { role: roleChangeTarget.newRole })
+      setRoleChangeTarget(null)
     }
   }
 
