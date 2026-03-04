@@ -115,9 +115,13 @@ What to change:
 - `JwtSettings:Secret` — must be non-empty; 32+ chars recommended
 
 What you can leave as-is for local dev:
-- `AiSettings` — defaults to `localhost:8000` (Python agent-service)
+- `AiSettings:BaseUrl` — defaults to `localhost:8000` (Python agent-service)
+- `AiSettings:TimeoutSeconds` — defaults to `120` (AI call timeout)
 - `AWS:S3:Enabled` — defaults to `false` (uses local file storage)
 - `Serilog` / `FileLogging` — logging config, defaults are fine
+
+What you **must** set:
+- `AiSettings:ServiceKey` — shared secret for .NET ↔ Python service-to-service auth. Must match the `AGENT_SERVICE_KEY` env var in `agent-service/.env`. Without this, the backend will fail to start.
 
 **Step 2: Create `appsettings.Development.json`** (local dev overrides)
 
