@@ -1,73 +1,51 @@
-import { useState, useCallback } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authApi } from '@/services/authApi'
-import { setAuthData, setStatus } from '@/slices/auth'
+import { normalizeApiError } from '@/shared/types/api.types'
+import { useApiMutation } from '@/shared/hooks/useApiMutation'
+import { setAuthData, setStatus, type AuthUser } from '@/slices/auth'
 import { useAppDispatch } from '@/store/hooks'
 import type { LoginFormData } from '../types'
+import { DEFAULT_ROUTES, normalizeAuthUser } from './authUtils'
 
-type UseLoginResult = {
-  login: (values: LoginFormData) => Promise<void>
-  isSubmitting: boolean
-  error: string | null
+type AuthResult = {
+  normalizedUser: AuthUser
+  roleKey: string
+  accessToken: string
 }
 
-const DEFAULT_ROUTES: Record<string, string> = {
-  admin: '/fairbot',
-  manager: '/roster/upload',
-}
-
-export function useLogin(): UseLoginResult {
+export function useLogin() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  const login = useCallback(
-    async (values: LoginFormData) => {
-      if (isSubmitting) return
-      setIsSubmitting(true)
-      setError(null)
-      dispatch(setStatus('authenticating'))
-
-      try {
-        const response = await authApi.login({
-          email: values.email,
-          password: values.password,
-        })
-
-        const name =
-          [response.user.firstName, response.user.lastName]
-            .filter(Boolean)
-            .join(' ') || response.user.email
-
-        const role = response.user.role?.toLowerCase()
-        const validRole: 'admin' | 'manager' | undefined =
-          role === 'admin' || role === 'manager' ? role : undefined
-
-        dispatch(
-          setAuthData({
-            user: {
-              id: response.user.id,
-              email: response.user.email,
-              name,
-              role: validRole,
-            },
-            accessToken: response.accessToken,
-          })
-        )
-
-        navigate(DEFAULT_ROUTES[role ?? ''] ?? '/403', { replace: true })
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Login failed. Please try again.'
-        setError(message)
-        dispatch(setStatus('unauthenticated'))
-      } finally {
-        setIsSubmitting(false)
-      }
+  const { mutate, isPending, error } = useApiMutation<
+    AuthResult,
+    LoginFormData
+  >({
+    mutationFn: async values => {
+      const response = await authApi.login({
+        email: values.email,
+        password: values.password,
+      })
+      const { normalizedUser, roleKey } = normalizeAuthUser(response.user)
+      return { normalizedUser, roleKey, accessToken: response.accessToken }
     },
-    [dispatch, isSubmitting, navigate]
-  )
+    onMutate: () => {
+      dispatch(setStatus('authenticating'))
+    },
+    onSuccess: ({ normalizedUser, roleKey, accessToken }) => {
+      dispatch(setAuthData({ user: normalizedUser, accessToken }))
+      navigate(DEFAULT_ROUTES[roleKey] ?? '/403', { replace: true })
+    },
+    onError: () => {
+      dispatch(setStatus('unauthenticated'))
+    },
+  })
 
-  return { login, isSubmitting, error }
+  const errorMessage = useMemo(() => {
+    if (!error) return null
+    return normalizeApiError(error).message
+  }, [error])
+
+  return { login: mutate, isSubmitting: isPending, error: errorMessage }
 }

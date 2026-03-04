@@ -290,24 +290,24 @@ public class PayrollValidationTests : IntegrationTestBase
         using (var scope = Factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
-            var passwordHasher =
-                scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+            var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
-            db.Set<User>().Add(
-                new User
-                {
-                    Id = managerId,
-                    Email = managerEmail,
-                    FirstName = "Manager",
-                    LastName = "Test",
-                    Role = UserRole.Manager,
-                    IsActive = true,
-                    OrganizationId = TestOrganizationId,
-                    PasswordHash = passwordHasher.Hash("TestPassword123"),
-                    CreatedAt = DateTimeOffset.UtcNow,
-                    IsDeleted = false,
-                }
-            );
+            db.Set<User>()
+                .Add(
+                    new User
+                    {
+                        Id = managerId,
+                        Email = managerEmail,
+                        FirstName = "Manager",
+                        LastName = "Test",
+                        Role = UserRole.Manager,
+                        IsActive = true,
+                        OrganizationId = TestOrganizationId,
+                        PasswordHash = passwordHasher.Hash("TestPassword123"),
+                        CreatedAt = DateTimeOffset.UtcNow,
+                        IsDeleted = false,
+                    }
+                );
             await db.SaveChangesAsync();
         }
 
@@ -319,10 +319,7 @@ public class PayrollValidationTests : IntegrationTestBase
         loginResponse.EnsureSuccessStatusCode();
         var loginJson = await loginResponse.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(loginJson);
-        var token = doc.RootElement
-            .GetProperty("data")
-            .GetProperty("accessToken")
-            .GetString()!;
+        var token = doc.RootElement.GetProperty("data").GetProperty("accessToken").GetString()!;
 
         var client = Factory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
@@ -331,11 +328,7 @@ public class PayrollValidationTests : IntegrationTestBase
         // Act
         var csvPath = Path.Combine(CsvDir, "compliant.csv");
         using var content = new MultipartFormDataContent();
-        content.Add(
-            new StreamContent(File.OpenRead(csvPath)),
-            "file",
-            "compliant.csv"
-        );
+        content.Add(new StreamContent(File.OpenRead(csvPath)), "file", "compliant.csv");
         content.Add(new StringContent("GeneralRetailIndustryAward2020"), "awardType");
         content.Add(new StringContent("VIC"), "state");
 

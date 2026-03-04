@@ -5,6 +5,7 @@ namespace FairWorkly.Application.FairBot.Features.SendChat;
 public class SendChatValidator : AbstractValidator<SendChatCommand>
 {
     private const int MaxMessageLength = 10_000;
+    private const int MaxConversationIdLength = 128;
 
     public SendChatValidator()
     {
@@ -21,5 +22,12 @@ public class SendChatValidator : AbstractValidator<SendChatCommand>
         RuleFor(x => x.UserId).NotEmpty().WithMessage("UserId is required.");
 
         RuleFor(x => x.OrganizationId).NotEmpty().WithMessage("OrganizationId is required.");
+
+        RuleFor(x => x.ConversationId)
+            .MaximumLength(MaxConversationIdLength)
+            .WithMessage(
+                $"ConversationId is too long. Maximum is {MaxConversationIdLength} characters."
+            )
+            .When(x => !string.IsNullOrWhiteSpace(x.ConversationId));
     }
 }

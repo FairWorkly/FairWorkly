@@ -22,6 +22,17 @@ public class SendChatCommand : IRequest<Result<FairBotChatResponse>>
     public string? ContextPayload { get; set; }
 
     /// <summary>
+    /// Raw chat history JSON from frontend.
+    /// Format: [{ role: "user"|"assistant", content: "..." }, ...]
+    /// </summary>
+    public string? HistoryPayload { get; set; }
+
+    /// <summary>
+    /// Client-generated conversation ID (for forward compatibility with future persisted threads).
+    /// </summary>
+    public string? ConversationId { get; set; }
+
+    /// <summary>
     /// Request ID for correlation (sanitized by controller from X-Request-Id header
     /// or HttpContext.TraceIdentifier).
     /// </summary>

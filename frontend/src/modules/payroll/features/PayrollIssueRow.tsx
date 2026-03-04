@@ -5,7 +5,7 @@
 // The backend guarantees these are mutually exclusive per issue.
 
 import React, { useState } from 'react'
-import { Box, Typography, Chip, Button, alpha } from '@mui/material'
+import { Box, Button, Typography, Chip, alpha } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import WarningAmberRounded from '@mui/icons-material/WarningAmberRounded'
@@ -56,30 +56,6 @@ const SeverityChip = styled(Chip, {
   '& .MuiChip-label': { color: chipColor },
 }))
 
-const ActionButton = styled(Button)(({ theme }) => ({
-  marginLeft: 'auto',
-  color: theme.palette.text.primary,
-  border: `1px solid ${theme.palette.divider}`,
-  borderRadius: theme.fairworkly.radius.sm,
-  padding: theme.spacing(0.75, 2),
-  fontSize: theme.typography.caption.fontSize,
-  fontWeight: theme.typography.button.fontWeight,
-  whiteSpace: 'nowrap',
-  flexShrink: 0,
-  [theme.breakpoints.between('sm', 'md')]: {
-    padding: theme.spacing(0.5, 1),
-    fontSize: '0.7rem',
-  },
-  [theme.breakpoints.down('sm')]: {
-    width: '100%',
-    marginLeft: 0,
-  },
-  '&:hover': {
-    backgroundColor: theme.palette.background.default,
-    borderColor: theme.palette.text.disabled,
-  },
-}))
-
 const DescriptionLine = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   lineHeight: 1.6,
@@ -125,6 +101,14 @@ const AlertBoldText = styled('span')(({ theme }) => ({
   fontWeight: theme.typography.subtitle2.fontWeight,
   color: theme.palette.text.primary,
   marginRight: theme.spacing(1),
+}))
+
+const ActionButton = styled(Button)(({ theme }) => ({
+  marginLeft: 'auto',
+  textTransform: 'none',
+  fontSize: theme.typography.caption.fontSize,
+  padding: theme.spacing(0.25, 1),
+  minHeight: 28,
 }))
 
 // --- Helpers ---

@@ -35,6 +35,10 @@ public class FairBotController(IMediator mediator, ICurrentUserService currentUs
         [FromForm(Name = "intent_hint")] string? intentHintLegacy = null,
         [FromForm] string? contextPayload = null,
         [FromForm(Name = "context_payload")] string? contextPayloadLegacy = null,
+        [FromForm] string? historyPayload = null,
+        [FromForm(Name = "history_payload")] string? historyPayloadLegacy = null,
+        [FromForm] string? conversationId = null,
+        [FromForm(Name = "conversation_id")] string? conversationIdLegacy = null,
         [FromHeader(Name = "X-Request-Id")] string? requestIdHeader = null,
         CancellationToken cancellationToken = default
     )
@@ -58,6 +62,12 @@ public class FairBotController(IMediator mediator, ICurrentUserService currentUs
             ContextPayload = !string.IsNullOrWhiteSpace(contextPayload)
                 ? contextPayload
                 : contextPayloadLegacy,
+            HistoryPayload = !string.IsNullOrWhiteSpace(historyPayload)
+                ? historyPayload
+                : historyPayloadLegacy,
+            ConversationId = !string.IsNullOrWhiteSpace(conversationId)
+                ? conversationId
+                : conversationIdLegacy,
             RequestId = requestId,
             UserId = userId,
             OrganizationId = organizationId,

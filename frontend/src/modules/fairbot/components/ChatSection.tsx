@@ -42,11 +42,20 @@ export const ChatSection = () => {
   const conversation = useConversation()
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  const handleQuickFollowUp = (prompt: string) => {
+    if (!prompt.trim()) {
+      return
+    }
+    console.info('[FairBot][action_follow_up_clicked]')
+    void conversation.sendMessage(prompt)
+  }
+
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
     const threshold = 80
-    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold
+    const isNearBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < threshold
     if (isNearBottom) {
       el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
     }
@@ -72,6 +81,10 @@ export const ChatSection = () => {
         <MessageList
           messages={conversation.messages}
           isTyping={conversation.isTyping}
+          onQuickFollowUp={handleQuickFollowUp}
+          quickFollowUpDisabled={
+            conversation.isLoading || conversation.isContextLoading
+          }
         />
       </ScrollArea>
       <Divider />

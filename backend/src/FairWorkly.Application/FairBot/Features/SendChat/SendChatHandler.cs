@@ -3,6 +3,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Roster.Features.GetValidationResults;
 using FairWorkly.Domain.Common.Result;
@@ -20,12 +21,26 @@ public class SendChatHandler(
 ) : IRequestHandler<SendChatCommand, Result<FairBotChatResponse>>
 {
     private const int MaxContextPayloadBytes = 512_000; // 500 KB
+    private const int MaxHistoryPayloadBytes = 128_000; // 125 KB
+    private const int MaxHistoryMessages = 20;
+    private const int MaxHistoryMessageChars = 2_000;
+    private const int MaxConversationIdLength = 128;
+
+    private static readonly Regex ValidConversationIdPattern = new(
+        @"^[\w\-:.]+$",
+        RegexOptions.Compiled
+    );
 
     private static readonly JsonSerializerOptions ContextPayloadSerializerOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter() },
+    };
+
+    private static readonly JsonSerializerOptions HistoryPayloadSerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
     private readonly int _agentTimeoutSeconds = Math.Max(
@@ -62,6 +77,21 @@ public class SendChatHandler(
             formFields["intent_hint"] = request.IntentHint;
         }
 
+        if (!string.IsNullOrWhiteSpace(request.ConversationId))
+        {
+            var normalizedConversationId = request.ConversationId.Trim();
+            if (
+                normalizedConversationId.Length > MaxConversationIdLength
+                || !ValidConversationIdPattern.IsMatch(normalizedConversationId)
+            )
+            {
+                return Result<FairBotChatResponse>.Of422(
+                    "ConversationId format is invalid. Please retry from a fresh FairBot session."
+                );
+            }
+            formFields["conversation_id"] = normalizedConversationId;
+        }
+
         // Roster intent: enrich context with full validation data from DB
         if (string.Equals(request.IntentHint, "roster", StringComparison.OrdinalIgnoreCase))
         {
@@ -78,7 +108,13 @@ public class SendChatHandler(
 
             if (contextResolution is { IsSuccess: true })
             {
-                if (ExceedsPayloadLimit(contextResolution.ContextPayload!, out var rosterBytes))
+                if (
+                    ExceedsPayloadLimit(
+                        contextResolution.ContextPayload!,
+                        MaxContextPayloadBytes,
+                        out var rosterBytes
+                    )
+                )
                 {
                     return Result<FairBotChatResponse>.Of413(
                         $"Context payload is too large ({rosterBytes} bytes). Maximum is {MaxContextPayloadBytes}."
@@ -99,7 +135,13 @@ public class SendChatHandler(
         }
         else if (!string.IsNullOrWhiteSpace(request.ContextPayload))
         {
-            if (ExceedsPayloadLimit(request.ContextPayload, out var payloadBytes))
+            if (
+                ExceedsPayloadLimit(
+                    request.ContextPayload,
+                    MaxContextPayloadBytes,
+                    out var payloadBytes
+                )
+            )
             {
                 return Result<FairBotChatResponse>.Of413(
                     $"Context payload is too large ({payloadBytes} bytes). Maximum is {MaxContextPayloadBytes}."
@@ -108,10 +150,41 @@ public class SendChatHandler(
             formFields["context_payload"] = request.ContextPayload;
         }
 
+        if (!string.IsNullOrWhiteSpace(request.HistoryPayload))
+        {
+            if (
+                ExceedsPayloadLimit(
+                    request.HistoryPayload,
+                    MaxHistoryPayloadBytes,
+                    out var historyBytes
+                )
+            )
+            {
+                return Result<FairBotChatResponse>.Of413(
+                    $"History payload is too large ({historyBytes} bytes). Maximum is {MaxHistoryPayloadBytes}."
+                );
+            }
+
+            if (
+                !TryNormalizeHistoryPayload(
+                    request.HistoryPayload,
+                    out var normalizedHistoryPayload,
+                    out var historyErrorMessage
+                )
+            )
+            {
+                return Result<FairBotChatResponse>.Of422(historyErrorMessage!);
+            }
+
+            formFields["history_payload"] = normalizedHistoryPayload!;
+        }
+
         logger.LogInformation(
-            "FairBot sending to agent: fields=[{Fields}], contextPayloadLength={Length}",
+            "FairBot sending to agent: fields=[{Fields}], contextPayloadLength={ContextLength}, historyPayloadLength={HistoryLength}, hasConversationId={HasConversationId}",
             string.Join(", ", formFields.Keys),
-            formFields.TryGetValue("context_payload", out var cp) ? cp.Length : -1
+            formFields.TryGetValue("context_payload", out var cp) ? cp.Length : -1,
+            formFields.TryGetValue("history_payload", out var hp) ? hp.Length : -1,
+            formFields.ContainsKey("conversation_id")
         );
 
         try
@@ -307,10 +380,88 @@ public class SendChatHandler(
         return Guid.TryParse(raw, out value);
     }
 
-    private static bool ExceedsPayloadLimit(string payload, out int byteCount)
+    private static bool ExceedsPayloadLimit(string payload, int maxBytes, out int byteCount)
     {
         byteCount = Encoding.UTF8.GetByteCount(payload);
-        return byteCount > MaxContextPayloadBytes;
+        return byteCount > maxBytes;
+    }
+
+    private static bool TryNormalizeHistoryPayload(
+        string rawHistoryPayload,
+        out string? normalizedPayload,
+        out string? errorMessage
+    )
+    {
+        normalizedPayload = null;
+        errorMessage = null;
+
+        try
+        {
+            using var doc = JsonDocument.Parse(rawHistoryPayload);
+            if (doc.RootElement.ValueKind != JsonValueKind.Array)
+            {
+                errorMessage = "History payload must be a JSON array.";
+                return false;
+            }
+
+            var normalized = new List<HistoryMessage>();
+            foreach (var item in doc.RootElement.EnumerateArray())
+            {
+                if (item.ValueKind != JsonValueKind.Object)
+                {
+                    errorMessage = "History payload items must be JSON objects.";
+                    return false;
+                }
+
+                if (
+                    !item.TryGetProperty("role", out var roleElement)
+                    || roleElement.ValueKind != JsonValueKind.String
+                )
+                {
+                    errorMessage = "History item role is required.";
+                    return false;
+                }
+
+                if (
+                    !item.TryGetProperty("content", out var contentElement)
+                    || contentElement.ValueKind != JsonValueKind.String
+                )
+                {
+                    errorMessage = "History item content is required.";
+                    return false;
+                }
+
+                var role = roleElement.GetString()?.Trim().ToLowerInvariant();
+                var content = contentElement.GetString()?.Trim() ?? string.Empty;
+
+                if (role is not ("user" or "assistant"))
+                {
+                    errorMessage = "History item role must be either 'user' or 'assistant'.";
+                    return false;
+                }
+
+                if (content.Length == 0)
+                {
+                    continue;
+                }
+
+                if (content.Length > MaxHistoryMessageChars)
+                {
+                    content = content[..MaxHistoryMessageChars];
+                }
+
+                normalized.Add(new HistoryMessage(role, content));
+            }
+
+            var bounded = normalized.TakeLast(MaxHistoryMessages).ToList();
+            normalizedPayload = JsonSerializer.Serialize(bounded, HistoryPayloadSerializerOptions);
+            return true;
+        }
+        catch (JsonException)
+        {
+            errorMessage = "History payload format is invalid JSON.";
+            return false;
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -318,6 +469,8 @@ public class SendChatHandler(
     // ═══════════════════════════════════════════════════════════════════
 
     private sealed record RosterContextReference(Guid? RosterId, Guid? ValidationId);
+
+    private sealed record HistoryMessage(string Role, string Content);
 
     private sealed record ResolvedRosterContext(
         bool IsSuccess,

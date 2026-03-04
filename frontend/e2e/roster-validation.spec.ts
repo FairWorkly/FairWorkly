@@ -22,7 +22,9 @@ test.describe('Roster validation', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
     await page.goto('/roster/upload')
-    await expect(page.getByText('Upload Roster')).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText('Upload Roster')).toBeVisible({
+      timeout: 15_000,
+    })
   })
 
   test('happy path — upload valid roster and see passing results', async ({
@@ -31,7 +33,7 @@ test.describe('Roster validation', () => {
     // Upload file via the hidden input
     const fileInput = page.locator('input[type="file"]')
     await fileInput.setInputFiles(
-      path.join(TEST_DATA_DIR, 'test-happy-path.xlsx'),
+      path.join(TEST_DATA_DIR, 'test-happy-path.xlsx')
     )
 
     // File card should appear with the filename
@@ -47,7 +49,9 @@ test.describe('Roster validation', () => {
     })
 
     // Summary stat cards should be visible
-    await expect(page.getByText('Employees Compliant')).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('Employees Compliant')).toBeVisible({
+      timeout: 10_000,
+    })
     await expect(page.getByText('Total Issues Found')).toBeVisible()
     await expect(page.getByText('Critical Issues')).toBeVisible()
     await expect(page.getByText('Employees Affected')).toBeVisible()
@@ -59,7 +63,7 @@ test.describe('Roster validation', () => {
     // Upload file with compliance errors
     const fileInput = page.locator('input[type="file"]')
     await fileInput.setInputFiles(
-      path.join(TEST_DATA_DIR, 'test-compliance-errors.xlsx'),
+      path.join(TEST_DATA_DIR, 'test-compliance-errors.xlsx')
     )
 
     await expect(page.getByText('test-compliance-errors.xlsx')).toBeVisible()
@@ -74,10 +78,70 @@ test.describe('Roster validation', () => {
     })
 
     // Summary should show issues
-    await expect(page.getByText('Total Issues Found')).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('Total Issues Found')).toBeVisible({
+      timeout: 10_000,
+    })
 
     // Issues by Category section should be rendered with at least one category
     await expect(page.getByText('Issues by Category')).toBeVisible()
     await expect(page.getByText(/\d+ employees? flagged/).first()).toBeVisible()
+  })
+
+  test('roster results -> ask fairbot explain works and avoids fallback copy', async ({
+    page,
+  }) => {
+    test.setTimeout(180_000)
+
+    // Add a small delay so loading-state assertions are deterministic.
+    await page.route('**/api/roster/*/validation', async route => {
+      await page.waitForTimeout(1500)
+      await route.continue()
+    })
+
+    const fileInput = page.locator('input[type="file"]')
+    await fileInput.setInputFiles(
+      path.join(TEST_DATA_DIR, 'test-compliance-errors.xlsx')
+    )
+    await expect(page.getByText('test-compliance-errors.xlsx')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Start Validation' }).click()
+    await expect(page).toHaveURL(/\/roster\/results\//, { timeout: 30_000 })
+    await expect(page.getByText('Running compliance checks...')).toBeHidden({
+      timeout: 60_000,
+    })
+
+    await page.getByRole('button', { name: 'Ask FairBot to Explain' }).click()
+    await expect(page).toHaveURL(/\/fairbot\?intent=roster/, {
+      timeout: 30_000,
+    })
+
+    const input = page.getByLabel('Message')
+    await expect(page.getByText('Loading roster context...')).toBeVisible({
+      timeout: 15_000,
+    })
+    await expect(input).toBeDisabled()
+
+    await expect(page.getByText('Roster context loaded')).toBeVisible({
+      timeout: 30_000,
+    })
+    await expect(input).toBeEnabled()
+
+    await input.fill('please explain the roster result')
+    const responsePromise = page.waitForResponse(
+      res =>
+        res.url().includes('/api/fairbot/chat') &&
+        res.request().method() === 'POST' &&
+        res.status() === 200,
+      { timeout: 120_000 }
+    )
+    await page.getByRole('button', { name: 'Send message' }).click()
+    await responsePromise
+
+    await expect(page.getByText("I don't have enough information.")).toBeHidden(
+      { timeout: 15_000 }
+    )
+    await expect(page.getByText('ROSTER_CONTEXT_REQUIRED')).toBeHidden({
+      timeout: 15_000,
+    })
   })
 })

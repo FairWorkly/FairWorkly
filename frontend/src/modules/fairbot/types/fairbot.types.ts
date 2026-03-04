@@ -7,10 +7,47 @@ export interface FairBotMessageSource {
   content?: string
 }
 
+export interface FairBotActionShift {
+  employee: string
+  dates: string
+  description: string
+}
+
+export interface FairBotActionPlanItem {
+  id: string
+  priority: string
+  title: string
+  owner: string
+  checkType: string
+  issueCount: number
+  criticalCount: number
+  affectedShifts: FairBotActionShift[]
+  whatToChange: string
+  why: string
+  expectedOutcome: string
+  riskIfIgnored: string
+  focusExamples: string
+}
+
+export interface FairBotActionFollowUp {
+  id: string
+  label: string
+  prompt: string
+  actionId: string
+}
+
+export interface FairBotActionPlan {
+  title: string
+  validationId: string | null
+  actions: FairBotActionPlanItem[]
+  quickFollowUps: FairBotActionFollowUp[]
+}
+
 export interface FairBotMessageMetadata {
   model?: string
   note?: string | null
   sources?: FairBotMessageSource[]
+  actionPlan?: FairBotActionPlan
 }
 
 // Chat message model used across UI and session storage.
