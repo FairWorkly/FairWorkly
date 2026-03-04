@@ -153,7 +153,7 @@ class PayrollFeature(FeatureBase):
                     e,
                     raw_text[:200],
                 )
-            except Exception as e:
+            except Exception:
                 # 503: LLM call failed (network, timeout, API key, etc.)
                 last_code = 503
                 last_msg = "LLM service unavailable"
@@ -168,7 +168,7 @@ class PayrollFeature(FeatureBase):
                     last_msg,
                     last_code,
                 )
-                await asyncio.sleep(delays[attempt])
+                await asyncio.sleep(delays[min(attempt, len(delays) - 1)])
 
         # Log 8: All retries exhausted
         logger.error(

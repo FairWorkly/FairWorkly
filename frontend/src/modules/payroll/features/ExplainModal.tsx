@@ -177,7 +177,7 @@ export const ExplainModal: React.FC<ExplainModalProps> = ({
         )}
 
         {/* State D: Warning */}
-        {!isLoading && showWarning && (
+        {!isLoading && !error && showWarning && (
           <Box>
             <Alert severity="warning">{result!.warning}</Alert>
             <Typography variant="body2" color="text.secondary" mt={2}>
