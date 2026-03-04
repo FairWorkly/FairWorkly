@@ -7,7 +7,7 @@ The core backend service for FairWorkly, built on .NET 8. The backend adopts **V
 - **Framework**: .NET 8 (Web API)
 - **Database**: PostgreSQL
 - **ORM**: Entity Framework Core 8
-- **DI Container**: Autofac
+- **DI Container**: Microsoft.Extensions.DependencyInjection (built-in)
 - **Validation**: FluentValidation
 - **Task Orchestration**: MediatR (CQRS)
 - **Code Formatting**: CSharpier (Enforced)
@@ -100,38 +100,37 @@ Follow the instructions below for your chosen IDE.
 
 Once installed, simply **Save (Ctrl+S)** any `.cs` file, and it will be formatted automatically. No further configuration is needed.
 
-### 5. Database Configuration
+### 5. Application Configuration
 
-**Method A: Using User Secrets**
+Both `appsettings.json` and `appsettings.Development.json` are git-ignored. The repo provides `.example` templates — copy them and edit locally.
 
-In VS2022, right-click `FairWorkly.API` project -> **Manage User Secrets**:
+**Step 1: Create `appsettings.json`** (base config, all environments)
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5433;Database=FairWorklyDb;Username=postgres;Password=postgres"
-  }
-}
+```bash
+cp src/FairWorkly.API/appsettings.example.json src/FairWorkly.API/appsettings.json
 ```
 
-Notes:
-- Port `5433` matches the local-dev default in `src/FairWorkly.API/appsettings.Development.example.json` (Docker Postgres exposed to host).
-- If you're running Postgres natively, change the port to `5432` and update credentials accordingly.
+What to change:
+- `ConnectionStrings:DefaultConnection` — your Postgres host, port, credentials
+- `JwtSettings:Secret` — must be non-empty; 32+ chars recommended
 
-**Method B: Create a local appsettings file (recommended)**
+What you can leave as-is for local dev:
+- `AiSettings` — defaults to `localhost:8000` (Python agent-service)
+- `AWS:S3:Enabled` — defaults to `false` (uses local file storage)
+- `Serilog` / `FileLogging` — logging config, defaults are fine
 
-Create `appsettings.Development.json` from the tracked example, then edit values locally (this file is intentionally ignored by git):
+**Step 2: Create `appsettings.Development.json`** (local dev overrides)
 
 ```bash
 cp src/FairWorkly.API/appsettings.Development.example.json src/FairWorkly.API/appsettings.Development.json
 ```
 
-Then update:
-- `ConnectionStrings:DefaultConnection`
-- `JwtSettings:Secret` (must be non-empty; 32+ chars recommended)
-- `AiSettings` if you want to point at a real `agent-service`
+This file overrides `appsettings.json` when running locally. The example has `_comment` fields explaining each setting. Typically the defaults work out of the box.
 
-**Apply Migrations**:
+> **Note on Postgres port**: The examples use port `5433` (Docker Postgres exposed to host). If you're running Postgres natively, change to `5432`.
+
+**Step 3: Apply Migrations**
+
 ```bash
 cd backend
 pwsh ./scripts/update-database.ps1
@@ -210,63 +209,25 @@ Entity configuration (table mapping, relationships, constraints) must be placed 
 
 ### 6. Result<T> Pattern
 
-All MediatR Handlers return `Result<T>` using `Of{code}` factory methods. Controllers inherit `BaseApiController` and call `RespondResult(result)` — no manual status code mapping needed.
+All MediatR Handlers return `Result<T>` using `Of{code}` factory methods. Controllers inherit `BaseApiController` and call `RespondResult(result)` — no manual status code mapping needed. All responses follow the `{ code, msg, data }` envelope format.
 
-**Key factory methods:**
-
-| Method | Scenario | HTTP |
-|--------|----------|------|
-| `Of200(message, value)` | Success | 200 |
-| `Of201(message, value)` | Resource created | 201 |
-| `Of204()` | No content (delete/logout) | 204 |
-| `Of400(errors)` | Input validation (auto via ValidationBehavior) | 400 |
-| `Of401()` / `Of404()` / `Of403()` | Auth & access errors | 401 / 404 / 403 |
-| `Of422(message, errors)` | Business processing error | 422 |
-| `Of500(message)` | Anticipated infrastructure failure | 500 |
-
-**Example:**
-
-```csharp
-// Handler
-if (entity == null)
-    return Result<MyDto>.Of404("Resource not found");
-return Result<MyDto>.Of200("Retrieved successfully", dto);
-```
-
-```csharp
-// Controller — inherit BaseApiController, one line handles the rest
-[Route("api/[controller]")]
-public class MyController(IMediator mediator) : BaseApiController
-{
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
-    {
-        var result = await mediator.Send(new GetMyQuery { Id = id });
-        return RespondResult(result);
-    }
-}
-```
-
-All responses follow the `{ code, msg, data }` envelope format.
-
-> 📖 For detailed usage, see [Result<T> Pattern Guide](../docs/guides/backend/result-pattern.md)
-
-Location: `src/FairWorkly.Domain/Common/Result/Result.cs`
+> 📖 **You must read the full guide before writing any Handler**: [Result<T> Pattern Guide](docs/result-pattern.md)
 
 ## Database Scripts
 
 All scripts are located in `backend/scripts/`. Run them in terminal:
+
 ```bash
 cd backend
 pwsh ./scripts/add-migration.ps1
 ```
 
-| Script                             | Purpose                                           | Data Loss        |
-| ---------------------------------- | ------------------------------------------------- | ---------------- |
-| `add-migration.ps1`                | Create a new migration                            | None             |
-| `update-database.ps1`              | Apply pending migrations (preserves data)         | None             |
-| `reset-database.ps1`               | Drop and recreate database with all migrations    | Data             |
-| `init-migrations-and-database.ps1` | Delete all migrations and regenerate from scratch | Data + History   |
+| Script                             | Purpose                                           | Data Loss      |
+| ---------------------------------- | ------------------------------------------------- | -------------- |
+| `add-migration.ps1`                | Create a new migration                            | None           |
+| `update-database.ps1`              | Apply pending migrations (preserves data)         | None           |
+| `reset-database.ps1`               | Drop and recreate database with all migrations    | Data           |
+| `init-migrations-and-database.ps1` | Delete all migrations and regenerate from scratch | Data + History |
 
 ### Before Committing Migrations
 
