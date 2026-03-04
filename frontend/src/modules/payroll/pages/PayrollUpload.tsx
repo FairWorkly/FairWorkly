@@ -31,13 +31,15 @@ interface RowError {
 function downloadValidationErrorsTxt(apiError: ApiError) {
   const details = apiError.details as { errors?: RowError[] } | undefined
   const errors = details?.errors
-  if (!Array.isArray(errors) || !errors.some(e => 'rowNumber' in e)) return
+  if (!Array.isArray(errors)) return
+  const rowErrors = errors.filter(e => typeof e.rowNumber === 'number')
+  if (rowErrors.length === 0) return
 
   const lines = [
     'Payroll Validation Errors',
     '=========================',
     '',
-    ...errors.map(e => `Row ${e.rowNumber}: ${e.message}`),
+    ...rowErrors.map(e => `Row ${e.rowNumber}: ${e.message}`),
   ]
   const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
