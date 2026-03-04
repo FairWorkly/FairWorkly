@@ -15,7 +15,7 @@ VALID_PAYLOAD = {
     "categoryType": "PenaltyRate",
     "employeeName": "Henry Park",
     "employeeId": "E008",
-    "severity": 3,
+    "severity": "Error",
     "impactAmount": 31.6,
     "description": {
         "actualValue": 30.0,
@@ -35,6 +35,7 @@ VALID_PAYLOAD = {
 class StubRetrievalResult:
     def __init__(self):
         self.metadatas = [{"source": "AWARD.pdf", "page": 42}]
+        self.documents = ["Stub document text for page 42."]
 
 
 class StubRetriever:

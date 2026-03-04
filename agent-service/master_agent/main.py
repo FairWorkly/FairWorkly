@@ -5,7 +5,14 @@ import os
 import time
 import uuid
 from collections import deque
+from pathlib import Path
 from typing import Deque, Dict, Optional
+
+from dotenv import load_dotenv
+
+# Load .env before any os.getenv() calls so that AGENT_SERVICE_KEY,
+# OPENAI_API_KEY, etc. are available at module-import time.
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env", override=False)
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
