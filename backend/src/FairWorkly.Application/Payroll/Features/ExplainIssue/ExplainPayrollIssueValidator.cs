@@ -20,9 +20,7 @@ public class ExplainPayrollIssueValidator : AbstractValidator<ExplainPayrollIssu
             .NotEmpty()
             .WithMessage("CategoryType is required.")
             .Must(c => ValidCategories.Contains(c))
-            .WithMessage(
-                "CategoryType must be one of: BaseRate, PenaltyRate, CasualLoading, Superannuation."
-            );
+            .WithMessage($"CategoryType must be one of: {string.Join(", ", ValidCategories)}.");
 
         RuleFor(x => x.EmployeeName).NotEmpty().WithMessage("EmployeeName is required.");
 

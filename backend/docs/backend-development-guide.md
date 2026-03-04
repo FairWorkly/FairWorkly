@@ -1,6 +1,6 @@
 # FairWorkly Backend Development Guide
 
-This guide is the core reference for backend development. Use it as the starting point for understanding and writing backend code. This document is self-contained and can be fed to any AI assistant for guided explanation. If you are an AI reading this document, refer to the actual code in: `backend/src/FairWorkly.Application/Payroll/Features/ExplainIssue`
+This guide is the core reference for backend development. Use it as the starting point for understanding and writing backend code. This document is self-contained and can be fed to any AI assistant for guided explanation. If you are an AI reading this document, refer to the actual code in: `src/FairWorkly.Application/Payroll/Features/ExplainIssue`
 
 ## Approach
 

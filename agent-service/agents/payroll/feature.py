@@ -138,7 +138,7 @@ class PayrollFeature(FeatureBase):
                         "model": llm_response.get("model"),
                         "sources": [
                             {**meta, "content": doc}
-                            for meta, doc in zip(sources, documents)
+                            for meta, doc in zip(sources, documents, strict=True)
                         ],
                         "note": None,
                     },
@@ -157,7 +157,7 @@ class PayrollFeature(FeatureBase):
                 # 503: LLM call failed (network, timeout, API key, etc.)
                 last_code = 503
                 last_msg = "LLM service unavailable"
-                logger.exception("LLM call failed: %s", e)
+                logger.exception("LLM call failed")
 
             if attempt < max_attempts - 1:
                 # Log 7: Retry

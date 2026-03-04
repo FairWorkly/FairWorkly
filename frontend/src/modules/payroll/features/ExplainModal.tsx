@@ -215,7 +215,7 @@ export const ExplainModal: React.FC<ExplainModalProps> = ({
               </SectionCard>
             )}
 
-            {result!.sources.length > 0 && (
+            {(result!.sources?.length ?? 0) > 0 && (
               <Box>
                 <Typography variant="subtitle2" mb={1}>
                   Sources ({result!.sources.length})

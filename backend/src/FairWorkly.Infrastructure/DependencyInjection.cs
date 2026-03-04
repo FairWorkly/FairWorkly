@@ -36,6 +36,15 @@ public static class DependencyInjection
         if (aiTimeoutSeconds <= 0)
             aiTimeoutSeconds = 120;
 
+        var serviceKey = configuration["AiSettings:ServiceKey"];
+        if (string.IsNullOrWhiteSpace(serviceKey))
+        {
+            throw new InvalidOperationException(
+                "AiSettings:ServiceKey is required. "
+                    + "Set it in appsettings.json or via environment variable AiSettings__ServiceKey."
+            );
+        }
+
         services
             .AddRefitClient<IPayrollAgentService>(
                 new RefitSettings
@@ -52,15 +61,6 @@ public static class DependencyInjection
             {
                 c.BaseAddress = new Uri(aiBaseUrl);
                 c.Timeout = TimeSpan.FromSeconds(aiTimeoutSeconds);
-
-                var serviceKey = configuration["AiSettings:ServiceKey"];
-                if (string.IsNullOrWhiteSpace(serviceKey))
-                {
-                    throw new InvalidOperationException(
-                        "AiSettings:ServiceKey is required. "
-                            + "Set it in appsettings.json or via environment variable AiSettings__ServiceKey."
-                    );
-                }
                 c.DefaultRequestHeaders.TryAddWithoutValidation("X-Service-Key", serviceKey);
             });
 
