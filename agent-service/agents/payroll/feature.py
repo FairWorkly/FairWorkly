@@ -97,6 +97,7 @@ class PayrollFeature(FeatureBase):
         last_msg = "Internal processing error"
 
         for attempt in range(max_attempts):
+            raw_text = ""
             try:
                 # Log 4: LLM call start
                 logger.info("LLM call attempt %d/%d", attempt + 1, max_attempts)
