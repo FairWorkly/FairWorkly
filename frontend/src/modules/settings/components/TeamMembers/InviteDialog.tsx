@@ -67,7 +67,7 @@ export function InviteDialog({
     form.email.trim() !== '' &&
     form.firstName.trim() !== '' &&
     form.lastName.trim() !== '' &&
-    form.role !== ''
+    !!form.role
 
   // Success step: show invite link
   if (inviteLink) {
