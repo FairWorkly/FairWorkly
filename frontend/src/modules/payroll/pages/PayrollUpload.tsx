@@ -23,6 +23,31 @@ const payrollValidationItems = [
   // Future: { key: 'enableStpCheck', label: 'Single Touch Payroll(STP) compliance' }
 ]
 
+interface RowError {
+  rowNumber: number
+  message: string
+}
+
+function downloadValidationErrorsTxt(apiError: ApiError) {
+  const details = apiError.details as { errors?: RowError[] } | undefined
+  const errors = details?.errors
+  if (!Array.isArray(errors) || !errors.some(e => 'rowNumber' in e)) return
+
+  const lines = [
+    'Payroll Validation Errors',
+    '=========================',
+    '',
+    ...errors.map(e => `Row ${e.rowNumber}: ${e.message}`),
+  ]
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'payroll-validation-errors.txt'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export function PayrollUpload() {
   const navigate = useNavigate()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
@@ -104,10 +129,9 @@ export function PayrollUpload() {
 
       navigate('/payroll/results', { state: { result } })
     } catch (err) {
-      console.error('Payroll validation error:', err)
       if (err && typeof err === 'object' && 'message' in err) {
         const apiError = err as ApiError
-        console.error('Error details:', apiError.details)
+        downloadValidationErrorsTxt(apiError)
         setError(apiError.message ?? 'An unexpected error occurred')
       } else {
         setError('An unexpected error occurred')
