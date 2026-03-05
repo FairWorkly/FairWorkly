@@ -6,6 +6,7 @@ on:
     paths:
       - "agent-service/**"
       - ".github/workflows/build-push-ecr-ey-agent-service.yml"
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -20,12 +21,22 @@ jobs:
 
       - name: Set image tags
         id: vars
+        shell: bash
         run: |
+          set -euo pipefail
+
           SHORT_SHA="${GITHUB_SHA:0:7}"
-          if [ "$GITHUB_REF_NAME" = "main" ]; then ENV_PREFIX="prod"; else ENV_PREFIX="uat"; fi
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            ENV_PREFIX="prod"
+          else
+            ENV_PREFIX="uat"
+          fi
           FULL_TAG="${ENV_PREFIX}-${SHORT_SHA}"
-          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
-          echo "full_tag=$FULL_TAG" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "short_sha=$SHORT_SHA"
+            echo "full_tag=$FULL_TAG"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -44,15 +55,14 @@ jobs:
           SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
         run: |
           set -euo pipefail
-      
+
           IMAGE="${REGISTRY}/${REPOSITORY}:${SHORT_SHA}"
           echo "Building $IMAGE"
-      
+
           docker build \
             -f agent-service/Dockerfile \
             -t "$IMAGE" \
             agent-service
-          
 
       - name: Push image
         env:
@@ -61,7 +71,9 @@ jobs:
           SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
           FULL_TAG: ${{ steps.vars.outputs.full_tag }}
         run: |
-          IMAGE="$REGISTRY/$REPOSITORY"
+          set -euo pipefail
+
+          IMAGE="${REGISTRY}/${REPOSITORY}"
           docker push "$IMAGE:$SHORT_SHA"
           docker tag "$IMAGE:$SHORT_SHA" "$IMAGE:$FULL_TAG"
           docker push "$IMAGE:$FULL_TAG"
