@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Button, Chip, CircularProgress, MenuItem, Table, TableBody, TableContainer, TableHead, Typography } from '@mui/material'
+import { Button, Chip, CircularProgress, MenuItem, Stack, Table, TableBody, TableContainer, TableHead, Typography } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import type { TeamMemberDto, UpdateTeamMemberRequest } from '../../types/teamMembers.types'
 import { ROLE_OPTIONS } from '../../types/teamMembers.types'
 import { DeactivateDialog } from './DeactivateDialog'
 import { RoleChangeDialog } from './RoleChangeDialog'
+import { CancelInviteDialog } from './CancelInviteDialog'
 import {
   TeamCard,
   CardHeader,
@@ -32,6 +33,13 @@ interface TeamMembersTableProps {
   updatingUserId: string | null
   onResendInvite: (userId: string) => void
   resendingUserId: string | null
+  onCancelInvite: (userId: string) => void
+  cancellingUserId: string | null
+}
+
+function isInvitationExpired(member: TeamMemberDto): boolean {
+  if (member.invitationStatus !== 'Pending' || !member.invitationTokenExpiry) return false
+  return new Date(member.invitationTokenExpiry) < new Date()
 }
 
 function formatLastLogin(lastLoginAt: string | null): string {
@@ -43,14 +51,16 @@ function formatLastLogin(lastLoginAt: string | null): string {
   })
 }
 
-export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendInvite, resendingUserId }: TeamMembersTableProps) {
+export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendInvite, resendingUserId, onCancelInvite, cancellingUserId }: TeamMembersTableProps) {
   const { user: currentUser } = useAuth()
   const [deactivateTarget, setDeactivateTarget] = useState<TeamMemberDto | null>(null)
   const [roleChangeTarget, setRoleChangeTarget] = useState<RoleChangeTarget | null>(null)
+  const [cancelTarget, setCancelTarget] = useState<TeamMemberDto | null>(null)
 
   const isRowUpdating = (member: TeamMemberDto) => updatingUserId === member.userId
   const isDeactivating = !!deactivateTarget && updatingUserId === deactivateTarget.userId
   const isChangingRole = !!roleChangeTarget && updatingUserId === roleChangeTarget.member.userId
+  const isCancelling = !!cancelTarget && cancellingUserId === cancelTarget.userId
 
 
   const handleRoleChange = (member: TeamMemberDto, event: SelectChangeEvent<unknown>) => {
@@ -79,6 +89,13 @@ export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendIn
     if (roleChangeTarget) {
       onUpdate(roleChangeTarget.member.userId, { role: roleChangeTarget.newRole })
       setRoleChangeTarget(null)
+    }
+  }
+
+  const handleConfirmCancel = () => {
+    if (cancelTarget) {
+      onCancelInvite(cancelTarget.userId)
+      setCancelTarget(null)
     }
   }
 
@@ -124,7 +141,9 @@ export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendIn
                         <YouChip label="You" size="small" color="primary" variant="outlined" />
                       )}
                       {member.invitationStatus === 'Pending' && (
-                        <Chip label="Pending" size="small" color="warning" sx={{ ml: 1, height: 20, fontSize: '0.7rem' }} />
+                        isInvitationExpired(member)
+                          ? <Chip label="Expired" size="small" color="error" sx={{ ml: 1, height: 20, fontSize: '0.7rem' }} />
+                          : <Chip label="Pending" size="small" color="warning" sx={{ ml: 1, height: 20, fontSize: '0.7rem' }} />
                       )}
                     </Typography>
                   </StyledTableCell>
@@ -169,19 +188,30 @@ export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendIn
 
                   <StyledTableCell>
                     {member.invitationStatus === 'Pending' && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => onResendInvite(member.userId)}
-                        disabled={resendingUserId === member.userId}
-                        startIcon={
-                          resendingUserId === member.userId ? (
-                            <CircularProgress size={14} />
-                          ) : undefined
-                        }
-                      >
-                        {resendingUserId === member.userId ? 'Resending...' : 'Resend'}
-                      </Button>
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => onResendInvite(member.userId)}
+                          disabled={resendingUserId === member.userId}
+                          startIcon={
+                            resendingUserId === member.userId ? (
+                              <CircularProgress size={14} />
+                            ) : undefined
+                          }
+                        >
+                          {resendingUserId === member.userId ? 'Resending...' : 'Resend'}
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          onClick={() => setCancelTarget(member)}
+                          disabled={cancellingUserId === member.userId}
+                        >
+                          Cancel
+                        </Button>
+                      </Stack>
                     )}
                   </StyledTableCell>
                 </StyledTableRow>
@@ -206,6 +236,14 @@ export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendIn
         isUpdating={isChangingRole}
         onConfirm={handleConfirmRoleChange}
         onCancel={() => setRoleChangeTarget(null)}
+      />
+
+      <CancelInviteDialog
+        open={!!cancelTarget}
+        memberName={cancelTarget?.fullName ?? ''}
+        isCancelling={isCancelling}
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setCancelTarget(null)}
       />
     </>
   )

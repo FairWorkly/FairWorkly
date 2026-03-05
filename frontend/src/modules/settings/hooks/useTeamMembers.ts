@@ -56,3 +56,14 @@ export function useResendInvitation() {
     },
   })
 }
+
+export function useCancelInvitation() {
+  const queryClient = useQueryClient()
+
+  return useApiMutation<void, string>({
+    mutationFn: (userId) => settingsApi.cancelInvitation(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
+  })
+}

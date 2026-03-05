@@ -58,13 +58,19 @@ export function InviteDialog({
 
   const handleCopy = async () => {
     if (!inviteLink) return
-    await navigator.clipboard.writeText(inviteLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(inviteLink)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard API not available (e.g. non-HTTPS or permission denied)
+    }
   }
 
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+
   const isFormValid =
-    form.email.trim() !== '' &&
+    isValidEmail(form.email) &&
     form.firstName.trim() !== '' &&
     form.lastName.trim() !== '' &&
     !!form.role

@@ -41,12 +41,52 @@ public class User : AuditableEntity, IValidatableDomain
     public string? PasswordResetToken { get; set; }
     public DateTime? PasswordResetTokenExpiry { get; set; }
 
+    // Invitation (team member invite)
+    public InvitationStatus InvitationStatus { get; set; } = InvitationStatus.None;
+    public string? InvitationToken { get; set; }
+    public DateTime? InvitationTokenExpiry { get; set; }
+
     // Employee Link (for Employee role)
     public Guid? EmployeeId { get; set; }
     public virtual Employee? Employee { get; set; }
 
     // Computed property
     public string FullName => $"{FirstName} {LastName}";
+
+    /// <summary>
+    /// Sets (or resets) the invitation token and expiry.
+    /// Used when inviting a new team member or resending an invitation.
+    /// </summary>
+    public void SetInvitationToken(string tokenHash, DateTime expiresAtUtc)
+    {
+        InvitationStatus = InvitationStatus.Pending;
+        InvitationToken = tokenHash;
+        InvitationTokenExpiry = expiresAtUtc;
+    }
+
+    /// <summary>
+    /// Accepts the invitation: sets password, activates the account, clears the token.
+    /// </summary>
+    public void AcceptInvitation(string passwordHash)
+    {
+        PasswordHash = passwordHash;
+        IsActive = true;
+        InvitationStatus = InvitationStatus.Accepted;
+        InvitationToken = null;
+        InvitationTokenExpiry = null;
+    }
+
+    /// <summary>
+    /// Cancels a pending invitation: soft-deletes the user and clears invitation data.
+    /// </summary>
+    public void CancelInvitation()
+    {
+        InvitationStatus = InvitationStatus.None;
+        InvitationToken = null;
+        InvitationTokenExpiry = null;
+        IsActive = false;
+        IsDeleted = true;
+    }
 
     /// <summary>
     /// Validates domain invariants. Call before persisting.
@@ -89,10 +129,13 @@ public class User : AuditableEntity, IValidatableDomain
             );
         }
 
-        // At least one authentication credential must be present
+        // At least one authentication credential must be present,
+        // unless user has a pending invitation (password not yet set)
+        // or is being soft-deleted (cancelled invitation)
         var hasPassword = !string.IsNullOrWhiteSpace(PasswordHash);
         var hasGoogleId = !string.IsNullOrWhiteSpace(GoogleId);
-        if (!hasPassword && !hasGoogleId)
+        var isPendingInvite = InvitationStatus == InvitationStatus.Pending;
+        if (!hasPassword && !hasGoogleId && !isPendingInvite && !IsDeleted)
         {
             throw new InvalidDomainStateException(
                 nameof(User),

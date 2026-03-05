@@ -16,6 +16,12 @@ public interface IUserRepository
     // Retrieves all users belonging to a specific organization
     Task<List<User>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken ct = default);
 
+    // Retrieve a user by the stored invitation token hash
+    Task<User?> GetByInvitationTokenHashAsync(
+        string invitationTokenHash,
+        CancellationToken ct = default
+    );
+
     // Checks if the email is already taken within an organization (matches composite unique index).
     Task<bool> IsEmailUniqueAsync(
         Guid organizationId,

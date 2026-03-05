@@ -1,4 +1,4 @@
-import httpClient from './httpClient'
+import * as baseApi from './baseApi'
 
 // --- Team Members ---
 
@@ -9,6 +9,7 @@ export interface TeamMemberDto {
   role: 'Admin' | 'Manager'
   isActive: boolean
   invitationStatus: 'None' | 'Pending' | 'Accepted'
+  invitationTokenExpiry: string | null
   lastLoginAt: string | null
 }
 
@@ -37,6 +38,11 @@ export interface InviteTeamMemberResponse {
 
 export interface ResendInvitationResponse {
   inviteLink: string
+}
+
+export interface ValidateInvitationTokenResponse {
+  email: string
+  fullName: string
 }
 
 export interface AcceptInvitationRequest {
@@ -82,65 +88,31 @@ export interface UpdateOrganizationProfileRequest {
 export const settingsApi = {
   // --- Team Members ---
 
-  async getTeamMembers(): Promise<TeamMemberDto[]> {
-    const response = await httpClient.get<TeamMemberDto[]>('/settings/team')
-    return response.data
-  },
+  getTeamMembers: () => baseApi.get<TeamMemberDto[]>('/settings/team'),
 
-  async updateTeamMember(
-    userId: string,
-    payload: UpdateTeamMemberRequest
-  ): Promise<TeamMemberUpdatedDto> {
-    const response = await httpClient.patch<TeamMemberUpdatedDto>(
-      `/settings/team/${userId}`,
-      payload
-    )
-    return response.data
-  },
+  updateTeamMember: (userId: string, payload: UpdateTeamMemberRequest) =>
+    baseApi.patch<TeamMemberUpdatedDto>(`/settings/team/${userId}`, payload),
 
-  async inviteTeamMember(
-    payload: InviteTeamMemberRequest
-  ): Promise<InviteTeamMemberResponse> {
-    const response = await httpClient.post<InviteTeamMemberResponse>(
-      '/settings/team/invite',
-      payload
-    )
-    return response.data
-  },
+  inviteTeamMember: (payload: InviteTeamMemberRequest) =>
+    baseApi.post<InviteTeamMemberResponse>('/settings/team/invite', payload),
 
-  async resendInvitation(userId: string): Promise<ResendInvitationResponse> {
-    const response = await httpClient.post<ResendInvitationResponse>(
-      `/settings/team/${userId}/resend-invite`
-    )
-    return response.data
-  },
+  resendInvitation: (userId: string) =>
+    baseApi.post<ResendInvitationResponse>(`/settings/team/${userId}/resend-invite`),
 
-  async acceptInvitation(
-    payload: AcceptInvitationRequest
-  ): Promise<AcceptInvitationResponse> {
-    const response = await httpClient.post<AcceptInvitationResponse>(
-      '/invite/accept',
-      payload
-    )
-    return response.data
-  },
+  cancelInvitation: (userId: string) =>
+    baseApi.del<void>(`/settings/team/${userId}/invite`),
+
+  validateInvitationToken: (token: string) =>
+    baseApi.get<ValidateInvitationTokenResponse>(`/invite/validate?token=${encodeURIComponent(token)}`),
+
+  acceptInvitation: (payload: AcceptInvitationRequest) =>
+    baseApi.post<AcceptInvitationResponse>('/invite/accept', payload),
 
   // --- Organization Profile ---
 
-  async getOrganizationProfile(): Promise<OrganizationProfileDto> {
-    const response = await httpClient.get<OrganizationProfileDto>(
-      '/settings/organization-profile'
-    )
-    return response.data
-  },
+  getOrganizationProfile: () =>
+    baseApi.get<OrganizationProfileDto>('/settings/organization-profile'),
 
-  async updateOrganizationProfile(
-    payload: UpdateOrganizationProfileRequest
-  ): Promise<OrganizationProfileDto> {
-    const response = await httpClient.put<OrganizationProfileDto>(
-      '/settings/organization-profile',
-      payload
-    )
-    return response.data
-  },
+  updateOrganizationProfile: (payload: UpdateOrganizationProfileRequest) =>
+    baseApi.put<OrganizationProfileDto>('/settings/organization-profile', payload),
 }

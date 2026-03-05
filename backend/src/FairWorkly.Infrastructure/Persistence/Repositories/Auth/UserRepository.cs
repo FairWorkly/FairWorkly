@@ -39,6 +39,18 @@ public class UserRepository : IUserRepository
         );
     }
 
+    // Retrieve a user by the stored invitation token hash
+    public async Task<User?> GetByInvitationTokenHashAsync(
+        string invitationTokenHash,
+        CancellationToken ct = default
+    )
+    {
+        return await _context.Users.FirstOrDefaultAsync(
+            u => u.InvitationToken == invitationTokenHash && !u.IsDeleted,
+            ct
+        );
+    }
+
     // Retrieves all users belonging to a specific organization
     public async Task<List<User>> GetByOrganizationIdAsync(
         Guid organizationId,

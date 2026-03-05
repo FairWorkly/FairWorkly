@@ -85,6 +85,7 @@ export function setupInterceptors(store: StoreLike) {
         '/auth/refresh',
         '/auth/logout',
         '/auth/register',
+        '/invite/accept',
       ]
       if (authPaths.some(path => requestUrl.includes(path))) {
         return Promise.reject(error)

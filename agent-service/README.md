@@ -80,48 +80,62 @@ http://localhost:8000/docs
 4. Add request header `X-Service-Key` with your `AGENT_SERVICE_KEY` value.
 5. Execute and verify that the payload is routed to the expected feature.
 
-## Directory structure
+## Architecture
+
+The agent service is designed as a **multi-agent system** with two layers:
+
+### Master Agent + Domain Agents
 
 ```
 agent-service/
-├── .env.example                # Template for API keys
-├── config.yaml                 # Central config (LLM modes, FAISS paths, prompts)
-├── master_agent/
-│   ├── main.py                 # FastAPI entry point
-│   ├── intent_router.py
-│   ├── feature_registry.py
-│   └── config.py               # Helper to load config.yaml
-├── scripts/
-│   └── ingest_assets_to_faiss.py   # Offline ingestion of assets/AWARD.pdf into FAISS
-├── agents/
-│   ├── compliance/compliance_feature.py
-│   └── shared/
-│       ├── file_handler.py
-│       ├── rag_retriever.py
-│       └── llm/
-│           ├── factory.py
-│           ├── local_provider.py
-│           └── langchain_provider.py
-│       ├── vector_db/
-│       │   └── faiss_store.py
-│       └── assets/
-│           └── AWARD.pdf
-├── tests/test_master_agent.py
-└── README.md
+├── master_agent/              # Orchestration layer ("master agent")
+│   ├── main.py                # FastAPI entry point + /api/agent/chat endpoint
+│   ├── intent_router.py       # Intent routing: dispatches to the right feature by hint/file
+│   ├── feature_registry.py    # FeatureBase interface + feature registry
+│   ├── config.py              # Helper to load config.yaml
+│   └── features/              # (legacy location, features now live under agents/)
+│
+├── agents/                    # Domain agents (business logic implementations)
+│   ├── compliance/            # Compliance Q&A (RAG over award documents)
+│   ├── payroll/               # Payroll verification
+│   └── roster/                # Roster parsing + explanation
+│       ├── feature.py         # RosterFeature (file upload → parse)
+│       ├── explain_feature.py # RosterExplainFeature (explain parse results)
+│       └── services/          # Core parsing logic (excel_reader, row_parsers, etc.)
+│
+├── shared/                    # Shared utilities (LLM providers, RAG, vector DB)
+├── scripts/                   # Offline tooling (FAISS ingestion)
+├── tests/                     # Test suite
+├── config.yaml                # Central config (LLM modes, FAISS paths, prompts)
+└── .env.example               # Template for API keys
 ```
+
+### Why `main.py` lives under `master_agent/` instead of the project root
+
+- **Semantic clarity**: The master agent is itself a cohesive module with its own responsibilities — request handling, authentication, rate limiting, intent routing, and feature registration. Grouping `main.py`, `intent_router.py`, and `feature_registry.py` together makes it a self-contained package.
+- **Parallel structure with `agents/`**: `master_agent/` and `agents/` sit at the same level as peer packages — one handles **dispatch**, the other handles **execution**. If `main.py` were at the root, it would break this symmetry.
+- **The startup command reflects the hierarchy**: `uvicorn master_agent.main:app` — you can tell from the command alone that this is the master agent's entry point.
+
+In short: the FastAPI application **is** the master agent, not something that exists outside of all agents. It receives requests, routes them via `IntentRouter`, looks up the target feature in `FeatureRegistry`, and delegates to the appropriate domain agent under `agents/`.
 
 ## Data flow overview
 
 ```mermaid
 flowchart TB
-    Client["Backend Adapter"]
+    Client["Backend (.NET)"]
     API["FastAPI master agent\n(master_agent.main)"]
     Router["IntentRouter"]
     Registry["FeatureRegistry"]
     Compliance["ComplianceFeature"]
+    Roster["RosterFeature"]
+    Payroll["DemoPayrollFeature"]
     LLM["LLM Provider"]
 
     Client -->|"POST /api/agent/chat"| API --> Router --> Registry
-    Registry -->|"get feature"| Compliance -->|"message"| LLM
+    Registry -->|"compliance_qa"| Compliance -->|"RAG + LLM"| LLM
+    Registry -->|"roster"| Roster
+    Registry -->|"payroll_verify"| Payroll
     LLM -->|"result"| Compliance --> API -->|"structured JSON"| Client
+    Roster --> API
+    Payroll --> API
 ```

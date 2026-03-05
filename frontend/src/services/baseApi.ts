@@ -45,6 +45,19 @@ export async function put<TResponse, TBody = unknown>(
   }
 }
 
+export async function patch<TResponse, TBody = unknown>(
+  url: string,
+  body?: TBody,
+  config?: AxiosRequestConfig
+): Promise<TResponse> {
+  try {
+    const res = await httpClient.patch<TResponse>(url, body, config)
+    return res.data
+  } catch (err) {
+    throw normalizeApiError(err)
+  }
+}
+
 export async function del<TResponse>(
   url: string,
   config?: AxiosRequestConfig
