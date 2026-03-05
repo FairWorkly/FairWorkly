@@ -3,7 +3,7 @@ import { Alert, Box, Button, Snackbar } from '@mui/material'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { TeamMembersTable } from '../../components/TeamMembers/TeamMembersTable'
 import { InviteDialog } from '../../components/TeamMembers/InviteDialog'
-import { useTeamMembers, useUpdateTeamMember, useInviteTeamMember, useResendInvitation } from '../../hooks/useTeamMembers'
+import { useTeamMembers, useUpdateTeamMember, useInviteTeamMember, useResendInvitation, useCancelInvitation } from '../../hooks/useTeamMembers'
 import { useNotification } from '@/shared/hooks'
 import type { UpdateTeamMemberRequest, InviteTeamMemberRequest } from '../../types/teamMembers.types'
 import { SectionWrapper, TableSkeleton } from './TeamMembersSection.styles'
@@ -13,12 +13,14 @@ export function TeamMembersSection() {
   const updateMutation = useUpdateTeamMember()
   const inviteMutation = useInviteTeamMember()
   const resendMutation = useResendInvitation()
+  const cancelMutation = useCancelInvitation()
   const { notification, notify, clear } = useNotification()
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null)
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
   const [inviteLink, setInviteLink] = useState<string | null>(null)
   const [inviteError, setInviteError] = useState<string | null>(null)
   const [resendingUserId, setResendingUserId] = useState<string | null>(null)
+  const [cancellingUserIds, setCancellingUserIds] = useState<Set<string>>(new Set())
 
   if (isLoading) {
     return (
@@ -90,6 +92,22 @@ export function TeamMembersSection() {
     })
   }
 
+  const handleCancelInvite = (userId: string) => {
+    if (cancellingUserIds.has(userId)) return
+    setCancellingUserIds(prev => new Set(prev).add(userId))
+    cancelMutation.mutate(userId, {
+      onSuccess: () => {
+        notify('Invitation cancelled successfully')
+      },
+      onError: (error) => {
+        notify(error.message || 'Failed to cancel invitation.', 'error')
+      },
+      onSettled: () => {
+        setCancellingUserIds(prev => { const s = new Set(prev); s.delete(userId); return s })
+      },
+    })
+  }
+
   return (
     <SectionWrapper>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -108,6 +126,8 @@ export function TeamMembersSection() {
         updatingUserId={updatingUserId}
         onResendInvite={handleResendInvite}
         resendingUserId={resendingUserId}
+        onCancelInvite={handleCancelInvite}
+        cancellingUserIds={cancellingUserIds}
       />
 
       <InviteDialog

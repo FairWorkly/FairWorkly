@@ -34,6 +34,16 @@ public class TeamMemberDto
     public bool IsActive { get; set; }
 
     /// <summary>
+    /// Invitation status (None, Pending, or Accepted)
+    /// </summary>
+    public InvitationStatus InvitationStatus { get; set; }
+
+    /// <summary>
+    /// When the invitation token expires (null if not invited)
+    /// </summary>
+    public DateTime? InvitationTokenExpiry { get; set; }
+
+    /// <summary>
     /// When the user last logged in (null if never)
     /// </summary>
     public DateTime? LastLoginAt { get; set; }

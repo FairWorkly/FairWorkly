@@ -4,6 +4,7 @@ import { PublicAuthLayout } from '@/shared/components/layout/public/PublicAuthLa
 import { AuthBranding } from '@/modules/auth'
 import { HomePage } from '@/modules/home/pages/HomePage'
 import { LoginPage } from '@/modules/auth/pages/LoginPage'
+import { AcceptInvitePage } from '@/modules/auth/pages/AcceptInvitePage'
 
 export const publicRoutes: RouteObject[] = [
   // Marketing pages (full-width center layout)
@@ -23,6 +24,10 @@ export const publicRoutes: RouteObject[] = [
       {
         path: '/login',
         element: <LoginPage />,
+      },
+      {
+        path: '/accept-invite',
+        element: <AcceptInvitePage />,
       },
     ],
   },

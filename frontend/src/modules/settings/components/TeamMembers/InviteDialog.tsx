@@ -44,11 +44,13 @@ export function InviteDialog({
 }: InviteDialogProps) {
   const [form, setForm] = useState<InviteTeamMemberRequest>(initialForm)
   const [copied, setCopied] = useState(false)
+  const [copyError, setCopyError] = useState(false)
 
   const handleClose = () => {
     if (isSubmitting) return
     setForm(initialForm)
     setCopied(false)
+    setCopyError(false)
     onClose()
   }
 
@@ -58,13 +60,20 @@ export function InviteDialog({
 
   const handleCopy = async () => {
     if (!inviteLink) return
-    await navigator.clipboard.writeText(inviteLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(inviteLink)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopyError(true)
+      setTimeout(() => setCopyError(false), 3000)
+    }
   }
 
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+
   const isFormValid =
-    form.email.trim() !== '' &&
+    isValidEmail(form.email) &&
     form.firstName.trim() !== '' &&
     form.lastName.trim() !== '' &&
     !!form.role
@@ -95,6 +104,11 @@ export function InviteDialog({
             }}
             size="small"
           />
+          {copyError && (
+            <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+              Could not copy — please copy the link manually.
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} variant="contained">

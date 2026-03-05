@@ -27,6 +27,8 @@ public class GetTeamMembersQueryHandler(IUserRepository userRepository)
                 Email = u.Email,
                 Role = u.Role,
                 IsActive = u.IsActive,
+                InvitationStatus = u.InvitationStatus,
+                InvitationTokenExpiry = u.InvitationTokenExpiry,
                 LastLoginAt = u.LastLoginAt,
             })
             .ToList();

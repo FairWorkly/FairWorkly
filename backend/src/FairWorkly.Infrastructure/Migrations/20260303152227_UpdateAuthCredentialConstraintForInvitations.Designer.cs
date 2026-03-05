@@ -3,6 +3,7 @@ using System;
 using FairWorkly.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FairWorkly.Infrastructure.Migrations
 {
     [DbContext(typeof(FairWorklyDbContext))]
-    partial class FairWorklyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260303152227_UpdateAuthCredentialConstraintForInvitations")]
+    partial class UpdateAuthCredentialConstraintForInvitations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -321,11 +324,6 @@ namespace FairWorkly.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_users_google_id")
                         .HasFilter("google_id IS NOT NULL AND is_deleted = false");
-
-                    b.HasIndex("InvitationToken")
-                        .IsUnique()
-                        .HasDatabaseName("ix_users_invitation_token")
-                        .HasFilter("invitation_token IS NOT NULL AND is_deleted = false");
 
                     b.HasIndex("RefreshToken")
                         .HasDatabaseName("ix_users_refresh_token")
