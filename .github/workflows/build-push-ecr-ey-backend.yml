@@ -1,4 +1,4 @@
-name: Build and Push to Amazon ECR by Eric
+name: Build and Push Backend Image to Amazon ECR by Eric
 
 on:
   push:

@@ -268,6 +268,19 @@ export const AuthErrorText = styled(Typography)(({ theme }) => ({
   marginTop: theme.spacing(1),
 }))
 
+export const LoadingCenter = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  paddingTop: theme.spacing(4),
+  paddingBottom: theme.spacing(4),
+}))
+
+export const InputHint = styled(Typography)(({ theme }) => ({
+  marginTop: theme.spacing(0.5),
+  fontSize: theme.typography.caption.fontSize,
+  color: theme.palette.text.secondary,
+}))
+
 export const AuthTabList = styled('nav')(({ theme }) => ({
   display: 'flex',
   background: theme.palette.background.paper,

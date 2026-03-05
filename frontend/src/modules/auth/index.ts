@@ -1,4 +1,4 @@
-export { LoginPage } from './pages'
+export { LoginPage, AcceptInvitePage } from './pages'
 export {
   AuthBranding,
   LoginForm,

@@ -10,8 +10,9 @@
 
 # Claude Code CLI local configuration
 .claude/
+.codex/
+.gemini/
 CLAUDE.md
-AGENTS.md
 .playwright-mcp/
 
 # Visual Studio (Backend)

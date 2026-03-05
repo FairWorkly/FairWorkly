@@ -45,6 +45,7 @@ try
     builder.Host.UseSerilog();
 
     // Register Application and Infrastructure services (DependencyInjection.cs)
+    // Note: IHttpContextAccessor + ICurrentUserService registered in Infrastructure/DependencyInjection.cs
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
 

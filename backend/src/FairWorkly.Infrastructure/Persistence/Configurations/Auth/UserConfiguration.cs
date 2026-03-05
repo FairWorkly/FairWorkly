@@ -1,4 +1,5 @@
 using FairWorkly.Domain.Auth.Entities;
+using FairWorkly.Domain.Auth.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -50,6 +51,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsUnique()
             .HasFilter("google_id IS NOT NULL AND is_deleted = false");
         builder.HasIndex(u => u.RefreshToken).HasFilter("refresh_token IS NOT NULL");
+        builder
+            .HasIndex(u => u.InvitationToken)
+            .IsUnique()
+            .HasFilter("invitation_token IS NOT NULL AND is_deleted = false");
 
         // Property configurations
         builder.Property(u => u.Email).HasMaxLength(255).IsRequired();
@@ -61,5 +66,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.GoogleId).HasMaxLength(100); // Optional for password users
         builder.Property(u => u.RefreshToken).HasMaxLength(500);
         builder.Property(u => u.PasswordResetToken).HasMaxLength(500);
+
+        // Invitation fields
+        builder.Property(u => u.InvitationStatus).HasDefaultValue(InvitationStatus.None);
+        builder.Property(u => u.InvitationToken).HasMaxLength(500);
     }
 }

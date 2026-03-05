@@ -13,6 +13,25 @@ public interface IUserRepository
     // Retrieve a user by the stored refresh token hash
     Task<User?> GetByRefreshTokenHashAsync(string refreshTokenHash, CancellationToken ct = default);
 
+    // Retrieves all users belonging to a specific organization
+    Task<List<User>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken ct = default);
+
+    // Retrieve a user by the stored invitation token hash
+    Task<User?> GetByInvitationTokenHashAsync(
+        string invitationTokenHash,
+        CancellationToken ct = default
+    );
+
+    // Atomically accepts a pending invitation via a single conditional UPDATE.
+    // Returns 1 if the row was updated, 0 if the token no longer matches a Pending,
+    // non-expired user (concurrent accept, cancellation, or expiry between pre-read and update).
+    Task<int> AcceptInvitationAtomicAsync(
+        string tokenHash,
+        string passwordHash,
+        DateTime now,
+        CancellationToken ct = default
+    );
+
     // Checks if the email is already taken within an organization (matches composite unique index).
     Task<bool> IsEmailUniqueAsync(
         Guid organizationId,

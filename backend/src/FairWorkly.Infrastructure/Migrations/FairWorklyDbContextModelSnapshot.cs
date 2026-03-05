@@ -231,6 +231,21 @@ namespace FairWorkly.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("google_id");
 
+                    b.Property<int>("InvitationStatus")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("invitation_status");
+
+                    b.Property<string>("InvitationToken")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("invitation_token");
+
+                    b.Property<DateTime?>("InvitationTokenExpiry")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("invitation_token_expiry");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -306,6 +321,11 @@ namespace FairWorkly.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_users_google_id")
                         .HasFilter("google_id IS NOT NULL AND is_deleted = false");
+
+                    b.HasIndex("InvitationToken")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_invitation_token")
+                        .HasFilter("invitation_token IS NOT NULL AND is_deleted = false");
 
                     b.HasIndex("RefreshToken")
                         .HasDatabaseName("ix_users_refresh_token")
