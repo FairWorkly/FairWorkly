@@ -32,14 +32,21 @@ public class AcceptInvitationHandler(
             return Result<AcceptInvitationResponse>.Of404("Invalid or expired invitation token.");
         }
 
-        if (user.InvitationStatus != InvitationStatus.Pending)
+        if (user.InvitationStatus == InvitationStatus.Accepted)
         {
             return Result<AcceptInvitationResponse>.Of409(
                 "This invitation has already been accepted."
             );
         }
 
-        if (user.InvitationTokenExpiry == null || user.InvitationTokenExpiry < now)
+        if (user.InvitationStatus != InvitationStatus.Pending)
+        {
+            return Result<AcceptInvitationResponse>.Of409(
+                "This invitation is no longer valid. Please ask your admin to resend the invitation."
+            );
+        }
+
+        if (user.InvitationTokenExpiry == null || user.InvitationTokenExpiry <= now)
         {
             return Result<AcceptInvitationResponse>.Of409(
                 "This invitation has expired. Please ask your admin to resend the invitation."
