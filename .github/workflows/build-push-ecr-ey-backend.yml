@@ -46,9 +46,11 @@ jobs:
 
           FULL_TAG="${ENV_PREFIX}-${SHORT_SHA}"
 
-          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
-          echo "env_prefix=$ENV_PREFIX" >> "$GITHUB_OUTPUT"
-          echo "full_tag=$FULL_TAG" >> "$GITHUB_OUTPUT"
+          {
+            echo "short_sha=$SHORT_SHA"
+            echo "env_prefix=$ENV_PREFIX"
+            echo "full_tag=$FULL_TAG"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -70,7 +72,7 @@ jobs:
           set -euo pipefail
           docker build \
             -f backend/Dockerfile \
-            -t $REGISTRY/$REPOSITORY:$SHORT_SHA \
+            -t "$REGISTRY/$REPOSITORY:$SHORT_SHA" \
             .
 
       - name: Tag and push to ECR
