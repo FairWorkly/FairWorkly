@@ -26,14 +26,21 @@ public class ValidateInvitationTokenHandler(
             );
         }
 
-        if (user.InvitationStatus != InvitationStatus.Pending)
+        if (user.InvitationStatus == InvitationStatus.Accepted)
         {
             return Result<ValidateInvitationTokenResponse>.Of409(
                 "This invitation has already been accepted."
             );
         }
 
-        if (user.InvitationTokenExpiry == null || user.InvitationTokenExpiry < DateTime.UtcNow)
+        if (user.InvitationStatus != InvitationStatus.Pending)
+        {
+            return Result<ValidateInvitationTokenResponse>.Of409(
+                "This invitation is no longer valid. Please ask your admin to resend the invitation."
+            );
+        }
+
+        if (user.InvitationTokenExpiry == null || user.InvitationTokenExpiry <= DateTime.UtcNow)
         {
             return Result<ValidateInvitationTokenResponse>.Of409(
                 "This invitation has expired. Please ask your admin to resend the invitation."

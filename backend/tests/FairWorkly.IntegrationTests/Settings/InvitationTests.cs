@@ -342,6 +342,7 @@ public class InvitationTests : AuthTestsBase
         var accessToken = await GetAccessTokenAsync();
         var client = CreateAuthenticatedClient(accessToken);
         var pendingUserId = Guid.NewGuid();
+        string oldTokenHash;
 
         using (var scope = Factory.Services.CreateScope())
         {
@@ -349,7 +350,7 @@ public class InvitationTests : AuthTestsBase
             var secretHasher = scope.ServiceProvider.GetRequiredService<ISecretHasher>();
             var adminUser = await db.Users.FirstAsync(u => u.Email == "test@example.com");
 
-            var oldToken = secretHasher.Hash("old-token");
+            oldTokenHash = secretHasher.Hash("old-token");
             var user = new User
             {
                 Id = pendingUserId,
@@ -360,7 +361,7 @@ public class InvitationTests : AuthTestsBase
                 OrganizationId = adminUser.OrganizationId,
                 IsActive = false,
                 InvitationStatus = InvitationStatus.Pending,
-                InvitationToken = oldToken,
+                InvitationToken = oldTokenHash,
                 InvitationTokenExpiry = DateTime.UtcNow.AddDays(7),
                 CreatedAt = DateTime.UtcNow,
             };
@@ -384,12 +385,13 @@ public class InvitationTests : AuthTestsBase
             json.GetProperty("data").GetProperty("inviteLink").GetString()
         );
 
-        // Verify token was rotated in DB
+        // Verify token was rotated in DB (new token must differ from the original)
         using (var scope = Factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<FairWorklyDbContext>();
             var user = await db.Users.FindAsync(pendingUserId);
             Assert.NotNull(user!.InvitationToken);
+            Assert.NotEqual(oldTokenHash, user.InvitationToken);
             Assert.True(user.InvitationTokenExpiry > DateTime.UtcNow);
         }
     }
@@ -606,7 +608,7 @@ public class InvitationTests : AuthTestsBase
             {
                 Id = Guid.NewGuid(),
                 CompanyName = "Other Corp Pty Ltd",
-                ABN = "98765432109",
+                ABN = Guid.NewGuid().ToString("N")[..11],
                 IndustryType = "Hospitality",
                 AddressLine1 = "456 Other St",
                 Suburb = "Sydney",
@@ -631,7 +633,7 @@ public class InvitationTests : AuthTestsBase
                 OrganizationId = otherOrg.Id,
                 IsActive = false,
                 InvitationStatus = InvitationStatus.Pending,
-                InvitationToken = secretHasher.Hash("other-org-token"),
+                InvitationToken = secretHasher.Hash(Guid.NewGuid().ToString()),
                 InvitationTokenExpiry = DateTime.UtcNow.AddDays(7),
                 CreatedAt = DateTime.UtcNow,
             };

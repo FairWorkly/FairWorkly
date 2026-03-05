@@ -69,6 +69,19 @@ public class User : AuditableEntity, IValidatableDomain
     /// </summary>
     public void AcceptInvitation(string passwordHash)
     {
+        if (InvitationStatus != InvitationStatus.Pending)
+            throw new InvalidDomainStateException(
+                nameof(User),
+                nameof(InvitationStatus),
+                "Cannot accept an invitation that is not pending."
+            );
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new InvalidDomainStateException(
+                nameof(User),
+                nameof(PasswordHash),
+                "Password hash cannot be empty."
+            );
+
         PasswordHash = passwordHash;
         IsActive = true;
         InvitationStatus = InvitationStatus.Accepted;
@@ -141,6 +154,19 @@ public class User : AuditableEntity, IValidatableDomain
                 nameof(User),
                 "Credentials",
                 "User must have at least one authentication credential (PasswordHash or GoogleId)"
+            );
+        }
+
+        // A pending invitation must always have both a token and an expiry set.
+        if (
+            isPendingInvite
+            && (string.IsNullOrWhiteSpace(InvitationToken) || !InvitationTokenExpiry.HasValue)
+        )
+        {
+            throw new InvalidDomainStateException(
+                nameof(User),
+                nameof(InvitationToken),
+                "A pending invitation must have both a token and an expiry date."
             );
         }
     }

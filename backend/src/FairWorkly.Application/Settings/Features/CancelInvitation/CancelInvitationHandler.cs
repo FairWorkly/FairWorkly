@@ -23,11 +23,9 @@ public class CancelInvitationHandler(
         if (user == null)
             return Result<CancelInvitationResponse>.Of404("User not found.");
 
-        // 2. Verify same organization
+        // 2. Verify same organization — return 404 to avoid leaking cross-org membership
         if (user.OrganizationId != request.OrganizationId)
-            return Result<CancelInvitationResponse>.Of403(
-                "Cannot modify users from other organizations."
-            );
+            return Result<CancelInvitationResponse>.Of404("User not found.");
 
         // 3. Verify user is in pending invitation status
         if (user.InvitationStatus != InvitationStatus.Pending)

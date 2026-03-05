@@ -71,7 +71,34 @@ public class InviteTeamMemberHandler(
         user.ValidateDomainRules();
 
         userRepository.Add(user);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(
+                ex,
+                "Invite persistence failed for {Email} in organization {OrganizationId}",
+                email,
+                request.OrganizationId
+            );
+
+            var isStillUnique = await userRepository.IsEmailUniqueAsync(
+                request.OrganizationId,
+                email,
+                cancellationToken
+            );
+
+            if (!isStillUnique)
+            {
+                return Result<InviteTeamMemberResponse>.Of409(
+                    "A user with this email already exists in your organization."
+                );
+            }
+
+            return Result<InviteTeamMemberResponse>.Of500("Failed to invite team member.");
+        }
 
         // 4. Build invite link
         var inviteLink = InvitationHelper.BuildInviteLink(configuration, plainToken);

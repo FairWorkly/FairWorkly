@@ -34,7 +34,7 @@ interface TeamMembersTableProps {
   onResendInvite: (userId: string) => void
   resendingUserId: string | null
   onCancelInvite: (userId: string) => void
-  cancellingUserId: string | null
+  cancellingUserIds: Set<string>
 }
 
 function isInvitationExpired(member: TeamMemberDto): boolean {
@@ -51,7 +51,7 @@ function formatLastLogin(lastLoginAt: string | null): string {
   })
 }
 
-export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendInvite, resendingUserId, onCancelInvite, cancellingUserId }: TeamMembersTableProps) {
+export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendInvite, resendingUserId, onCancelInvite, cancellingUserIds }: TeamMembersTableProps) {
   const { user: currentUser } = useAuth()
   const [deactivateTarget, setDeactivateTarget] = useState<TeamMemberDto | null>(null)
   const [roleChangeTarget, setRoleChangeTarget] = useState<RoleChangeTarget | null>(null)
@@ -60,7 +60,7 @@ export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendIn
   const isRowUpdating = (member: TeamMemberDto) => updatingUserId === member.userId
   const isDeactivating = !!deactivateTarget && updatingUserId === deactivateTarget.userId
   const isChangingRole = !!roleChangeTarget && updatingUserId === roleChangeTarget.member.userId
-  const isCancelling = !!cancelTarget && cancellingUserId === cancelTarget.userId
+  const isCancelling = !!cancelTarget && cancellingUserIds.has(cancelTarget.userId)
 
 
   const handleRoleChange = (member: TeamMemberDto, event: SelectChangeEvent<unknown>) => {
@@ -207,7 +207,7 @@ export function TeamMembersTable({ members, onUpdate, updatingUserId, onResendIn
                           variant="outlined"
                           color="error"
                           onClick={() => setCancelTarget(member)}
-                          disabled={cancellingUserId === member.userId}
+                          disabled={cancellingUserIds.has(member.userId)}
                         >
                           Cancel
                         </Button>

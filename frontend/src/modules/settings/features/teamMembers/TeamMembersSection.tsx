@@ -20,7 +20,7 @@ export function TeamMembersSection() {
   const [inviteLink, setInviteLink] = useState<string | null>(null)
   const [inviteError, setInviteError] = useState<string | null>(null)
   const [resendingUserId, setResendingUserId] = useState<string | null>(null)
-  const [cancellingUserId, setCancellingUserId] = useState<string | null>(null)
+  const [cancellingUserIds, setCancellingUserIds] = useState<Set<string>>(new Set())
 
   if (isLoading) {
     return (
@@ -93,15 +93,17 @@ export function TeamMembersSection() {
   }
 
   const handleCancelInvite = (userId: string) => {
-    setCancellingUserId(userId)
+    if (cancellingUserIds.has(userId)) return
+    setCancellingUserIds(prev => new Set(prev).add(userId))
     cancelMutation.mutate(userId, {
       onSuccess: () => {
         notify('Invitation cancelled successfully')
-        setCancellingUserId(null)
       },
       onError: (error) => {
         notify(error.message || 'Failed to cancel invitation.', 'error')
-        setCancellingUserId(null)
+      },
+      onSettled: () => {
+        setCancellingUserIds(prev => { const s = new Set(prev); s.delete(userId); return s })
       },
     })
   }
@@ -125,7 +127,7 @@ export function TeamMembersSection() {
         onResendInvite={handleResendInvite}
         resendingUserId={resendingUserId}
         onCancelInvite={handleCancelInvite}
-        cancellingUserId={cancellingUserId}
+        cancellingUserIds={cancellingUserIds}
       />
 
       <InviteDialog

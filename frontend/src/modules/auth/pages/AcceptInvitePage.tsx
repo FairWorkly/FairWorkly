@@ -126,9 +126,12 @@ export function AcceptInvitePage() {
         <AuthSubtitle>{invitee?.fullName ? `Hi ${invitee.fullName}, create a password to complete your account setup.` : 'Create a password to complete your account setup.'}</AuthSubtitle>
       </AuthHeader>
 
-      {(validationError || acceptMutation.error) && (
+      {validationError && (
+        <AuthErrorAlert severity="error">{validationError}</AuthErrorAlert>
+      )}
+      {acceptMutation.error && (
         <AuthErrorAlert severity="error">
-          {validationError || acceptMutation.error?.message || 'Something went wrong.'}
+          {acceptMutation.error.message || 'Something went wrong.'}
         </AuthErrorAlert>
       )}
 

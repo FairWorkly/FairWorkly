@@ -51,7 +51,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsUnique()
             .HasFilter("google_id IS NOT NULL AND is_deleted = false");
         builder.HasIndex(u => u.RefreshToken).HasFilter("refresh_token IS NOT NULL");
-        builder.HasIndex(u => u.InvitationToken).HasFilter("invitation_token IS NOT NULL");
+        builder
+            .HasIndex(u => u.InvitationToken)
+            .IsUnique()
+            .HasFilter("invitation_token IS NOT NULL AND is_deleted = false");
 
         // Property configurations
         builder.Property(u => u.Email).HasMaxLength(255).IsRequired();

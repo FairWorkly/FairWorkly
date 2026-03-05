@@ -1,4 +1,5 @@
 using FairWorkly.Domain.Auth.Entities;
+using FairWorkly.Domain.Auth.Enums;
 using FairWorkly.Domain.Auth.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -96,5 +97,40 @@ public class UserRepository : IUserRepository
     {
         user.IsDeleted = true;
         _context.Users.Update(user);
+    }
+
+    // Atomically accepts a pending invitation.
+    // Issues a single conditional UPDATE so that exactly one concurrent request can succeed.
+    // ExecuteUpdateAsync translates directly to SQL:
+    //   UPDATE users SET ... WHERE invitation_token = @hash AND invitation_status = Pending
+    //                         AND invitation_token_expiry > @now AND is_deleted = false
+    // The database row-level lock ensures at most one concurrent request sees rows_affected = 1.
+    public async Task<int> AcceptInvitationAtomicAsync(
+        string tokenHash,
+        string passwordHash,
+        DateTime now,
+        CancellationToken ct = default
+    )
+    {
+        var nowOffset = new DateTimeOffset(now, TimeSpan.Zero);
+
+        return await _context
+            .Users.Where(u =>
+                u.InvitationToken == tokenHash
+                && u.InvitationStatus == InvitationStatus.Pending
+                && u.InvitationTokenExpiry != null
+                && u.InvitationTokenExpiry > now
+            )
+            .ExecuteUpdateAsync(
+                setters =>
+                    setters
+                        .SetProperty(u => u.PasswordHash, passwordHash)
+                        .SetProperty(u => u.IsActive, true)
+                        .SetProperty(u => u.InvitationStatus, InvitationStatus.Accepted)
+                        .SetProperty(u => u.InvitationToken, (string?)null)
+                        .SetProperty(u => u.InvitationTokenExpiry, (DateTime?)null)
+                        .SetProperty(u => u.UpdatedAt, nowOffset),
+                ct
+            );
     }
 }

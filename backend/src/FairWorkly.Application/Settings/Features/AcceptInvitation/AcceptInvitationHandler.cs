@@ -11,7 +11,6 @@ public class AcceptInvitationHandler(
     IUserRepository userRepository,
     ISecretHasher secretHasher,
     IPasswordHasher passwordHasher,
-    IUnitOfWork unitOfWork,
     ILogger<AcceptInvitationHandler> logger
 ) : IRequestHandler<AcceptInvitationCommand, Result<AcceptInvitationResponse>>
 {
@@ -20,8 +19,12 @@ public class AcceptInvitationHandler(
         CancellationToken cancellationToken
     )
     {
-        // 1. Hash the provided token and look up user
         var tokenHash = secretHasher.Hash(request.Token);
+        var now = DateTime.UtcNow;
+
+        // 1. Pre-read: verify the token exists and surface actionable errors early.
+        //    This read is also the only source of response data (email, fullName),
+        //    since ExecuteUpdateAsync does not return the affected row.
         var user = await userRepository.GetByInvitationTokenHashAsync(tokenHash, cancellationToken);
 
         if (user == null)
@@ -29,7 +32,6 @@ public class AcceptInvitationHandler(
             return Result<AcceptInvitationResponse>.Of404("Invalid or expired invitation token.");
         }
 
-        // 2. Verify invitation is still pending
         if (user.InvitationStatus != InvitationStatus.Pending)
         {
             return Result<AcceptInvitationResponse>.Of409(
@@ -37,19 +39,35 @@ public class AcceptInvitationHandler(
             );
         }
 
-        // 3. Check token expiry
-        if (user.InvitationTokenExpiry == null || user.InvitationTokenExpiry < DateTime.UtcNow)
+        if (user.InvitationTokenExpiry == null || user.InvitationTokenExpiry < now)
         {
             return Result<AcceptInvitationResponse>.Of409(
                 "This invitation has expired. Please ask your admin to resend the invitation."
             );
         }
 
-        // 4. Set password and activate user
-        user.AcceptInvitation(passwordHasher.Hash(request.Password));
-        user.ValidateDomainRules();
-        userRepository.Update(user);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        // 2. Atomic compare-and-set UPDATE.
+        //    The WHERE clause in AcceptInvitationAtomicAsync re-checks token + Pending + expiry
+        //    inside a single SQL statement, so concurrent requests racing past step 1 are
+        //    serialized by the database row lock: exactly one will see rowsAffected == 1.
+        var passwordHash = passwordHasher.Hash(request.Password);
+        var rowsAffected = await userRepository.AcceptInvitationAtomicAsync(
+            tokenHash,
+            passwordHash,
+            now,
+            cancellationToken
+        );
+
+        if (rowsAffected == 0)
+        {
+            logger.LogWarning(
+                "Concurrent invitation acceptance rejected for UserId {UserId}",
+                user.Id
+            );
+            return Result<AcceptInvitationResponse>.Of409(
+                "This invitation is no longer valid. It may have been accepted or cancelled."
+            );
+        }
 
         logger.LogInformation(
             "Invitation accepted by {Email} (UserId: {UserId})",
