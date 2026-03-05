@@ -5,7 +5,7 @@ on:
     branches: [ main, devops/eric-ECS-ECR-FARGATE ]
     paths:
       - "agent-service/**"
-      - ".github/workflows/build-push-agent-ey.yml"
+      - ".github/workflows/build-push-ecr-ey-agent-service.yml"
 
 permissions:
   id-token: write
