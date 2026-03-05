@@ -35,8 +35,10 @@ public class InviteTeamMemberValidator : AbstractValidator<InviteTeamMemberComma
             .NotEmpty()
             .WithMessage("Role is required.")
             .Must(role =>
-                Enum.TryParse<UserRole>(role, ignoreCase: true, out var parsed)
-                && parsed != UserRole.Unknown
+                !string.IsNullOrWhiteSpace(role)
+                && Enum.TryParse<UserRole>(role, ignoreCase: true, out var parsed)
+                && Enum.IsDefined(typeof(UserRole), parsed)
+                && parsed is UserRole.Admin or UserRole.Manager
             )
             .WithMessage("Role must be a valid role (e.g. Admin, Manager).");
     }
