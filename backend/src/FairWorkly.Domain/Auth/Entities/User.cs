@@ -94,6 +94,13 @@ public class User : AuditableEntity, IValidatableDomain
     /// </summary>
     public void CancelInvitation()
     {
+        if (InvitationStatus != InvitationStatus.Pending)
+            throw new InvalidDomainStateException(
+                nameof(User),
+                nameof(InvitationStatus),
+                "Only pending invitations can be cancelled."
+            );
+
         InvitationStatus = InvitationStatus.None;
         InvitationToken = null;
         InvitationTokenExpiry = null;

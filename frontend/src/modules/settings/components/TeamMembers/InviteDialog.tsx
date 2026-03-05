@@ -44,11 +44,13 @@ export function InviteDialog({
 }: InviteDialogProps) {
   const [form, setForm] = useState<InviteTeamMemberRequest>(initialForm)
   const [copied, setCopied] = useState(false)
+  const [copyError, setCopyError] = useState(false)
 
   const handleClose = () => {
     if (isSubmitting) return
     setForm(initialForm)
     setCopied(false)
+    setCopyError(false)
     onClose()
   }
 
@@ -63,7 +65,8 @@ export function InviteDialog({
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      // Clipboard API not available (e.g. non-HTTPS or permission denied)
+      setCopyError(true)
+      setTimeout(() => setCopyError(false), 3000)
     }
   }
 
@@ -101,6 +104,11 @@ export function InviteDialog({
             }}
             size="small"
           />
+          {copyError && (
+            <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+              Could not copy — please copy the link manually.
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} variant="contained">

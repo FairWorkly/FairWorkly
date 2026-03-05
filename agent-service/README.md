@@ -86,7 +86,7 @@ The agent service is designed as a **multi-agent system** with two layers:
 
 ### Master Agent + Domain Agents
 
-```
+```text
 agent-service/
 ├── master_agent/              # Orchestration layer ("master agent")
 │   ├── main.py                # FastAPI entry point + /api/agent/chat endpoint

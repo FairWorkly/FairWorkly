@@ -76,11 +76,7 @@ public class AcceptInvitationHandler(
             );
         }
 
-        logger.LogInformation(
-            "Invitation accepted by {Email} (UserId: {UserId})",
-            user.Email,
-            user.Id
-        );
+        logger.LogInformation("Invitation accepted (UserId: {UserId})", user.Id);
 
         return Result<AcceptInvitationResponse>.Of200(
             "Invitation accepted successfully",

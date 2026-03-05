@@ -120,6 +120,7 @@ public class UserRepository : IUserRepository
                 && u.InvitationStatus == InvitationStatus.Pending
                 && u.InvitationTokenExpiry != null
                 && u.InvitationTokenExpiry > now
+                && !u.IsDeleted
             )
             .ExecuteUpdateAsync(
                 setters =>
