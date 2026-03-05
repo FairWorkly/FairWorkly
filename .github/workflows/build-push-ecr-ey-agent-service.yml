@@ -43,7 +43,7 @@ jobs:
           REPOSITORY: ${{ vars.ECR_REPO_AGENT }}
           SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
         run: |
-          docker build -f agent-service/Dockerfile \
+          docker build -f agent-service/Dockerfile -t ... agent-service
             -t $REGISTRY/$REPOSITORY:$SHORT_SHA .
 
       - name: Push image
