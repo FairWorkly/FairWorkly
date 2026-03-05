@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { Box, TextField, Typography, Alert, CircularProgress } from '@mui/material'
+import { TextField, Alert, CircularProgress } from '@mui/material'
 import { useApiQuery } from '@/shared/hooks/useApiQuery'
 import { settingsApi } from '@/services/settingsApi'
 import { useAcceptInvitation } from '../hooks/useAcceptInvitation'
@@ -10,8 +10,11 @@ import {
   AuthSubtitle,
   AuthFieldset,
   AuthFormContainer,
+  AuthErrorAlert,
   SubmitButton,
   FormActions,
+  LoadingCenter,
+  InputHint,
 } from '../ui'
 
 export function AcceptInvitePage() {
@@ -53,9 +56,9 @@ export function AcceptInvitePage() {
         <AuthHeader>
           <AuthTitle>Verifying Invitation...</AuthTitle>
         </AuthHeader>
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <LoadingCenter>
           <CircularProgress />
-        </Box>
+        </LoadingCenter>
       </section>
     )
   }
@@ -124,14 +127,14 @@ export function AcceptInvitePage() {
       </AuthHeader>
 
       {(validationError || acceptMutation.error) && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <AuthErrorAlert severity="error">
           {validationError || acceptMutation.error?.message || 'Something went wrong.'}
-        </Alert>
+        </AuthErrorAlert>
       )}
 
       <AuthFormContainer onSubmit={handleSubmit}>
         <AuthFieldset disabled={acceptMutation.isPending}>
-          <Box>
+          <div>
             <TextField
               label="Password"
               type="password"
@@ -141,10 +144,8 @@ export function AcceptInvitePage() {
               required
               autoComplete="new-password"
             />
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-              Minimum 8 characters
-            </Typography>
-          </Box>
+            <InputHint variant="caption">Minimum 8 characters</InputHint>
+          </div>
           <TextField
             label="Confirm Password"
             type="password"
