@@ -25,14 +25,14 @@ public static class DbSeeder
 
         // Backfill: runs on every startup so existing local DBs get the demo award
         // without requiring a full data reset.
-        var demoOrg = await organizations.FirstOrDefaultAsync(o =>
+        var existingDemoOrg = await organizations.FirstOrDefaultAsync(o =>
             o.ContactEmail == "contact@fairworkly.com.au" && !o.IsDeleted
         );
 
         if (
-            demoOrg != null
+            existingDemoOrg != null
             && !await awards.AnyAsync(oa =>
-                oa.OrganizationId == demoOrg.Id && oa.IsPrimary && !oa.IsDeleted
+                oa.OrganizationId == existingDemoOrg.Id && oa.IsPrimary && !oa.IsDeleted
             )
         )
         {
@@ -40,7 +40,7 @@ public static class DbSeeder
                 new OrganizationAward
                 {
                     Id = Guid.NewGuid(),
-                    OrganizationId = demoOrg.Id,
+                    OrganizationId = existingDemoOrg.Id,
                     AwardType = AwardType.GeneralRetailIndustryAward2020,
                     IsPrimary = true,
                     EmployeeCount = 0,

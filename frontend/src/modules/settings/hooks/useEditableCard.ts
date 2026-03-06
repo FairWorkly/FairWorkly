@@ -42,7 +42,7 @@ export function useEditableCard<T extends object>({
     setIsEditing(false)
   }, [data])
 
-  const handleChange = useCallback((field: keyof T, value: string) => {
+  const handleChange = useCallback((field: keyof T, value: T[keyof T]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     setErrors(prev => {
       if (!prev[field as string]) return prev
