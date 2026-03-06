@@ -78,9 +78,22 @@ public static class DbSeeder
             IsDeleted = false,
         };
 
+        var demoOrgAward = new OrganizationAward
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = organizationId,
+            AwardType = AwardType.GeneralRetailIndustryAward2020,
+            IsPrimary = true,
+            EmployeeCount = 0,
+            AddedAt = now.UtcDateTime,
+            CreatedAt = now,
+            IsDeleted = false,
+        };
+
         organizations.Add(demoOrg);
         users.Add(adminUser);
         users.Add(managerUser);
+        context.Set<OrganizationAward>().Add(demoOrgAward);
 
         await context.SaveChangesAsync();
     }

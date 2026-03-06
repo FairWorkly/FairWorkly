@@ -6,6 +6,8 @@ import {
   styled,
   Typography,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material'
 import { CheckCircleOutline, SellOutlined } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
@@ -55,34 +57,87 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
 const SectionSubTitle = styled(Typography)(({ theme }) => ({
   margin: '0 auto',
   color: theme.palette.text.secondary,
+  marginBottom: theme.spacing(4),
 }))
 
-const FEATURED_SCALE = 1.05
-const CARDS_WIDTH_RATIO = 0.86
+const BillingToggleContainer = styled(Box)(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: theme.spacing(1.5),
+  backgroundColor: theme.palette.action.hover,
+  borderRadius: theme.fairworkly.radius.pill,
+  padding: theme.spacing(0.5),
+}))
+
+const BillingToggle = styled(ToggleButtonGroup)(({ theme }) => ({
+  gap: theme.spacing(0.5),
+  '& .MuiToggleButtonGroup-grouped': {
+    border: 'none',
+    borderRadius: `${theme.fairworkly.radius.pill}px !important`,
+    padding: theme.spacing(0.75, 2),
+    fontWeight: theme.typography.fontWeightBold,
+    fontSize: theme.typography.caption.fontSize,
+    letterSpacing: '0.02em',
+    color: theme.palette.text.secondary,
+    whiteSpace: 'nowrap',
+    transition: theme.transitions.create(['background', 'color', 'box-shadow'], {
+      duration: theme.transitions.duration.short,
+    }),
+    '&.Mui-selected': {
+      backgroundColor: theme.palette.background.paper,
+      color: theme.palette.text.primary,
+      boxShadow: theme.fairworkly.shadow.sm,
+      '&:hover': {
+        backgroundColor: theme.palette.background.paper,
+      },
+    },
+    '&:hover': {
+      backgroundColor: 'transparent',
+    },
+  },
+}))
+
+const SaveBadge = styled(Chip)(({ theme }) => ({
+  background: theme.fairworkly.gradient.primary,
+  color: theme.palette.common.white,
+  fontWeight: theme.typography.fontWeightBold,
+  fontSize: 10,
+  height: theme.spacing(2.25),
+  letterSpacing: '0.04em',
+  '& .MuiChip-label': {
+    padding: theme.spacing(0, 1),
+  },
+}))
+
+const FEATURED_SCALE = 1.04
 const SIGNUP_ROUTE = '/login?signup=true'
 
 const CardsLayout = styled(Box)(({ theme }) => ({
   display: 'grid',
-  gap: theme.spacing(4),
-  maxWidth: theme.fairworkly.layout.containerMaxWidth * CARDS_WIDTH_RATIO,
+  gap: theme.spacing(3),
+  maxWidth: theme.fairworkly.layout.containerMaxWidth,
   margin: '0 auto',
   gridTemplateColumns: '1fr',
 
   [theme.breakpoints.up('md')]: {
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+  },
+
+  [theme.breakpoints.up('lg')]: {
+    gridTemplateColumns: 'repeat(4, 1fr)',
   },
 }))
 
 const CardContainer = styled(Card, {
   shouldForwardProp: prop => prop !== 'featured',
 })<{ featured?: boolean }>(({ theme, featured }) => ({
-  padding: theme.spacing(5),
+  padding: theme.spacing(3.5),
   borderRadius: theme.spacing(3),
   border: `2px solid ${featured ? theme.palette.primary.main : theme.palette.divider}`,
   backgroundColor: featured
     ? theme.palette.background.paper
     : theme.palette.background.default,
-  transition: theme.transitions.create(['transform', 'box-shadow'], {
+  transition: theme.transitions.create(['transform', 'box-shadow', 'border-color'], {
     duration: theme.transitions.duration.standard,
     easing: theme.transitions.easing.easeInOut,
   }),
@@ -99,6 +154,7 @@ const CardContainer = styled(Card, {
   }),
   '&:hover': {
     boxShadow: theme.fairworkly.shadow.lg,
+    borderColor: theme.palette.primary.main,
     [theme.breakpoints.up('md')]: {
       transform: featured
         ? `scale(${FEATURED_SCALE}) translateY(${theme.spacing(-1)})`
@@ -128,6 +184,7 @@ const CardTitle = styled(Typography)(({ theme }) => ({
 const CardDescription = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   marginBottom: theme.spacing(3),
+  whiteSpace: 'nowrap',
 }))
 
 const PriceContainer = styled(Box)(({ theme }) => ({
@@ -145,6 +202,12 @@ const PricePeriod = styled(Typography)(({ theme }) => ({
   fontSize: theme.typography.body1.fontSize,
   color: theme.palette.text.disabled,
   marginLeft: theme.spacing(0.5),
+}))
+
+const AnnualNote = styled(Typography)(({ theme }) => ({
+  fontSize: theme.typography.caption.fontSize,
+  color: theme.palette.text.disabled,
+  marginTop: theme.spacing(0.5),
 }))
 
 const FeaturesList = styled(Stack)(({ theme }) => ({
@@ -185,7 +248,7 @@ const ActionButton = styled(Button, {
   '&:hover': {
     background: featured
       ? `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.main})`
-      : `linear-gradient(${theme.fairworkly.effect.primaryGlow})`,
+      : theme.fairworkly.effect.primaryGlowHover,
     transform: `translateY(${theme.spacing(-0.25)})`,
     boxShadow: featured ? theme.fairworkly.shadow.primaryButtonHover : 'none',
   },
@@ -206,8 +269,9 @@ interface PricingPlan {
   id: string
   name: string
   description: string
-  price?: string
-  period?: string
+  monthlyPrice?: string
+  annualMonthlyPrice?: string
+  annualTotal?: string
   features: string[]
   featured?: boolean
   badgeLabel?: string
@@ -226,16 +290,19 @@ const content = {
 
 const PricingCard = ({
   plan,
+  isAnnual,
   onButtonClick,
 }: {
   plan: PricingPlan
+  isAnnual: boolean
   onButtonClick: (action: CTAAction) => void
 }) => {
   const {
     name,
     description,
-    price,
-    period,
+    monthlyPrice,
+    annualMonthlyPrice,
+    annualTotal,
     features,
     featured,
     badgeLabel,
@@ -243,6 +310,8 @@ const PricingCard = ({
     buttonVariant,
     buttonAction,
   } = plan
+
+  const displayPrice = isAnnual && annualMonthlyPrice ? annualMonthlyPrice : monthlyPrice
 
   return (
     <CardContainer elevation={0} featured={featured}>
@@ -252,8 +321,11 @@ const PricingCard = ({
       <CardDescription variant="body2">{description}</CardDescription>
 
       <PriceContainer>
-        <PriceAmount>{price || content.priceFallback}</PriceAmount>
-        {period && <PricePeriod>/{period}</PricePeriod>}
+        <PriceAmount>{displayPrice || content.priceFallback}</PriceAmount>
+        {displayPrice && <PricePeriod>/mo · AUD</PricePeriod>}
+        {isAnnual && annualTotal && (
+          <AnnualNote>Billed {annualTotal} / year</AnnualNote>
+        )}
       </PriceContainer>
 
       <FeaturesList>
@@ -282,6 +354,9 @@ const PricingCard = ({
 export const PricingSection: React.FC = () => {
   const navigate = useNavigate()
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
+
+  const isAnnual = billingCycle === 'annual'
 
   const handleNavigation = (action: CTAAction) => {
     if (action === CTAAction.Signup) {
@@ -304,17 +379,37 @@ export const PricingSection: React.FC = () => {
 
   const plans: PricingPlan[] = [
     {
+      id: 'lite',
+      name: 'Lite',
+      description: 'Small businesses getting started',
+      monthlyPrice: '$49',
+      annualMonthlyPrice: '$41',
+      annualTotal: '$490',
+      features: [
+        '1 location (same state)',
+        'Up to 20 employees',
+        'Roster & payroll compliance checking',
+        'XLSX & CSV upload',
+        '1 Modern Award',
+      ],
+      buttonText: 'Start Free Trial',
+      buttonVariant: 'outlined',
+      buttonAction: CTAAction.Signup,
+    },
+    {
       id: 'starter',
       name: 'Starter',
       description: 'Perfect for single locations',
-      price: '$149',
-      period: 'month',
+      monthlyPrice: '$149',
+      annualMonthlyPrice: '$124',
+      annualTotal: '$1,490',
       features: [
         '1 location (same state)',
         'Up to 50 employees',
-        'Unlimited file uploads (CSV/XLSX)',
-        'Payroll + Roster + Document',
-        '3 Awards (Hospitality/Retail/Clerks)',
+        'Roster & payroll compliance checking',
+        'Document compliance checking',
+        'XLSX & CSV upload',
+        '3 Modern Awards covered',
       ],
       buttonText: 'Start Free Trial',
       buttonVariant: 'outlined',
@@ -324,8 +419,9 @@ export const PricingSection: React.FC = () => {
       id: 'professional',
       name: 'Professional',
       description: 'Perfect for multi-location chains',
-      price: '$299',
-      period: 'month',
+      monthlyPrice: '$299',
+      annualMonthlyPrice: '$249',
+      annualTotal: '$2,990',
       features: [
         'Everything in Starter, plus:',
         'Up to 10 locations (same state)',
@@ -367,6 +463,20 @@ export const PricingSection: React.FC = () => {
             </SectionLabel>
             <SectionTitle variant="h2">{content.title}</SectionTitle>
             <SectionSubTitle variant="h5">{content.subtitle}</SectionSubTitle>
+
+            <BillingToggleContainer>
+              <BillingToggle
+                value={billingCycle}
+                exclusive
+                onChange={(_, val) => val && setBillingCycle(val)}
+              >
+                <ToggleButton value="monthly">Monthly</ToggleButton>
+                <ToggleButton value="annual">
+                  Annual &nbsp;
+                  <SaveBadge label="2 months free" size="small" />
+                </ToggleButton>
+              </BillingToggle>
+            </BillingToggleContainer>
           </HeaderContainer>
 
           <CardsLayout>
@@ -374,6 +484,7 @@ export const PricingSection: React.FC = () => {
               <PricingCard
                 key={plan.id}
                 plan={plan}
+                isAnnual={isAnnual}
                 onButtonClick={handleClick}
               />
             ))}

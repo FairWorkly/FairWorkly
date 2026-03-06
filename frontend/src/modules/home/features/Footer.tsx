@@ -3,6 +3,7 @@ import { LinkedIn, Bolt } from '@mui/icons-material'
 
 const PageSection = styled('footer')(({ theme }) => ({
   position: 'relative',
+  width: '100%',
   backgroundColor: theme.fairworkly.surface.navDark,
   color: alpha(theme.palette.common.white, 0.7),
   padding: theme.spacing(8, 0, 4),

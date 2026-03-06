@@ -19,6 +19,14 @@ public class OrganizationRepository : IOrganizationRepository
         return await _context.Organizations.FindAsync(new object[] { id }, ct);
     }
 
+    // Fetches an organisation with its OrganizationAwards collection included.
+    public async Task<Organization?> GetByIdWithAwardsAsync(Guid id, CancellationToken ct = default)
+    {
+        return await _context
+            .Organizations.Include(o => o.OrganizationAwards)
+            .FirstOrDefaultAsync(o => o.Id == id, ct);
+    }
+
     // Checks if the ABN is already taken by another organization.
     public async Task<bool> IsAbnUniqueAsync(string abn, CancellationToken ct = default)
     {

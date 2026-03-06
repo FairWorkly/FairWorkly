@@ -61,6 +61,7 @@ export interface OrganizationProfileDto {
   companyName: string
   abn: string
   industryType: string
+  primaryAward: string | null
   contactEmail: string
   phoneNumber: string | null
   addressLine1: string
@@ -75,6 +76,7 @@ export interface UpdateOrganizationProfileRequest {
   companyName: string
   abn: string
   industryType: string
+  primaryAward?: string | null
   contactEmail: string
   phoneNumber?: string | null
   addressLine1: string

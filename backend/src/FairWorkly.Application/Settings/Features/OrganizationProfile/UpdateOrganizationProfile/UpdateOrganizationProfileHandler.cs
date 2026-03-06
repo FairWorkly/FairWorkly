@@ -1,4 +1,5 @@
 using FairWorkly.Application.Common.Interfaces;
+using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Common.Result;
@@ -28,7 +29,7 @@ public class UpdateOrganizationProfileHandler
     {
         var request = command.Request;
 
-        var organization = await _organizationRepository.GetByIdAsync(
+        var organization = await _organizationRepository.GetByIdWithAwardsAsync(
             command.OrganizationId,
             cancellationToken
         );
@@ -66,6 +67,45 @@ public class UpdateOrganizationProfileHandler
         organization.State = stateEnum;
         organization.Postcode = request.Postcode;
         organization.LogoUrl = request.LogoUrl;
+
+        if (!string.IsNullOrEmpty(request.PrimaryAward))
+        {
+            if (
+                !Enum.TryParse<AwardType>(request.PrimaryAward, ignoreCase: true, out var awardType)
+            )
+            {
+                return Result<OrganizationProfileDto>.Of400(
+                    "Invalid award type",
+                    new List<Validation400Error>
+                    {
+                        new()
+                        {
+                            Field = "primaryAward",
+                            Message = $"'{request.PrimaryAward}' is not a valid award type",
+                        },
+                    }
+                );
+            }
+
+            var existing = organization.OrganizationAwards.FirstOrDefault(oa => oa.IsPrimary);
+            if (existing != null)
+            {
+                existing.AwardType = awardType;
+                existing.AddedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                organization.OrganizationAwards.Add(
+                    new OrganizationAward
+                    {
+                        OrganizationId = organization.Id,
+                        AwardType = awardType,
+                        IsPrimary = true,
+                        AddedAt = DateTime.UtcNow,
+                    }
+                );
+            }
+        }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -1,4 +1,5 @@
 using FairWorkly.Domain.Auth.Entities;
+using FairWorkly.Domain.Common.Enums;
 
 namespace FairWorkly.Application.Settings.Features.OrganizationProfile;
 
@@ -12,6 +13,12 @@ public class OrganizationProfileDto
     public string ABN { get; set; } = string.Empty;
 
     public string IndustryType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Primary Modern Award type (e.g., "HospitalityIndustryAward2020").
+    /// Null if the organization has not configured an award yet.
+    /// </summary>
+    public string? PrimaryAward { get; set; }
 
     public string ContactEmail { get; set; } = string.Empty;
 
@@ -41,6 +48,9 @@ public class OrganizationProfileDto
             CompanyName = organization.CompanyName,
             ABN = organization.ABN,
             IndustryType = organization.IndustryType,
+            PrimaryAward = organization
+                .OrganizationAwards.FirstOrDefault(oa => oa.IsPrimary)
+                ?.AwardType.ToString(),
             ContactEmail = organization.ContactEmail,
             PhoneNumber = organization.PhoneNumber,
             AddressLine1 = organization.AddressLine1,
