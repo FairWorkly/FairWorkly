@@ -1,36 +1,27 @@
 # FairWorkly Backend
 
-The core backend service for FairWorkly, built on .NET 8. The backend adopts a **Hybrid Architecture** to balance the needs of complex business logic with simple data management.
+The core backend service for FairWorkly, built on .NET 8. The backend adopts **Vertical Slicing** architecture, splitting code by business feature into independent Features.
 
 ## Tech Stack
 
 - **Framework**: .NET 8 (Web API)
 - **Database**: PostgreSQL
 - **ORM**: Entity Framework Core 8
-- **DI Container**: Autofac
+- **DI Container**: Microsoft.Extensions.DependencyInjection (built-in)
 - **Validation**: FluentValidation
 - **Task Orchestration**: MediatR (CQRS)
 - **Code Formatting**: CSharpier (Enforced)
 
-## Project Architecture (Hybrid Architecture)
+## Project Architecture (Vertical Slicing)
 
-### 1. Core Business: Vertical Slicing
+All modules use the **CQRS + MediatR** pattern, vertically slicing functionality into independent Features.
 
-For Agent modules with complex logic involving AI Orchestration, we use the **CQRS + MediatR** pattern, vertically slicing functionality into independent Features.
-
-- **Applicable Modules**:
-  - `src/FairWorkly.Application/Compliance/` (Compliance Agent)
+- **Modules**:
+  - `src/FairWorkly.Application/Roster/` (Roster Agent)
   - `src/FairWorkly.Application/Payroll/` (Payroll Agent)
+  - `src/FairWorkly.Application/FairBot/` (FairBot Chat)
 - **Code Structure**: Each Feature contains independent `Command`, `Handler`, `Validator`, and `DTO`.
-
-### 2. Basic Operations: Traditional N-Layer
-
-For management modules that are primarily CRUD-based with relatively linear logic, we retain the traditional **Service-Repository** pattern.
-
-- **Applicable Modules**:
-  - `src/FairWorkly.Application/Documents/` (Document Management)
-  - `src/FairWorkly.Application/Employees/` (Employee Profiles)
-- **Code Structure**: `Controller` -> `Service` (Business Logic) -> `Repository` (Data Access).
+- **AI Integration**: External AI services are called via **Refit** typed interfaces, registered per target service in DI.
 
 ## Prerequisites
 
@@ -109,38 +100,41 @@ Follow the instructions below for your chosen IDE.
 
 Once installed, simply **Save (Ctrl+S)** any `.cs` file, and it will be formatted automatically. No further configuration is needed.
 
-### 5. Database Configuration
+### 5. Application Configuration
 
-**Method A: Using User Secrets**
+Both `appsettings.json` and `appsettings.Development.json` are git-ignored. The repo provides `.example` templates — copy them and edit locally.
 
-In VS2022, right-click `FairWorkly.API` project -> **Manage User Secrets**:
+**Step 1: Create `appsettings.json`** (base config, all environments)
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5433;Database=FairWorklyDb;Username=postgres;Password=postgres"
-  }
-}
+```bash
+cp src/FairWorkly.API/appsettings.example.json src/FairWorkly.API/appsettings.json
 ```
 
-Notes:
-- Port `5433` matches the local-dev default in `src/FairWorkly.API/appsettings.Development.example.json` (Docker Postgres exposed to host).
-- If you're running Postgres natively, change the port to `5432` and update credentials accordingly.
+What to change:
+- `ConnectionStrings:DefaultConnection` — your Postgres host, port, credentials
+- `JwtSettings:Secret` — must be non-empty; 32+ chars recommended
 
-**Method B: Create a local appsettings file (recommended)**
+What you can leave as-is for local dev:
+- `AiSettings:BaseUrl` — defaults to `localhost:8000` (Python agent-service)
+- `AiSettings:TimeoutSeconds` — defaults to `120` (AI call timeout)
+- `AWS:S3:Enabled` — defaults to `false` (uses local file storage)
+- `Serilog` / `FileLogging` — logging config, defaults are fine
 
-Create `appsettings.Development.json` from the tracked example, then edit values locally (this file is intentionally ignored by git):
+What you **must** set:
+- `AiSettings:ServiceKey` — shared secret for .NET ↔ Python service-to-service auth. Must match the `AGENT_SERVICE_KEY` env var in `agent-service/.env`. Without this, the backend will fail to start.
+
+**Step 2: Create `appsettings.Development.json`** (local dev overrides)
 
 ```bash
 cp src/FairWorkly.API/appsettings.Development.example.json src/FairWorkly.API/appsettings.Development.json
 ```
 
-Then update:
-- `ConnectionStrings:DefaultConnection`
-- `JwtSettings:Secret` (must be non-empty; 32+ chars recommended)
-- `AiSettings` if you want to point at a real `agent-service`
+This file overrides `appsettings.json` when running locally. The example has `_comment` fields explaining each setting. Typically the defaults work out of the box.
 
-**Apply Migrations**:
+> **Note on Postgres port**: The examples use port `5433` (Docker Postgres exposed to host). If you're running Postgres natively, change to `5432`.
+
+**Step 3: Apply Migrations**
+
 ```bash
 cd backend
 pwsh ./scripts/update-database.ps1
@@ -171,26 +165,14 @@ This project follows Clean Architecture, and dependency injection registration l
 
 > **Note**: `Program.cs` in the API layer is only responsible for calling these two extension methods. **It is strictly forbidden to register business services directly in `Program.cs`**.
 
-### 2. AI Service Configuration (Mock vs Real)
-
-The backend depends on a Python AI Service (`agent-service`). The Agent Service must be running for AI-powered features (roster parsing, FairBot chat) to work.
-
-Configuration location: `src/FairWorkly.API/appsettings.Development.json` (or user secrets), with defaults in `src/FairWorkly.API/appsettings.Development.example.json`.
-
-```json
-"AiSettings": {
-  "BaseUrl": "http://localhost:8000"
-}
-```
-
-### 3. Time Handling Standards (Time Provider)
+### 2. Time Handling Standards (Time Provider)
 
 To ensure the testability of business logic (such as "determining if it is within rostered hours"), **it is strictly forbidden to use `DateTime.Now` or `DateTimeOffset.Now` directly in the code**.
 
 - **Correct Approach**: Inject `IDateTimeProvider` via the constructor.
 - **Usage**: `_dateTimeProvider.Now`.
 
-### 4. Current User Service
+### 3. Current User Service
 
 To access the authenticated user's identity in Handlers or Services, inject `ICurrentUserService`. It reads JWT claims from the current HTTP request automatically.
 
@@ -211,7 +193,7 @@ public class MyHandler(ICurrentUserService currentUser)
 - **Interface**: `src/FairWorkly.Application/Common/Interfaces/ICurrentUserService.cs`
 - **Implementation**: `src/FairWorkly.Infrastructure/Services/CurrentUserService.cs`
 
-### 5. File Storage Strategy
+### 4. File Storage Strategy
 
 This project uses the Adapter Pattern to handle file storage, with the core interface being `IFileStorageService`.
 
@@ -220,7 +202,7 @@ This project uses the Adapter Pattern to handle file storage, with the core inte
   - Physical Path: `src/FairWorkly.API/wwwroot/uploads/`.
   - **Note**: This directory is ignored in `.gitignore`.
 
-### 6. Entity Configuration Standards
+### 5. Entity Configuration Standards
 
 Entity configuration (table mapping, relationships, constraints) must be placed in dedicated Configuration classes, **not in DbContext**.
 
@@ -229,65 +211,27 @@ Entity configuration (table mapping, relationships, constraints) must be placed 
 
 > **Forbidden**: Writing `modelBuilder.Entity<T>()` directly in `FairWorklyDbContext.OnModelCreating()`.
 
-### 7. Result<T> Pattern
+### 6. Result<T> Pattern
 
-All MediatR Handlers return `Result<T>` using `Of{code}` factory methods. Controllers inherit `BaseApiController` and call `RespondResult(result)` — no manual status code mapping needed.
+All MediatR Handlers return `Result<T>` using `Of{code}` factory methods. Controllers inherit `BaseApiController` and call `RespondResult(result)` — no manual status code mapping needed. All responses follow the `{ code, msg, data }` envelope format.
 
-**Key factory methods:**
-
-| Method | Scenario | HTTP |
-|--------|----------|------|
-| `Of200(message, value)` | Success | 200 |
-| `Of201(message, value)` | Resource created | 201 |
-| `Of204()` | No content (delete/logout) | 204 |
-| `Of400(errors)` | Input validation (auto via ValidationBehavior) | 400 |
-| `Of401()` / `Of404()` / `Of403()` | Auth & access errors | 401 / 404 / 403 |
-| `Of422(message, errors)` | Business processing error | 422 |
-| `Of500(message)` | Anticipated infrastructure failure | 500 |
-
-**Example:**
-
-```csharp
-// Handler
-if (entity == null)
-    return Result<MyDto>.Of404("Resource not found");
-return Result<MyDto>.Of200("Retrieved successfully", dto);
-```
-
-```csharp
-// Controller — inherit BaseApiController, one line handles the rest
-[Route("api/[controller]")]
-public class MyController(IMediator mediator) : BaseApiController
-{
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
-    {
-        var result = await mediator.Send(new GetMyQuery { Id = id });
-        return RespondResult(result);
-    }
-}
-```
-
-All responses follow the `{ code, msg, data }` envelope format.
-
-> 📖 For detailed usage, see [Result<T> Pattern Guide](../docs/guides/backend/result-pattern.md)
-
-Location: `src/FairWorkly.Domain/Common/Result/Result.cs`
+> 📖 **You must read the full guide before writing any Handler**: [Result<T> Pattern Guide](docs/result-pattern.md)
 
 ## Database Scripts
 
 All scripts are located in `backend/scripts/`. Run them in terminal:
+
 ```bash
 cd backend
 pwsh ./scripts/add-migration.ps1
 ```
 
-| Script                             | Purpose                                           | Data Loss        |
-| ---------------------------------- | ------------------------------------------------- | ---------------- |
-| `add-migration.ps1`                | Create a new migration                            | None             |
-| `update-database.ps1`              | Apply pending migrations (preserves data)         | None             |
-| `reset-database.ps1`               | Drop and recreate database with all migrations    | Data             |
-| `init-migrations-and-database.ps1` | Delete all migrations and regenerate from scratch | Data + History   |
+| Script                             | Purpose                                           | Data Loss      |
+| ---------------------------------- | ------------------------------------------------- | -------------- |
+| `add-migration.ps1`                | Create a new migration                            | None           |
+| `update-database.ps1`              | Apply pending migrations (preserves data)         | None           |
+| `reset-database.ps1`               | Drop and recreate database with all migrations    | Data           |
+| `init-migrations-and-database.ps1` | Delete all migrations and regenerate from scratch | Data + History |
 
 ### Before Committing Migrations
 
@@ -297,9 +241,9 @@ Test with `reset-database.ps1` or `update-database.ps1` depending on your situat
 
 ## Advanced Development Guide
 
-For details on how to develop new Features, write AI Orchestrators, and interface with the Python Agent, please refer to:
+For details on how to develop new Features, use Refit interfaces to call the Python Agent, and write tests, please refer to:
 
-- [Backend Development Guide](../docs/guides/backend/development.md) - Comprehensive guide with code examples
-- [Result<T> Pattern Guide](../docs/guides/backend/result-pattern.md) - How to use Result pattern in Handlers
+- [Backend Development Guide](docs/backend-development-guide.md) - Comprehensive guide with code examples
+- [Result<T> Pattern Guide](docs/result-pattern.md) - How to use Result pattern in Handlers
 
 > These documents are also available on the team's Google Drive.

@@ -19,9 +19,12 @@ export function useOrganizationProfile() {
 export function useUpdateOrganizationProfile() {
   const queryClient = useQueryClient()
 
-  return useApiMutation<OrganizationProfileDto, UpdateOrganizationProfileRequest>({
+  return useApiMutation<
+    OrganizationProfileDto,
+    UpdateOrganizationProfileRequest
+  >({
     mutationFn: settingsApi.updateOrganizationProfile,
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.setQueryData(QUERY_KEY, data)
     },
   })

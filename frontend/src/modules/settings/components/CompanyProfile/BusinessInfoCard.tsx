@@ -37,10 +37,20 @@ function validate(formData: BusinessInfo): ValidationErrors {
   return errors
 }
 
-export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInfoCardProps) {
+export function BusinessInfoCard({
+  data,
+  onSave,
+  isSaving = false,
+}: BusinessInfoCardProps) {
   const {
-    isEditing, formData, errors, hasErrors,
-    handleEdit, handleSave, handleCancel, handleChange,
+    isEditing,
+    formData,
+    errors,
+    hasErrors,
+    handleEdit,
+    handleSave,
+    handleCancel,
+    handleChange,
   } = useEditableCard({ data, onSave, validate })
 
   function handleIndustryChange(value: string) {
@@ -71,14 +81,12 @@ export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInf
               fullWidth
               size="small"
               value={formData.companyName}
-              onChange={(e) => handleChange('companyName', e.target.value)}
+              onChange={e => handleChange('companyName', e.target.value)}
               error={!!errors.companyName}
               placeholder="Enter company name"
               disabled={isSaving}
             />
-            {errors.companyName && (
-              <ErrorText>{errors.companyName}</ErrorText>
-            )}
+            {errors.companyName && <ErrorText>{errors.companyName}</ErrorText>}
           </FormField>
         ) : (
           <FieldValue>{data.companyName}</FieldValue>
@@ -93,16 +101,14 @@ export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInf
               fullWidth
               size="small"
               value={formData.abn}
-              onChange={(e) => handleChange('abn', e.target.value)}
+              onChange={e => handleChange('abn', e.target.value)}
               error={!!errors.abn}
               placeholder="12345678901"
               helperText="Must be 11 digits"
               disabled={isSaving}
               slotProps={{ htmlInput: { maxLength: 11, inputMode: 'numeric' } }}
             />
-            {errors.abn && (
-              <ErrorText>{errors.abn}</ErrorText>
-            )}
+            {errors.abn && <ErrorText>{errors.abn}</ErrorText>}
           </FormField>
         ) : (
           <FieldValue>{data.abn}</FieldValue>
@@ -122,7 +128,7 @@ export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInf
               error={!!errors.industryType}
               disabled={isSaving}
             >
-              {INDUSTRY_TYPES.map((type) => (
+              {INDUSTRY_TYPES.map(type => (
                 <MenuItem key={type} value={type}>
                   {type}
                 </MenuItem>

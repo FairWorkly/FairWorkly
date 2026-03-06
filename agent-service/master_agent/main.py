@@ -5,7 +5,14 @@ import os
 import time
 import uuid
 from collections import deque
+from pathlib import Path
 from typing import Deque, Dict, Optional
+
+from dotenv import load_dotenv
+
+# Load .env before any os.getenv() calls so that AGENT_SERVICE_KEY,
+# OPENAI_API_KEY, etc. are available at module-import time.
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env", override=False)
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,7 +26,8 @@ from master_agent.feature_registry import FeatureRegistry
 
 # Import features from domain packages
 from agents.compliance.feature import ComplianceFeature
-from agents.payroll.feature import DemoPayrollFeature
+from agents.payroll.feature import PayrollFeature
+from agents.payroll.models import PayrollExplainRequest
 from agents.roster.feature import RosterFeature
 from agents.roster.explain_feature import RosterExplainFeature
 
@@ -152,10 +160,12 @@ registry = FeatureRegistry()
 
 # Register Features
 registry.register("compliance_qa", ComplianceFeature())
-registry.register("payroll_verify", DemoPayrollFeature())
 registry.register("roster", RosterFeature())
 registry.register("roster_explain", RosterExplainFeature())
 
+payroll_feature = PayrollFeature()
+
+logger = logging.getLogger(__name__)
 
 
 @app.get("/health")
@@ -168,6 +178,7 @@ async def health_check():
 async def root():
     # Redirect root requests straight to Swagger UI for convenience
     return RedirectResponse(url="/docs")
+
 
 @app.post("/api/agent/chat")
 async def chat(
@@ -258,17 +269,34 @@ async def chat(
         result.get("note") if isinstance(result, dict) else None,
         elapsed_ms,
     )
-    
+
     return {
         "status": "success",
         "request_id": request_id,
         "message": message,
         "file_name": file_name,
         "routed_to": feature_type,
-        "result": result
+        "result": result,
     }
+
+
+@app.post("/api/agent/payroll/explain")
+async def payroll_explain(
+    request: PayrollExplainRequest,
+    _: None = Depends(verify_service_key),
+):
+    try:
+        result = await payroll_feature.process(request.model_dump())
+        return JSONResponse(content=result, status_code=result.get("code", 500))
+    except Exception:
+        logger.exception("Unhandled error in payroll_explain endpoint")
+        return JSONResponse(
+            content={"code": 500, "msg": "Internal processing error"},
+            status_code=500,
+        )
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("master_agent.main:app", host="127.0.0.1", port=8000, reload=True)

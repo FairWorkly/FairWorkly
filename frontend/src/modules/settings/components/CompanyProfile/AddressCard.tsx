@@ -7,7 +7,10 @@ import {
   ErrorText,
   FormField,
 } from './CompanyProfile.styles'
-import type { AddressInfo, ValidationErrors } from '../../types/companyProfile.types'
+import type {
+  AddressInfo,
+  ValidationErrors,
+} from '../../types/companyProfile.types'
 import { AUSTRALIAN_STATES } from '../../types/companyProfile.types'
 import { useEditableCard } from '../../hooks/useEditableCard'
 
@@ -41,10 +44,20 @@ function validate(formData: AddressInfo): ValidationErrors {
   return errors
 }
 
-export function AddressCard({ data, onSave, isSaving = false }: AddressCardProps) {
+export function AddressCard({
+  data,
+  onSave,
+  isSaving = false,
+}: AddressCardProps) {
   const {
-    isEditing, formData, errors, hasErrors,
-    handleEdit, handleSave, handleCancel, handleChange,
+    isEditing,
+    formData,
+    errors,
+    hasErrors,
+    handleEdit,
+    handleSave,
+    handleCancel,
+    handleChange,
   } = useEditableCard({ data, onSave, validate })
 
   return (
@@ -65,7 +78,7 @@ export function AddressCard({ data, onSave, isSaving = false }: AddressCardProps
               fullWidth
               size="small"
               value={formData.addressLine1}
-              onChange={(e) => handleChange('addressLine1', e.target.value)}
+              onChange={e => handleChange('addressLine1', e.target.value)}
               error={!!errors.addressLine1}
               placeholder="123 Main Street"
               disabled={isSaving}
@@ -86,7 +99,7 @@ export function AddressCard({ data, onSave, isSaving = false }: AddressCardProps
             fullWidth
             size="small"
             value={formData.addressLine2}
-            onChange={(e) => handleChange('addressLine2', e.target.value)}
+            onChange={e => handleChange('addressLine2', e.target.value)}
             placeholder="Suite 100 (optional)"
             disabled={isSaving}
           />
@@ -103,14 +116,12 @@ export function AddressCard({ data, onSave, isSaving = false }: AddressCardProps
               fullWidth
               size="small"
               value={formData.suburb}
-              onChange={(e) => handleChange('suburb', e.target.value)}
+              onChange={e => handleChange('suburb', e.target.value)}
               error={!!errors.suburb}
               placeholder="Melbourne"
               disabled={isSaving}
             />
-            {errors.suburb && (
-              <ErrorText>{errors.suburb}</ErrorText>
-            )}
+            {errors.suburb && <ErrorText>{errors.suburb}</ErrorText>}
           </FormField>
         ) : (
           <FieldValue>{data.suburb}</FieldValue>
@@ -126,23 +137,22 @@ export function AddressCard({ data, onSave, isSaving = false }: AddressCardProps
               select
               size="small"
               value={formData.state}
-              onChange={(e) => handleChange('state', e.target.value)}
+              onChange={e => handleChange('state', e.target.value)}
               error={!!errors.state}
               disabled={isSaving}
             >
-              {AUSTRALIAN_STATES.map((state) => (
+              {AUSTRALIAN_STATES.map(state => (
                 <MenuItem key={state.value} value={state.value}>
                   {state.label}
                 </MenuItem>
               ))}
             </TextField>
-            {errors.state && (
-              <ErrorText>{errors.state}</ErrorText>
-            )}
+            {errors.state && <ErrorText>{errors.state}</ErrorText>}
           </FormField>
         ) : (
           <FieldValue>
-            {AUSTRALIAN_STATES.find(s => s.value === data.state)?.label || data.state}
+            {AUSTRALIAN_STATES.find(s => s.value === data.state)?.label ||
+              data.state}
           </FieldValue>
         )}
       </FormRow>
@@ -155,16 +165,14 @@ export function AddressCard({ data, onSave, isSaving = false }: AddressCardProps
               fullWidth
               size="small"
               value={formData.postcode}
-              onChange={(e) => handleChange('postcode', e.target.value)}
+              onChange={e => handleChange('postcode', e.target.value)}
               error={!!errors.postcode}
               placeholder="3000"
               helperText="Must be 4 digits"
               disabled={isSaving}
               slotProps={{ htmlInput: { maxLength: 4, inputMode: 'numeric' } }}
             />
-            {errors.postcode && (
-              <ErrorText>{errors.postcode}</ErrorText>
-            )}
+            {errors.postcode && <ErrorText>{errors.postcode}</ErrorText>}
           </FormField>
         ) : (
           <FieldValue>{data.postcode}</FieldValue>

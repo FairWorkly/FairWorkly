@@ -53,7 +53,7 @@ export function RosterResults() {
               navigate(
                 validationId
                   ? `/fairbot?intent=roster&rosterId=${rosterId}&validationId=${validationId}`
-                  : `/fairbot?intent=roster&rosterId=${rosterId}`,
+                  : `/fairbot?intent=roster&rosterId=${rosterId}`
               )
             }
           >

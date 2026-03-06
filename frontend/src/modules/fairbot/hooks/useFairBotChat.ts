@@ -124,7 +124,7 @@ export const useFairBotChat = (): UseFairBotChatResult => {
       'roster-context',
       string | undefined,
       string | null,
-      string | null
+      string | null,
     ]
   >({
     queryKey: [

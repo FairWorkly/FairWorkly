@@ -56,7 +56,9 @@ function getStrengthText(strength: 'weak' | 'medium' | 'strong' | ''): string {
 }
 
 function isPasswordPolicyValid(password: string): boolean {
-  return password.length >= 8 && /[A-Za-z]/.test(password) && /\d/.test(password)
+  return (
+    password.length >= 8 && /[A-Za-z]/.test(password) && /\d/.test(password)
+  )
 }
 
 export function SignupForm({
@@ -105,7 +107,8 @@ export function SignupForm({
     isPasswordValid &&
     confirmPassword.trim() !== '' &&
     passwordsMatch
-  const isSubmitDisabled = isSubmitting || isGoogleLoading || !canProceedToUserStep || !canSubmit
+  const isSubmitDisabled =
+    isSubmitting || isGoogleLoading || !canProceedToUserStep || !canSubmit
   const isGoogleDisabled = isGoogleLoading || isSubmitting
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -164,7 +167,7 @@ export function SignupForm({
               fullWidth
               autoComplete="organization"
               value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
+              onChange={e => setCompanyName(e.target.value)}
             />
 
             <TextField
@@ -173,9 +176,13 @@ export function SignupForm({
               required
               fullWidth
               value={abn}
-              onChange={(e) => setAbn(e.target.value)}
+              onChange={e => setAbn(e.target.value)}
               error={abn !== '' && !isAbnValid}
-              helperText={abn !== '' && !isAbnValid ? 'ABN must be exactly 11 digits' : ' '}
+              helperText={
+                abn !== '' && !isAbnValid
+                  ? 'ABN must be exactly 11 digits'
+                  : ' '
+              }
               inputProps={{ inputMode: 'numeric', pattern: '\\d{11}' }}
             />
 
@@ -185,7 +192,7 @@ export function SignupForm({
               required
               fullWidth
               value={industryType}
-              onChange={(e) => setIndustryType(e.target.value)}
+              onChange={e => setIndustryType(e.target.value)}
             />
 
             <TextField
@@ -195,7 +202,7 @@ export function SignupForm({
               fullWidth
               autoComplete="address-line1"
               value={addressLine1}
-              onChange={(e) => setAddressLine1(e.target.value)}
+              onChange={e => setAddressLine1(e.target.value)}
             />
 
             <TextField
@@ -204,7 +211,7 @@ export function SignupForm({
               fullWidth
               autoComplete="address-line2"
               value={addressLine2}
-              onChange={(e) => setAddressLine2(e.target.value)}
+              onChange={e => setAddressLine2(e.target.value)}
             />
 
             <TextField
@@ -214,7 +221,7 @@ export function SignupForm({
               fullWidth
               autoComplete="address-level2"
               value={suburb}
-              onChange={(e) => setSuburb(e.target.value)}
+              onChange={e => setSuburb(e.target.value)}
             />
 
             <FormRow>
@@ -224,13 +231,15 @@ export function SignupForm({
                 required
                 fullWidth
                 value={state}
-                onChange={(e) => setState(e.target.value)}
+                onChange={e => setState(e.target.value)}
               >
-                {['VIC', 'NSW', 'QLD', 'SA', 'WA', 'TAS', 'ACT', 'NT'].map((code) => (
-                  <MenuItem key={code} value={code}>
-                    {code}
-                  </MenuItem>
-                ))}
+                {['VIC', 'NSW', 'QLD', 'SA', 'WA', 'TAS', 'ACT', 'NT'].map(
+                  code => (
+                    <MenuItem key={code} value={code}>
+                      {code}
+                    </MenuItem>
+                  )
+                )}
               </TextField>
               <TextField
                 label="Postcode"
@@ -238,9 +247,13 @@ export function SignupForm({
                 required
                 fullWidth
                 value={postcode}
-                onChange={(e) => setPostcode(e.target.value)}
+                onChange={e => setPostcode(e.target.value)}
                 error={postcode !== '' && !isPostcodeValid}
-                helperText={postcode !== '' && !isPostcodeValid ? 'Postcode must be 4 digits' : ' '}
+                helperText={
+                  postcode !== '' && !isPostcodeValid
+                    ? 'Postcode must be 4 digits'
+                    : ' '
+                }
                 inputProps={{ inputMode: 'numeric', pattern: '\\d{4}' }}
               />
             </FormRow>
@@ -253,7 +266,7 @@ export function SignupForm({
               fullWidth
               autoComplete="email"
               value={contactEmail}
-              onChange={(e) => setContactEmail(e.target.value)}
+              onChange={e => setContactEmail(e.target.value)}
             />
           </>
         ) : (
@@ -268,7 +281,7 @@ export function SignupForm({
                 fullWidth
                 autoComplete="given-name"
                 value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                onChange={e => setFirstName(e.target.value)}
               />
               <TextField
                 label="Last Name"
@@ -277,7 +290,7 @@ export function SignupForm({
                 fullWidth
                 autoComplete="family-name"
                 value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                onChange={e => setLastName(e.target.value)}
               />
             </FormRow>
 
@@ -289,7 +302,7 @@ export function SignupForm({
               fullWidth
               autoComplete="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
             />
 
             <div>
@@ -300,9 +313,13 @@ export function SignupForm({
                 required
                 fullWidth
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 error={showPasswordPolicyError}
-                helperText={showPasswordPolicyError ? 'Use at least 8 characters with both letters and numbers' : ' '}
+                helperText={
+                  showPasswordPolicyError
+                    ? 'Use at least 8 characters with both letters and numbers'
+                    : ' '
+                }
                 autoComplete="new-password"
               />
               <StrengthBar>
@@ -318,7 +335,7 @@ export function SignupForm({
               required
               fullWidth
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={e => setConfirmPassword(e.target.value)}
               error={showConfirmMismatch}
               helperText={showConfirmMismatch ? 'Passwords do not match' : ' '}
               autoComplete="new-password"
@@ -329,7 +346,11 @@ export function SignupForm({
 
       <FormActions>
         {step === 1 ? (
-          <SubmitButton type="button" onClick={handleNextStep} disabled={!canProceedToUserStep}>
+          <SubmitButton
+            type="button"
+            onClick={handleNextStep}
+            disabled={!canProceedToUserStep}
+          >
             Next
             <ArrowForwardIcon fontSize="small" />
           </SubmitButton>

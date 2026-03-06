@@ -7,7 +7,10 @@ import {
   ErrorText,
   FormField,
 } from './CompanyProfile.styles'
-import type { ContactInfo, ValidationErrors } from '../../types/companyProfile.types'
+import type {
+  ContactInfo,
+  ValidationErrors,
+} from '../../types/companyProfile.types'
 import { useEditableCard } from '../../hooks/useEditableCard'
 
 interface ContactCardProps {
@@ -28,10 +31,20 @@ function validate(formData: ContactInfo): ValidationErrors {
   return errors
 }
 
-export function ContactCard({ data, onSave, isSaving = false }: ContactCardProps) {
+export function ContactCard({
+  data,
+  onSave,
+  isSaving = false,
+}: ContactCardProps) {
   const {
-    isEditing, formData, errors, hasErrors,
-    handleEdit, handleSave, handleCancel, handleChange,
+    isEditing,
+    formData,
+    errors,
+    hasErrors,
+    handleEdit,
+    handleSave,
+    handleCancel,
+    handleChange,
   } = useEditableCard({ data, onSave, validate })
 
   return (
@@ -53,7 +66,7 @@ export function ContactCard({ data, onSave, isSaving = false }: ContactCardProps
               size="small"
               type="email"
               value={formData.contactEmail}
-              onChange={(e) => handleChange('contactEmail', e.target.value)}
+              onChange={e => handleChange('contactEmail', e.target.value)}
               error={!!errors.contactEmail}
               placeholder="hello@company.com"
               disabled={isSaving}
@@ -76,7 +89,7 @@ export function ContactCard({ data, onSave, isSaving = false }: ContactCardProps
               size="small"
               type="tel"
               value={formData.phoneNumber}
-              onChange={(e) => handleChange('phoneNumber', e.target.value)}
+              onChange={e => handleChange('phoneNumber', e.target.value)}
               placeholder="+61 400 000 000"
               disabled={isSaving}
             />

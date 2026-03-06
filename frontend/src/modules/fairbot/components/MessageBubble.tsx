@@ -17,7 +17,7 @@ interface BubbleProps {
 }
 
 const MessageRow = styled('div', {
-  shouldForwardProp: (prop) => prop !== 'isUser',
+  shouldForwardProp: prop => prop !== 'isUser',
 })<BubbleProps>(({ theme, isUser }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -26,7 +26,7 @@ const MessageRow = styled('div', {
 }))
 
 const Bubble = styled('div', {
-  shouldForwardProp: (prop) => prop !== 'isUser',
+  shouldForwardProp: prop => prop !== 'isUser',
 })<BubbleProps>(({ theme, isUser }) => ({
   maxWidth: theme.spacing(65),
   borderRadius: theme.fairworkly.radius.lg,
@@ -34,11 +34,13 @@ const Bubble = styled('div', {
   backgroundColor: isUser
     ? theme.palette.primary.main
     : theme.palette.action.hover,
-  color: isUser ? theme.palette.primary.contrastText : theme.palette.text.primary,
+  color: isUser
+    ? theme.palette.primary.contrastText
+    : theme.palette.text.primary,
 }))
 
 const MetaRow = styled('div', {
-  shouldForwardProp: (prop) => prop !== 'isUser',
+  shouldForwardProp: prop => prop !== 'isUser',
 })<BubbleProps>(({ theme, isUser }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -147,7 +149,9 @@ export const MessageBubble = ({
         </Typography>
       </MetaRow>
       <Bubble isUser={isUser}>
-        <Typography variant="body2" whiteSpace="pre-line">{message.text}</Typography>
+        <Typography variant="body2" whiteSpace="pre-line">
+          {message.text}
+        </Typography>
         {hasDetails && (
           <DetailSection>
             {metadata?.model && (
@@ -168,9 +172,12 @@ export const MessageBubble = ({
                 {sources.map((source, index) => {
                   const snippet = truncate(source.content)
                   return (
-                    <SourceItem key={`${source.source}-${source.page ?? 'na'}-${index}`}>
+                    <SourceItem
+                      key={`${source.source}-${source.page ?? 'na'}-${index}`}
+                    >
                       <Typography variant="caption" color="text.secondary">
-                        {index + 1}. {source.source}{formatPage(source.page)}
+                        {index + 1}. {source.source}
+                        {formatPage(source.page)}
                       </Typography>
                       {snippet && (
                         <Typography variant="caption" display="block">
@@ -182,54 +189,58 @@ export const MessageBubble = ({
                 })}
               </SourceList>
             )}
-            {actionPlan && Array.isArray(actionPlan.actions) && actionPlan.actions.length > 0 && (
-              <ActionPlanSection>
-                <Typography variant="caption" color="text.secondary">
-                  {actionPlan.title}
-                </Typography>
-                {actionPlan.actions.slice(0, 3).map((action) => (
-                  <ActionCard key={action.id}>
-                    <div>
-                      <Chip
-                        size="small"
-                        label={action.priority || 'Action'}
-                        color="warning"
-                        variant="outlined"
-                      />
-                    </div>
-                    <Typography variant="body2" fontWeight={700}>
-                      {action.title}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      What to change: {action.whatToChange}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Why: {action.why}
-                    </Typography>
-                    {action.focusExamples && (
-                      <Typography variant="caption" color="text.secondary">
-                        Focus: {action.focusExamples}
+            {actionPlan &&
+              Array.isArray(actionPlan.actions) &&
+              actionPlan.actions.length > 0 && (
+                <ActionPlanSection>
+                  <Typography variant="caption" color="text.secondary">
+                    {actionPlan.title}
+                  </Typography>
+                  {actionPlan.actions.slice(0, 3).map(action => (
+                    <ActionCard key={action.id}>
+                      <div>
+                        <Chip
+                          size="small"
+                          label={action.priority || 'Action'}
+                          color="warning"
+                          variant="outlined"
+                        />
+                      </div>
+                      <Typography variant="body2" fontWeight={700}>
+                        {action.title}
                       </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        What to change: {action.whatToChange}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Why: {action.why}
+                      </Typography>
+                      {action.focusExamples && (
+                        <Typography variant="caption" color="text.secondary">
+                          Focus: {action.focusExamples}
+                        </Typography>
+                      )}
+                    </ActionCard>
+                  ))}
+                  {Array.isArray(actionPlan.quickFollowUps) &&
+                    actionPlan.quickFollowUps.length > 0 &&
+                    onQuickFollowUp && (
+                      <FollowUpRow>
+                        {actionPlan.quickFollowUps.slice(0, 3).map(item => (
+                          <FollowUpButton
+                            key={item.id}
+                            size="small"
+                            variant="outlined"
+                            disabled={quickFollowUpDisabled}
+                            onClick={() => onQuickFollowUp(item.prompt)}
+                          >
+                            {item.label}
+                          </FollowUpButton>
+                        ))}
+                      </FollowUpRow>
                     )}
-                  </ActionCard>
-                ))}
-                {Array.isArray(actionPlan.quickFollowUps) && actionPlan.quickFollowUps.length > 0 && onQuickFollowUp && (
-                  <FollowUpRow>
-                    {actionPlan.quickFollowUps.slice(0, 3).map((item) => (
-                      <FollowUpButton
-                        key={item.id}
-                        size="small"
-                        variant="outlined"
-                        disabled={quickFollowUpDisabled}
-                        onClick={() => onQuickFollowUp(item.prompt)}
-                      >
-                        {item.label}
-                      </FollowUpButton>
-                    ))}
-                  </FollowUpRow>
-                )}
-              </ActionPlanSection>
-            )}
+                </ActionPlanSection>
+              )}
           </DetailSection>
         )}
       </Bubble>

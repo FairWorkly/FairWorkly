@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Amazon.S3;
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.Employees.Interfaces;
@@ -16,6 +17,7 @@ using FairWorkly.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Refit;
 
 namespace FairWorkly.Infrastructure;
 
@@ -27,6 +29,40 @@ public static class DependencyInjection
     )
     {
         services.AddHttpClient<IAiClient, PythonAiClient>();
+
+        // Refit: Payroll Agent Service
+        var aiBaseUrl = configuration["AiSettings:BaseUrl"] ?? "http://localhost:8000";
+        var aiTimeoutSeconds = configuration.GetValue<int?>("AiSettings:TimeoutSeconds") ?? 120;
+        if (aiTimeoutSeconds <= 0)
+            aiTimeoutSeconds = 120;
+
+        var serviceKey = configuration["AiSettings:ServiceKey"];
+        if (string.IsNullOrWhiteSpace(serviceKey))
+        {
+            throw new InvalidOperationException(
+                "AiSettings:ServiceKey is required. "
+                    + "Set it in appsettings.json or via environment variable AiSettings__ServiceKey."
+            );
+        }
+
+        services
+            .AddRefitClient<IPayrollAgentService>(
+                new RefitSettings
+                {
+                    ContentSerializer = new SystemTextJsonContentSerializer(
+                        new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        }
+                    ),
+                }
+            )
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri(aiBaseUrl);
+                c.Timeout = TimeSpan.FromSeconds(aiTimeoutSeconds);
+                c.DefaultRequestHeaders.TryAddWithoutValidation("X-Service-Key", serviceKey);
+            });
 
         // Register DbContext (PostgreSQL)
         var connectionString = configuration.GetConnectionString("DefaultConnection");

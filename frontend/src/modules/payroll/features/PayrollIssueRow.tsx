@@ -4,12 +4,16 @@
 //   - description: rich text line + alert card built from category templates
 // The backend guarantees these are mutually exclusive per issue.
 
-import React from 'react'
-import { Box, Typography, Chip, alpha } from '@mui/material'
+import React, { useState } from 'react'
+import { Box, Button, Typography, Chip, alpha } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import WarningAmberRounded from '@mui/icons-material/WarningAmberRounded'
 import { styled } from '@/styles/styled'
-import type { ValidationIssue } from '../types/payrollValidation.types'
+import { ExplainModal } from './ExplainModal'
+import { explainPayrollIssue } from '@/services/payrollApi'
+import type { ValidationIssue, ExplainResult } from '../types'
+import type { ApiError } from '@/shared/types/api.types'
 import { severityConfig } from './payrollCategoryConfig'
 import { buildDescriptionLines } from './payrollDescriptionTemplates'
 
@@ -99,6 +103,30 @@ const AlertBoldText = styled('span')(({ theme }) => ({
   marginRight: theme.spacing(1),
 }))
 
+const ActionButton = styled(Button)(({ theme }) => ({
+  marginLeft: 'auto',
+  color: theme.palette.text.primary,
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: theme.fairworkly.radius.sm,
+  padding: theme.spacing(0.75, 2),
+  fontSize: theme.typography.caption.fontSize,
+  fontWeight: theme.typography.button.fontWeight,
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
+  [theme.breakpoints.between('sm', 'md')]: {
+    padding: theme.spacing(0.5, 1),
+    fontSize: '0.7rem',
+  },
+  [theme.breakpoints.down('sm')]: {
+    width: '100%',
+    marginLeft: 0,
+  },
+  '&:hover': {
+    backgroundColor: theme.palette.background.default,
+    borderColor: theme.palette.text.disabled,
+  },
+}))
+
 // --- Helpers ---
 
 function renderRichLine(
@@ -145,6 +173,10 @@ interface PayrollIssueRowProps {
 
 export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
   const theme = useTheme()
+  const [fixModalOpen, setFixModalOpen] = useState(false)
+  const [explainResult, setExplainResult] = useState<ExplainResult | null>(null)
+  const [isExplaining, setIsExplaining] = useState(false)
+  const [explainError, setExplainError] = useState<string | null>(null)
 
   const sev = severityConfig[issue.severity]
   const severityColor =
@@ -155,6 +187,49 @@ export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
   const warnSev = severityConfig[2]
   const warningColor =
     warnSev.color ?? theme.palette[warnSev.paletteKey][warnSev.paletteTone]
+
+  const handleHowToFix = async () => {
+    // Guard: if already requesting, just re-open the modal
+    if (isExplaining) {
+      setFixModalOpen(true)
+      return
+    }
+
+    // Check sessionStorage cache
+    const cacheKey = `payroll-explain-${issue.issueId}`
+    const cached = sessionStorage.getItem(cacheKey)
+    if (cached) {
+      try {
+        setExplainResult(JSON.parse(cached))
+        setFixModalOpen(true)
+        return
+      } catch {
+        /* corrupted cache, fall through to API */
+      }
+    }
+
+    // Call API
+    setIsExplaining(true)
+    setExplainError(null)
+    setFixModalOpen(true)
+
+    try {
+      const result = await explainPayrollIssue(issue)
+      setExplainResult(result)
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify(result))
+      } catch {
+        /* quota exceeded — ignore */
+      }
+    } catch (err) {
+      const apiErr = err as ApiError
+      setExplainError(
+        apiErr.message ?? 'Unable to generate explanation. Please try again.'
+      )
+    } finally {
+      setIsExplaining(false)
+    }
+  }
 
   return (
     <>
@@ -168,6 +243,14 @@ export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
             variant="outlined"
             chipColor={severityColor}
           />
+          {!issue.warning && (
+            <ActionButton
+              startIcon={<HelpOutlineOutlinedIcon />}
+              onClick={handleHowToFix}
+            >
+              How to Fix
+            </ActionButton>
+          )}
         </HeaderRow>
 
         {d && descLines && (
@@ -193,6 +276,15 @@ export const PayrollIssueRow: React.FC<PayrollIssueRowProps> = ({ issue }) => {
         )}
       </RowContainer>
 
+      <ExplainModal
+        open={fixModalOpen}
+        onClose={() => setFixModalOpen(false)}
+        onRetry={handleHowToFix}
+        result={explainResult}
+        isLoading={isExplaining}
+        error={explainError}
+        employeeName={issue.employeeName}
+      />
     </>
   )
 }

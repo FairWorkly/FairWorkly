@@ -6,13 +6,16 @@ export const DEFAULT_ROUTES: Record<string, string> = {
 }
 
 export function normalizeAuthUser(user: UserDto) {
-  const name = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email
+  const name =
+    [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email
   const role = user.role?.toLowerCase()
   const validRole: 'admin' | 'manager' | undefined =
     role === 'admin' || role === 'manager' ? role : undefined
 
   if (!validRole) {
-    throw new Error('Your account has no valid role assigned. Please contact support.')
+    throw new Error(
+      'Your account has no valid role assigned. Please contact support.'
+    )
   }
 
   return {

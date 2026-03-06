@@ -31,12 +31,10 @@ export const MessageList = ({
   quickFollowUpDisabled = false,
 }: MessageListProps) => {
   const hasMessages = messages.length > 0
-  const latestActionPlanIndex = [...messages]
-    .reverse()
-    .findIndex(message => {
-      const actions = message.metadata?.actionPlan?.actions
-      return Array.isArray(actions) && actions.length > 0
-    })
+  const latestActionPlanIndex = [...messages].reverse().findIndex(message => {
+    const actions = message.metadata?.actionPlan?.actions
+    return Array.isArray(actions) && actions.length > 0
+  })
   const latestActionPlanMessageIndex =
     latestActionPlanIndex === -1
       ? -1

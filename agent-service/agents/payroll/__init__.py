@@ -1,3 +1,3 @@
-from .feature import DemoPayrollFeature
+from .feature import PayrollFeature
 
-__all__ = ["DemoPayrollFeature"]
+__all__ = ["PayrollFeature"]

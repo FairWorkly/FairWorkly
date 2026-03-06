@@ -18,8 +18,11 @@ export function useLogin() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  const { mutate, isPending, error } = useApiMutation<AuthResult, LoginFormData>({
-    mutationFn: async (values) => {
+  const { mutate, isPending, error } = useApiMutation<
+    AuthResult,
+    LoginFormData
+  >({
+    mutationFn: async values => {
       const response = await authApi.login({
         email: values.email,
         password: values.password,
