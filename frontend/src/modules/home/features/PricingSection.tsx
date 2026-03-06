@@ -184,7 +184,6 @@ const CardTitle = styled(Typography)(({ theme }) => ({
 const CardDescription = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   marginBottom: theme.spacing(3),
-  whiteSpace: 'nowrap',
 }))
 
 const PriceContainer = styled(Box)(({ theme }) => ({

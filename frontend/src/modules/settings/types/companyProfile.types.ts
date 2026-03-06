@@ -2,7 +2,7 @@ export interface BusinessInfo {
     companyName: string
     abn: string
     industryType: string
-    primaryAward: string | null
+    primaryAward: AwardValue | null
     logoUrl: string | null
 }
 
@@ -68,7 +68,9 @@ export const AWARD_TYPES = [
     },
 ] as const
 
+export type AwardValue = typeof AWARD_TYPES[number]['value']
+
 /** Returns the suggested award value for a given industry type, or null for 'Other'. */
-export function suggestAwardForIndustry(industryType: string): string | null {
+export function suggestAwardForIndustry(industryType: string): AwardValue | null {
     return AWARD_TYPES.find(a => a.industry === industryType)?.value ?? null
 }

@@ -16,7 +16,10 @@ public class OrganizationRepository : IOrganizationRepository
     // Fetches an organisation by its unique identifier.
     public async Task<Organization?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _context.Organizations.FindAsync(new object[] { id }, ct);
+        return await _context.Organizations.FirstOrDefaultAsync(
+            o => o.Id == id && !o.IsDeleted,
+            ct
+        );
     }
 
     // Fetches an organisation with its OrganizationAwards collection included.
@@ -24,7 +27,7 @@ public class OrganizationRepository : IOrganizationRepository
     {
         return await _context
             .Organizations.Include(o => o.OrganizationAwards)
-            .FirstOrDefaultAsync(o => o.Id == id, ct);
+            .FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted, ct);
     }
 
     // Checks if the ABN is already taken by another organization.

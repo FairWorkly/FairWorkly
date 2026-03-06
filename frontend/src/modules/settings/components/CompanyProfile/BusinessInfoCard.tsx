@@ -146,7 +146,10 @@ export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInf
               select
               size="small"
               value={formData.primaryAward ?? ''}
-              onChange={(e) => handleChange('primaryAward', e.target.value)}
+              onChange={(e) => {
+                const match = AWARD_TYPES.find(a => a.value === e.target.value)
+                handleChange('primaryAward', match ? match.value : null)
+              }}
               disabled={isSaving}
             >
               <MenuItem value=""><em>Not specified</em></MenuItem>

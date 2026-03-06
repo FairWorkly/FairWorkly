@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import {
   Box,
   Button,
@@ -228,8 +227,6 @@ const EMPLOYEE_LIMIT = 20
 //   - Wire "Manage Billing" button to Stripe customer portal
 
 export function BillingSection() {
-  const navigate = useNavigate()
-
   return (
     <BillingSectionRoot>
       {/* Current plan */}
@@ -331,7 +328,7 @@ export function BillingSection() {
             >
               Upgrade to Starter
             </GradientButton>
-            <Button variant="outlined" color="primary" onClick={() => navigate('/#pricing')}>
+            <Button variant="outlined" color="primary" component="a" href="/#pricing">
               View all plans
             </Button>
           </ActionRow>

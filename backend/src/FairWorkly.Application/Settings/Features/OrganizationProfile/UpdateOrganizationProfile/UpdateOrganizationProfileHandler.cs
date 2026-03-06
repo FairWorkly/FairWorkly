@@ -68,7 +68,15 @@ public class UpdateOrganizationProfileHandler
         organization.Postcode = request.Postcode;
         organization.LogoUrl = request.LogoUrl;
 
-        if (!string.IsNullOrEmpty(request.PrimaryAward))
+        if (string.IsNullOrEmpty(request.PrimaryAward))
+        {
+            var existingToRemove = organization.OrganizationAwards.FirstOrDefault(oa =>
+                oa.IsPrimary
+            );
+            if (existingToRemove != null)
+                organization.OrganizationAwards.Remove(existingToRemove);
+        }
+        else
         {
             if (
                 !Enum.TryParse<AwardType>(request.PrimaryAward, ignoreCase: true, out var awardType)
@@ -87,11 +95,18 @@ public class UpdateOrganizationProfileHandler
                 );
             }
 
-            var existing = organization.OrganizationAwards.FirstOrDefault(oa => oa.IsPrimary);
-            if (existing != null)
+            // Demote the current primary (if any)
+            var currentPrimary = organization.OrganizationAwards.FirstOrDefault(oa => oa.IsPrimary);
+            if (currentPrimary != null)
+                currentPrimary.IsPrimary = false;
+
+            // Promote the target award if it already exists; otherwise add a new row
+            var target = organization.OrganizationAwards.FirstOrDefault(oa =>
+                oa.AwardType == awardType
+            );
+            if (target != null)
             {
-                existing.AwardType = awardType;
-                existing.AddedAt = DateTime.UtcNow;
+                target.IsPrimary = true;
             }
             else
             {
