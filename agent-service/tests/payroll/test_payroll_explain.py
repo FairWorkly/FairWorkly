@@ -101,6 +101,10 @@ async def _instant_sleep(_seconds):
     pass
 
 
+async def _instant_wait_for(coro, timeout=None):
+    return await coro
+
+
 # ---------------------------------------------------------------------------
 # Fixture: patch all external deps for feature.process() unit tests
 # ---------------------------------------------------------------------------
@@ -117,7 +121,14 @@ def patch_feature(monkeypatch):
         monkeypatch.setattr(feature_module, "load_config", lambda: {})
         monkeypatch.setattr(feature_module, "ensure_retriever", stub_ensure_retriever)
         monkeypatch.setattr(feature_module, "LLMProvider", llm_cls)
-        monkeypatch.setattr(feature_module, "asyncio", type("A", (), {"sleep": _instant_sleep}))
+        monkeypatch.setattr(
+            feature_module, "asyncio",
+            type("A", (), {
+                "sleep": _instant_sleep,
+                "wait_for": _instant_wait_for,
+                "TimeoutError": asyncio.TimeoutError,
+            }),
+        )
 
     return _apply
 
@@ -188,7 +199,14 @@ def test_llm_failure_returns_503(patch_feature):
 def test_retry_success_on_second_attempt(monkeypatch):
     monkeypatch.setattr(feature_module, "load_config", lambda: {})
     monkeypatch.setattr(feature_module, "ensure_retriever", stub_ensure_retriever)
-    monkeypatch.setattr(feature_module, "asyncio", type("A", (), {"sleep": _instant_sleep}))
+    monkeypatch.setattr(
+        feature_module, "asyncio",
+        type("A", (), {
+            "sleep": _instant_sleep,
+            "wait_for": _instant_wait_for,
+            "TimeoutError": asyncio.TimeoutError,
+        }),
+    )
 
     retry_llm = RetryOnceLLM()
     monkeypatch.setattr(feature_module, "LLMProvider", lambda: retry_llm)

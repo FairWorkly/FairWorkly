@@ -13,6 +13,7 @@ from shared.llm.factory import LLMProvider
 from shared.rag.retriever_manager import ensure_retriever
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
+LLM_TIMEOUT_SECONDS = 20
 
 
 class PayrollFeature(FeatureBase):
@@ -104,10 +105,13 @@ class PayrollFeature(FeatureBase):
                 llm_start = time.time()
 
                 llm = LLMProvider()
-                llm_response = await llm.generate(
-                    messages,
-                    temperature=0.3,
-                    max_tokens=800,
+                llm_response = await asyncio.wait_for(
+                    llm.generate(
+                        messages,
+                        temperature=0.3,
+                        max_tokens=800,
+                    ),
+                    timeout=LLM_TIMEOUT_SECONDS,
                 )
                 raw_text = llm_response.get("content", "").strip()
 
@@ -154,6 +158,10 @@ class PayrollFeature(FeatureBase):
                     e,
                     raw_text[:200],
                 )
+            except asyncio.TimeoutError:
+                last_code = 504
+                last_msg = "LLM request timed out"
+                logger.error("LLM call timed out after %ds", LLM_TIMEOUT_SECONDS)
             except Exception:
                 # 503: LLM call failed (network, timeout, API key, etc.)
                 last_code = 503

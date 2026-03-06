@@ -55,6 +55,6 @@ export function explainPayrollIssue(
   issue: ValidationIssue
 ): Promise<ExplainResult> {
   return post<ExplainResult, ValidationIssue>('/payroll/explain', issue, {
-    timeout: 60_000,
+    timeout: 30_000,
   })
 }

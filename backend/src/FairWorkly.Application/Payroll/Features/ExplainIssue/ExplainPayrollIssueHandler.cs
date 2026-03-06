@@ -22,7 +22,7 @@ public class ExplainPayrollIssueHandler(
     /// Per-request timeout (seconds). Independent from HttpClient global 120s ceiling.
     /// Different Features can set different timeouts (e.g., BatchExplain could use 90s).
     /// </summary>
-    private const int RequestTimeoutSeconds = 30;
+    private const int RequestTimeoutSeconds = 25;
 
     public async Task<Result<ExplainPayrollIssueDto>> Handle(
         ExplainPayrollIssueCommand command,
@@ -117,7 +117,7 @@ public class ExplainPayrollIssueHandler(
         }
         catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
         {
-            // Business timeout (30s) — return clean 503.
+            // Business timeout (25s) — return clean 503.
             // User-initiated cancellation (browser close) does NOT match this filter,
             // so it propagates normally.
             stopwatch.Stop();
