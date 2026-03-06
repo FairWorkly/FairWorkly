@@ -1,8 +1,9 @@
 export interface BusinessInfo {
-  companyName: string
-  abn: string
-  industryType: string
-  logoUrl: string | null
+    companyName: string
+    abn: string
+    industryType: string
+    primaryAward: AwardValue | null
+    logoUrl: string | null
 }
 
 export interface ContactInfo {
@@ -34,8 +35,37 @@ export const AUSTRALIAN_STATES = [
 ] as const
 
 export const INDUSTRY_TYPES = [
-  'Retail',
-  'Hospitality',
-  'Clerks',
-  'Other',
+    'Retail',
+    'Hospitality',
+    'Clerks',
+    'Other',
 ] as const
+
+
+export const AWARD_TYPES = [
+    {
+        value: 'GeneralRetailIndustryAward2020',
+        label: 'General Retail Industry Award 2020',
+        maCode: 'MA000004',
+        industry: 'Retail',
+    },
+    {
+        value: 'HospitalityIndustryAward2020',
+        label: 'Hospitality Industry (General) Award 2020',
+        maCode: 'MA000009',
+        industry: 'Hospitality',
+    },
+    {
+        value: 'ClerksPrivateSectorAward2020',
+        label: 'Clerks—Private Sector Award 2020',
+        maCode: 'MA000002',
+        industry: 'Clerks',
+    },
+] as const
+
+export type AwardValue = typeof AWARD_TYPES[number]['value']
+
+/** Returns the suggested award value for a given industry type, or null for 'Other'. */
+export function suggestAwardForIndustry(industryType: string): AwardValue | null {
+    return AWARD_TYPES.find(a => a.industry === industryType)?.value ?? null
+}

@@ -1,4 +1,5 @@
 using FairWorkly.Application.Common.Interfaces;
+using FairWorkly.Domain.Auth.Entities;
 using FairWorkly.Domain.Auth.Interfaces;
 using FairWorkly.Domain.Common.Enums;
 using FairWorkly.Domain.Common.Result;
@@ -28,7 +29,7 @@ public class UpdateOrganizationProfileHandler
     {
         var request = command.Request;
 
-        var organization = await _organizationRepository.GetByIdAsync(
+        var organization = await _organizationRepository.GetByIdWithAwardsAsync(
             command.OrganizationId,
             cancellationToken
         );
@@ -66,6 +67,60 @@ public class UpdateOrganizationProfileHandler
         organization.State = stateEnum;
         organization.Postcode = request.Postcode;
         organization.LogoUrl = request.LogoUrl;
+
+        if (string.IsNullOrEmpty(request.PrimaryAward))
+        {
+            var existingToRemove = organization.OrganizationAwards.FirstOrDefault(oa =>
+                oa.IsPrimary
+            );
+            if (existingToRemove != null)
+                organization.OrganizationAwards.Remove(existingToRemove);
+        }
+        else
+        {
+            if (
+                !Enum.TryParse<AwardType>(request.PrimaryAward, ignoreCase: true, out var awardType)
+            )
+            {
+                return Result<OrganizationProfileDto>.Of400(
+                    "Invalid award type",
+                    new List<Validation400Error>
+                    {
+                        new()
+                        {
+                            Field = "primaryAward",
+                            Message = $"'{request.PrimaryAward}' is not a valid award type",
+                        },
+                    }
+                );
+            }
+
+            // Demote the current primary (if any)
+            var currentPrimary = organization.OrganizationAwards.FirstOrDefault(oa => oa.IsPrimary);
+            if (currentPrimary != null)
+                currentPrimary.IsPrimary = false;
+
+            // Promote the target award if it already exists; otherwise add a new row
+            var target = organization.OrganizationAwards.FirstOrDefault(oa =>
+                oa.AwardType == awardType
+            );
+            if (target != null)
+            {
+                target.IsPrimary = true;
+            }
+            else
+            {
+                organization.OrganizationAwards.Add(
+                    new OrganizationAward
+                    {
+                        OrganizationId = organization.Id,
+                        AwardType = awardType,
+                        IsPrimary = true,
+                        AddedAt = DateTime.UtcNow,
+                    }
+                );
+            }
+        }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

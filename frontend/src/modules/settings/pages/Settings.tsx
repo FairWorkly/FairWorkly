@@ -1,10 +1,8 @@
 import { useState } from 'react'
-import { Typography } from '@mui/material'
 import {
   Business as BusinessIcon,
   Group as GroupIcon,
   CreditCard as CreditCardIcon,
-  Security as SecurityIcon,
 } from '@mui/icons-material'
 import {
   SettingsContainer,
@@ -13,12 +11,12 @@ import {
   SettingsNavItem,
   SettingsNavItemText,
   SettingsContent,
-  PageHeader,
-  SectionContent,
-} from './Settings.styles'
+} from '@/modules/settings/ui/Settings.styles'
 import { CompanyProfileSection } from '../features/CompanyProfile/CompanyProfileSection'
+import { TeamMembersSection } from '@/modules/settings/features'
+import { BillingSection } from '../features/Billing/BillingSection'
 
-type SettingsSection = 'company' | 'team' | 'billing' | 'security'
+type SettingsSection = 'company' | 'team' | 'billing'
 
 export function Settings() {
   const [activeSection, setActiveSection] = useState<SettingsSection>('company')
@@ -39,24 +37,10 @@ export function Settings() {
       icon: <CreditCardIcon />,
       label: 'Billing',
     },
-    {
-      id: 'security' as const,
-      icon: <SecurityIcon />,
-      label: 'Security',
-    },
   ]
 
   return (
     <SettingsContainer>
-      <PageHeader>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Settings
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Manage your company settings and team members
-        </Typography>
-      </PageHeader>
-
       <SettingsLayout>
         <SettingsNav>
           {navItems.map(item => (
@@ -76,32 +60,9 @@ export function Settings() {
         <SettingsContent>
           {activeSection === 'company' && <CompanyProfileSection />}
 
-          {activeSection === 'team' && (
-            <SectionContent>
-              <Typography variant="h5">Team Members</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Coming soon...
-              </Typography>
-            </SectionContent>
-          )}
+          {activeSection === 'team' && <TeamMembersSection />}
 
-          {activeSection === 'billing' && (
-            <SectionContent>
-              <Typography variant="h5">Billing</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Coming soon...
-              </Typography>
-            </SectionContent>
-          )}
-
-          {activeSection === 'security' && (
-            <SectionContent>
-              <Typography variant="h5">Security</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Coming soon...
-              </Typography>
-            </SectionContent>
-          )}
+          {activeSection === 'billing' && <BillingSection />}
         </SettingsContent>
       </SettingsLayout>
     </SettingsContainer>

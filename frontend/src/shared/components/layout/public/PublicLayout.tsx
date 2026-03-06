@@ -7,7 +7,6 @@ import {
   PublicSplitMain,
   PublicSplitContainer,
   PublicCenterMain,
-  PublicCenterContainer,
 } from './PublicLayout.styles'
 
 type PublicLayoutVariant = 'split' | 'center'
@@ -43,9 +42,7 @@ export function PublicLayout({
   return (
     <PublicShell>
       <PublicCenterMain>
-        <PublicCenterContainer>
-          <Outlet />
-        </PublicCenterContainer>
+        <Outlet />
       </PublicCenterMain>
     </PublicShell>
   )

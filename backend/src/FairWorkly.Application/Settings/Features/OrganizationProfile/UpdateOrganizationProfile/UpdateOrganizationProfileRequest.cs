@@ -11,6 +11,12 @@ public class UpdateOrganizationProfileRequest
 
     public string IndustryType { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Primary Modern Award type string (e.g., "HospitalityIndustryAward2020").
+    /// Null means no change to existing award configuration.
+    /// </summary>
+    public string? PrimaryAward { get; set; }
+
     public string ContactEmail { get; set; } = string.Empty;
 
     public string? PhoneNumber { get; set; }

@@ -19,7 +19,7 @@ public class GetOrganizationProfileHandler
         CancellationToken cancellationToken
     )
     {
-        var organization = await _organizationRepository.GetByIdAsync(
+        var organization = await _organizationRepository.GetByIdWithAwardsAsync(
             request.OrganizationId,
             cancellationToken
         );

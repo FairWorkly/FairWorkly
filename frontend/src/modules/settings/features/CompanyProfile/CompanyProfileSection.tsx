@@ -53,6 +53,7 @@ export function CompanyProfileSection() {
       companyName: profile!.companyName,
       abn: profile!.abn,
       industryType: profile!.industryType,
+      primaryAward: profile!.primaryAward,
       contactEmail: profile!.contactEmail,
       phoneNumber: profile!.phoneNumber,
       addressLine1: profile!.addressLine1,
@@ -83,7 +84,10 @@ export function CompanyProfileSection() {
   }
 
   const handleSaveBusinessInfo = (data: BusinessInfo) =>
-    saveCard(data, 'Business info updated successfully')
+    saveCard(
+      { ...data, primaryAward: data.primaryAward || null },
+      'Business info updated successfully',
+    )
 
   const handleSaveContact = (data: ContactInfo) =>
     saveCard(data, 'Contact updated successfully')
@@ -100,6 +104,7 @@ export function CompanyProfileSection() {
           companyName: profile.companyName,
           abn: profile.abn,
           industryType: profile.industryType,
+          primaryAward: profile.primaryAward,
           logoUrl: profile.logoUrl,
         }}
         onSave={handleSaveBusinessInfo}

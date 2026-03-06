@@ -1,4 +1,5 @@
 using FairWorkly.Domain.Auth.Entities;
+using FairWorkly.Domain.Auth.Enums;
 using FairWorkly.Domain.Auth.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,6 +36,18 @@ public class UserRepository : IUserRepository
     {
         return await _context.Users.FirstOrDefaultAsync(
             u => u.RefreshToken == refreshTokenHash,
+            ct
+        );
+    }
+
+    // Retrieve a user by the stored invitation token hash
+    public async Task<User?> GetByInvitationTokenHashAsync(
+        string invitationTokenHash,
+        CancellationToken ct = default
+    )
+    {
+        return await _context.Users.FirstOrDefaultAsync(
+            u => u.InvitationToken == invitationTokenHash && !u.IsDeleted,
             ct
         );
     }
@@ -84,5 +97,41 @@ public class UserRepository : IUserRepository
     {
         user.IsDeleted = true;
         _context.Users.Update(user);
+    }
+
+    // Atomically accepts a pending invitation.
+    // Issues a single conditional UPDATE so that exactly one concurrent request can succeed.
+    // ExecuteUpdateAsync translates directly to SQL:
+    //   UPDATE users SET ... WHERE invitation_token = @hash AND invitation_status = Pending
+    //                         AND invitation_token_expiry > @now AND is_deleted = false
+    // The database row-level lock ensures at most one concurrent request sees rows_affected = 1.
+    public async Task<int> AcceptInvitationAtomicAsync(
+        string tokenHash,
+        string passwordHash,
+        DateTime now,
+        CancellationToken ct = default
+    )
+    {
+        var nowOffset = new DateTimeOffset(now, TimeSpan.Zero);
+
+        return await _context
+            .Users.Where(u =>
+                u.InvitationToken == tokenHash
+                && u.InvitationStatus == InvitationStatus.Pending
+                && u.InvitationTokenExpiry != null
+                && u.InvitationTokenExpiry > now
+                && !u.IsDeleted
+            )
+            .ExecuteUpdateAsync(
+                setters =>
+                    setters
+                        .SetProperty(u => u.PasswordHash, passwordHash)
+                        .SetProperty(u => u.IsActive, true)
+                        .SetProperty(u => u.InvitationStatus, InvitationStatus.Accepted)
+                        .SetProperty(u => u.InvitationToken, (string?)null)
+                        .SetProperty(u => u.InvitationTokenExpiry, (DateTime?)null)
+                        .SetProperty(u => u.UpdatedAt, nowOffset),
+                ct
+            );
     }
 }
