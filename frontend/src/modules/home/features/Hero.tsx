@@ -1,7 +1,6 @@
 import { Link as RouterLink } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Stack from '@mui/material/Stack'
 import { alpha } from '@mui/material/styles'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import VerifiedIcon from '@mui/icons-material/Verified'
@@ -85,14 +84,17 @@ const HeroSubtitle = styled(Typography)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }))
 
-const HeroActions = styled(Stack)(({ theme }) => ({
+const HeroActions = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'row',
+  gap: theme.spacing(2),
   marginBottom: theme.spacing(5),
+  alignItems: 'stretch',
   [theme.breakpoints.down('lg')]: {
     justifyContent: 'center',
   },
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down('md')]: {
     flexDirection: 'column',
-    alignItems: 'stretch',
     width: '100%',
     maxWidth: theme.spacing(40),
     margin: '0 auto',
@@ -112,12 +114,13 @@ const PrimaryLink = styled(RouterLink)(({ theme }) => ({
   ...theme.typography.button,
   background: theme.fairworkly.gradient.primary,
   color: theme.palette.common.white,
+  border: '1px solid transparent',
   boxShadow: theme.fairworkly.shadow.primaryButton,
   transition: theme.transitions.create(['box-shadow']),
   '&:hover': {
     boxShadow: theme.fairworkly.shadow.primaryButtonHover,
   },
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down('md')]: {
     width: '100%',
   },
 }))
@@ -141,7 +144,7 @@ const SecondaryButton = styled('button')(({ theme }) => ({
     background: theme.fairworkly.effect.primaryGlowHover,
     borderColor: theme.palette.primary.main,
   },
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down('md')]: {
     width: '100%',
   },
 }))
@@ -190,7 +193,7 @@ const BadgeIcon = styled(Box)(({ theme }) => ({
   color: theme.palette.success.main,
 }))
 
-const BadgeContent = styled(Stack)({})
+const BadgeContent = styled(Box)({})
 
 const BadgeTitle = styled(Typography)({})
 
@@ -224,7 +227,7 @@ export function Hero() {
               Work validation. Avoid $50K+ penalties with AI-powered compliance
               checking.
             </HeroSubtitle>
-            <HeroActions direction="row" spacing={2}>
+            <HeroActions>
               <PrimaryLink to="/login?signup=true">
                 Start Free Trial
                 <ArrowForwardIcon />

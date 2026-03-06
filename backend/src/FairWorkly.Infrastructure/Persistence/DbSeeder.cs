@@ -21,7 +21,38 @@ public static class DbSeeder
 
         var users = context.Set<User>();
         var organizations = context.Set<Organization>();
+        var awards = context.Set<OrganizationAward>();
 
+        // Backfill: runs on every startup so existing local DBs get the demo award
+        // without requiring a full data reset.
+        var existingDemoOrg = await organizations.FirstOrDefaultAsync(o =>
+            o.ContactEmail == "contact@fairworkly.com.au" && !o.IsDeleted
+        );
+
+        if (
+            existingDemoOrg != null
+            && !await awards.AnyAsync(oa =>
+                oa.OrganizationId == existingDemoOrg.Id && oa.IsPrimary && !oa.IsDeleted
+            )
+        )
+        {
+            awards.Add(
+                new OrganizationAward
+                {
+                    Id = Guid.NewGuid(),
+                    OrganizationId = existingDemoOrg.Id,
+                    AwardType = AwardType.GeneralRetailIndustryAward2020,
+                    IsPrimary = true,
+                    EmployeeCount = 0,
+                    AddedAt = DateTime.UtcNow,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    IsDeleted = false,
+                }
+            );
+            await context.SaveChangesAsync();
+        }
+
+        // Full seed only runs on a brand-new database.
         if (await users.AnyAsync())
         {
             return;
@@ -78,9 +109,22 @@ public static class DbSeeder
             IsDeleted = false,
         };
 
+        var demoOrgAward = new OrganizationAward
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = organizationId,
+            AwardType = AwardType.GeneralRetailIndustryAward2020,
+            IsPrimary = true,
+            EmployeeCount = 0,
+            AddedAt = now.UtcDateTime,
+            CreatedAt = now,
+            IsDeleted = false,
+        };
+
         organizations.Add(demoOrg);
         users.Add(adminUser);
         users.Add(managerUser);
+        context.Set<OrganizationAward>().Add(demoOrgAward);
 
         await context.SaveChangesAsync();
     }

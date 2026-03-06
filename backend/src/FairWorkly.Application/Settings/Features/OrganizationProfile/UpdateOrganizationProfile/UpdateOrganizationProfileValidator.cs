@@ -88,6 +88,13 @@ public class UpdateOrganizationProfileRequestValidator
             .MaximumLength(500)
             .WithMessage("Logo URL must not exceed 500 characters")
             .When(x => !string.IsNullOrEmpty(x.LogoUrl));
+
+        RuleFor(x => x.PrimaryAward)
+            .Must(BeValidAwardType)
+            .WithMessage(
+                "Primary award must be a valid award type (e.g., HospitalityIndustryAward2020)"
+            )
+            .When(x => !string.IsNullOrEmpty(x.PrimaryAward));
     }
 
     private bool BeValidAustralianState(string state)
@@ -95,5 +102,12 @@ public class UpdateOrganizationProfileRequestValidator
         if (string.IsNullOrWhiteSpace(state))
             return false;
         return Enum.TryParse<AustralianState>(state, ignoreCase: true, out _);
+    }
+
+    private bool BeValidAwardType(string? award)
+    {
+        if (string.IsNullOrWhiteSpace(award))
+            return true;
+        return Enum.TryParse<AwardType>(award, ignoreCase: true, out _);
     }
 }

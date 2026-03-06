@@ -3,7 +3,7 @@ import { alpha } from '@mui/material/styles'
 import { styled } from '@/styles/styled'
 
 export const SettingsContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(4),
+  padding: theme.spacing(5, 4, 4),
   maxWidth: theme.fairworkly.layout.containerMaxWidth,
   margin: '0 auto',
   width: '100%',
@@ -25,7 +25,8 @@ export const SettingsNav = styled(Paper)(({ theme }) => ({
   borderRadius: `${theme.fairworkly.radius.lg}px`,
   border: `${theme.spacing(0.125)} solid ${theme.palette.divider}`,
   position: 'sticky',
-  top: theme.spacing(12),
+  top: theme.spacing(10),
+  alignSelf: 'start',
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing(0.5),
