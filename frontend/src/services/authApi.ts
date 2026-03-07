@@ -52,7 +52,10 @@ export const authApi = {
    * Register a new organization + first admin user
    */
   async register(payload: RegisterRequest): Promise<LoginResponse> {
-    const response = await httpClient.post<LoginResponse>('/auth/register', payload)
+    const response = await httpClient.post<LoginResponse>(
+      '/auth/register',
+      payload
+    )
     return response.data
   },
 

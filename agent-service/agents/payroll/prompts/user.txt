@@ -1,0 +1,5 @@
+Issue data:
+{issue_json}
+
+Relevant Award excerpts:
+{award_excerpts}

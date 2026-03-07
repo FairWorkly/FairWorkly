@@ -6,13 +6,21 @@ import {
   useOrganizationProfile,
   useUpdateOrganizationProfile,
 } from '../../hooks/useOrganizationProfile'
-import type { BusinessInfo, ContactInfo, AddressInfo } from '../../types/companyProfile.types'
+import type {
+  BusinessInfo,
+  ContactInfo,
+  AddressInfo,
+} from '../../types/companyProfile.types'
 import type { UpdateOrganizationProfileRequest } from '@/services/settingsApi'
 import { useNotification } from '@/shared/hooks'
 import { SectionWrapper, CardSkeleton } from './CompanyProfileSection.styles'
 
 export function CompanyProfileSection() {
-  const { data: profile, isLoading, error: loadError } = useOrganizationProfile()
+  const {
+    data: profile,
+    isLoading,
+    error: loadError,
+  } = useOrganizationProfile()
   const updateMutation = useUpdateOrganizationProfile()
   const { notification, notify, clear } = useNotification()
 
@@ -38,11 +46,14 @@ export function CompanyProfileSection() {
 
   if (!profile) return null
 
-  function buildPayload(overrides: Partial<UpdateOrganizationProfileRequest>): UpdateOrganizationProfileRequest {
+  function buildPayload(
+    overrides: Partial<UpdateOrganizationProfileRequest>
+  ): UpdateOrganizationProfileRequest {
     return {
       companyName: profile!.companyName,
       abn: profile!.abn,
       industryType: profile!.industryType,
+      primaryAward: profile!.primaryAward,
       contactEmail: profile!.contactEmail,
       phoneNumber: profile!.phoneNumber,
       addressLine1: profile!.addressLine1,
@@ -56,7 +67,7 @@ export function CompanyProfileSection() {
 
   function saveCard(
     overrides: Partial<UpdateOrganizationProfileRequest>,
-    message: string,
+    message: string
   ): Promise<boolean> {
     return new Promise(resolve => {
       updateMutation.mutate(buildPayload(overrides), {
@@ -73,7 +84,10 @@ export function CompanyProfileSection() {
   }
 
   const handleSaveBusinessInfo = (data: BusinessInfo) =>
-    saveCard(data, 'Business info updated successfully')
+    saveCard(
+      { ...data, primaryAward: data.primaryAward || null },
+      'Business info updated successfully',
+    )
 
   const handleSaveContact = (data: ContactInfo) =>
     saveCard(data, 'Contact updated successfully')
@@ -90,6 +104,7 @@ export function CompanyProfileSection() {
           companyName: profile.companyName,
           abn: profile.abn,
           industryType: profile.industryType,
+          primaryAward: profile.primaryAward,
           logoUrl: profile.logoUrl,
         }}
         onSave={handleSaveBusinessInfo}
@@ -117,13 +132,13 @@ export function CompanyProfileSection() {
         isSaving={isSaving}
       />
 
-      <Snackbar
-        open={!!notification}
-        autoHideDuration={3000}
-        onClose={clear}
-      >
+      <Snackbar open={!!notification} autoHideDuration={3000} onClose={clear}>
         {notification ? (
-          <Alert onClose={clear} severity={notification.severity} variant="filled">
+          <Alert
+            onClose={clear}
+            severity={notification.severity}
+            variant="filled"
+          >
             {notification.message}
           </Alert>
         ) : undefined}

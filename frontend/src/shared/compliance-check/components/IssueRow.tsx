@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-  Box,
-  Typography,
-  Checkbox,
-  styled,
-  alpha,
-} from '@mui/material'
+import { Box, Typography, Checkbox, styled, alpha } from '@mui/material'
 import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined'
 import type { IssueItem } from '../types/complianceCheck.type'
 

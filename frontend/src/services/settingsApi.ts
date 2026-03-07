@@ -1,4 +1,5 @@
 import * as baseApi from './baseApi'
+import type { AwardValue } from '@/modules/settings/types/companyProfile.types'
 
 // --- Team Members ---
 
@@ -61,6 +62,7 @@ export interface OrganizationProfileDto {
   companyName: string
   abn: string
   industryType: string
+  primaryAward: AwardValue | null
   contactEmail: string
   phoneNumber: string | null
   addressLine1: string
@@ -75,6 +77,7 @@ export interface UpdateOrganizationProfileRequest {
   companyName: string
   abn: string
   industryType: string
+  primaryAward?: AwardValue | null
   contactEmail: string
   phoneNumber?: string | null
   addressLine1: string

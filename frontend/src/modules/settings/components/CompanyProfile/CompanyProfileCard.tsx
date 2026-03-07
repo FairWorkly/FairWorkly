@@ -23,7 +23,6 @@ interface CompanyProfileCardProps {
   isSaveDisabled?: boolean
 }
 
-
 export function CompanyProfileCard({
   title,
   isEditing,
@@ -37,9 +36,7 @@ export function CompanyProfileCard({
   return (
     <ProfileCard>
       <CardHeader>
-        <CardTitle>
-          {title}
-        </CardTitle>
+        <CardTitle>{title}</CardTitle>
 
         {isEditing ? (
           <ButtonContainer>
@@ -70,9 +67,7 @@ export function CompanyProfileCard({
         )}
       </CardHeader>
 
-      <CardContent>
-        {children}
-      </CardContent>
+      <CardContent>{children}</CardContent>
     </ProfileCard>
   )
 }

@@ -132,6 +132,28 @@ public class ValidatePayrollValidatorTests
             .Contain(e => e.PropertyName == "state" && e.ErrorMessage.Contains("must be one of"));
     }
 
+    // ==================== Compliance check toggles ====================
+
+    [Fact]
+    public async Task Validate_AllChecksDisabled_ReturnsError()
+    {
+        var command = CreateValidCommand();
+        command.EnableBaseRateCheck = false;
+        command.EnablePenaltyCheck = false;
+        command.EnableCasualLoadingCheck = false;
+        command.EnableSuperCheck = false;
+
+        var result = await _validator.ValidateAsync(command);
+
+        result.IsValid.Should().BeFalse();
+        result
+            .Errors.Should()
+            .Contain(e =>
+                e.PropertyName == "enableChecks"
+                && e.ErrorMessage == "At least one compliance check must be enabled"
+            );
+    }
+
     // ==================== Happy Path ====================
 
     [Fact]

@@ -50,5 +50,15 @@ public class ValidatePayrollValidator : AbstractValidator<ValidatePayrollCommand
             .When(x => !string.IsNullOrEmpty(x.State))
             .WithMessage($"State must be one of: {string.Join(", ", ValidStates)}")
             .OverridePropertyName("state");
+
+        RuleFor(x => x)
+            .Must(x =>
+                x.EnableBaseRateCheck
+                || x.EnablePenaltyCheck
+                || x.EnableCasualLoadingCheck
+                || x.EnableSuperCheck
+            )
+            .WithMessage("At least one compliance check must be enabled")
+            .OverridePropertyName("enableChecks");
     }
 }

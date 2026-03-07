@@ -59,16 +59,12 @@ export const MessageInput = ({
       <StyledTextField
         placeholder="Ask a Fair Work question..."
         value={value}
-        onChange={(event) => setValue(event.target.value)}
+        onChange={event => setValue(event.target.value)}
         size="small"
         disabled={disabled}
         slotProps={{ htmlInput: { 'aria-label': 'Message' } }}
       />
-      <SendButton
-        type="submit"
-        aria-label="Send message"
-        disabled={disabled}
-      >
+      <SendButton type="submit" aria-label="Send message" disabled={disabled}>
         <SendRounded fontSize="small" />
       </SendButton>
     </InputRow>

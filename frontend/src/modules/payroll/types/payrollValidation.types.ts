@@ -93,3 +93,20 @@ export interface PayrollServerError {
   detail?: string
   instance?: string
 }
+
+// --- AI Explain types ---
+
+export interface ExplainSource {
+  source: string
+  page: number | null
+  content: string | null
+}
+
+export interface ExplainResult {
+  issueId: string
+  detailedExplanation: string | null
+  recommendation: string | null
+  model: string | null
+  sources: ExplainSource[]
+  warning: string | null
+}

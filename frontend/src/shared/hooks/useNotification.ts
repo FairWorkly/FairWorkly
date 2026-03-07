@@ -10,9 +10,12 @@ interface Notification {
 export function useNotification() {
   const [notification, setNotification] = useState<Notification | null>(null)
 
-  const notify = useCallback((message: string, severity: Severity = 'success') => {
-    setNotification({ message, severity })
-  }, [])
+  const notify = useCallback(
+    (message: string, severity: Severity = 'success') => {
+      setNotification({ message, severity })
+    },
+    []
+  )
 
   const clear = useCallback(() => {
     setNotification(null)

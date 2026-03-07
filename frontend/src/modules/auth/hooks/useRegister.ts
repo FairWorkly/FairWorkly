@@ -18,8 +18,11 @@ export function useRegister() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  const { mutate, isPending, error } = useApiMutation<AuthResult, SignupFormData>({
-    mutationFn: async (values) => {
+  const { mutate, isPending, error } = useApiMutation<
+    AuthResult,
+    SignupFormData
+  >({
+    mutationFn: async values => {
       const response = await authApi.register({
         companyName: values.companyName,
         abn: values.abn,

@@ -8,7 +8,7 @@ import {
   FormField,
 } from './CompanyProfile.styles'
 import type { BusinessInfo, ValidationErrors } from '../../types/companyProfile.types'
-import { INDUSTRY_TYPES } from '../../types/companyProfile.types'
+import { INDUSTRY_TYPES, AWARD_TYPES, suggestAwardForIndustry } from '../../types/companyProfile.types'
 import { useEditableCard } from '../../hooks/useEditableCard'
 
 interface BusinessInfoCardProps {
@@ -37,11 +37,31 @@ function validate(formData: BusinessInfo): ValidationErrors {
   return errors
 }
 
-export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInfoCardProps) {
+export function BusinessInfoCard({
+  data,
+  onSave,
+  isSaving = false,
+}: BusinessInfoCardProps) {
   const {
-    isEditing, formData, errors, hasErrors,
-    handleEdit, handleSave, handleCancel, handleChange,
+    isEditing,
+    formData,
+    errors,
+    hasErrors,
+    handleEdit,
+    handleSave,
+    handleCancel,
+    handleChange,
   } = useEditableCard({ data, onSave, validate })
+
+  function handleIndustryChange(value: string) {
+    handleChange('industryType', value)
+    const suggested = suggestAwardForIndustry(value)
+    if (suggested) {
+      handleChange('primaryAward', suggested)
+    }
+  }
+
+  const primaryAwardLabel = AWARD_TYPES.find(a => a.value === data.primaryAward)?.label ?? null
 
   return (
     <CompanyProfileCard
@@ -61,14 +81,12 @@ export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInf
               fullWidth
               size="small"
               value={formData.companyName}
-              onChange={(e) => handleChange('companyName', e.target.value)}
+              onChange={e => handleChange('companyName', e.target.value)}
               error={!!errors.companyName}
               placeholder="Enter company name"
               disabled={isSaving}
             />
-            {errors.companyName && (
-              <ErrorText>{errors.companyName}</ErrorText>
-            )}
+            {errors.companyName && <ErrorText>{errors.companyName}</ErrorText>}
           </FormField>
         ) : (
           <FieldValue>{data.companyName}</FieldValue>
@@ -83,16 +101,14 @@ export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInf
               fullWidth
               size="small"
               value={formData.abn}
-              onChange={(e) => handleChange('abn', e.target.value)}
+              onChange={e => handleChange('abn', e.target.value)}
               error={!!errors.abn}
               placeholder="12345678901"
               helperText="Must be 11 digits"
               disabled={isSaving}
               slotProps={{ htmlInput: { maxLength: 11, inputMode: 'numeric' } }}
             />
-            {errors.abn && (
-              <ErrorText>{errors.abn}</ErrorText>
-            )}
+            {errors.abn && <ErrorText>{errors.abn}</ErrorText>}
           </FormField>
         ) : (
           <FieldValue>{data.abn}</FieldValue>
@@ -108,11 +124,11 @@ export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInf
               select
               size="small"
               value={formData.industryType}
-              onChange={(e) => handleChange('industryType', e.target.value)}
+              onChange={(e) => handleIndustryChange(e.target.value)}
               error={!!errors.industryType}
               disabled={isSaving}
             >
-              {INDUSTRY_TYPES.map((type) => (
+              {INDUSTRY_TYPES.map(type => (
                 <MenuItem key={type} value={type}>
                   {type}
                 </MenuItem>
@@ -124,6 +140,34 @@ export function BusinessInfoCard({ data, onSave, isSaving = false }: BusinessInf
           </FormField>
         ) : (
           <FieldValue>{data.industryType}</FieldValue>
+        )}
+      </FormRow>
+
+      <FormRow>
+        <FieldLabel>Applicable Award</FieldLabel>
+        {isEditing ? (
+          <FormField>
+            <TextField
+              fullWidth
+              select
+              size="small"
+              value={formData.primaryAward ?? ''}
+              onChange={(e) => {
+                const match = AWARD_TYPES.find(a => a.value === e.target.value)
+                handleChange('primaryAward', match ? match.value : null)
+              }}
+              disabled={isSaving}
+            >
+              <MenuItem value=""><em>Not specified</em></MenuItem>
+              {AWARD_TYPES.map((award) => (
+                <MenuItem key={award.value} value={award.value}>
+                  {award.label} ({award.maCode})
+                </MenuItem>
+              ))}
+            </TextField>
+          </FormField>
+        ) : (
+          <FieldValue>{primaryAwardLabel ?? 'Not specified'}</FieldValue>
         )}
       </FormRow>
     </CompanyProfileCard>

@@ -1,1 +1,31 @@
-cd frontend && npx lint-staged
+#!/bin/bash
+set -e
+
+# ── Frontend: lint-staged ──
+# subshell ensures cd does not affect subsequent script working directory
+(cd frontend && npx lint-staged)
+
+# ── Backend: CSharpier ──
+STAGED_CS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' || true)
+if [ -n "$STAGED_CS" ]; then
+    FILES=()
+    for file in $STAGED_CS; do
+        relative="${file#backend/}"
+        if [ "$relative" != "$file" ]; then
+            FILES+=("$relative")
+        fi
+    done
+
+    if [ ${#FILES[@]} -gt 0 ]; then
+        if ! (cd backend && dotnet csharpier --version) &>/dev/null; then
+            echo "[pre-commit] CSharpier not found. Run: cd backend && dotnet tool restore"
+        elif ! (cd backend && dotnet csharpier format "${FILES[@]}"); then
+            echo "[pre-commit] CSharpier formatting failed."
+            exit 1
+        else
+            for file in $STAGED_CS; do
+                git add "$file"
+            done
+        fi
+    fi
+fi

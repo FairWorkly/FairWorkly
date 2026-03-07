@@ -54,7 +54,8 @@ export const ChatSection = () => {
     const el = scrollRef.current
     if (!el) return
     const threshold = 80
-    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold
+    const isNearBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < threshold
     if (isNearBottom) {
       el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
     }

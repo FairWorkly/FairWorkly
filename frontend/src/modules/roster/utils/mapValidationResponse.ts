@@ -106,7 +106,8 @@ export function mapValidationToComplianceResults(
   const summary: ValidationSummary = {
     employeesCompliant: compliantEmployees,
     totalIssues: complianceIssues.length,
-    criticalIssuesCount: complianceIssues.filter(i => i.severity === 'Error').length,
+    criticalIssuesCount: complianceIssues.filter(i => i.severity === 'Error')
+      .length,
     totalUnderpayment: 'N/A',
     employeesAffected: affectedEmployeeIds.size,
   }
