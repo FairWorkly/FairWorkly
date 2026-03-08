@@ -34,17 +34,33 @@ export function ForgotPasswordModal({
 }: ForgotPasswordModalProps) {
   const [step, setStep] = useState<'email' | 'success'>('email')
   const [email, setEmail] = useState('')
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { mutateAsync, reset: resetMutation } = useForgotPassword()
   const requestVersionRef = useRef(0)
   const wasOpenRef = useRef(open)
 
+  const getErrorMessage = (error: unknown) => {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'message' in error &&
+      typeof error.message === 'string' &&
+      error.message.trim()
+    ) {
+      return error.message
+    }
+
+    return 'Something went wrong.'
+  }
+
   useEffect(() => {
     if (wasOpenRef.current && !open) {
       requestVersionRef.current += 1
       setStep('email')
       setEmail('')
+      setSubmittedEmail(null)
       setErrorMessage(null)
       setIsSubmitting(false)
       resetMutation()
@@ -57,18 +73,21 @@ export function ForgotPasswordModal({
     requestVersionRef.current += 1
     setStep('email')
     setEmail('')
+    setSubmittedEmail(null)
     setErrorMessage(null)
     setIsSubmitting(false)
     resetMutation()
     onClose()
   }
 
-  const submitEmail = async () => {
-    const trimmedEmail = email.trim()
+  const submitEmail = async (nextEmail = email) => {
+    const trimmedEmail = nextEmail.trim()
     if (!trimmedEmail || isSubmitting) return
 
     const requestVersion = requestVersionRef.current + 1
     requestVersionRef.current = requestVersion
+    setEmail(trimmedEmail)
+    setSubmittedEmail(trimmedEmail)
     setErrorMessage(null)
     setIsSubmitting(true)
 
@@ -85,9 +104,7 @@ export function ForgotPasswordModal({
         return
       }
 
-      setErrorMessage(
-        error instanceof Error ? error.message : 'Something went wrong.'
-      )
+      setErrorMessage(getErrorMessage(error))
     } finally {
       if (requestVersionRef.current === requestVersion) {
         setIsSubmitting(false)
@@ -101,7 +118,7 @@ export function ForgotPasswordModal({
   }
 
   const handleResend = () => {
-    void submitEmail()
+    void submitEmail(submittedEmail ?? email)
   }
 
   return (
@@ -130,6 +147,7 @@ export function ForgotPasswordModal({
                 fullWidth
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                disabled={isSubmitting}
               />
 
               {errorMessage && (

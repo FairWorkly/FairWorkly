@@ -21,11 +21,36 @@ import {
   SubmitButton,
 } from '../ui'
 
+const RESET_PASSWORD_TOKEN_STORAGE_KEY = 'reset_password_token'
+
+function readStoredResetToken() {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  return window.sessionStorage.getItem(RESET_PASSWORD_TOKEN_STORAGE_KEY)
+}
+
+function storeResetToken(token: string) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.sessionStorage.setItem(RESET_PASSWORD_TOKEN_STORAGE_KEY, token)
+}
+
+function clearStoredResetToken() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.sessionStorage.removeItem(RESET_PASSWORD_TOKEN_STORAGE_KEY)
+}
+
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const tokenFromUrl = searchParams.get('token')
-  const [token] = useState(tokenFromUrl)
   const resetPasswordMutation = useResetPassword()
 
   const [password, setPassword] = useState('')
@@ -35,18 +60,41 @@ export function ResetPasswordPage() {
 
   useEffect(() => {
     if (tokenFromUrl) {
+      storeResetToken(tokenFromUrl)
       navigate('/reset-password', { replace: true })
     }
   }, [navigate, tokenFromUrl])
 
+  const storedToken = tokenFromUrl ? null : readStoredResetToken()
+  const effectiveToken = tokenFromUrl ?? storedToken
+
   const tokenQuery = useApiQuery({
-    queryKey: ['reset-password-validate', token] as const,
-    queryFn: () => authApi.validateResetPasswordToken(token!),
-    enabled: !!token,
+    queryKey: ['reset-password-validate', effectiveToken] as const,
+    queryFn: () => authApi.validateResetPasswordToken(effectiveToken!),
+    enabled: !!effectiveToken,
     retry: false,
   })
 
-  if (!token) {
+  if (success) {
+    return (
+      <section>
+        <AuthHeader>
+          <AuthTitle>Password Reset</AuthTitle>
+          <AuthSubtitle>
+            Your password has been updated. You can now sign in with your new
+            password.
+          </AuthSubtitle>
+        </AuthHeader>
+        <FormActions>
+          <SubmitButton type="button" onClick={() => navigate('/login')}>
+            Go to Login
+          </SubmitButton>
+        </FormActions>
+      </section>
+    )
+  }
+
+  if (!effectiveToken) {
     return (
       <section>
         <AuthHeader>
@@ -91,25 +139,6 @@ export function ResetPasswordPage() {
     )
   }
 
-  if (success) {
-    return (
-      <section>
-        <AuthHeader>
-          <AuthTitle>Password Reset</AuthTitle>
-          <AuthSubtitle>
-            Your password has been updated. You can now sign in with your new
-            password.
-          </AuthSubtitle>
-        </AuthHeader>
-        <FormActions>
-          <SubmitButton type="button" onClick={() => navigate('/login')}>
-            Go to Login
-          </SubmitButton>
-        </FormActions>
-      </section>
-    )
-  }
-
   const showPasswordPolicyError =
     password !== '' && !isPasswordPolicyValid(password)
   const showConfirmMismatch =
@@ -130,9 +159,10 @@ export function ResetPasswordPage() {
     }
 
     resetPasswordMutation.mutate(
-      { token, password },
+      { token: effectiveToken, password },
       {
         onSuccess: () => {
+          clearStoredResetToken()
           setSuccess(true)
         },
       }
