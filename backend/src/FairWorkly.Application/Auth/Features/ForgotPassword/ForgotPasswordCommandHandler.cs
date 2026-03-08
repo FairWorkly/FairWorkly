@@ -12,6 +12,7 @@ public class ForgotPasswordCommandHandler(
     IUserRepository userRepository,
     ISecretHasher secretHasher,
     IUnitOfWork unitOfWork,
+    IDateTimeProvider dateTimeProvider,
     IConfiguration configuration,
     ILogger<ForgotPasswordCommandHandler> logger
 ) : IRequestHandler<ForgotPasswordCommand, Result<bool>>
@@ -38,7 +39,7 @@ public class ForgotPasswordCommandHandler(
             "AuthSettings:PasswordResetTokenExpiryMinutes",
             30
         );
-        var expiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes);
+        var expiresAt = dateTimeProvider.UtcNow.UtcDateTime.AddMinutes(expiryMinutes);
 
         user.PasswordResetToken = tokenHash;
         user.PasswordResetTokenExpiry = expiresAt;
@@ -49,17 +50,14 @@ public class ForgotPasswordCommandHandler(
         var baseUrl = configuration.GetValue<string>("Frontend:BaseUrl") ?? "http://localhost:5173";
         var normalizedBaseUrl = baseUrl.TrimEnd('/');
         var resetLink = $"{normalizedBaseUrl}/reset-password?token={token}";
-
-        var isDevelopment = string.Equals(
-            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
-            "Development",
-            StringComparison.OrdinalIgnoreCase
-        );
+        var environmentName =
+            configuration["ASPNETCORE_ENVIRONMENT"]
+            ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
         // TODO: Replace with email service integration; avoid logging reset links in production.
-        if (isDevelopment)
+        if (string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase))
         {
-            logger.LogDebug("Password reset link for {Email}: {ResetLink}", email, resetLink);
+            logger.LogInformation("Password reset link for {Email}: {ResetLink}", email, resetLink);
         }
         else
         {

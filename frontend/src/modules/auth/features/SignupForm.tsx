@@ -4,6 +4,10 @@ import MenuItem from '@mui/material/MenuItem'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import type { SignupFormData } from '../types'
 import {
+  PASSWORD_POLICY_HINT,
+  isPasswordPolicyValid,
+} from '../utils/passwordPolicy'
+import {
   AuthFormContainer,
   GoogleButton,
   GoogleIcon,
@@ -53,12 +57,6 @@ function getStrengthText(strength: 'weak' | 'medium' | 'strong' | ''): string {
     default:
       return 'Use 8+ characters with letters, numbers & symbols'
   }
-}
-
-function isPasswordPolicyValid(password: string): boolean {
-  return (
-    password.length >= 8 && /[A-Za-z]/.test(password) && /\d/.test(password)
-  )
 }
 
 export function SignupForm({
@@ -316,9 +314,7 @@ export function SignupForm({
                 onChange={e => setPassword(e.target.value)}
                 error={showPasswordPolicyError}
                 helperText={
-                  showPasswordPolicyError
-                    ? 'Use at least 8 characters with both letters and numbers'
-                    : ' '
+                  showPasswordPolicyError ? PASSWORD_POLICY_HINT : ' '
                 }
                 autoComplete="new-password"
               />

@@ -1,44 +1,40 @@
 import { useState } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
-import { TextField, Alert, CircularProgress } from '@mui/material'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Alert, CircularProgress, TextField } from '@mui/material'
 import { useApiQuery } from '@/shared/hooks/useApiQuery'
-import { settingsApi } from '@/services/settingsApi'
-import { useAcceptInvitation } from '../hooks/useAcceptInvitation'
+import { authApi } from '@/services/authApi'
+import { useResetPassword } from '../hooks'
 import {
   PASSWORD_POLICY_HINT,
   isPasswordPolicyValid,
 } from '../utils/passwordPolicy'
 import {
-  AuthHeader,
-  AuthTitle,
-  AuthSubtitle,
+  AuthErrorAlert,
   AuthFieldset,
   AuthFormContainer,
-  AuthErrorAlert,
-  SubmitButton,
+  AuthHeader,
+  AuthSubtitle,
+  AuthTitle,
   FormActions,
-  LoadingCenter,
   InputHint,
+  LoadingCenter,
+  SubmitButton,
 } from '../ui'
 
-export function AcceptInvitePage() {
+export function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const token = searchParams.get('token')
-  const acceptMutation = useAcceptInvitation()
+  const resetPasswordMutation = useResetPassword()
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [validationError, setValidationError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<{
-    email: string
-    fullName: string
-  } | null>(null)
+  const [success, setSuccess] = useState(false)
 
-  // Pre-validate token on page load
   const tokenQuery = useApiQuery({
-    queryKey: ['invitation-validate', token] as const,
-    queryFn: () => settingsApi.validateInvitationToken(token!),
+    queryKey: ['reset-password-validate', token] as const,
+    queryFn: () => authApi.validateResetPasswordToken(token!),
     enabled: !!token,
     retry: false,
   })
@@ -47,11 +43,10 @@ export function AcceptInvitePage() {
     return (
       <section>
         <AuthHeader>
-          <AuthTitle>Invalid Invitation</AuthTitle>
+          <AuthTitle>Invalid Reset Link</AuthTitle>
         </AuthHeader>
         <Alert severity="error">
-          No invitation token found. Please check the link you received or ask
-          your admin to resend the invitation.
+          No password reset token was found. Please request a new reset link.
         </Alert>
       </section>
     )
@@ -61,7 +56,7 @@ export function AcceptInvitePage() {
     return (
       <section>
         <AuthHeader>
-          <AuthTitle>Verifying Invitation...</AuthTitle>
+          <AuthTitle>Verifying Reset Link...</AuthTitle>
         </AuthHeader>
         <LoadingCenter>
           <CircularProgress />
@@ -74,12 +69,17 @@ export function AcceptInvitePage() {
     return (
       <section>
         <AuthHeader>
-          <AuthTitle>Invalid Invitation</AuthTitle>
+          <AuthTitle>Invalid Reset Link</AuthTitle>
         </AuthHeader>
         <Alert severity="error">
           {tokenQuery.error.message ||
-            'This invitation link is invalid or has expired.'}
+            'This password reset link is invalid or has expired.'}
         </Alert>
+        <FormActions>
+          <SubmitButton type="button" onClick={() => navigate('/login')}>
+            Back to Login
+          </SubmitButton>
+        </FormActions>
       </section>
     )
   }
@@ -88,10 +88,10 @@ export function AcceptInvitePage() {
     return (
       <section>
         <AuthHeader>
-          <AuthTitle>Welcome, {success.fullName}!</AuthTitle>
+          <AuthTitle>Password Reset</AuthTitle>
           <AuthSubtitle>
-            Your account has been set up successfully. You can now sign in with
-            your email.
+            Your password has been updated. You can now sign in with your new
+            password.
           </AuthSubtitle>
         </AuthHeader>
         <FormActions>
@@ -103,6 +103,11 @@ export function AcceptInvitePage() {
     )
   }
 
+  const showPasswordPolicyError =
+    password !== '' && !isPasswordPolicyValid(password)
+  const showConfirmMismatch =
+    confirmPassword !== '' && confirmPassword !== password
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setValidationError(null)
@@ -111,60 +116,51 @@ export function AcceptInvitePage() {
       setValidationError(PASSWORD_POLICY_HINT)
       return
     }
+
     if (password !== confirmPassword) {
       setValidationError('Passwords do not match.')
       return
     }
 
-    acceptMutation.mutate(
+    resetPasswordMutation.mutate(
       { token, password },
       {
-        onSuccess: data => {
-          setSuccess({ email: data.email, fullName: data.fullName })
+        onSuccess: () => {
+          setSuccess(true)
         },
       }
     )
   }
 
-  const invitee = tokenQuery.data
-
   return (
     <section>
       <AuthHeader>
-        <AuthTitle>Set Your Password</AuthTitle>
-        <AuthSubtitle>
-          {invitee?.fullName
-            ? `Hi ${invitee.fullName}, create a password to complete your account setup.`
-            : 'Create a password to complete your account setup.'}
-        </AuthSubtitle>
+        <AuthTitle>Reset Your Password</AuthTitle>
+        <AuthSubtitle>Create a new password for your account.</AuthSubtitle>
       </AuthHeader>
 
       {validationError && (
         <AuthErrorAlert severity="error">{validationError}</AuthErrorAlert>
       )}
-      {acceptMutation.error && (
+      {resetPasswordMutation.error && (
         <AuthErrorAlert severity="error">
-          {acceptMutation.error.message || 'Something went wrong.'}
+          {resetPasswordMutation.error.message || 'Something went wrong.'}
         </AuthErrorAlert>
       )}
 
       <AuthFormContainer onSubmit={handleSubmit}>
-        <AuthFieldset disabled={acceptMutation.isPending}>
+        <AuthFieldset disabled={resetPasswordMutation.isPending}>
           <div>
             <TextField
-              label="Password"
+              label="New Password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               fullWidth
               required
               autoComplete="new-password"
-              error={password !== '' && !isPasswordPolicyValid(password)}
-              helperText={
-                password !== '' && !isPasswordPolicyValid(password)
-                  ? PASSWORD_POLICY_HINT
-                  : ' '
-              }
+              error={showPasswordPolicyError}
+              helperText={showPasswordPolicyError ? PASSWORD_POLICY_HINT : ' '}
             />
             <InputHint variant="caption">{PASSWORD_POLICY_HINT}</InputHint>
           </div>
@@ -176,21 +172,20 @@ export function AcceptInvitePage() {
             fullWidth
             required
             autoComplete="new-password"
-            error={confirmPassword !== '' && confirmPassword !== password}
-            helperText={
-              confirmPassword !== '' && confirmPassword !== password
-                ? 'Passwords do not match.'
-                : ' '
-            }
+            error={showConfirmMismatch}
+            helperText={showConfirmMismatch ? 'Passwords do not match.' : ' '}
           />
           <FormActions>
-            <SubmitButton type="submit" disabled={acceptMutation.isPending}>
-              {acceptMutation.isPending && (
+            <SubmitButton
+              type="submit"
+              disabled={resetPasswordMutation.isPending}
+            >
+              {resetPasswordMutation.isPending && (
                 <CircularProgress size={18} color="inherit" />
               )}
-              {acceptMutation.isPending
-                ? 'Setting up...'
-                : 'Set Password & Join'}
+              {resetPasswordMutation.isPending
+                ? 'Resetting...'
+                : 'Reset Password'}
             </SubmitButton>
           </FormActions>
         </AuthFieldset>

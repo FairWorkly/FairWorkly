@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -12,6 +13,7 @@ namespace FairWorkly.Infrastructure.Identity;
 
 public class TokenService : ITokenService
 {
+    public const string AuthVersionClaimType = "authVersion";
     private readonly IConfiguration _configuration;
     private readonly IDateTimeProvider _dateTimeProvider;
 
@@ -50,6 +52,7 @@ public class TokenService : ITokenService
             // --- decision fields ---
             new Claim("orgId", user.OrganizationId.ToString()), // [Decision 1] Tenant isolation
             new Claim("role", user.Role.ToString()), // [Decision 2] Role as string
+            new Claim(AuthVersionClaimType, GetAuthVersion(user)),
         };
 
         // [Decision 3] If EmployeeId exists, include it
@@ -80,5 +83,11 @@ public class TokenService : ITokenService
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomNumber);
         return Convert.ToBase64String(randomNumber);
+    }
+
+    public static string GetAuthVersion(User user)
+    {
+        var effectiveTimestamp = user.UpdatedAt ?? user.CreatedAt;
+        return effectiveTimestamp.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
     }
 }

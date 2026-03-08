@@ -6,6 +6,8 @@ using FairWorkly.Application.Auth.Features.Logout;
 using FairWorkly.Application.Auth.Features.Me;
 using FairWorkly.Application.Auth.Features.Refresh;
 using FairWorkly.Application.Auth.Features.Register;
+using FairWorkly.Application.Auth.Features.ResetPassword;
+using FairWorkly.Application.Auth.Features.ValidateResetPasswordToken;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Result;
 using MediatR;
@@ -89,6 +91,28 @@ public class AuthController(IMediator mediator) : BaseApiController
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
     {
         var result = await mediator.Send(command);
+        return RespondResult(result);
+    }
+
+    [HttpGet("reset-password/validate")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ValidateResetPasswordToken(
+        [FromQuery] ValidateResetPasswordTokenQuery query,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await mediator.Send(query, cancellationToken);
+        return RespondResult(result);
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword(
+        [FromBody] ResetPasswordCommand command,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await mediator.Send(command, cancellationToken);
         return RespondResult(result);
     }
 
