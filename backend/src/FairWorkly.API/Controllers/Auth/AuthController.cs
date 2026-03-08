@@ -94,10 +94,10 @@ public class AuthController(IMediator mediator) : BaseApiController
         return RespondResult(result);
     }
 
-    [HttpGet("reset-password/validate")]
+    [HttpPost("reset-password/validate")]
     [AllowAnonymous]
     public async Task<IActionResult> ValidateResetPasswordToken(
-        [FromQuery] ValidateResetPasswordTokenQuery query,
+        [FromBody] ValidateResetPasswordTokenQuery query,
         CancellationToken cancellationToken
     )
     {

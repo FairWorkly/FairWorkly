@@ -69,8 +69,9 @@ public class ForgotResetPasswordTests : AuthTestsBase
             DateTime.UtcNow.AddMinutes(30)
         );
 
-        var response = await Client.GetAsync(
-            $"/api/auth/reset-password/validate?token={Uri.EscapeDataString(plainToken)}"
+        var response = await Client.PostAsJsonAsync(
+            "/api/auth/reset-password/validate",
+            new { Token = plainToken }
         );
 
         response.EnsureSuccessStatusCode();
@@ -91,8 +92,9 @@ public class ForgotResetPasswordTests : AuthTestsBase
             DateTime.UtcNow.AddMinutes(-5)
         );
 
-        var response = await Client.GetAsync(
-            $"/api/auth/reset-password/validate?token={Uri.EscapeDataString(plainToken)}"
+        var response = await Client.PostAsJsonAsync(
+            "/api/auth/reset-password/validate",
+            new { Token = plainToken }
         );
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);

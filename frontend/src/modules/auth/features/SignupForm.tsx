@@ -55,7 +55,7 @@ function getStrengthText(strength: 'weak' | 'medium' | 'strong' | ''): string {
     case 'strong':
       return 'Strong password!'
     default:
-      return 'Use 8+ characters with letters, numbers & symbols'
+      return PASSWORD_POLICY_HINT
   }
 }
 

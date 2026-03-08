@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Alert, CircularProgress, TextField } from '@mui/material'
 import { useApiQuery } from '@/shared/hooks/useApiQuery'
@@ -24,13 +24,20 @@ import {
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const token = searchParams.get('token')
+  const tokenFromUrl = searchParams.get('token')
+  const [token] = useState(tokenFromUrl)
   const resetPasswordMutation = useResetPassword()
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [validationError, setValidationError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    if (tokenFromUrl) {
+      navigate('/reset-password', { replace: true })
+    }
+  }, [navigate, tokenFromUrl])
 
   const tokenQuery = useApiQuery({
     queryKey: ['reset-password-validate', token] as const,

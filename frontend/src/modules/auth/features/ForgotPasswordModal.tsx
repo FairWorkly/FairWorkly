@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import TextField from '@mui/material/TextField'
 import Dialog from '@mui/material/Dialog'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -34,33 +34,74 @@ export function ForgotPasswordModal({
 }: ForgotPasswordModalProps) {
   const [step, setStep] = useState<'email' | 'success'>('email')
   const [email, setEmail] = useState('')
-  const forgotPasswordMutation = useForgotPassword()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { mutateAsync, reset: resetMutation } = useForgotPassword()
+  const requestVersionRef = useRef(0)
+  const wasOpenRef = useRef(open)
+
+  useEffect(() => {
+    if (wasOpenRef.current && !open) {
+      requestVersionRef.current += 1
+      setStep('email')
+      setEmail('')
+      setErrorMessage(null)
+      setIsSubmitting(false)
+      resetMutation()
+    }
+
+    wasOpenRef.current = open
+  }, [open, resetMutation])
 
   const handleClose = () => {
+    requestVersionRef.current += 1
     setStep('email')
     setEmail('')
-    forgotPasswordMutation.reset()
+    setErrorMessage(null)
+    setIsSubmitting(false)
+    resetMutation()
     onClose()
   }
 
-  const submitEmail = () => {
+  const submitEmail = async () => {
     const trimmedEmail = email.trim()
-    if (!trimmedEmail) return
+    if (!trimmedEmail || isSubmitting) return
 
-    forgotPasswordMutation.mutate(trimmedEmail, {
-      onSuccess: () => {
-        setStep('success')
-      },
-    })
+    const requestVersion = requestVersionRef.current + 1
+    requestVersionRef.current = requestVersion
+    setErrorMessage(null)
+    setIsSubmitting(true)
+
+    try {
+      await mutateAsync(trimmedEmail)
+
+      if (requestVersionRef.current !== requestVersion) {
+        return
+      }
+
+      setStep('success')
+    } catch (error) {
+      if (requestVersionRef.current !== requestVersion) {
+        return
+      }
+
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Something went wrong.'
+      )
+    } finally {
+      if (requestVersionRef.current === requestVersion) {
+        setIsSubmitting(false)
+      }
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    submitEmail()
+    void submitEmail()
   }
 
   const handleResend = () => {
-    submitEmail()
+    void submitEmail()
   }
 
   return (
@@ -91,25 +132,20 @@ export function ForgotPasswordModal({
                 onChange={e => setEmail(e.target.value)}
               />
 
-              {forgotPasswordMutation.error && (
+              {errorMessage && (
                 <AuthErrorAlert severity="error" sx={{ mt: 2 }}>
-                  {forgotPasswordMutation.error.message}
+                  {errorMessage}
                 </AuthErrorAlert>
               )}
 
               <FormActions>
-                <SubmitButton
-                  type="submit"
-                  disabled={forgotPasswordMutation.isPending}
-                >
-                  {forgotPasswordMutation.isPending ? (
+                <SubmitButton type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
                     <CircularProgress size={18} color="inherit" />
                   ) : (
                     <SendIcon fontSize="small" />
                   )}
-                  {forgotPasswordMutation.isPending
-                    ? 'Sending...'
-                    : 'Send Reset Link'}
+                  {isSubmitting ? 'Sending...' : 'Send Reset Link'}
                 </SubmitButton>
               </FormActions>
             </form>
@@ -130,9 +166,9 @@ export function ForgotPasswordModal({
               Check your email for reset instructions
             </ModalSubtitle>
 
-            {forgotPasswordMutation.error && (
+            {errorMessage && (
               <AuthErrorAlert severity="error" sx={{ mb: 2 }}>
-                {forgotPasswordMutation.error.message}
+                {errorMessage}
               </AuthErrorAlert>
             )}
 
@@ -145,9 +181,9 @@ export function ForgotPasswordModal({
               <FormLink
                 type="button"
                 onClick={handleResend}
-                disabled={forgotPasswordMutation.isPending}
+                disabled={isSubmitting}
               >
-                {forgotPasswordMutation.isPending ? 'Resending...' : 'Resend'}
+                {isSubmitting ? 'Resending...' : 'Resend'}
               </FormLink>
             </FormTerms>
           </ModalBody>
