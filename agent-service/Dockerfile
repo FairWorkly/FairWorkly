@@ -5,8 +5,9 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
-# Install Poetry — must match the version that generated poetry.lock (2.3.2)
-RUN pip install --no-cache-dir "poetry==2.3.2"
+# Install Poetry — must match the version that generated poetry.lock (2.3.2).
+# poetry-plugin-export is required separately in Poetry 2.x (no longer bundled).
+RUN pip install --no-cache-dir "poetry==2.3.2" poetry-plugin-export
 
 # Copy lock files only — changes here invalidate only the export step
 COPY pyproject.toml poetry.lock ./
