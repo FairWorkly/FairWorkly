@@ -220,6 +220,10 @@ try
 
     app.MapControllers();
 
+    app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
+        .AllowAnonymous()
+        .ExcludeFromDescription();
+
     await app.RunAsync();
 }
 catch (Exception ex)
