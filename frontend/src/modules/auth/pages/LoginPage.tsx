@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useSearchParams, Navigate } from 'react-router-dom'
 import { useAppSelector } from '@/store/hooks'
-import { DEFAULT_ROUTES } from '../hooks/authUtils'
+import { getDefaultRoute } from '../hooks/authUtils'
 import { LoginForm, SignupForm, ForgotPasswordModal } from '../features'
 import type { SignupFormData } from '../types'
 import { useLogin, useRegister } from '../hooks'
@@ -35,8 +35,7 @@ export function LoginPage() {
   const isGoogleLoading = false
 
   if (status === 'authenticated' && user) {
-    const route = DEFAULT_ROUTES[user.role ?? ''] ?? '/fairbot'
-    return <Navigate to={route} replace />
+    return <Navigate to={getDefaultRoute(user.role)} replace />
   }
 
   const handleSignup = (values: SignupFormData) => {
