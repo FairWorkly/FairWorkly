@@ -88,13 +88,17 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$ENV_PREFIX" = "prod" ]; then
-            echo "cluster=${{ vars.ECS_CLUSTER_PROD }}"          >> "$GITHUB_OUTPUT"
-            echo "service=${{ vars.ECS_SERVICE_AGENT_PROD }}"    >> "$GITHUB_OUTPUT"
-            echo "task_def=${{ vars.ECS_TASK_DEF_AGENT_PROD }}"  >> "$GITHUB_OUTPUT"
+            {
+              echo "cluster=${{ vars.ECS_CLUSTER_PROD }}"
+              echo "service=${{ vars.ECS_SERVICE_AGENT_PROD }}"
+              echo "task_def=${{ vars.ECS_TASK_DEF_AGENT_PROD }}"
+            } >> "$GITHUB_OUTPUT"
           else
-            echo "cluster=${{ vars.ECS_CLUSTER_UAT }}"          >> "$GITHUB_OUTPUT"
-            echo "service=${{ vars.ECS_SERVICE_AGENT_UAT }}"    >> "$GITHUB_OUTPUT"
-            echo "task_def=${{ vars.ECS_TASK_DEF_AGENT_UAT }}"  >> "$GITHUB_OUTPUT"
+            {
+              echo "cluster=${{ vars.ECS_CLUSTER_UAT }}"
+              echo "service=${{ vars.ECS_SERVICE_AGENT_UAT }}"
+              echo "task_def=${{ vars.ECS_TASK_DEF_AGENT_UAT }}"
+            } >> "$GITHUB_OUTPUT"
           fi
 
       - name: Download current task definition
