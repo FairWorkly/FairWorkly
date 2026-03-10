@@ -29,8 +29,8 @@ jobs:
           echo "sha=$GITHUB_SHA"
 
       # Tag logic:
-      # main  -> prod-<7sha>
-      # other -> uat-<7sha>
+      # devops/prod -> prod-<7sha>
+      # other       -> uat-<7sha>
       - name: Set image tags
         id: vars
         shell: bash
