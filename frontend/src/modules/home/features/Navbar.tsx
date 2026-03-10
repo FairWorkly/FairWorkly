@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
+import { useAppSelector } from '@/store/hooks'
+import { DEFAULT_ROUTES } from '@/modules/auth/hooks/authUtils'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Menu from '@mui/material/Menu'
@@ -164,6 +166,10 @@ interface NavbarProps {
 }
 
 export function Navbar({ onScrollToSection }: NavbarProps) {
+  const { user, status } = useAppSelector(state => state.auth)
+  const isAuthenticated = status === 'authenticated' && !!user
+  const appRoute = DEFAULT_ROUTES[user?.role ?? ''] ?? '/fairbot'
+
   const [scrolled, setScrolled] = useState(false)
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
   const isMenuOpen = Boolean(menuAnchorEl)
@@ -217,11 +223,20 @@ export function Navbar({ onScrollToSection }: NavbarProps) {
         </NavList>
 
         <NavActions direction="row" spacing={2}>
-          <GhostLink to="/login">Log In</GhostLink>
-          <PrimaryLink to="/login?signup=true">
-            Start Free Trial
-            <ArrowForwardIcon />
-          </PrimaryLink>
+          {isAuthenticated ? (
+            <PrimaryLink to={appRoute}>
+              Go to App
+              <ArrowForwardIcon />
+            </PrimaryLink>
+          ) : (
+            <>
+              <GhostLink to="/login">Log In</GhostLink>
+              <PrimaryLink to="/login?signup=true">
+                Start Free Trial
+                <ArrowForwardIcon />
+              </PrimaryLink>
+            </>
+          )}
           <MobileMenuButton
             aria-label="Open navigation menu"
             aria-controls={isMenuOpen ? 'home-nav-menu' : undefined}

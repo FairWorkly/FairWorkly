@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Navigate } from 'react-router-dom'
+import { useAppSelector } from '@/store/hooks'
+import { DEFAULT_ROUTES } from '../hooks/authUtils'
 import { LoginForm, SignupForm, ForgotPasswordModal } from '../features'
 import type { SignupFormData } from '../types'
 import { useLogin, useRegister } from '../hooks'
@@ -15,6 +17,13 @@ import {
 type TabType = 'login' | 'signup'
 
 export function LoginPage() {
+  const { user, status } = useAppSelector(state => state.auth)
+
+  if (status === 'authenticated' && user) {
+    const route = DEFAULT_ROUTES[user.role ?? ''] ?? '/fairbot'
+    return <Navigate to={route} replace />
+  }
+
   const [searchParams] = useSearchParams()
   const {
     login,
