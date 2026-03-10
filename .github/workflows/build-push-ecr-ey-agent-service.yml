@@ -2,7 +2,7 @@ name: Build and Push Agent Service Image
 
 on:
   push:
-    branches: [ main, devops/eric-ECS-ECR-FARGATE ]
+    branches: [ main, devops/eric-ECS-ECR-FARGATE, devops/prod ]
     paths:
       - "agent-service/**"
       - ".github/workflows/build-push-ecr-ey-agent-service.yml"
@@ -65,6 +65,7 @@ jobs:
             agent-service
 
       - name: Push image
+        id: push
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ vars.ECR_REPO_AGENT }}
@@ -77,3 +78,44 @@ jobs:
           docker push "$IMAGE:$SHORT_SHA"
           docker tag "$IMAGE:$SHORT_SHA" "$IMAGE:$FULL_TAG"
           docker push "$IMAGE:$FULL_TAG"
+
+          echo "image=$IMAGE:$FULL_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Set deploy targets
+        id: targets
+        env:
+          ENV_PREFIX: ${{ steps.vars.outputs.env_prefix }}
+        run: |
+          set -euo pipefail
+          if [ "$ENV_PREFIX" = "prod" ]; then
+            echo "cluster=${{ vars.ECS_CLUSTER_PROD }}"          >> "$GITHUB_OUTPUT"
+            echo "service=${{ vars.ECS_SERVICE_AGENT_PROD }}"    >> "$GITHUB_OUTPUT"
+            echo "task_def=${{ vars.ECS_TASK_DEF_AGENT_PROD }}"  >> "$GITHUB_OUTPUT"
+          else
+            echo "cluster=${{ vars.ECS_CLUSTER_UAT }}"          >> "$GITHUB_OUTPUT"
+            echo "service=${{ vars.ECS_SERVICE_AGENT_UAT }}"    >> "$GITHUB_OUTPUT"
+            echo "task_def=${{ vars.ECS_TASK_DEF_AGENT_UAT }}"  >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ steps.targets.outputs.task_def }} \
+            --query taskDefinition \
+            > task-def.json
+
+      - name: Update task definition with new image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-def.json
+          container-name: ${{ vars.ECS_CONTAINER_AGENT }}
+          image: ${{ steps.push.outputs.image }}
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ steps.targets.outputs.service }}
+          cluster: ${{ steps.targets.outputs.cluster }}
+          wait-for-service-stability: true

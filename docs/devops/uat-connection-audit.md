@@ -124,6 +124,51 @@ Required for cross-domain cookies (`uat.fairworkly.com` → `api.fairworkly.com`
 
 ---
 
+## AWS Infrastructure Snapshot (2026-03-10)
+
+### ECS — cluster: `fairworkly-backend-eric` (ap-southeast-2)
+| Service | Task Def | Status |
+|---------|----------|--------|
+| `fairworkly-backend-eric-service-anr4tnxx` | `:15` | 1/1 running |
+| `fairworkly-agent-service-service-aolozkop` | `:5` | 1/1 running |
+
+### ECR Repositories
+- `fairworkly-backend-eric`, `fairworkly-agent-service` — active
+- `fairworkly-dbmigrate` — exists, no pipeline wired
+- `fairworkly-backend` — unused/old
+
+### RDS
+- `fairworly-database-1.c3i2igo4c9wg.ap-southeast-2.rds.amazonaws.com` (note: typo in name)
+- PostgreSQL 17.6, `db.t3.micro`, 20GB, database: `postgres`
+
+### ALB
+- `fairworkly-backend-alb` (internet-facing, ports 80+443, health check `/health` → port 5680)
+- `fairworkly-agent-alb` (internal)
+
+### Route 53 (fairworkly.com)
+| Record | Target |
+|--------|--------|
+| `api.fairworkly.com` | backend ALB |
+| `api-uat.fairworkly.com` | same backend ALB |
+| `uat.fairworkly.com` | CloudFront `E2DGMZORXWXK2U` |
+| `www.fairworkly.com` | CloudFront `E2DGMZORXWXK2U` |
+| `fairworkly.com` | CloudFront `E2DGMZORXWXK2U` |
+
+### S3 + CloudFront
+- CloudFront `E2DGMZORXWXK2U` → origin: S3 `uat.fairworkly.com`
+- Serves `fairworkly.com`, `www.fairworkly.com`, `uat.fairworkly.com`
+- **No custom error pages configured** → direct URL access to SPA routes returns 403
+
+### Known Gaps
+- No Terraform — all infrastructure is manually provisioned
+- No CI/CD pipelines for ECR push, ECS deploy, or DB migrations
+- `fairworkly-dbmigrate` ECR repo exists but migration pipeline not wired
+- CloudFront SPA routing broken (no 403/404 → index.html custom error pages)
+- `api.fairworkly.com` and `api-uat.fairworkly.com` point to same ALB — no backend env separation
+- `AiSettings__ServiceKey` still set to placeholder value in task def
+
+---
+
 ## Watch Items
 
 - **`UseHttpsRedirection` behind ALB:** `Program.cs:215` has `app.UseHttpsRedirection()`. In ECS, the ALB terminates TLS and forwards HTTP internally. If the backend receives an HTTP request (e.g., ALB health check), this middleware issues a 301 redirect — CORS preflight responses on redirects are dropped by browsers. Monitor ALB health check logs if health checks start failing.
