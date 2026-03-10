@@ -81,7 +81,10 @@ public class RosterIssueConfiguration : IEntityTypeConfiguration<RosterIssue>
         builder.Property(ri => ri.Recommendation).HasMaxLength(1000);
         builder
             .Property(ri => ri.AffectedDates)
-            .HasConversion(v => v.ToStorageString(), v => AffectedDateSet.Parse(v))
+            .HasConversion(
+                v => v.ToStorageString() ?? string.Empty,
+                v => AffectedDateSet.Parse(string.IsNullOrEmpty(v) ? null : v)
+            )
             .HasMaxLength(500);
         builder.Property(ri => ri.ResolutionNotes).HasMaxLength(1000);
         builder.Property(ri => ri.WaiverReason).HasMaxLength(1000);
