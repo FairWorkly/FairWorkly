@@ -26,7 +26,7 @@ jobs:
           set -euo pipefail
 
           SHORT_SHA="${GITHUB_SHA:0:7}"
-          if [ "$GITHUB_REF_NAME" = "main" ] || [ "$GITHUB_REF_NAME" = "devops/prod" ]; then
+          if [ "$GITHUB_REF_NAME" = "devops/prod" ]; then
             ENV_PREFIX="prod"
           else
             ENV_PREFIX="uat"
