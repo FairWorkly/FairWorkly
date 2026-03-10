@@ -18,12 +18,6 @@ type TabType = 'login' | 'signup'
 
 export function LoginPage() {
   const { user, status } = useAppSelector(state => state.auth)
-
-  if (status === 'authenticated' && user) {
-    const route = DEFAULT_ROUTES[user.role ?? ''] ?? '/fairbot'
-    return <Navigate to={route} replace />
-  }
-
   const [searchParams] = useSearchParams()
   const {
     login,
@@ -39,6 +33,11 @@ export function LoginPage() {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
   const isGoogleLoading = false
+
+  if (status === 'authenticated' && user) {
+    const route = DEFAULT_ROUTES[user.role ?? ''] ?? '/fairbot'
+    return <Navigate to={route} replace />
+  }
 
   const handleSignup = (values: SignupFormData) => {
     void register(values)
