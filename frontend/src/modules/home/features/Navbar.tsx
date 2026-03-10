@@ -167,7 +167,6 @@ interface NavbarProps {
 
 export function Navbar({ onScrollToSection }: NavbarProps) {
   const { user, status } = useAppSelector(state => state.auth)
-  const isAuthenticated = status === 'authenticated' && !!user
   const appRoute = getDefaultRoute(user?.role)
 
   const [scrolled, setScrolled] = useState(false)
@@ -223,12 +222,12 @@ export function Navbar({ onScrollToSection }: NavbarProps) {
         </NavList>
 
         <NavActions direction="row" spacing={2}>
-          {isAuthenticated ? (
+          {status === 'authenticated' && user ? (
             <PrimaryLink to={appRoute}>
               Go to App
               <ArrowForwardIcon />
             </PrimaryLink>
-          ) : (
+          ) : status === 'unauthenticated' ? (
             <>
               <GhostLink to="/login">Log In</GhostLink>
               <PrimaryLink to="/login?signup=true">
@@ -236,7 +235,7 @@ export function Navbar({ onScrollToSection }: NavbarProps) {
                 <ArrowForwardIcon />
               </PrimaryLink>
             </>
-          )}
+          ) : null}
           <MobileMenuButton
             aria-label="Open navigation menu"
             aria-controls={isMenuOpen ? 'home-nav-menu' : undefined}
