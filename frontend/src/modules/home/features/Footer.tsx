@@ -1,5 +1,5 @@
 import { Box, Typography, Link as MuiLink, styled, alpha } from '@mui/material'
-import { LinkedIn, Bolt } from '@mui/icons-material'
+import { LinkedIn, VerifiedUser } from '@mui/icons-material'
 
 const PageSection = styled('footer')(({ theme }) => ({
   position: 'relative',
@@ -153,7 +153,7 @@ export function Footer() {
           <BrandColumn>
             <LogoLink href="/">
               <LogoIcon>
-                <Bolt />
+                <VerifiedUser />
               </LogoIcon>
               <LogoText>FairWorkly</LogoText>
             </LogoLink>
