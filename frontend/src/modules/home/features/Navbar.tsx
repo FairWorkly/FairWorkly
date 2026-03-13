@@ -8,7 +8,7 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import IconButton from '@mui/material/IconButton'
 import { alpha } from '@mui/material/styles'
-import BoltIcon from '@mui/icons-material/Bolt'
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import MenuIcon from '@mui/icons-material/Menu'
 import { styled } from '@/styles/styled'
@@ -210,7 +210,7 @@ export function Navbar({ onScrollToSection }: NavbarProps) {
       <NavContainer>
         <LogoLink to="/">
           <LogoIcon>
-            <BoltIcon />
+            <VerifiedUserIcon />
           </LogoIcon>
           <LogoText>FairWorkly</LogoText>
         </LogoLink>
