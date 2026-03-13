@@ -114,7 +114,7 @@ try
                 if (builder.Environment.IsDevelopment())
                 {
                     policy
-                        .WithOrigins("http://localhost:5173")
+                        .WithOrigins("http://localhost:5173", "http://localhost:3000")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials();
@@ -219,6 +219,10 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
+
+    app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
+        .AllowAnonymous()
+        .ExcludeFromDescription();
 
     await app.RunAsync();
 }

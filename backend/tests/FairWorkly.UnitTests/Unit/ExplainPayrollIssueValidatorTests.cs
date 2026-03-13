@@ -64,8 +64,7 @@ public class ExplainPayrollIssueValidatorTests
         result
             .Errors.Should()
             .Contain(e =>
-                e.PropertyName == "CategoryType"
-                && e.ErrorMessage.Contains("must be one of")
+                e.PropertyName == "CategoryType" && e.ErrorMessage.Contains("must be one of")
             );
     }
 

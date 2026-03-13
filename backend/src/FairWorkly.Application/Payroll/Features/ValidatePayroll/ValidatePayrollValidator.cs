@@ -52,8 +52,12 @@ public class ValidatePayrollValidator : AbstractValidator<ValidatePayrollCommand
             .OverridePropertyName("state");
 
         RuleFor(x => x)
-            .Must(x => x.EnableBaseRateCheck || x.EnablePenaltyCheck
-                || x.EnableCasualLoadingCheck || x.EnableSuperCheck)
+            .Must(x =>
+                x.EnableBaseRateCheck
+                || x.EnablePenaltyCheck
+                || x.EnableCasualLoadingCheck
+                || x.EnableSuperCheck
+            )
             .WithMessage("At least one compliance check must be enabled")
             .OverridePropertyName("enableChecks");
     }

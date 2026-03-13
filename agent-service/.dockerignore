@@ -1,0 +1,43 @@
+# # Version control
+# .git
+# .gitignore
+
+# # Python cache / compiled bytecode
+# __pycache__
+# *.py[cod]
+# *.pyo
+# *.pyd
+# .Python
+
+# # Virtual environments (should not be committed, but exclude anyway)
+# .venv
+# venv
+# env
+
+# # Test artifacts
+# .pytest_cache
+# .coverage
+# htmlcov
+# tests/
+
+# # Local env / secrets — never bake these into the image
+# .env
+# .env.*
+# *.env
+
+# # Build / distribution artefacts
+# *.egg-info
+# dist
+# build
+
+# # Editor / OS noise
+# .DS_Store
+# .idea
+# .vscode
+# *.swp
+# *.swo
+
+# # CI / docs / local scripts that have no place in the image
+# .github
+# docs
+# *.md

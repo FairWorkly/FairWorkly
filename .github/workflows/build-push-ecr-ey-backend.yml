@@ -1,0 +1,141 @@
+name: Build and Push Backend Image to Amazon ECR by Eric
+
+on:
+  push:
+    branches:
+      - main
+      - devops/eric-ECS-ECR-FARGATE
+      - devops/prod
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-push-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Optional debug
+      - name: Debug GitHub context
+        run: |
+          echo "repository=$GITHUB_REPOSITORY"
+          echo "ref=$GITHUB_REF"
+          echo "ref_name=$GITHUB_REF_NAME"
+          echo "sha=$GITHUB_SHA"
+
+      # Tag logic:
+      # devops/prod -> prod-<7sha>
+      # other       -> uat-<7sha>
+      - name: Set image tags
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+
+          if [ "$GITHUB_REF_NAME" = "devops/prod" ]; then
+            ENV_PREFIX="prod"
+          else
+            ENV_PREFIX="uat"
+          fi
+
+          FULL_TAG="${ENV_PREFIX}-${SHORT_SHA}"
+
+          {
+            echo "short_sha=$SHORT_SHA"
+            echo "env_prefix=$ENV_PREFIX"
+            echo "full_tag=$FULL_TAG"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-ecs-backend-deploy-oidc
+          aws-region: ${{ vars.AWS_REGION }}
+
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_BACKEND }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+        run: |
+          set -euo pipefail
+          docker build \
+            -f backend/Dockerfile \
+            -t "$REGISTRY/$REPOSITORY:$SHORT_SHA" \
+            .
+
+      - name: Tag and push to ECR
+        id: push
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_BACKEND }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+          FULL_TAG: ${{ steps.vars.outputs.full_tag }}
+        run: |
+          set -euo pipefail
+
+          IMAGE="$REGISTRY/$REPOSITORY"
+
+          # Push base short SHA tag (optional but useful for traceability)
+          docker push "$IMAGE:$SHORT_SHA"
+
+          # Push env-prefixed tag: prod-<7sha> or uat-<7sha>
+          docker tag  "$IMAGE:$SHORT_SHA" "$IMAGE:$FULL_TAG"
+          docker push "$IMAGE:$FULL_TAG"
+
+          echo "image=$IMAGE:$FULL_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Set deploy targets
+        id: targets
+        env:
+          ENV_PREFIX: ${{ steps.vars.outputs.env_prefix }}
+        run: |
+          set -euo pipefail
+          if [ "$ENV_PREFIX" = "prod" ]; then
+            {
+              echo "cluster=${{ vars.ECS_CLUSTER_PROD }}"
+              echo "service=${{ vars.ECS_SERVICE_BACKEND_PROD }}"
+              echo "task_def=${{ vars.ECS_TASK_DEF_BACKEND_PROD }}"
+            } >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "cluster=${{ vars.ECS_CLUSTER_UAT }}"
+              echo "service=${{ vars.ECS_SERVICE_BACKEND_UAT }}"
+              echo "task_def=${{ vars.ECS_TASK_DEF_BACKEND_UAT }}"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ steps.targets.outputs.task_def }} \
+            --query taskDefinition \
+            > task-def.json
+
+      - name: Update task definition with new image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-def.json
+          container-name: ${{ vars.ECS_CONTAINER_BACKEND }}
+          image: ${{ steps.push.outputs.image }}
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ steps.targets.outputs.service }}
+          cluster: ${{ steps.targets.outputs.cluster }}
+          wait-for-service-stability: true

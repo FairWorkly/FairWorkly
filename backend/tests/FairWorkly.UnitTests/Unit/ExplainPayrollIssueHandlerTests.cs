@@ -115,9 +115,7 @@ public class ExplainPayrollIssueHandlerTests
     private void SetupIssueFound(PayrollIssue issue)
     {
         _issueRepoMock
-            .Setup(r =>
-                r.GetByIdAsync(_issueId, _orgId, It.IsAny<CancellationToken>())
-            )
+            .Setup(r => r.GetByIdAsync(_issueId, _orgId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(issue);
     }
 
@@ -139,9 +137,7 @@ public class ExplainPayrollIssueHandlerTests
     {
         SetupUserWithOrg();
         _issueRepoMock
-            .Setup(r =>
-                r.GetByIdAsync(_issueId, _orgId, It.IsAny<CancellationToken>())
-            )
+            .Setup(r => r.GetByIdAsync(_issueId, _orgId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((PayrollIssue?)null);
         var command = CreateValidCommand(_issueId);
 
@@ -162,7 +158,8 @@ public class ExplainPayrollIssueHandlerTests
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Code.Should().Be(200);
-        result.Value!.Warning.Should()
+        result
+            .Value!.Warning.Should()
             .Be("Negative Ordinary Pay detected. Skipping compliance check.");
         result.Value.DetailedExplanation.Should().BeNull();
         result.Value.Recommendation.Should().BeNull();
@@ -223,10 +220,7 @@ public class ExplainPayrollIssueHandlerTests
 
         issue.DetailedExplanation.Should().Be("Saturday hours must be paid at 125%.");
         issue.Recommendation.Should().Be("Correct the Saturday rate to $33.95/hr.");
-        _unitOfWorkMock.Verify(
-            u => u.SaveChangesAsync(It.IsAny<CancellationToken>()),
-            Times.Once
-        );
+        _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -278,10 +272,7 @@ public class ExplainPayrollIssueHandlerTests
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Code.Should().Be(503);
-        _unitOfWorkMock.Verify(
-            u => u.SaveChangesAsync(It.IsAny<CancellationToken>()),
-            Times.Never
-        );
+        _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -299,7 +290,12 @@ public class ExplainPayrollIssueHandlerTests
             .ReturnsAsync(
                 new ApiResponse<AgentExplainResponse>(
                     new HttpResponseMessage(HttpStatusCode.OK),
-                    new AgentExplainResponse { Code = 500, Msg = "error", Data = null },
+                    new AgentExplainResponse
+                    {
+                        Code = 500,
+                        Msg = "error",
+                        Data = null,
+                    },
                     new RefitSettings()
                 )
             );
@@ -325,7 +321,12 @@ public class ExplainPayrollIssueHandlerTests
             .ReturnsAsync(
                 new ApiResponse<AgentExplainResponse>(
                     new HttpResponseMessage(HttpStatusCode.OK),
-                    new AgentExplainResponse { Code = 200, Msg = "OK", Data = null },
+                    new AgentExplainResponse
+                    {
+                        Code = 200,
+                        Msg = "OK",
+                        Data = null,
+                    },
                     new RefitSettings()
                 )
             );

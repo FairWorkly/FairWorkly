@@ -13,8 +13,6 @@
 .codex/
 .gemini/
 CLAUDE.md
-GEMINI.md
-AGENTS.md
 .playwright-mcp/
 
 # Visual Studio (Backend)
@@ -40,7 +38,6 @@ logs/
 
 # Database and Logs
 *.db
-*.lock
 *.log
 
 # .NET Compiled Files
@@ -81,7 +78,6 @@ __pycache__/
 agent-service/.env
 
 # Backend sensitive config (use .example files as templates)
-backend/src/FairWorkly.API/appsettings.json
 backend/src/FairWorkly.API/appsettings.Development.json
 backend/tests/FairWorkly.UnitTests/appsettings.json
 backend/tests/FairWorkly.IntegrationTests/appsettings.json
@@ -107,3 +103,6 @@ aux
 
 # Local dev runner artifacts
 .dev/
+
+# DevOps private notes
+docs/devops/

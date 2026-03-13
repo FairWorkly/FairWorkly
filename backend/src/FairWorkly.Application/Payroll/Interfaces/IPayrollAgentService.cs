@@ -18,5 +18,6 @@ public interface IPayrollAgentService
     [Post("/api/agent/payroll/explain")]
     Task<ApiResponse<AgentExplainResponse>> ExplainIssueAsync(
         [Body] PayrollExplainRequest request,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

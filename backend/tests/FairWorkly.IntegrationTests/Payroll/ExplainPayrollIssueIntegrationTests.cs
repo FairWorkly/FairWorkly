@@ -28,8 +28,11 @@ public class ExplainPayrollIssueIntegrationTests : IntegrationTestBase
     // ═══════════════════════════════════════════════════════════════
 
     private class StubPayrollAgentService(
-        Func<PayrollExplainRequest, CancellationToken, Task<ApiResponse<AgentExplainResponse>>>
-            handler
+        Func<
+            PayrollExplainRequest,
+            CancellationToken,
+            Task<ApiResponse<AgentExplainResponse>>
+        > handler
     ) : IPayrollAgentService
     {
         public Task<ApiResponse<AgentExplainResponse>> ExplainIssueAsync(
@@ -51,10 +54,8 @@ public class ExplainPayrollIssueIntegrationTests : IntegrationTestBase
                             Data = new AgentExplainData
                             {
                                 Type = "payroll_explain",
-                                DetailedExplanation =
-                                    "Saturday hours must be paid at 125%.",
-                                Recommendation =
-                                    "Correct the Saturday rate to $33.95/hr.",
+                                DetailedExplanation = "Saturday hours must be paid at 125%.",
+                                Recommendation = "Correct the Saturday rate to $33.95/hr.",
                                 Model = "gpt-4o-mini",
                                 Sources =
                                 [
@@ -101,10 +102,7 @@ public class ExplainPayrollIssueIntegrationTests : IntegrationTestBase
                 });
             })
             .CreateClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            "Bearer",
-            token
-        );
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return client;
     }
 
@@ -226,7 +224,10 @@ public class ExplainPayrollIssueIntegrationTests : IntegrationTestBase
         var issueId = await SeedTestIssueAsync();
         var client = await CreateClientWithStub(CreateSuccessStub());
 
-        var response = await client.PostAsJsonAsync("/api/payroll/explain", CreateRequestBody(issueId));
+        var response = await client.PostAsJsonAsync(
+            "/api/payroll/explain",
+            CreateRequestBody(issueId)
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var json = ParseJson(await response.Content.ReadAsStringAsync());
@@ -273,7 +274,10 @@ public class ExplainPayrollIssueIntegrationTests : IntegrationTestBase
         var issueId = await SeedTestIssueAsync();
         var client = await CreateClientWithStub(CreateFailureStub());
 
-        var response = await client.PostAsJsonAsync("/api/payroll/explain", CreateRequestBody(issueId));
+        var response = await client.PostAsJsonAsync(
+            "/api/payroll/explain",
+            CreateRequestBody(issueId)
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
         var json = ParseJson(await response.Content.ReadAsStringAsync());
@@ -286,7 +290,10 @@ public class ExplainPayrollIssueIntegrationTests : IntegrationTestBase
         var issueId = await SeedTestIssueAsync();
         var client = await CreateClientWithStub(CreateSuccessStub());
 
-        var response = await client.PostAsJsonAsync("/api/payroll/explain", CreateRequestBody(issueId));
+        var response = await client.PostAsJsonAsync(
+            "/api/payroll/explain",
+            CreateRequestBody(issueId)
+        );
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Verify DB persistence
