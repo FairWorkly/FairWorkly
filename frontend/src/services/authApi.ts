@@ -93,10 +93,9 @@ export const authApi = {
    * Validate a password reset token before showing the reset form.
    */
   validateResetPasswordToken(token: string): Promise<boolean> {
-    return baseApi.post<boolean, { token: string }>(
-      '/auth/reset-password/validate',
-      { token }
-    )
+    return baseApi.get<boolean>('/auth/reset-password/validate', {
+      params: { token },
+    })
   },
 
   /**

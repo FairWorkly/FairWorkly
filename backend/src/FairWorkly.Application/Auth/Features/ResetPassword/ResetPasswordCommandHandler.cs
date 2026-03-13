@@ -43,6 +43,7 @@ public class ResetPasswordCommandHandler(
         var rowsAffected = await userRepository.ResetPasswordAtomicAsync(
             tokenHash,
             passwordHash,
+            Guid.NewGuid(),
             now,
             cancellationToken
         );

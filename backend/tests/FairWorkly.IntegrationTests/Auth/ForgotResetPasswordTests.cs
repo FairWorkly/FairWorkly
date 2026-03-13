@@ -69,9 +69,8 @@ public class ForgotResetPasswordTests : AuthTestsBase
             DateTime.UtcNow.AddMinutes(30)
         );
 
-        var response = await Client.PostAsJsonAsync(
-            "/api/auth/reset-password/validate",
-            new { Token = plainToken }
+        var response = await Client.GetAsync(
+            $"/api/auth/reset-password/validate?token={Uri.EscapeDataString(plainToken)}"
         );
 
         response.EnsureSuccessStatusCode();
@@ -92,15 +91,52 @@ public class ForgotResetPasswordTests : AuthTestsBase
             DateTime.UtcNow.AddMinutes(-5)
         );
 
-        var response = await Client.PostAsJsonAsync(
-            "/api/auth/reset-password/validate",
-            new { Token = plainToken }
+        var response = await Client.GetAsync(
+            $"/api/auth/reset-password/validate?token={Uri.EscapeDataString(plainToken)}"
         );
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
 
         var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
         Assert.Contains("expired", json.GetProperty("msg").GetString()!.ToLowerInvariant());
+    }
+
+    [Fact]
+    public async Task ResetPassword_ShouldInvalidateExistingAccessToken()
+    {
+        var email = $"stamp_{Guid.NewGuid()}@example.com";
+        var oldPassword = "OldPassword123";
+        var newPassword = "NewPassword456";
+        var plainToken = $"reset-stamp-{Guid.NewGuid()}";
+
+        await CreateUserAsync(email, oldPassword, plainToken, DateTime.UtcNow.AddMinutes(30));
+
+        // Log in to obtain a valid access token before the reset
+        var loginResponse = await Client.PostAsJsonAsync(
+            "/api/auth/login",
+            new { Email = email, Password = oldPassword }
+        );
+        loginResponse.EnsureSuccessStatusCode();
+        var loginJson = JsonDocument
+            .Parse(await loginResponse.Content.ReadAsStringAsync())
+            .RootElement;
+        var accessToken = loginJson.GetProperty("data").GetProperty("accessToken").GetString()!;
+
+        // Confirm the token works before the reset
+        var meClient = CreateAuthenticatedClient(accessToken);
+        var meBefore = await meClient.GetAsync("/api/auth/me");
+        Assert.Equal(HttpStatusCode.OK, meBefore.StatusCode);
+
+        // Reset the password — this rotates SecurityStamp
+        var resetResponse = await Client.PostAsJsonAsync(
+            "/api/auth/reset-password",
+            new { Token = plainToken, Password = newPassword }
+        );
+        resetResponse.EnsureSuccessStatusCode();
+
+        // The old access token must now be rejected (authVersion claim no longer matches SecurityStamp)
+        var meAfter = await meClient.GetAsync("/api/auth/me");
+        Assert.Equal(HttpStatusCode.Unauthorized, meAfter.StatusCode);
     }
 
     [Fact]

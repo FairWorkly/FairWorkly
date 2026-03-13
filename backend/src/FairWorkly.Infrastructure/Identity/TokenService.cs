@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -85,9 +84,5 @@ public class TokenService : ITokenService
         return Convert.ToBase64String(randomNumber);
     }
 
-    public static string GetAuthVersion(User user)
-    {
-        var effectiveTimestamp = user.UpdatedAt ?? user.CreatedAt;
-        return effectiveTimestamp.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
-    }
+    public static string GetAuthVersion(User user) => user.SecurityStamp.ToString();
 }

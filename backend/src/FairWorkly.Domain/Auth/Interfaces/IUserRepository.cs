@@ -39,10 +39,12 @@ public interface IUserRepository
     );
 
     // Atomically resets a user's password when the reset token is still valid.
+    // Also rotates SecurityStamp so that existing access tokens are invalidated on next use.
     // Returns 1 if the row was updated, 0 if the token no longer matches a non-expired user.
     Task<int> ResetPasswordAtomicAsync(
         string tokenHash,
         string passwordHash,
+        Guid newSecurityStamp,
         DateTime now,
         CancellationToken ct = default
     );

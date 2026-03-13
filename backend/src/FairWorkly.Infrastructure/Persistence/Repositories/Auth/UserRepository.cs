@@ -148,9 +148,11 @@ public class UserRepository : IUserRepository
     }
 
     // Atomically resets a user's password and invalidates existing reset/refresh tokens.
+    // Rotates SecurityStamp so that existing access tokens are rejected on next use.
     public async Task<int> ResetPasswordAtomicAsync(
         string tokenHash,
         string passwordHash,
+        Guid newSecurityStamp,
         DateTime now,
         CancellationToken ct = default
     )
@@ -172,6 +174,7 @@ public class UserRepository : IUserRepository
                         .SetProperty(u => u.PasswordResetTokenExpiry, (DateTime?)null)
                         .SetProperty(u => u.RefreshToken, (string?)null)
                         .SetProperty(u => u.RefreshTokenExpiresAt, (DateTime?)null)
+                        .SetProperty(u => u.SecurityStamp, newSecurityStamp)
                         .SetProperty(u => u.UpdatedAt, nowOffset),
                 ct
             );

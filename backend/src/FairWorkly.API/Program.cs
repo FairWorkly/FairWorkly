@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using FairWorkly.API.ExceptionHandlers;
 using FairWorkly.Application;
 using FairWorkly.Infrastructure;
@@ -10,6 +11,7 @@ using FairWorkly.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -108,6 +110,28 @@ try
     builder.Services.AddSingleton<IExceptionHandler, GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
+    // Memory cache — used to avoid a DB round-trip on every authenticated request
+    builder.Services.AddMemoryCache();
+
+    // Rate limiting — protects unauthenticated auth endpoints from abuse
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.AddPolicy(
+            "auth",
+            context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        Window = TimeSpan.FromMinutes(1),
+                        PermitLimit = 5,
+                        QueueLimit = 0,
+                    }
+                )
+        );
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    });
+
     // Add CORS
     builder.Services.AddCors(options =>
     {
@@ -183,20 +207,33 @@ try
                         return;
                     }
 
-                    var db =
-                        context.HttpContext.RequestServices.GetRequiredService<FairWorklyDbContext>();
-                    var user = await db.Users.FirstOrDefaultAsync(
-                        u => u.Id == userId,
-                        context.HttpContext.RequestAborted
-                    );
+                    var cache =
+                        context.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
+                    var cacheKey = $"auth_version_{userId}";
 
-                    if (user == null || !user.IsActive)
+                    // Cache the current authVersion for 60 s to avoid a DB hit on every request.
+                    // Trade-off: a revoked token (e.g. after password reset) remains valid for up
+                    // to 60 s. This is acceptable because refresh tokens are cleared immediately,
+                    // preventing the attacker from obtaining a new access token after the window.
+                    if (!cache.TryGetValue(cacheKey, out string? currentAuthVersion))
                     {
-                        context.Fail("User is no longer available.");
-                        return;
+                        var db =
+                            context.HttpContext.RequestServices.GetRequiredService<FairWorklyDbContext>();
+                        var user = await db.Users.FirstOrDefaultAsync(
+                            u => u.Id == userId,
+                            context.HttpContext.RequestAborted
+                        );
+
+                        if (user == null || !user.IsActive)
+                        {
+                            context.Fail("User is no longer available.");
+                            return;
+                        }
+
+                        currentAuthVersion = TokenService.GetAuthVersion(user);
+                        cache.Set(cacheKey, currentAuthVersion, TimeSpan.FromSeconds(60));
                     }
 
-                    var currentAuthVersion = TokenService.GetAuthVersion(user);
                     if (
                         !string.Equals(
                             authVersionClaim,
@@ -263,6 +300,8 @@ try
     app.UseCors("AllowFrontend");
 
     app.UseHttpsRedirection();
+
+    app.UseRateLimiter();
 
     // Authentication must come before Authorization
     app.UseAuthentication();
