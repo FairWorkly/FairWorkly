@@ -84,7 +84,6 @@ public class RegisterCommandHandler(
             PasswordHash = passwordHasher.Hash(request.Password),
         };
 
-        var accessToken = tokenService.GenerateAccessToken(user);
         var refreshToken = tokenService.GenerateRefreshToken();
         var refreshTokenHash = secretHasher.Hash(refreshToken);
 
@@ -98,6 +97,8 @@ public class RegisterCommandHandler(
         userRepository.Add(user);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var accessToken = tokenService.GenerateAccessToken(user);
 
         return Result<LoginResponse>.Of201(
             "Registration successful",

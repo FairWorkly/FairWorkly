@@ -5,6 +5,10 @@ import { useApiQuery } from '@/shared/hooks/useApiQuery'
 import { settingsApi } from '@/services/settingsApi'
 import { useAcceptInvitation } from '../hooks/useAcceptInvitation'
 import {
+  PASSWORD_POLICY_HINT,
+  isPasswordPolicyValid,
+} from '../utils/passwordPolicy'
+import {
   AuthHeader,
   AuthTitle,
   AuthSubtitle,
@@ -26,7 +30,10 @@ export function AcceptInvitePage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [validationError, setValidationError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<{ email: string; fullName: string } | null>(null)
+  const [success, setSuccess] = useState<{
+    email: string
+    fullName: string
+  } | null>(null)
 
   // Pre-validate token on page load
   const tokenQuery = useApiQuery({
@@ -43,8 +50,8 @@ export function AcceptInvitePage() {
           <AuthTitle>Invalid Invitation</AuthTitle>
         </AuthHeader>
         <Alert severity="error">
-          No invitation token found. Please check the link you received or ask your admin to resend
-          the invitation.
+          No invitation token found. Please check the link you received or ask
+          your admin to resend the invitation.
         </Alert>
       </section>
     )
@@ -70,7 +77,8 @@ export function AcceptInvitePage() {
           <AuthTitle>Invalid Invitation</AuthTitle>
         </AuthHeader>
         <Alert severity="error">
-          {tokenQuery.error.message || 'This invitation link is invalid or has expired.'}
+          {tokenQuery.error.message ||
+            'This invitation link is invalid or has expired.'}
         </Alert>
       </section>
     )
@@ -82,7 +90,8 @@ export function AcceptInvitePage() {
         <AuthHeader>
           <AuthTitle>Welcome, {success.fullName}!</AuthTitle>
           <AuthSubtitle>
-            Your account has been set up successfully. You can now sign in with your email.
+            Your account has been set up successfully. You can now sign in with
+            your email.
           </AuthSubtitle>
         </AuthHeader>
         <FormActions>
@@ -98,8 +107,8 @@ export function AcceptInvitePage() {
     e.preventDefault()
     setValidationError(null)
 
-    if (password.length < 8) {
-      setValidationError('Password must be at least 8 characters.')
+    if (!isPasswordPolicyValid(password)) {
+      setValidationError(PASSWORD_POLICY_HINT)
       return
     }
     if (password !== confirmPassword) {
@@ -110,7 +119,7 @@ export function AcceptInvitePage() {
     acceptMutation.mutate(
       { token, password },
       {
-        onSuccess: (data) => {
+        onSuccess: data => {
           setSuccess({ email: data.email, fullName: data.fullName })
         },
       }
@@ -123,7 +132,11 @@ export function AcceptInvitePage() {
     <section>
       <AuthHeader>
         <AuthTitle>Set Your Password</AuthTitle>
-        <AuthSubtitle>{invitee?.fullName ? `Hi ${invitee.fullName}, create a password to complete your account setup.` : 'Create a password to complete your account setup.'}</AuthSubtitle>
+        <AuthSubtitle>
+          {invitee?.fullName
+            ? `Hi ${invitee.fullName}, create a password to complete your account setup.`
+            : 'Create a password to complete your account setup.'}
+        </AuthSubtitle>
       </AuthHeader>
 
       {validationError && (
@@ -142,26 +155,42 @@ export function AcceptInvitePage() {
               label="Password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               fullWidth
               required
               autoComplete="new-password"
+              error={password !== '' && !isPasswordPolicyValid(password)}
+              helperText={
+                password !== '' && !isPasswordPolicyValid(password)
+                  ? PASSWORD_POLICY_HINT
+                  : ' '
+              }
             />
-            <InputHint variant="caption">Minimum 8 characters</InputHint>
+            <InputHint variant="caption">{PASSWORD_POLICY_HINT}</InputHint>
           </div>
           <TextField
             label="Confirm Password"
             type="password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={e => setConfirmPassword(e.target.value)}
             fullWidth
             required
             autoComplete="new-password"
+            error={confirmPassword !== '' && confirmPassword !== password}
+            helperText={
+              confirmPassword !== '' && confirmPassword !== password
+                ? 'Passwords do not match.'
+                : ' '
+            }
           />
           <FormActions>
             <SubmitButton type="submit" disabled={acceptMutation.isPending}>
-              {acceptMutation.isPending && <CircularProgress size={18} color="inherit" />}
-              {acceptMutation.isPending ? 'Setting up...' : 'Set Password & Join'}
+              {acceptMutation.isPending && (
+                <CircularProgress size={18} color="inherit" />
+              )}
+              {acceptMutation.isPending
+                ? 'Setting up...'
+                : 'Set Password & Join'}
             </SubmitButton>
           </FormActions>
         </AuthFieldset>

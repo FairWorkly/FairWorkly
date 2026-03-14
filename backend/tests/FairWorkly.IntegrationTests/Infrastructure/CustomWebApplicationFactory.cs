@@ -23,6 +23,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         // Set environment variables BEFORE the host is created
         // These override any values from appsettings.json
+        Environment.SetEnvironmentVariable(
+            "AiSettings__ServiceKey",
+            "integration-test-service-key"
+        );
         Environment.SetEnvironmentVariable("JwtSettings__Secret", TestJwtSecret);
         Environment.SetEnvironmentVariable("JwtSettings__Issuer", "FairWorkly.Auth");
         Environment.SetEnvironmentVariable("JwtSettings__Audience", "FairWorkly.Web");

@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Domain.Auth.Entities;
+using FairWorkly.Infrastructure.Identity;
 using FairWorkly.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -94,6 +95,10 @@ public abstract class AuthTestsBase : IClassFixture<CustomWebApplicationFactory>
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim("orgId", testUser?.OrganizationId.ToString() ?? Guid.NewGuid().ToString()),
             new Claim("role", "Admin"),
+            new Claim(
+                TokenService.AuthVersionClaimType,
+                testUser == null ? "0" : TokenService.GetAuthVersion(testUser)
+            ),
         };
 
         // Create a token that expired 1 hour ago
@@ -134,6 +139,7 @@ public abstract class AuthTestsBase : IClassFixture<CustomWebApplicationFactory>
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim("orgId", Guid.NewGuid().ToString()),
             new Claim("role", "Admin"),
+            new Claim(TokenService.AuthVersionClaimType, "0"),
         };
 
         var currentTime = DateTime.UtcNow;

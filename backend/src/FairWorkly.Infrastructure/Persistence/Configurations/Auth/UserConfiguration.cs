@@ -67,6 +67,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.RefreshToken).HasMaxLength(500);
         builder.Property(u => u.PasswordResetToken).HasMaxLength(500);
 
+        // Security stamp — rotated on every password reset to invalidate existing access tokens
+        builder
+            .Property(u => u.SecurityStamp)
+            .HasDefaultValueSql("gen_random_uuid()")
+            .IsRequired();
+
         // Invitation fields
         builder.Property(u => u.InvitationStatus).HasDefaultValue(InvitationStatus.None);
         builder.Property(u => u.InvitationToken).HasMaxLength(500);

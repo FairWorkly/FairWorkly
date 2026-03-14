@@ -40,6 +40,18 @@ public class UserRepository : IUserRepository
         );
     }
 
+    // Retrieve a user by the stored password reset token hash
+    public async Task<User?> GetByPasswordResetTokenHashAsync(
+        string passwordResetTokenHash,
+        CancellationToken ct = default
+    )
+    {
+        return await _context.Users.FirstOrDefaultAsync(
+            u => u.PasswordResetToken == passwordResetTokenHash && !u.IsDeleted,
+            ct
+        );
+    }
+
     // Retrieve a user by the stored invitation token hash
     public async Task<User?> GetByInvitationTokenHashAsync(
         string invitationTokenHash,
@@ -130,6 +142,39 @@ public class UserRepository : IUserRepository
                         .SetProperty(u => u.InvitationStatus, InvitationStatus.Accepted)
                         .SetProperty(u => u.InvitationToken, (string?)null)
                         .SetProperty(u => u.InvitationTokenExpiry, (DateTime?)null)
+                        .SetProperty(u => u.UpdatedAt, nowOffset),
+                ct
+            );
+    }
+
+    // Atomically resets a user's password and invalidates existing reset/refresh tokens.
+    // Rotates SecurityStamp so that existing access tokens are rejected on next use.
+    public async Task<int> ResetPasswordAtomicAsync(
+        string tokenHash,
+        string passwordHash,
+        Guid newSecurityStamp,
+        DateTime now,
+        CancellationToken ct = default
+    )
+    {
+        var nowOffset = new DateTimeOffset(now, TimeSpan.Zero);
+
+        return await _context
+            .Users.Where(u =>
+                u.PasswordResetToken == tokenHash
+                && u.PasswordResetTokenExpiry != null
+                && u.PasswordResetTokenExpiry > now
+                && !u.IsDeleted
+            )
+            .ExecuteUpdateAsync(
+                setters =>
+                    setters
+                        .SetProperty(u => u.PasswordHash, passwordHash)
+                        .SetProperty(u => u.PasswordResetToken, (string?)null)
+                        .SetProperty(u => u.PasswordResetTokenExpiry, (DateTime?)null)
+                        .SetProperty(u => u.RefreshToken, (string?)null)
+                        .SetProperty(u => u.RefreshTokenExpiresAt, (DateTime?)null)
+                        .SetProperty(u => u.SecurityStamp, newSecurityStamp)
                         .SetProperty(u => u.UpdatedAt, nowOffset),
                 ct
             );
