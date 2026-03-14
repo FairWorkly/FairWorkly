@@ -110,9 +110,6 @@ try
     builder.Services.AddSingleton<IExceptionHandler, GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
-    // Memory cache — used to avoid a DB round-trip on every authenticated request
-    builder.Services.AddMemoryCache();
-
     // Rate limiting — protects unauthenticated auth endpoints from abuse
     builder.Services.AddRateLimiter(options =>
     {
@@ -207,33 +204,20 @@ try
                         return;
                     }
 
-                    var cache =
-                        context.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
-                    var cacheKey = $"auth_version_{userId}";
+                    var db =
+                        context.HttpContext.RequestServices.GetRequiredService<FairWorklyDbContext>();
+                    var user = await db.Users.FirstOrDefaultAsync(
+                        u => u.Id == userId,
+                        context.HttpContext.RequestAborted
+                    );
 
-                    // Cache the current authVersion for 60 s to avoid a DB hit on every request.
-                    // Trade-off: a revoked token (e.g. after password reset) remains valid for up
-                    // to 60 s. This is acceptable because refresh tokens are cleared immediately,
-                    // preventing the attacker from obtaining a new access token after the window.
-                    if (!cache.TryGetValue(cacheKey, out string? currentAuthVersion))
+                    if (user == null || !user.IsActive)
                     {
-                        var db =
-                            context.HttpContext.RequestServices.GetRequiredService<FairWorklyDbContext>();
-                        var user = await db.Users.FirstOrDefaultAsync(
-                            u => u.Id == userId,
-                            context.HttpContext.RequestAborted
-                        );
-
-                        if (user == null || !user.IsActive)
-                        {
-                            context.Fail("User is no longer available.");
-                            return;
-                        }
-
-                        currentAuthVersion = TokenService.GetAuthVersion(user);
-                        cache.Set(cacheKey, currentAuthVersion, TimeSpan.FromSeconds(60));
+                        context.Fail("User is no longer available.");
+                        return;
                     }
 
+                    var currentAuthVersion = TokenService.GetAuthVersion(user);
                     if (
                         !string.Equals(
                             authVersionClaim,
