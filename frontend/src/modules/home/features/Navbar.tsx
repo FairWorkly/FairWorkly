@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
+import { useAppSelector } from '@/store/hooks'
+import { getDefaultRoute } from '@/modules/auth/hooks/authUtils'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import IconButton from '@mui/material/IconButton'
 import { alpha } from '@mui/material/styles'
-import BoltIcon from '@mui/icons-material/Bolt'
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import MenuIcon from '@mui/icons-material/Menu'
 import { styled } from '@/styles/styled'
@@ -164,6 +166,9 @@ interface NavbarProps {
 }
 
 export function Navbar({ onScrollToSection }: NavbarProps) {
+  const { user, status } = useAppSelector(state => state.auth)
+  const appRoute = getDefaultRoute(user?.role)
+
   const [scrolled, setScrolled] = useState(false)
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
   const isMenuOpen = Boolean(menuAnchorEl)
@@ -205,7 +210,7 @@ export function Navbar({ onScrollToSection }: NavbarProps) {
       <NavContainer>
         <LogoLink to="/">
           <LogoIcon>
-            <BoltIcon />
+            <VerifiedUserIcon />
           </LogoIcon>
           <LogoText>FairWorkly</LogoText>
         </LogoLink>
@@ -217,11 +222,20 @@ export function Navbar({ onScrollToSection }: NavbarProps) {
         </NavList>
 
         <NavActions direction="row" spacing={2}>
-          <GhostLink to="/login">Log In</GhostLink>
-          <PrimaryLink to="/login?signup=true">
-            Start Free Trial
-            <ArrowForwardIcon />
-          </PrimaryLink>
+          {status === 'authenticated' && user ? (
+            <PrimaryLink to={appRoute}>
+              Go to App
+              <ArrowForwardIcon />
+            </PrimaryLink>
+          ) : status === 'unauthenticated' ? (
+            <>
+              <GhostLink to="/login">Log In</GhostLink>
+              <PrimaryLink to="/login?signup=true">
+                Start Free Trial
+                <ArrowForwardIcon />
+              </PrimaryLink>
+            </>
+          ) : null}
           <MobileMenuButton
             aria-label="Open navigation menu"
             aria-controls={isMenuOpen ? 'home-nav-menu' : undefined}

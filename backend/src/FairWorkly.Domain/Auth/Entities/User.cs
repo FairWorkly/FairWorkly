@@ -41,6 +41,10 @@ public class User : AuditableEntity, IValidatableDomain
     public string? PasswordResetToken { get; set; }
     public DateTime? PasswordResetTokenExpiry { get; set; }
 
+    // Security stamp — changes on every security-sensitive operation (password reset, etc.)
+    // Used to derive the authVersion JWT claim; rotating this invalidates all existing access tokens.
+    public Guid SecurityStamp { get; set; } = Guid.NewGuid();
+
     // Invitation (team member invite)
     public InvitationStatus InvitationStatus { get; set; } = InvitationStatus.None;
     public string? InvitationToken { get; set; }

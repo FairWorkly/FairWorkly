@@ -5,6 +5,7 @@ import { AuthBranding } from '@/modules/auth'
 import { HomePage } from '@/modules/home/pages/HomePage'
 import { LoginPage } from '@/modules/auth/pages/LoginPage'
 import { AcceptInvitePage } from '@/modules/auth/pages/AcceptInvitePage'
+import { ResetPasswordPage } from '@/modules/auth/pages/ResetPasswordPage'
 
 export const publicRoutes: RouteObject[] = [
   // Marketing pages (full-width center layout)
@@ -28,6 +29,10 @@ export const publicRoutes: RouteObject[] = [
       {
         path: '/accept-invite',
         element: <AcceptInvitePage />,
+      },
+      {
+        path: '/reset-password',
+        element: <ResetPasswordPage />,
       },
     ],
   },

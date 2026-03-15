@@ -1,3 +1,4 @@
+import * as baseApi from './baseApi'
 import httpClient from './httpClient'
 
 export interface LoginRequest {
@@ -33,6 +34,11 @@ export interface UserDto {
 export interface LoginResponse {
   accessToken: string
   user: UserDto
+}
+
+export interface ResetPasswordPayload {
+  token: string
+  password: string
 }
 
 export const authApi = {
@@ -72,5 +78,33 @@ export const authApi = {
   async me(): Promise<UserDto> {
     const response = await httpClient.get<UserDto>('/auth/me')
     return response.data
+  },
+
+  /**
+   * Request a password reset link for the given email.
+   */
+  forgotPassword(email: string): Promise<boolean> {
+    return baseApi.post<boolean, { email: string }>('/auth/forgot-password', {
+      email,
+    })
+  },
+
+  /**
+   * Validate a password reset token before showing the reset form.
+   */
+  validateResetPasswordToken(token: string): Promise<boolean> {
+    return baseApi.get<boolean>('/auth/reset-password/validate', {
+      params: { token },
+    })
+  },
+
+  /**
+   * Reset a password with a valid reset token.
+   */
+  resetPassword(token: string, password: string): Promise<boolean> {
+    return baseApi.post<boolean, ResetPasswordPayload>('/auth/reset-password', {
+      token,
+      password,
+    })
   },
 }

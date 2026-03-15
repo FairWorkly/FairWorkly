@@ -7,7 +7,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule'
 import VerifiedIcon from '@mui/icons-material/Verified'
 import SmartToyIcon from '@mui/icons-material/SmartToy'
 import SupportAgentIcon from '@mui/icons-material/SupportAgent'
-import BoltIcon from '@mui/icons-material/Bolt'
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
 import { styled } from '@/styles/styled'
 
 const LogoSection = styled(Stack)(({ theme }) => ({
@@ -27,7 +27,7 @@ const LogoIcon = styled(Box)(({ theme }) => ({
   color: theme.palette.common.white,
 }))
 
-const LogoIconContent = styled(BoltIcon)(({ theme }) => ({
+const LogoIconContent = styled(VerifiedUserIcon)(({ theme }) => ({
   fontSize: theme.typography.h3.fontSize,
 }))
 

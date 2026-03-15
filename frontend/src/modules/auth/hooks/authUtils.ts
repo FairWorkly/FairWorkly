@@ -5,6 +5,11 @@ export const DEFAULT_ROUTES: Record<string, string> = {
   manager: '/roster/upload',
 }
 
+/** Resolve the default route for a role, falling back to /403 for unknown roles. */
+export function getDefaultRoute(role: string | undefined): string {
+  return DEFAULT_ROUTES[role ?? ''] ?? '/403'
+}
+
 export function normalizeAuthUser(user: UserDto) {
   const name =
     [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email

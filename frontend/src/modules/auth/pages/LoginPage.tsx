@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Navigate } from 'react-router-dom'
+import { useAppSelector } from '@/store/hooks'
+import { getDefaultRoute } from '../hooks/authUtils'
 import { LoginForm, SignupForm, ForgotPasswordModal } from '../features'
 import type { SignupFormData } from '../types'
 import { useLogin, useRegister } from '../hooks'
@@ -15,6 +17,7 @@ import {
 type TabType = 'login' | 'signup'
 
 export function LoginPage() {
+  const { user, status } = useAppSelector(state => state.auth)
   const [searchParams] = useSearchParams()
   const {
     login,
@@ -30,6 +33,10 @@ export function LoginPage() {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
   const isGoogleLoading = false
+
+  if (status === 'authenticated' && user) {
+    return <Navigate to={getDefaultRoute(user.role)} replace />
+  }
 
   const handleSignup = (values: SignupFormData) => {
     void register(values)

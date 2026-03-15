@@ -43,7 +43,6 @@ public class RefreshCommandHandler(
         }
 
         // Passed validation - rotate tokens
-        var newAccessToken = tokenService.GenerateAccessToken(user);
         var newRefreshPlain = tokenService.GenerateRefreshToken();
         var newRefreshHash = secretHasher.Hash(newRefreshPlain);
 
@@ -55,6 +54,8 @@ public class RefreshCommandHandler(
 
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var newAccessToken = tokenService.GenerateAccessToken(user);
 
         return Result<RefreshResponse>.Of200(
             "Token refreshed",
