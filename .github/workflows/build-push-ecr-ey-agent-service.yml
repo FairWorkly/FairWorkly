@@ -104,6 +104,7 @@ jobs:
 
       - name: Download current task definition
         run: |
+          set -euo pipefail
           aws ecs describe-task-definition \
             --task-definition ${{ steps.targets.outputs.task_def }} \
             --query taskDefinition \
