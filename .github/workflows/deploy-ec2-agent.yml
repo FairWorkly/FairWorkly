@@ -1,0 +1,102 @@
+name: Deploy Agent Service to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - devops/eric-ECS-ECR-FARGATE
+      - devops/prod
+    paths:
+      - "agent-service/**"
+      - ".github/workflows/deploy-ec2-agent.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set image tags
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+          if [ "$GITHUB_REF_NAME" = "devops/prod" ]; then
+            ENV_PREFIX="prod"
+          else
+            ENV_PREFIX="uat"
+          fi
+          FULL_TAG="${ENV_PREFIX}-${SHORT_SHA}"
+          {
+            echo "short_sha=$SHORT_SHA"
+            echo "env_prefix=$ENV_PREFIX"
+            echo "full_tag=$FULL_TAG"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-ecs-backend-deploy-oidc
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push agent image
+        id: push
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_AGENT }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+          FULL_TAG: ${{ steps.vars.outputs.full_tag }}
+        run: |
+          set -euo pipefail
+          IMAGE="$REGISTRY/$REPOSITORY"
+          docker build -f agent-service/Dockerfile -t "$IMAGE:$SHORT_SHA" agent-service
+          docker push "$IMAGE:$SHORT_SHA"
+          docker tag "$IMAGE:$SHORT_SHA" "$IMAGE:$FULL_TAG"
+          docker push "$IMAGE:$FULL_TAG"
+          echo "image=$IMAGE:$FULL_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Set EC2 host
+        id: ec2
+        run: |
+          if [ "${{ steps.vars.outputs.env_prefix }}" = "prod" ]; then
+            echo "host=${{ vars.EC2_HOST_PROD }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "host=${{ vars.EC2_HOST_UAT }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy agent-service to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          AGENT_IMAGE: ${{ steps.push.outputs.image }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+        with:
+          host: ${{ steps.ec2.outputs.host }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: AGENT_IMAGE,AWS_REGION,AWS_ACCOUNT_ID
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+            cd /opt/fairworkly
+
+            sed -i "s|AGENT_IMAGE=.*|AGENT_IMAGE=${AGENT_IMAGE}|" .env
+
+            aws ecr get-login-password --region "$AWS_REGION" \
+              | docker login --username AWS --password-stdin \
+                "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+            docker pull "${AGENT_IMAGE}"
+            docker compose -f docker-compose.ec2.yml up -d --no-build agent-service
