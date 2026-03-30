@@ -64,19 +64,6 @@ jobs:
           docker push "$IMAGE:$FULL_TAG"
           echo "image=$IMAGE:$FULL_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push migration image
-        id: push-migrate
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: ${{ vars.ECR_REPO_MIGRATE }}
-          FULL_TAG: ${{ steps.vars.outputs.full_tag }}
-        run: |
-          set -euo pipefail
-          IMAGE="$REGISTRY/$REPOSITORY:$FULL_TAG"
-          docker build -f infra/migrations/Dockerfile.migrate -t "$IMAGE" .
-          docker push "$IMAGE"
-          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
-
       - name: Set EC2 host
         id: ec2
         run: |
@@ -90,14 +77,13 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           BACKEND_IMAGE: ${{ steps.push.outputs.image }}
-          MIGRATE_IMAGE: ${{ steps.push-migrate.outputs.image }}
           AWS_REGION: ${{ vars.AWS_REGION }}
           AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
         with:
           host: ${{ steps.ec2.outputs.host }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: BACKEND_IMAGE,MIGRATE_IMAGE,AWS_REGION,AWS_ACCOUNT_ID
+          envs: BACKEND_IMAGE,AWS_REGION,AWS_ACCOUNT_ID
           command_timeout: 10m
           script: |
             set -euo pipefail
@@ -110,12 +96,4 @@ jobs:
                 "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
             docker pull "${BACKEND_IMAGE}"
-            docker pull "${MIGRATE_IMAGE}"
-
-            POSTGRES_URL=$(grep '^POSTGRES_URL=' .env | cut -d= -f2-)
-            docker run --rm \
-              --network fairworkly_default \
-              -e "ConnectionStrings__DefaultConnection=${POSTGRES_URL}" \
-              "${MIGRATE_IMAGE}"
-
             docker compose -f docker-compose.ec2.yml up -d --no-build backend nginx
