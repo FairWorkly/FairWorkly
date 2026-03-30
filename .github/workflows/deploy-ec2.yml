@@ -1,4 +1,4 @@
-name: Deploy Agent Service to EC2
+name: Deploy to EC2
 
 on:
   push:
@@ -6,9 +6,6 @@ on:
       - main
       - devops/eric-ECS-ECR-FARGATE
       - devops/prod
-    paths:
-      - "agent-service/**"
-      - ".github/workflows/deploy-ec2-agent.yml"
   workflow_dispatch:
 
 permissions:
@@ -51,8 +48,24 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Build and push backend image
+        id: push-backend
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_BACKEND }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+          FULL_TAG: ${{ steps.vars.outputs.full_tag }}
+        run: |
+          set -euo pipefail
+          IMAGE="$REGISTRY/$REPOSITORY"
+          docker build -f backend/Dockerfile -t "$IMAGE:$SHORT_SHA" .
+          docker push "$IMAGE:$SHORT_SHA"
+          docker tag "$IMAGE:$SHORT_SHA" "$IMAGE:$FULL_TAG"
+          docker push "$IMAGE:$FULL_TAG"
+          echo "image=$IMAGE:$FULL_TAG" >> "$GITHUB_OUTPUT"
+
       - name: Build and push agent image
-        id: push
+        id: push-agent
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ vars.ECR_REPO_AGENT }}
@@ -76,27 +89,30 @@ jobs:
             echo "host=${{ vars.EC2_HOST_UAT }}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Deploy agent-service to EC2
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         env:
-          AGENT_IMAGE: ${{ steps.push.outputs.image }}
+          BACKEND_IMAGE: ${{ steps.push-backend.outputs.image }}
+          AGENT_IMAGE: ${{ steps.push-agent.outputs.image }}
           AWS_REGION: ${{ vars.AWS_REGION }}
           AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
         with:
           host: ${{ steps.ec2.outputs.host }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: AGENT_IMAGE,AWS_REGION,AWS_ACCOUNT_ID
+          envs: BACKEND_IMAGE,AGENT_IMAGE,AWS_REGION,AWS_ACCOUNT_ID
           command_timeout: 10m
           script: |
             set -euo pipefail
             cd /opt/fairworkly
 
+            sed -i "s|BACKEND_IMAGE=.*|BACKEND_IMAGE=${BACKEND_IMAGE}|" .env
             sed -i "s|AGENT_IMAGE=.*|AGENT_IMAGE=${AGENT_IMAGE}|" .env
 
             aws ecr get-login-password --region "$AWS_REGION" \
               | docker login --username AWS --password-stdin \
                 "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
+            docker pull "${BACKEND_IMAGE}"
             docker pull "${AGENT_IMAGE}"
-            docker compose -f docker-compose.ec2.yml up -d --no-build agent-service
+            docker compose -f docker-compose.ec2.yml up -d --no-build backend agent-service nginx
