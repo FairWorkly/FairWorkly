@@ -41,10 +41,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<FairWorkly
 
         var builder = new ConfigurationBuilder();
 
-        // Environment variables (lowest priority, added first)
-        builder.AddEnvironmentVariables();
-
-        // appsettings.json from API project
+        // appsettings.json from API project (lowest priority)
         var appSettingsPath = Path.Combine(apiProjectPath, "appsettings.json");
         if (File.Exists(appSettingsPath))
         {
@@ -59,6 +56,9 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<FairWorkly
         {
             builder.AddJsonFile(envSettingsPath, optional: true, reloadOnChange: false);
         }
+
+        // Environment variables override appsettings
+        builder.AddEnvironmentVariables();
 
         // User Secrets (highest priority, added last)
         builder.AddUserSecrets(
