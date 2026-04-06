@@ -6,7 +6,6 @@ import logging
 from typing import Optional, Dict, Any
 
 from langchain_core.embeddings import Embeddings
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 
 
@@ -20,6 +19,13 @@ def create_embeddings(
     mode = model_params.get("deployment_mode_embedding", "local").lower()
 
     if mode == "local":
+        try:
+            from langchain_huggingface import HuggingFaceEmbeddings
+        except ImportError as e:
+            raise ImportError(
+                "langchain-huggingface is required for local embedding mode. "
+                "Install with: poetry install --with local"
+            ) from e
         model_name = model_params.get("local_embedding_model")
         if not model_name:
             raise ValueError("local_embedding_model must be set for local embeddings")
