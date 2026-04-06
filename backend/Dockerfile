@@ -14,6 +14,7 @@ WORKDIR /src/backend/src/FairWorkly.Infrastructure
 ENTRYPOINT ["/root/.dotnet/tools/dotnet-ef", "database", "update", \
             "--project", "/src/backend/src/FairWorkly.Infrastructure", \
             "--startup-project", "/src/backend/src/FairWorkly.API", \
+            "--configuration", "Release", \
             "--no-build"]
 
 # ── Runtime image ──────────────────────────────────────────────────────────────
