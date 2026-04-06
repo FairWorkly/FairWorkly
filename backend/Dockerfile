@@ -9,10 +9,9 @@ RUN dotnet publish -c Release -o /app/publish
 
 # ── Migrate stage — runs EF Core migrations, then exits ───────────────────────
 FROM build AS migrate
-RUN dotnet tool install --global dotnet-ef --version 8.*
-ENV PATH="$PATH:/root/.dotnet/tools"
+RUN dotnet tool install --global dotnet-ef --version 8.0.*
 WORKDIR /src/backend/src/FairWorkly.Infrastructure
-ENTRYPOINT ["dotnet", "ef", "database", "update", \
+ENTRYPOINT ["/root/.dotnet/tools/dotnet-ef", "database", "update", \
             "--project", "/src/backend/src/FairWorkly.Infrastructure", \
             "--startup-project", "/src/backend/src/FairWorkly.API", \
             "--no-build"]
