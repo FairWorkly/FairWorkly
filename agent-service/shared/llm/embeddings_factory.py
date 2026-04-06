@@ -24,11 +24,11 @@ def create_embeddings(
             raise ValueError("local_embedding_model must be set for local embeddings")
         try:
             from langchain_huggingface import HuggingFaceEmbeddings
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 "langchain-huggingface is required for local embeddings. "
                 "Install it with: poetry install --with local-models"
-            )
+            ) from err
         logger.debug("Creating local embeddings using %s", model_name)
         return HuggingFaceEmbeddings(model_name=model_name)
 
