@@ -45,7 +45,7 @@ services:
     container_name: fairworkly-backend
     restart: unless-stopped
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://0.0.0.0:5680
       ConnectionStrings__DefaultConnection: ${POSTGRES_URL:?POSTGRES_URL is required}
       AiSettings__BaseUrl: http://agent-service:8000
