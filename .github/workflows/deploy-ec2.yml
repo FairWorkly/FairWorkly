@@ -153,6 +153,7 @@ jobs:
                 "${MIGRATE_IMAGE}"
 
               docker compose -f docker-compose.ec2.yml up -d --no-build backend-prod agent-service-prod nginx
+              docker exec fairworkly-nginx nginx -s reload
             else
               sed -i "s|BACKEND_IMAGE=.*|BACKEND_IMAGE=${BACKEND_IMAGE}|" .env
               sed -i "s|AGENT_IMAGE=.*|AGENT_IMAGE=${AGENT_IMAGE}|" .env
@@ -164,4 +165,5 @@ jobs:
                 "${MIGRATE_IMAGE}"
 
               docker compose -f docker-compose.ec2.yml up -d --no-build backend agent-service nginx
+              docker exec fairworkly-nginx nginx -s reload
             fi
