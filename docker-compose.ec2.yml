@@ -67,10 +67,8 @@ services:
       LLM_PROVIDER: ${LLM_PROVIDER:-openai}
       AGENT_SERVICE_KEY: ${AGENT_SERVICE_KEY_PROD:?AGENT_SERVICE_KEY_PROD is required}
       ALLOWED_ORIGINS: https://fairworkly.com
-      HOST: 0.0.0.0
-      PORT: 8001
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -84,7 +82,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://0.0.0.0:5681
       ConnectionStrings__DefaultConnection: ${POSTGRES_URL_PROD:?POSTGRES_URL_PROD is required}
-      AiSettings__BaseUrl: http://agent-service-prod:8001
+      AiSettings__BaseUrl: http://agent-service-prod:8000
       AiSettings__ServiceKey: ${AGENT_SERVICE_KEY_PROD:?AGENT_SERVICE_KEY_PROD is required}
       JwtSettings__Secret: ${JWT_SECRET_PROD:?JWT_SECRET_PROD is required}
     depends_on:
