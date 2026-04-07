@@ -6,7 +6,7 @@ import { useApiMutation } from '@/shared/hooks/useApiMutation'
 import { setAuthData, setStatus, type AuthUser } from '@/slices/auth'
 import { useAppDispatch } from '@/store/hooks'
 import type { SignupFormData } from '../types'
-import { DEFAULT_ROUTES, normalizeAuthUser } from './authUtils'
+import { getDefaultRoute, normalizeAuthUser } from './authUtils'
 
 type AuthResult = {
   normalizedUser: AuthUser
@@ -47,7 +47,7 @@ export function useRegister() {
     },
     onSuccess: ({ normalizedUser, roleKey, accessToken }) => {
       dispatch(setAuthData({ user: normalizedUser, accessToken }))
-      navigate(DEFAULT_ROUTES[roleKey] ?? '/403', { replace: true })
+      navigate(getDefaultRoute(roleKey), { replace: true })
     },
     onError: () => {
       dispatch(setStatus('unauthenticated'))

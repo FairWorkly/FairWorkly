@@ -1,7 +1,7 @@
 # ── Stage 1: dependency export ────────────────────────────────────────────────
 # Poetry is only used here to export a plain requirements.txt.
 # It never touches the final image.
-FROM python:3.11-slim AS builder
+FROM python:3.11.12-slim AS builder
 
 WORKDIR /build
 
@@ -21,7 +21,7 @@ RUN poetry export \
 
 
 # ── Stage 2: production image ──────────────────────────────────────────────────
-FROM python:3.11-slim AS runtime
+FROM python:3.11.12-slim AS runtime
 
 WORKDIR /app
 
@@ -38,6 +38,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application source (after deps so this layer is rebuilt less often)
 COPY . .
+
+RUN adduser --disabled-password --gecos "" appuser
+USER appuser
 
 EXPOSE 8000
 

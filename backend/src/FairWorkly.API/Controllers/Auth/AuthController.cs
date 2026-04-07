@@ -1,16 +1,20 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 using FairWorkly.Application.Auth.Features.ForgotPassword;
 using FairWorkly.Application.Auth.Features.Login;
 using FairWorkly.Application.Auth.Features.Logout;
 using FairWorkly.Application.Auth.Features.Me;
 using FairWorkly.Application.Auth.Features.Refresh;
 using FairWorkly.Application.Auth.Features.Register;
+using FairWorkly.Application.Auth.Features.ResetPassword;
+using FairWorkly.Application.Auth.Features.ValidateResetPasswordToken;
 using FairWorkly.Domain.Common;
 using FairWorkly.Domain.Common.Result;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace FairWorkly.API.Controllers.Auth;
@@ -86,9 +90,33 @@ public class AuthController(IMediator mediator) : BaseApiController
 
     [HttpPost("forgot-password")]
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
     {
         var result = await mediator.Send(command);
+        return RespondResult(result);
+    }
+
+    [HttpGet("reset-password/validate")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ValidateResetPasswordToken(
+        [FromQuery] ValidateResetPasswordTokenQuery query,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await mediator.Send(query, cancellationToken);
+        return RespondResult(result);
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    [EnableRateLimiting("auth")]
+    public async Task<IActionResult> ResetPassword(
+        [FromBody] ResetPasswordCommand command,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await mediator.Send(command, cancellationToken);
         return RespondResult(result);
     }
 

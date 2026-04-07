@@ -1,11 +1,14 @@
 name: Build and Push Backend Image to Amazon ECR by Eric
 
+# ECS deploy — disabled (EC2 is now active via deploy-ec2-backend.yml)
+# on:
+#   push:
+#     branches:
+#       - main
+#       - devops/eric-ECS-ECR-FARGATE
+#       - devops/prod
+#   workflow_dispatch:
 on:
-  push:
-    branches:
-      - main
-      - devops/eric-ECS-ECR-FARGATE
-      - devops/prod
   workflow_dispatch:
 
 permissions:
@@ -29,8 +32,8 @@ jobs:
           echo "sha=$GITHUB_SHA"
 
       # Tag logic:
-      # main  -> prod-<7sha>
-      # other -> uat-<7sha>
+      # devops/prod -> prod-<7sha>
+      # other       -> uat-<7sha>
       - name: Set image tags
         id: vars
         shell: bash
@@ -119,6 +122,7 @@ jobs:
 
       - name: Download current task definition
         run: |
+          set -euo pipefail
           aws ecs describe-task-definition \
             --task-definition ${{ steps.targets.outputs.task_def }} \
             --query taskDefinition \

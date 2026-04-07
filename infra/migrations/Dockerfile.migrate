@@ -13,4 +13,7 @@ RUN dotnet tool run dotnet-ef migrations bundle \
 FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=build /out/migrate /app/migrate
+RUN useradd --no-create-home --shell /bin/false migrate \
+    && chown migrate:migrate /app/migrate
+USER migrate
 ENTRYPOINT ["/app/migrate"]

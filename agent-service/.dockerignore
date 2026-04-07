@@ -1,43 +1,46 @@
-# # Version control
-# .git
-# .gitignore
+# Version control
+.git
+.gitignore
 
-# # Python cache / compiled bytecode
-# __pycache__
-# *.py[cod]
-# *.pyo
-# *.pyd
-# .Python
+# Python artifacts
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+dist/
+build/
 
-# # Virtual environments (should not be committed, but exclude anyway)
-# .venv
-# venv
-# env
+# Virtual environments
+.venv
+venv
+env
 
-# # Test artifacts
-# .pytest_cache
-# .coverage
-# htmlcov
-# tests/
+# IDE
+.vscode
+.idea
 
-# # Local env / secrets — never bake these into the image
-# .env
-# .env.*
-# *.env
+# Testing
+.pytest_cache
+.coverage
+htmlcov/
 
-# # Build / distribution artefacts
-# *.egg-info
-# dist
-# build
+# Secrets
+.env
+.env.*
+*.env
 
-# # Editor / OS noise
-# .DS_Store
-# .idea
-# .vscode
-# *.swp
-# *.swo
+# Docker files (not needed in build context)
+Dockerfile
+docker-compose*.yml
+.dockerignore
 
-# # CI / docs / local scripts that have no place in the image
-# .github
-# docs
-# *.md
+# Docs
+*.md
+
+# Model/data files — HuggingFace cache files can be gigabytes
+*.pt
+*.bin
+*.safetensors
+*.onnx
+models/
+data/

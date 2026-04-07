@@ -1,11 +1,14 @@
 name: Build and Push Agent Service Image
 
+# ECS deploy — disabled (EC2 is now active via deploy-ec2-agent.yml)
+# on:
+#   push:
+#     branches: [ main, devops/eric-ECS-ECR-FARGATE, devops/prod ]
+#     paths:
+#       - "agent-service/**"
+#       - ".github/workflows/build-push-ecr-ey-agent-service.yml"
+#   workflow_dispatch:
 on:
-  push:
-    branches: [ main, devops/eric-ECS-ECR-FARGATE, devops/prod ]
-    paths:
-      - "agent-service/**"
-      - ".github/workflows/build-push-ecr-ey-agent-service.yml"
   workflow_dispatch:
 
 permissions:
@@ -104,6 +107,7 @@ jobs:
 
       - name: Download current task definition
         run: |
+          set -euo pipefail
           aws ecs describe-task-definition \
             --task-definition ${{ steps.targets.outputs.task_def }} \
             --query taskDefinition \

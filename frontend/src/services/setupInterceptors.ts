@@ -85,6 +85,9 @@ export function setupInterceptors(store: StoreLike) {
         '/auth/refresh',
         '/auth/logout',
         '/auth/register',
+        '/auth/forgot-password',
+        '/auth/reset-password',
+        '/auth/reset-password/validate',
         '/invite/accept',
       ]
       if (authPaths.some(path => requestUrl.includes(path))) {

@@ -40,7 +40,6 @@ public class LoginCommandHandler(
             return Result<LoginResponse>.Of403("Account is disabled.");
         }
 
-        var accessToken = tokenService.GenerateAccessToken(user);
         var refreshToken = tokenService.GenerateRefreshToken();
 
         // Persist the Refresh Token to the database (store HASH, not plain)
@@ -57,6 +56,8 @@ public class LoginCommandHandler(
         userRepository.Update(user);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var accessToken = tokenService.GenerateAccessToken(user);
 
         return Result<LoginResponse>.Of200(
             "Login successful",
