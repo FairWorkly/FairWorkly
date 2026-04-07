@@ -105,6 +105,16 @@ jobs:
             echo "host=${{ vars.EC2_HOST_UAT }}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Sync compose and nginx config to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ steps.ec2.outputs.host }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.ec2.yml,nginx/nginx.conf"
+          target: /opt/fairworkly/
+          strip_components: 0
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         env:
