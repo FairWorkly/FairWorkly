@@ -113,18 +113,16 @@ jobs:
           MIGRATE_IMAGE: ${{ steps.push-migrate.outputs.image }}
           AWS_REGION: ${{ vars.AWS_REGION }}
           AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+          ENV_PREFIX: ${{ steps.vars.outputs.env_prefix }}
         with:
           host: ${{ steps.ec2.outputs.host }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: BACKEND_IMAGE,AGENT_IMAGE,MIGRATE_IMAGE,AWS_REGION,AWS_ACCOUNT_ID
+          envs: BACKEND_IMAGE,AGENT_IMAGE,MIGRATE_IMAGE,AWS_REGION,AWS_ACCOUNT_ID,ENV_PREFIX
           command_timeout: 10m
           script: |
             set -euo pipefail
             cd /opt/fairworkly
-
-            sed -i "s|BACKEND_IMAGE=.*|BACKEND_IMAGE=${BACKEND_IMAGE}|" .env
-            sed -i "s|AGENT_IMAGE=.*|AGENT_IMAGE=${AGENT_IMAGE}|" .env
 
             aws ecr get-login-password --region "$AWS_REGION" \
               | docker login --username AWS --password-stdin \
@@ -134,10 +132,26 @@ jobs:
             docker pull "${AGENT_IMAGE}"
             docker pull "${MIGRATE_IMAGE}"
 
-            POSTGRES_URL=$(grep '^POSTGRES_URL=' .env | cut -d= -f2-)
-            docker run --rm \
-              --network fairworkly_default \
-              -e "ConnectionStrings__DefaultConnection=${POSTGRES_URL}" \
-              "${MIGRATE_IMAGE}"
+            if [ "$ENV_PREFIX" = "prod" ]; then
+              sed -i "s|BACKEND_IMAGE_PROD=.*|BACKEND_IMAGE_PROD=${BACKEND_IMAGE}|" .env
+              sed -i "s|AGENT_IMAGE_PROD=.*|AGENT_IMAGE_PROD=${AGENT_IMAGE}|" .env
 
-            docker compose -f docker-compose.ec2.yml up -d --no-build backend agent-service nginx
+              POSTGRES_URL_PROD=$(grep '^POSTGRES_URL_PROD=' .env | cut -d= -f2-)
+              docker run --rm \
+                --network fairworkly_default \
+                -e "ConnectionStrings__DefaultConnection=${POSTGRES_URL_PROD}" \
+                "${MIGRATE_IMAGE}"
+
+              docker compose -f docker-compose.ec2.yml up -d --no-build backend-prod agent-service-prod nginx
+            else
+              sed -i "s|BACKEND_IMAGE=.*|BACKEND_IMAGE=${BACKEND_IMAGE}|" .env
+              sed -i "s|AGENT_IMAGE=.*|AGENT_IMAGE=${AGENT_IMAGE}|" .env
+
+              POSTGRES_URL=$(grep '^POSTGRES_URL=' .env | cut -d= -f2-)
+              docker run --rm \
+                --network fairworkly_default \
+                -e "ConnectionStrings__DefaultConnection=${POSTGRES_URL}" \
+                "${MIGRATE_IMAGE}"
+
+              docker compose -f docker-compose.ec2.yml up -d --no-build backend agent-service nginx
+            fi
