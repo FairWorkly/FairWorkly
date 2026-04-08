@@ -24,7 +24,7 @@ langchain-huggingface = "^0.1.0"
 langchain-text-splitters = "^0.3.0"
 faiss-cpu = "^1.8.0.post1"
 pypdf = "^5.1.0"
-transformers = "^4.46.0"
+transformers = "^5.0.0rc3"
 openpyxl = "^3.1.0"
 
 [tool.poetry.group.dev.dependencies]
