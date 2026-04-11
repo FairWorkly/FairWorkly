@@ -143,7 +143,7 @@ export const DebateTimeline = ({ result }: DebateTimelineProps) => {
                   <Chip
                     key={`${src.source}-${src.page}-${i}`}
                     size="small"
-                    label={`${src.source} p.${src.page + 1}`}
+                    label={`${src.source}${src.page != null ? ` p.${src.page + 1}` : ''}`}
                     variant="outlined"
                   />
                 ))}
