@@ -93,6 +93,9 @@ public class FairBotController(
         if (currentUser.UserId is not { } userId || userId == Guid.Empty)
             return RespondResult(Result<object>.Of401("Invalid user token"));
 
+        if (currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
+            return RespondResult(Result<object>.Of401("Invalid user token"));
+
         try
         {
             var result = await aiClient.PostAsync<object, object>(
