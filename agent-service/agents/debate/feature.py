@@ -24,6 +24,7 @@ _PROMPTS_DIR = Path(__file__).parent / "prompts"
 _LLM_TIMEOUT = 30
 
 logger = logging.getLogger(__name__)
+_NO_RELEVANT_DOCS = "No relevant documents found."
 
 
 def _load_prompt(name: str) -> str:
@@ -50,6 +51,43 @@ def _parse_field(text: str, field: str) -> str:
     return match.group(1).strip() if match else ""
 
 
+def _has_award_evidence(award_excerpts: str) -> bool:
+    normalized = award_excerpts.strip()
+    return bool(normalized) and normalized != _NO_RELEVANT_DOCS
+
+
+def _build_insufficient_evidence_result(
+    scenario: ShiftScenario,
+    scenario_str: str,
+    rag_sources: List[Dict[str, Any]],
+) -> DebateResult:
+    reasoning = (
+        f"FairWorkly could not retrieve usable excerpts from {scenario.award_name} that directly "
+        "support the required rate tiers or overtime thresholds for this scenario. The debate was "
+        "stopped to avoid unsupported payroll guidance. Retrieve the relevant Award clauses and rerun "
+        "the analysis."
+    )
+    return DebateResult(
+        scenario_summary=scenario_str,
+        rounds=[
+            DebateRound(
+                agent="Fair Bot",
+                role="Compliance Arbitrator",
+                icon="⚖️",
+                stance="Insufficient retrieved Award evidence to determine the exact pay rate.",
+                reasoning=reasoning,
+                sources=rag_sources,
+            )
+        ],
+        final_ruling=(
+            "Insufficient retrieved Award evidence to determine the exact pay rate. "
+            "Retrieve the relevant Award clauses and rerun this debate."
+        ),
+        cited_award_section=None,
+        model=None,
+    )
+
+
 class DebateFeature(FeatureBase):
     """Orchestrates a three-round multi-agent compliance debate."""
 
@@ -65,23 +103,47 @@ class DebateFeature(FeatureBase):
         rag_sources: List[Dict[str, Any]] = []
         try:
             retriever, _ = ensure_retriever(config, logger)
-            query = f"{scenario.award_name} overtime penalty rates Saturday {scenario.extra_context or ''}"
+            query_parts = [
+                scenario.award_name,
+                scenario.shift_date,
+                f"{scenario.shift_hours} hour shift",
+                f"{scenario.week_hours_before_shift} hours already worked this week",
+                "penalty rates overtime thresholds",
+            ]
+            if scenario.extra_context:
+                query_parts.append(scenario.extra_context)
+            query = " ".join(str(part) for part in query_parts if part)
             top_k = config.get("faiss", {}).get("similarity_search_k_docs", 3)
             retrieval = await retriever.retrieve(query, top_k=top_k)
             award_excerpts = retriever.format_context_for_llm(retrieval)
             rag_sources = retrieval.metadatas
         except Exception:
-            logger.warning("RAG retrieval failed for debate; proceeding without Award excerpts", exc_info=True)
+            logger.warning(
+                "RAG retrieval failed for debate; returning insufficient-evidence fallback",
+                exc_info=True,
+            )
+
+        if not _has_award_evidence(award_excerpts):
+            logger.info("Debate skipped due to missing usable Award excerpts")
+            return _build_insufficient_evidence_result(
+                scenario=scenario,
+                scenario_str=scenario_str,
+                rag_sources=rag_sources,
+            ).model_dump()
 
         llm = LLMProviderFactory.create()
         model_name: Optional[str] = None
         rounds: List[DebateRound] = []
 
         # ── Round 1: Roster Agent ────────────────────────────────────
-        roster_prompt = _load_prompt("roster_agent")
+        roster_prompt = _load_prompt("roster_agent").format(
+            scenario=scenario_str,
+            award_name=scenario.award_name,
+            award_excerpts=award_excerpts,
+        )
         roster_messages = [
             {"role": "system", "content": roster_prompt},
-            {"role": "user", "content": f"Shift Scenario:\n{scenario_str}"},
+            {"role": "user", "content": "Review the retrieved Award excerpts and provide your initial assessment."},
         ]
         roster_raw = await self._call_llm(llm, roster_messages)
         model_name = roster_raw.get("model")
@@ -93,6 +155,7 @@ class DebateFeature(FeatureBase):
             icon="📋",
             stance=_parse_field(roster_text, "STANCE"),
             reasoning=_parse_field(roster_text, "REASONING"),
+            sources=rag_sources,
         ))
 
         # ── Round 2: Payroll Agent ───────────────────────────────────

@@ -13,7 +13,9 @@ Your job is to:
 2. Determine which agent's analysis is more accurate (or synthesise a correct answer from both).
 3. Deliver a clear, authoritative FINAL RULING with the specific Award section that supports it.
 
-Be decisive. The employer needs to know exactly what rate to pay and why.
+Use ONLY the supplied Award excerpts as authority. If they do not support an exact rate or clause-based ruling, your final ruling must say the evidence is insufficient and must not invent a rate from general knowledge.
+
+Be decisive. The employer needs to know exactly what rate to pay and why, or that the current evidence is insufficient to answer safely.
 
 ## Context
 
@@ -31,11 +33,11 @@ Be decisive. The employer needs to know exactly what rate to pay and why.
 
 ## Response Format (strict)
 
-RULING: <one definitive sentence — the correct pay treatment>
+RULING: <one definitive sentence — the correct pay treatment, or that the supplied Award evidence is insufficient>
 
 AGREES_WITH: <"Roster Agent" or "Payroll Agent" or "Neither — corrected below">
 
 REASONING:
-<3-5 sentences. Reference the specific Award clause(s) that resolve the disagreement. Explain why the losing agent's interpretation was incorrect. Use precise language.>
+<3-5 sentences. Reference the specific Award clause(s) that resolve the disagreement. Explain why the losing agent's interpretation was incorrect. If the excerpts are insufficient, explicitly say so and identify the missing clause or rate detail. Use precise language.>
 
-CITED_SECTION: <The specific Award section number and title, e.g. "Section 33.2 — Overtime for full-time employees">
+CITED_SECTION: <The specific Award section number and title, e.g. "Section 33.2 — Overtime for full-time employees", or "None — insufficient retrieved Award evidence">
