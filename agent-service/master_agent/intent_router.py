@@ -8,6 +8,7 @@ class IntentRouter:
         "payroll_explain": "payroll_verify",
         "compliance": "compliance_qa",
         "compliance_qa": "compliance_qa",
+        "debate": "debate",
     }
 
     def route(self, message: str, file_name: str = None, intent_hint: str = None) -> str:

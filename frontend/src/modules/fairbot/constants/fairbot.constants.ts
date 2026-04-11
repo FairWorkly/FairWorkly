@@ -23,4 +23,11 @@ export const FAIRBOT_ACTION_CARDS = {
     description: 'Upload payslip CSV to check for underpayment risks',
     route: '/payroll',
   },
+  DEBATE: {
+    id: 'agent-debate',
+    title: 'Agent Debate',
+    description:
+      'Watch three AI agents debate a compliance scenario and deliver a ruling',
+    route: '/debate',
+  },
 } as const

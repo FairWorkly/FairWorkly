@@ -26,6 +26,8 @@ from master_agent.feature_registry import FeatureRegistry
 
 # Import features from domain packages
 from agents.compliance.feature import ComplianceFeature
+from agents.debate.feature import DebateFeature
+from agents.debate.models import DebateRequest
 from agents.payroll.feature import PayrollFeature
 from agents.payroll.models import PayrollExplainRequest
 from agents.roster.feature import RosterFeature
@@ -162,8 +164,10 @@ registry = FeatureRegistry()
 registry.register("compliance_qa", ComplianceFeature())
 registry.register("roster", RosterFeature())
 registry.register("roster_explain", RosterExplainFeature())
+registry.register("debate", DebateFeature())
 
 payroll_feature = PayrollFeature()
+debate_feature = registry.get_feature("debate")
 
 logger = logging.getLogger(__name__)
 
@@ -278,6 +282,23 @@ async def chat(
         "routed_to": feature_type,
         "result": result,
     }
+
+
+@app.post("/api/agent/debate")
+async def debate(
+    request: DebateRequest,
+    _: None = Depends(verify_service_key),
+):
+    """Multi-agent compliance debate — three agents evaluate a shift scenario."""
+    try:
+        result = await debate_feature.process(request.model_dump())
+        return JSONResponse(content={"code": 200, "msg": "OK", "data": result})
+    except Exception:
+        logger.exception("Unhandled error in debate endpoint")
+        return JSONResponse(
+            content={"code": 500, "msg": "Internal processing error"},
+            status_code=500,
+        )
 
 
 @app.post("/api/agent/payroll/explain")

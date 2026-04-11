@@ -15,8 +15,11 @@ namespace FairWorkly.API.Controllers.FairBot;
 /// </summary>
 [Route("api/fairbot")]
 [Authorize(Policy = "RequireAdmin")]
-public class FairBotController(IMediator mediator, ICurrentUserService currentUser)
-    : BaseApiController
+public class FairBotController(
+    IMediator mediator,
+    ICurrentUserService currentUser,
+    IAiClient aiClient
+) : BaseApiController
 {
     private const int MaxRequestIdLength = 128;
     private static readonly Regex ValidRequestIdPattern = new(
@@ -75,6 +78,37 @@ public class FairBotController(IMediator mediator, ICurrentUserService currentUs
 
         var result = await mediator.Send(command, cancellationToken);
         return RespondResult(result);
+    }
+
+    /// <summary>
+    /// Multi-agent compliance debate — proxies to Agent Service.
+    /// Three AI agents evaluate a shift scenario and deliver a final ruling.
+    /// </summary>
+    [HttpPost("debate")]
+    public async Task<IActionResult> Debate(
+        [FromBody] object request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (currentUser.UserId is not { } userId || userId == Guid.Empty)
+            return RespondResult(Result<object>.Of401("Invalid user token"));
+
+        if (currentUser.OrganizationId is not { } organizationId || organizationId == Guid.Empty)
+            return RespondResult(Result<object>.Of401("Invalid user token"));
+
+        try
+        {
+            var result = await aiClient.PostAsync<object, object>(
+                "/api/agent/debate",
+                request,
+                cancellationToken
+            );
+            return Ok(result);
+        }
+        catch (HttpRequestException ex)
+        {
+            return StatusCode(502, new { code = 502, msg = ex.Message });
+        }
     }
 
     private static string? SanitizeRequestId(string? raw)

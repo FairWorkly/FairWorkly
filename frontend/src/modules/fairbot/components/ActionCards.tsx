@@ -5,13 +5,20 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined'
 import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined'
+import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined'
 import { alpha } from '@mui/material/styles'
-import { FAIRBOT_ARIA, FAIRBOT_ACTION_CARDS } from '../constants/fairbot.constants'
+import {
+  FAIRBOT_ARIA,
+  FAIRBOT_ACTION_CARDS,
+} from '../constants/fairbot.constants'
 
 const CardsGrid = styled('section')(({ theme }) => ({
   display: 'grid',
-  gridTemplateColumns: 'repeat(2, 1fr)',
+  gridTemplateColumns: 'repeat(3, 1fr)',
   gap: theme.spacing(2),
+  [theme.breakpoints.down('md')]: {
+    gridTemplateColumns: 'repeat(2, 1fr)',
+  },
   [theme.breakpoints.down('sm')]: {
     gridTemplateColumns: '1fr',
   },
@@ -26,9 +33,12 @@ const Card = styled(Paper)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
   boxShadow: theme.fairworkly.shadow.sm,
   cursor: 'pointer',
-  transition: theme.transitions.create(['border-color', 'box-shadow', 'transform'], {
-    duration: theme.transitions.duration.short,
-  }),
+  transition: theme.transitions.create(
+    ['border-color', 'box-shadow', 'transform'],
+    {
+      duration: theme.transitions.duration.short,
+    }
+  ),
   '&:hover': {
     borderColor: alpha(theme.palette.primary.main, 0.3),
     boxShadow: theme.fairworkly.shadow.md,
@@ -57,13 +67,23 @@ const PayrollIconBox = styled(IconBox)(({ theme }) => ({
   color: theme.palette.success.main,
 }))
 
+const DebateIconBox = styled(IconBox)(({ theme }) => ({
+  background: alpha(theme.palette.warning.main, 0.08),
+  border: `1px solid ${alpha(theme.palette.warning.main, 0.1)}`,
+  color: theme.palette.warning.main,
+}))
+
 const CardContent = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing(0.5),
 }))
 
-export const ActionCards = () => {
+interface ActionCardsProps {
+  onDebateClick?: () => void
+}
+
+export const ActionCards = ({ onDebateClick }: ActionCardsProps) => {
   const navigate = useNavigate()
 
   return (
@@ -72,7 +92,7 @@ export const ActionCards = () => {
         onClick={() => navigate(FAIRBOT_ACTION_CARDS.ROSTER.route)}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
             navigate(FAIRBOT_ACTION_CARDS.ROSTER.route)
@@ -96,7 +116,7 @@ export const ActionCards = () => {
         onClick={() => navigate(FAIRBOT_ACTION_CARDS.PAYROLL.route)}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
             navigate(FAIRBOT_ACTION_CARDS.PAYROLL.route)
@@ -112,6 +132,30 @@ export const ActionCards = () => {
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {FAIRBOT_ACTION_CARDS.PAYROLL.description}
+          </Typography>
+        </CardContent>
+      </Card>
+
+      <Card
+        onClick={() => onDebateClick?.()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onDebateClick?.()
+          }
+        }}
+      >
+        <DebateIconBox>
+          <GavelOutlinedIcon />
+        </DebateIconBox>
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight="bold">
+            {FAIRBOT_ACTION_CARDS.DEBATE.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {FAIRBOT_ACTION_CARDS.DEBATE.description}
           </Typography>
         </CardContent>
       </Card>

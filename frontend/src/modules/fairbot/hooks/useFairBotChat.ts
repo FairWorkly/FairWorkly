@@ -6,6 +6,7 @@ import {
   type AgentChatResponse,
   type AgentChatHistoryItem,
 } from '@/services/fairbotApi'
+import { runDebate } from '@/services/debateApi'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { getValidationResults } from '@/services/rosterApi'
 import { useApiMutation } from '@/shared/hooks/useApiMutation'
@@ -207,6 +208,39 @@ export const useFairBotChat = (): UseFairBotChatResult => {
     }
   }, [])
 
+  const [isDebating, setIsDebating] = useState(false)
+
+  const sendDebate = useCallback(async (): Promise<boolean> => {
+    setIsDebating(true)
+    try {
+      const debateResult = await runDebate({
+        employee_name: 'Alice',
+        shift_date: '2024-03-16 (Saturday)',
+        shift_hours: 10,
+        week_hours_before_shift: 38,
+        award_name: 'Hospitality Industry (General) Award 2020',
+        extra_context: 'Full-time employee',
+      })
+
+      const assistantMessage = createMessage(
+        FAIRBOT_ROLES.ASSISTANT,
+        'Here is the multi-agent compliance debate result:',
+        {
+          model: debateResult.model ?? undefined,
+          debateResult,
+        }
+      )
+      setMessages(prev => [...prev, assistantMessage])
+      return true
+    } catch (caughtError) {
+      const normalized = createChatError(caughtError)
+      setError(normalized)
+      return false
+    } finally {
+      setIsDebating(false)
+    }
+  }, [])
+
   const sendMessage = useCallback(
     async (text: string): Promise<boolean> => {
       const trimmedText = text.trim()
@@ -216,9 +250,15 @@ export const useFairBotChat = (): UseFairBotChatResult => {
 
       setError(null)
 
-      const historyPayload = toHistoryPayload(messages)
       const userMessage = createMessage(FAIRBOT_ROLES.USER, trimmedText)
       setMessages(prev => [...prev, userMessage])
+
+      // Intercept /debate command — route to multi-agent debate
+      if (trimmedText.startsWith('/debate')) {
+        return sendDebate()
+      }
+
+      const historyPayload = toHistoryPayload(messages)
 
       runtimeRef.current.abortController?.abort()
       const controller = new AbortController()
@@ -264,14 +304,14 @@ export const useFairBotChat = (): UseFairBotChatResult => {
         }
       }
     },
-    [context, messages, sendChat]
+    [context, messages, sendChat, sendDebate]
   )
 
   return useMemo(
     () => ({
       messages,
       sendMessage,
-      isLoading: isSending,
+      isLoading: isSending || isDebating,
       error,
       contextLabel: isRosterExplainMode
         ? isContextLoading
@@ -286,6 +326,7 @@ export const useFairBotChat = (): UseFairBotChatResult => {
       messages,
       sendMessage,
       isSending,
+      isDebating,
       error,
       context,
       isRosterExplainMode,

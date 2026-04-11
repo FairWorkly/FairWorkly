@@ -43,11 +43,30 @@ export interface FairBotActionPlan {
   quickFollowUps: FairBotActionFollowUp[]
 }
 
+export interface FairBotDebateRound {
+  agent: string
+  role: string
+  icon: string
+  stance: string
+  reasoning: string
+  challenges: string | null
+  sources: FairBotMessageSource[]
+}
+
+export interface FairBotDebateResult {
+  scenario_summary: string
+  rounds: FairBotDebateRound[]
+  final_ruling: string
+  cited_award_section: string | null
+  model: string | null
+}
+
 export interface FairBotMessageMetadata {
   model?: string
   note?: string | null
   sources?: FairBotMessageSource[]
   actionPlan?: FairBotActionPlan
+  debateResult?: FairBotDebateResult
 }
 
 // Chat message model used across UI and session storage.
