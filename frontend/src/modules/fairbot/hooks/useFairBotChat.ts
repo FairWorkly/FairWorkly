@@ -210,7 +210,7 @@ export const useFairBotChat = (): UseFairBotChatResult => {
 
   const [isDebating, setIsDebating] = useState(false)
 
-  const sendDebate = useCallback(async (_text: string): Promise<boolean> => {
+  const sendDebate = useCallback(async (): Promise<boolean> => {
     setIsDebating(true)
     try {
       const debateResult = await runDebate({
@@ -255,7 +255,7 @@ export const useFairBotChat = (): UseFairBotChatResult => {
 
       // Intercept /debate command — route to multi-agent debate
       if (trimmedText.startsWith('/debate')) {
-        return sendDebate(trimmedText)
+        return sendDebate()
       }
 
       const historyPayload = toHistoryPayload(messages)
