@@ -19,6 +19,15 @@ def _scenario_payload() -> dict:
     }
 
 
+def test_debate_requires_scenario_payload():
+    try:
+        asyncio.run(DebateFeature().process({}))
+    except ValueError as exc:
+        assert str(exc) == "Debate payload must include a 'scenario' object."
+    else:
+        raise AssertionError("Expected ValueError for missing scenario payload")
+
+
 def test_debate_returns_insufficient_evidence_when_award_retrieval_is_empty(monkeypatch):
     class _EmptyRetriever:
         async def retrieve(self, query: str, top_k: int = 3):

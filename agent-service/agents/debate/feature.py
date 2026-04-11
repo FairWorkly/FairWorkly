@@ -13,6 +13,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from pydantic import ValidationError
+
 from master_agent.config import load_config
 from master_agent.feature_registry import FeatureBase
 from shared.llm.factory import LLMProviderFactory
@@ -88,11 +90,24 @@ def _build_insufficient_evidence_result(
     )
 
 
+def _parse_scenario_payload(payload: Dict[str, Any]) -> ShiftScenario:
+    scenario_payload = payload.get("scenario")
+    if scenario_payload is None:
+        raise ValueError("Debate payload must include a 'scenario' object.")
+    if not isinstance(scenario_payload, dict):
+        raise ValueError("Debate payload 'scenario' must be an object.")
+
+    try:
+        return ShiftScenario(**scenario_payload)
+    except ValidationError as exc:
+        raise ValueError(f"Invalid debate scenario payload: {exc}") from exc
+
+
 class DebateFeature(FeatureBase):
     """Orchestrates a three-round multi-agent compliance debate."""
 
     async def process(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        scenario = ShiftScenario(**payload["scenario"])
+        scenario = _parse_scenario_payload(payload)
         config = load_config()
         start = time.perf_counter()
 
