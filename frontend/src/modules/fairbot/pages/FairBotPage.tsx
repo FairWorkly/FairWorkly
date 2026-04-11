@@ -17,10 +17,11 @@ const PageContainer = styled('div')(({ theme }) => ({
 
 export const FairBotPage = () => {
   const conversation = useConversation()
+  const { sendMessage } = conversation
 
   const handleDebateClick = useCallback(() => {
-    void conversation.sendMessage(DEBATE_TRIGGER)
-  }, [conversation.sendMessage])
+    void sendMessage(DEBATE_TRIGGER)
+  }, [sendMessage])
 
   return (
     <PageContainer>
