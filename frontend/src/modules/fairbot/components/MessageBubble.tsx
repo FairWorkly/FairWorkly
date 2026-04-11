@@ -4,6 +4,7 @@ import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import { FAIRBOT_ROLES } from '../constants/fairbot.constants'
 import type { FairBotMessage } from '../types/fairbot.types'
+import { InlineDebateTimeline } from '../features/debate/InlineDebateTimeline'
 
 interface MessageBubbleProps {
   message: FairBotMessage
@@ -136,6 +137,7 @@ export const MessageBubble = ({
   const metadata = message.metadata
   const sources = metadata?.sources?.slice(0, 5) ?? []
   const actionPlan = showActionPlan ? metadata?.actionPlan : undefined
+  const debateResult = metadata?.debateResult
   const hasDetails =
     !isUser &&
     (metadata?.model || metadata?.note || sources.length > 0 || actionPlan)
@@ -148,10 +150,15 @@ export const MessageBubble = ({
           Sent {formatTimestamp(message.timestamp)}
         </Typography>
       </MetaRow>
-      <Bubble isUser={isUser}>
+      <Bubble isUser={isUser} sx={debateResult ? { maxWidth: 600 } : undefined}>
         <Typography variant="body2" whiteSpace="pre-line">
           {message.text}
         </Typography>
+        {debateResult && (
+          <DetailSection>
+            <InlineDebateTimeline result={debateResult} />
+          </DetailSection>
+        )}
         {hasDetails && (
           <DetailSection>
             {metadata?.model && (

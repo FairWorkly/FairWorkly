@@ -38,8 +38,15 @@ const StatusArea = styled('div')(({ theme }) => ({
   padding: theme.spacing(2, 3, 0),
 }))
 
-export const ChatSection = () => {
-  const conversation = useConversation()
+interface ChatSectionProps {
+  conversationOverride?: ReturnType<typeof useConversation>
+}
+
+export const ChatSection = ({
+  conversationOverride,
+}: ChatSectionProps = {}) => {
+  const internalConversation = useConversation()
+  const conversation = conversationOverride ?? internalConversation
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const handleQuickFollowUp = (prompt: string) => {
