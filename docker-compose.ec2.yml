@@ -1,8 +1,11 @@
-# FairWorkly EC2 Production Docker Compose
+# FairWorkly EC2 Docker Compose — UAT + Prod on same instance
 # Run on EC2: docker compose -f docker-compose.ec2.yml up -d
 # Requires /opt/fairworkly/.env with:
-#   BACKEND_IMAGE, AGENT_IMAGE, POSTGRES_PASSWORD, JWT_SECRET,
-#   AGENT_SERVICE_KEY, OPENAI_API_KEY, POSTGRES_URL, ALLOWED_ORIGINS
+#   UAT:  BACKEND_IMAGE, AGENT_IMAGE, POSTGRES_URL, JWT_SECRET,
+#         AGENT_SERVICE_KEY, ALLOWED_ORIGINS
+#   Prod: BACKEND_IMAGE_PROD, AGENT_IMAGE_PROD, POSTGRES_URL_PROD,
+#         JWT_SECRET_PROD, AGENT_SERVICE_KEY_PROD
+#   Shared: POSTGRES_PASSWORD, OPENAI_API_KEY
 
 services:
   postgres:
@@ -101,5 +104,3 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-    depends_on:
-      - backend
