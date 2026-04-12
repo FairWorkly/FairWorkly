@@ -14,7 +14,7 @@ poetry install
 ```
 
 If you already created a virtual environment with a different Python version, remove
-`agent-service/.venv` first and then re-run the commands above so local development
+`.venv` first and then re-run the commands above so local development
 matches Docker and CI.
 
 Set secrets via shell environment variables (recommended):
