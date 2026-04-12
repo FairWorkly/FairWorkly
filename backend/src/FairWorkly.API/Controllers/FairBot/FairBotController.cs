@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Text.Json;
 using FairWorkly.Application.Common.Interfaces;
 using FairWorkly.Application.FairBot;
 using FairWorkly.Application.FairBot.Features.SendChat;
@@ -107,8 +108,41 @@ public class FairBotController(
         }
         catch (HttpRequestException ex)
         {
-            return StatusCode(502, new { code = 502, msg = ex.Message });
+            return StatusCode(502, new { code = 502, msg = ExtractUpstreamErrorMessage(ex.Message) });
         }
+    }
+
+    private static string ExtractUpstreamErrorMessage(string rawMessage)
+    {
+        if (string.IsNullOrWhiteSpace(rawMessage))
+            return "Debate request failed upstream.";
+
+        var jsonStart = rawMessage.IndexOf('{');
+        if (jsonStart >= 0)
+        {
+            var json = rawMessage[jsonStart..];
+            try
+            {
+                using var document = JsonDocument.Parse(json);
+                if (
+                    document.RootElement.TryGetProperty("msg", out var msgElement)
+                    && msgElement.ValueKind == JsonValueKind.String
+                )
+                {
+                    var upstreamMessage = msgElement.GetString();
+                    if (!string.IsNullOrWhiteSpace(upstreamMessage))
+                    {
+                        return upstreamMessage!;
+                    }
+                }
+            }
+            catch (JsonException)
+            {
+                // Ignore malformed upstream JSON and fall back to the raw message.
+            }
+        }
+
+        return rawMessage;
     }
 
     private static string? SanitizeRequestId(string? raw)

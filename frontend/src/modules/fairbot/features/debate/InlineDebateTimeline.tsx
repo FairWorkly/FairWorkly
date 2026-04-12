@@ -110,6 +110,11 @@ export const InlineDebateTimeline = ({ result }: InlineDebateTimelineProps) => {
                 {round.challenges}
               </ChallengeText>
             )}
+            {round.agrees_with && (
+              <ChallengeText variant="caption" color="success.dark">
+                Agrees most with: {round.agrees_with}
+              </ChallengeText>
+            )}
             <Typography variant="caption" color="text.secondary">
               {round.reasoning}
             </Typography>

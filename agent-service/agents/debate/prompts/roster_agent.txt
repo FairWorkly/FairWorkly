@@ -20,9 +20,5 @@ Do NOT consider cumulative weekly hours or complex Award interactions unless the
 
 ## Response Format (strict)
 
-Respond with EXACTLY this structure — no extra keys, no markdown fences:
-
-STANCE: <one sentence summarising your rate determination, or that the supplied Award evidence is insufficient>
-
-REASONING:
-<2-4 sentences explaining your logic. Mention the day, hours, and which rate tiers you applied only if the supplied excerpts explicitly support them. Cite the relevant clause or excerpt wording where possible, and state that the evidence is insufficient if it does not support an exact answer.>
+Return EXACTLY one JSON object with these keys and no markdown fences:
+{{"stance":"<one sentence summarising your rate determination, or that the supplied Award evidence is insufficient>","reasoning":"<2-4 sentences explaining your logic. Mention the day, hours, and which rate tiers you applied only if the supplied excerpts explicitly support them. Cite the relevant clause or excerpt wording where possible, and state that the evidence is insufficient if it does not support an exact answer.>"}}

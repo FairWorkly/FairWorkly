@@ -20,6 +20,7 @@ export interface DebateRound {
   stance: string
   reasoning: string
   challenges: string | null
+  agrees_with: string | null
   sources: DebateSource[]
 }
 

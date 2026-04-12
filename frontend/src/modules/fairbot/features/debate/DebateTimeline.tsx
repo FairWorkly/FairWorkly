@@ -133,6 +133,14 @@ export const DebateTimeline = ({ result }: DebateTimelineProps) => {
               </ChallengeBar>
             )}
 
+            {round.agrees_with && (
+              <ChallengeBar>
+                <Typography variant="caption" color="success.dark">
+                  Agrees most with: {round.agrees_with}
+                </Typography>
+              </ChallengeBar>
+            )}
+
             <Typography variant="body2" color="text.secondary">
               {round.reasoning}
             </Typography>

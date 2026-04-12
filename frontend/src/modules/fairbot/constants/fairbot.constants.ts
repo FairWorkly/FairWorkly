@@ -25,9 +25,9 @@ export const FAIRBOT_ACTION_CARDS = {
   },
   DEBATE: {
     id: 'agent-debate',
-    title: 'Agent Debate',
+    title: 'Run Sample Debate',
     description:
-      'Watch three AI agents debate a compliance scenario and deliver a ruling',
-    route: '/debate',
+      'Run a sample compliance case and inspect how three AI agents reach a ruling',
+    route: '/fairbot',
   },
 } as const

@@ -1,6 +1,8 @@
 import asyncio
 from types import SimpleNamespace
 
+import pytest
+
 from agents.debate import feature as debate_feature_module
 from agents.debate.feature import DebateFeature
 from shared.llm.factory import LLMProviderFactory
@@ -26,6 +28,17 @@ def test_debate_requires_scenario_payload():
         assert str(exc) == "Debate payload must include a 'scenario' object."
     else:
         raise AssertionError("Expected ValueError for missing scenario payload")
+
+
+def test_debate_rejects_non_positive_shift_hours():
+    invalid_payload = _scenario_payload()
+    invalid_payload["scenario"]["shift_hours"] = 0
+
+    with pytest.raises(
+        ValueError,
+        match="Invalid debate scenario payload:",
+    ):
+        asyncio.run(DebateFeature().process(invalid_payload))
 
 
 def test_debate_returns_insufficient_evidence_when_award_retrieval_is_empty(monkeypatch):
@@ -66,6 +79,7 @@ def test_debate_returns_insufficient_evidence_when_award_retrieval_is_empty(monk
                 "rerun the analysis."
             ),
             "challenges": None,
+            "agrees_with": None,
             "sources": [],
         }
     ]
@@ -94,39 +108,31 @@ def test_debate_passes_retrieved_award_excerpts_to_roster_agent(monkeypatch):
         async def generate(self, messages, temperature: float = 0.4, max_tokens: int = 600):
             captured_messages.append(messages)
             system_prompt = messages[0]["content"]
-            if "Roster Agent" in system_prompt:
+            if "You are the **Roster Agent**" in system_prompt:
                 return {
                     "content": (
-                        "STANCE: Saturday hours are paid at 150% based on the retrieved excerpt.\n\n"
-                        "REASONING:\n"
-                        "The supplied Award excerpt states that Saturday work is paid at 150%. "
-                        "I am limiting this initial view to the shift in isolation and not "
-                        "adding any weekly overtime assumptions."
+                        '{"stance":"Saturday hours are paid at 150% based on the retrieved excerpt.",'
+                        '"reasoning":"The supplied Award excerpt states that Saturday work is paid at 150%. '
+                        'I am limiting this initial view to the shift in isolation and not '
+                        'adding any weekly overtime assumptions."}'
                     ),
                     "model": "stub-model",
                 }
-            if "Payroll Agent" in system_prompt:
+            if "You are the **Payroll Agent**" in system_prompt:
                 return {
                     "content": (
-                        "STANCE: The retrieved excerpts support Saturday work at 150%, but weekly "
-                        "overtime would need explicit Award support.\n\n"
-                        "CHALLENGES: I agree, and additionally the rate must stay grounded in the "
-                        "retrieved Award text.\n\n"
-                        "REASONING:\n"
-                        "The supplied excerpt supports the Saturday multiplier. I would need a "
-                        "retrieved overtime clause before asserting any higher rate."
+                        '{"stance":"The retrieved excerpts support Saturday work at 150%, but weekly overtime would need explicit Award support.",'
+                        '"challenges":"I agree, and additionally the rate must stay grounded in the retrieved Award text.",'
+                        '"reasoning":"The supplied excerpt supports the Saturday multiplier. I would need a retrieved overtime clause before asserting any higher rate."}'
                     ),
                     "model": "stub-model",
                 }
             return {
                 "content": (
-                    "RULING: The retrieved Award excerpt supports Saturday work at 150%, and no "
-                    "higher rate is justified without an overtime clause.\n\n"
-                    "AGREES_WITH: Payroll Agent\n\n"
-                    "REASONING:\n"
-                    "The payroll view is the safest because it stays within the retrieved Award "
-                    "text. There is no retrieved overtime clause supporting a higher multiplier.\n\n"
-                    "CITED_SECTION: Clause 29.3 - Saturday work"
+                    '{"ruling":"The retrieved Award excerpt supports Saturday work at 150%, and no higher rate is justified without an overtime clause.",'
+                    '"agrees_with":"Payroll Agent",'
+                    '"reasoning":"The payroll view is the safest because it stays within the retrieved Award text. There is no retrieved overtime clause supporting a higher multiplier.",'
+                    '"cited_section":"Clause 29.3 - Saturday work"}'
                 ),
                 "model": "stub-model",
             }
@@ -145,4 +151,122 @@ def test_debate_passes_retrieved_award_excerpts_to_roster_agent(monkeypatch):
     assert "Use ONLY the supplied Award excerpts as support for your answer." in roster_system_prompt
     assert "2024-03-16 (Saturday)" in captured_query["value"]
     assert result["rounds"][0]["sources"] == [{"source": "hospitality-award.pdf", "page": 12}]
+    assert result["rounds"][2]["challenges"] is None
+    assert result["rounds"][2]["agrees_with"] == "Payroll Agent"
     assert result["model"] == "stub-model"
+
+
+def test_debate_rejects_invalid_structured_agent_response(monkeypatch):
+    class _Retriever:
+        async def retrieve(self, query: str, top_k: int = 3):
+            return SimpleNamespace(
+                documents=["Clause 29.3 says Saturday work is paid at 150%."],
+                metadatas=[{"source": "hospitality-award.pdf", "page": 12}],
+            )
+
+        def format_context_for_llm(self, retrieval) -> str:
+            return "Clause 29.3 says Saturday work is paid at 150%."
+
+    class _StubLLM:
+        async def generate(self, messages, temperature: float = 0.4, max_tokens: int = 600):
+            return {
+                "content": "STANCE: Saturday work might be 150%",
+                "model": "stub-model",
+            }
+
+    monkeypatch.setattr(
+        debate_feature_module,
+        "ensure_retriever",
+        lambda *_args, **_kwargs: (_Retriever(), None),
+    )
+    monkeypatch.setattr(LLMProviderFactory, "create", lambda: _StubLLM())
+
+    with pytest.raises(
+        ValueError,
+        match="Roster Agent returned an invalid structured response.",
+    ):
+        asyncio.run(DebateFeature().process(_scenario_payload()))
+
+
+def test_debate_preserves_llm_provider_error_detail(monkeypatch):
+    class _Retriever:
+        async def retrieve(self, query: str, top_k: int = 3):
+            return SimpleNamespace(
+                documents=["Clause 29.3 says Saturday work is paid at 150%."],
+                metadatas=[{"source": "hospitality-award.pdf", "page": 12}],
+            )
+
+        def format_context_for_llm(self, retrieval) -> str:
+            return "Clause 29.3 says Saturday work is paid at 150%."
+
+    class _StubLLM:
+        async def generate(self, messages, temperature: float = 0.4, max_tokens: int = 600):
+            raise RuntimeError("context length exceeded for this model")
+
+    monkeypatch.setattr(
+        debate_feature_module,
+        "ensure_retriever",
+        lambda *_args, **_kwargs: (_Retriever(), None),
+    )
+    monkeypatch.setattr(LLMProviderFactory, "create", lambda: _StubLLM())
+
+    with pytest.raises(
+        ValueError,
+        match="Roster Agent failed while generating the debate response: context length exceeded for this model",
+    ):
+        asyncio.run(DebateFeature().process(_scenario_payload()))
+
+
+def test_debate_rejects_structured_response_with_blank_fields_or_extra_keys(monkeypatch):
+    class _Retriever:
+        async def retrieve(self, query: str, top_k: int = 3):
+            return SimpleNamespace(
+                documents=["Clause 29.3 says Saturday work is paid at 150%."],
+                metadatas=[{"source": "hospitality-award.pdf", "page": 12}],
+            )
+
+        def format_context_for_llm(self, retrieval) -> str:
+            return "Clause 29.3 says Saturday work is paid at 150%."
+
+    class _StubLLM:
+        async def generate(self, messages, temperature: float = 0.4, max_tokens: int = 600):
+            system_prompt = messages[0]["content"]
+            if "You are the **Roster Agent**" in system_prompt:
+                return {
+                    "content": (
+                        '{"stance":"Saturday hours are paid at 150% based on the retrieved excerpt.",'
+                        '"reasoning":"The supplied Award excerpt states that Saturday work is paid at 150%."}'
+                    ),
+                    "model": "stub-model",
+                }
+            if "You are the **Payroll Agent**" in system_prompt:
+                return {
+                    "content": (
+                        '{"stance":"The retrieved excerpts support Saturday work at 150%.",'
+                        '"challenges":"I agree, and additionally the rate must stay grounded in the retrieved Award text.",'
+                        '"reasoning":"The supplied excerpt supports the Saturday multiplier."}'
+                    ),
+                    "model": "stub-model",
+                }
+            return {
+                "content": (
+                    '{"ruling":" ","agrees_with":"Payroll Agent",'
+                    '"reasoning":"",'
+                    '"cited_section":"Clause 29.3 - Saturday work",'
+                    '"extra":"drift"}'
+                ),
+                "model": "stub-model",
+            }
+
+    monkeypatch.setattr(
+        debate_feature_module,
+        "ensure_retriever",
+        lambda *_args, **_kwargs: (_Retriever(), None),
+    )
+    monkeypatch.setattr(LLMProviderFactory, "create", lambda: _StubLLM())
+
+    with pytest.raises(
+        ValueError,
+        match="Fair Bot returned an invalid structured response.",
+    ):
+        asyncio.run(DebateFeature().process(_scenario_payload()))
