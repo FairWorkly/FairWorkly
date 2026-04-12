@@ -2,9 +2,9 @@
 # Run on EC2: docker compose -f docker-compose.ec2.yml up -d
 # Requires /opt/fairworkly/.env with:
 #   UAT:  BACKEND_IMAGE, AGENT_IMAGE, POSTGRES_URL, JWT_SECRET,
-#         AGENT_SERVICE_KEY, ALLOWED_ORIGINS
+#         AGENT_SERVICE_KEY, ALLOWED_ORIGINS, S3_BUCKET_ROSTER
 #   Prod: BACKEND_IMAGE_PROD, AGENT_IMAGE_PROD, POSTGRES_URL_PROD,
-#         JWT_SECRET_PROD, AGENT_SERVICE_KEY_PROD
+#         JWT_SECRET_PROD, AGENT_SERVICE_KEY_PROD, S3_BUCKET_ROSTER_PROD
 #   Shared: POSTGRES_PASSWORD, OPENAI_API_KEY
 
 services:
@@ -48,12 +48,14 @@ services:
     container_name: fairworkly-backend
     restart: unless-stopped
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: Staging
       ASPNETCORE_URLS: http://0.0.0.0:5680
       ConnectionStrings__DefaultConnection: ${POSTGRES_URL:?POSTGRES_URL is required}
       AiSettings__BaseUrl: http://agent-service:8000
       AiSettings__ServiceKey: ${AGENT_SERVICE_KEY:?AGENT_SERVICE_KEY is required}
       JwtSettings__Secret: ${JWT_SECRET:?JWT_SECRET is required}
+      AWS__S3__Enabled: "true"
+      AWS__S3__BucketName: ${S3_BUCKET_ROSTER:?S3_BUCKET_ROSTER is required}
     depends_on:
       postgres:
         condition: service_healthy
@@ -88,6 +90,8 @@ services:
       AiSettings__BaseUrl: http://agent-service-prod:8000
       AiSettings__ServiceKey: ${AGENT_SERVICE_KEY_PROD:?AGENT_SERVICE_KEY_PROD is required}
       JwtSettings__Secret: ${JWT_SECRET_PROD:?JWT_SECRET_PROD is required}
+      AWS__S3__Enabled: "true"
+      AWS__S3__BucketName: ${S3_BUCKET_ROSTER_PROD:?S3_BUCKET_ROSTER_PROD is required}
     depends_on:
       postgres:
         condition: service_healthy
