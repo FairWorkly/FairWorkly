@@ -1,0 +1,211 @@
+name: Deploy to EC2
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+      - devops/eric-ECS-ECR-FARGATE
+      - devops/prod
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-ec2-${{ github.event.workflow_run.head_branch || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Set image tags
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHORT_SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
+          SHORT_SHA="${SHORT_SHA:0:7}"
+          REF_NAME="${{ github.event.workflow_run.head_branch || github.ref_name }}"
+          if [ "$REF_NAME" = "devops/prod" ]; then
+            ENV_PREFIX="prod"
+          else
+            ENV_PREFIX="uat"
+          fi
+          FULL_TAG="${ENV_PREFIX}-${SHORT_SHA}"
+          {
+            echo "short_sha=$SHORT_SHA"
+            echo "env_prefix=$ENV_PREFIX"
+            echo "full_tag=$FULL_TAG"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-ecs-backend-deploy-oidc
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78 # v2
+
+      - name: Build and push backend image
+        id: push-backend
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_BACKEND }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+          FULL_TAG: ${{ steps.vars.outputs.full_tag }}
+        run: |
+          set -euo pipefail
+          IMAGE="$REGISTRY/$REPOSITORY"
+          docker build -f backend/Dockerfile -t "$IMAGE:$SHORT_SHA" .
+          docker push "$IMAGE:$SHORT_SHA"
+          docker tag "$IMAGE:$SHORT_SHA" "$IMAGE:$FULL_TAG"
+          docker push "$IMAGE:$FULL_TAG"
+          echo "image=$IMAGE:$FULL_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push migrate image
+        id: push-migrate
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_MIGRATE }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+          FULL_TAG: ${{ steps.vars.outputs.full_tag }}
+        run: |
+          set -euo pipefail
+          IMAGE="$REGISTRY/$REPOSITORY"
+          docker build -f backend/Dockerfile --target migrate -t "$IMAGE:$SHORT_SHA" .
+          docker push "$IMAGE:$SHORT_SHA"
+          docker tag "$IMAGE:$SHORT_SHA" "$IMAGE:latest"
+          docker push "$IMAGE:latest"
+          echo "image=$IMAGE:$SHORT_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push agent image
+        id: push-agent
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPO_AGENT }}
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+          FULL_TAG: ${{ steps.vars.outputs.full_tag }}
+        run: |
+          set -euo pipefail
+          IMAGE="$REGISTRY/$REPOSITORY"
+          docker build -f agent-service/Dockerfile -t "$IMAGE:$SHORT_SHA" agent-service
+          docker push "$IMAGE:$SHORT_SHA"
+          docker tag "$IMAGE:$SHORT_SHA" "$IMAGE:$FULL_TAG"
+          docker push "$IMAGE:$FULL_TAG"
+          echo "image=$IMAGE:$FULL_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Set EC2 host
+        id: ec2
+        run: |
+          if [ "${{ steps.vars.outputs.env_prefix }}" = "prod" ]; then
+            echo "host=${{ vars.EC2_HOST_PROD }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "host=${{ vars.EC2_HOST_UAT }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Sync compose and nginx config to EC2
+        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
+        with:
+          host: ${{ steps.ec2.outputs.host }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.ec2.yml,nginx/nginx.conf"
+          target: /opt/fairworkly/
+          strip_components: 0
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
+        env:
+          BACKEND_IMAGE: ${{ steps.push-backend.outputs.image }}
+          AGENT_IMAGE: ${{ steps.push-agent.outputs.image }}
+          MIGRATE_IMAGE: ${{ steps.push-migrate.outputs.image }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+          ENV_PREFIX: ${{ steps.vars.outputs.env_prefix }}
+        with:
+          host: ${{ steps.ec2.outputs.host }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: BACKEND_IMAGE,AGENT_IMAGE,MIGRATE_IMAGE,AWS_REGION,AWS_ACCOUNT_ID,ENV_PREFIX
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+            cd /opt/fairworkly
+
+            aws ecr get-login-password --region "$AWS_REGION" \
+              | docker login --username AWS --password-stdin \
+                "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+            docker pull "${BACKEND_IMAGE}"
+            docker pull "${AGENT_IMAGE}"
+            docker pull "${MIGRATE_IMAGE}"
+
+            docker network create fairworkly_default 2>/dev/null || true
+
+            # Ensure postgres is up before running migrations (handles fresh-host deploys)
+            docker compose -f docker-compose.ec2.yml up -d postgres
+            until docker exec fairworkly-postgres pg_isready -U postgres -q; do
+              echo "Waiting for postgres..."; sleep 3
+            done
+
+            if [ "$ENV_PREFIX" = "prod" ]; then
+              grep -q '^BACKEND_IMAGE_PROD=' .env || { echo "ERROR: BACKEND_IMAGE_PROD missing from .env"; exit 1; }
+              grep -q '^AGENT_IMAGE_PROD=' .env    || { echo "ERROR: AGENT_IMAGE_PROD missing from .env"; exit 1; }
+              grep -q '^POSTGRES_URL_PROD=' .env   || { echo "ERROR: POSTGRES_URL_PROD missing from .env"; exit 1; }
+
+              POSTGRES_URL_PROD=$(grep '^POSTGRES_URL_PROD=' .env | cut -d= -f2-)
+              docker run --rm \
+                --network fairworkly_default \
+                -e "ConnectionStrings__DefaultConnection=${POSTGRES_URL_PROD}" \
+                "${MIGRATE_IMAGE}"
+
+              sed -i "s|BACKEND_IMAGE_PROD=.*|BACKEND_IMAGE_PROD=${BACKEND_IMAGE}|" .env
+              sed -i "s|AGENT_IMAGE_PROD=.*|AGENT_IMAGE_PROD=${AGENT_IMAGE}|" .env
+
+              docker compose -f docker-compose.ec2.yml up -d --no-build backend-prod agent-service-prod nginx
+              docker exec fairworkly-nginx nginx -t
+              docker exec fairworkly-nginx nginx -s reload
+
+              until curl -sf http://localhost:5681/health >/dev/null 2>&1; do
+                echo "Waiting for backend-prod..."; sleep 3
+              done
+              echo "backend-prod healthy"
+            else
+              grep -q '^BACKEND_IMAGE=' .env || { echo "ERROR: BACKEND_IMAGE missing from .env"; exit 1; }
+              grep -q '^AGENT_IMAGE=' .env    || { echo "ERROR: AGENT_IMAGE missing from .env"; exit 1; }
+              grep -q '^POSTGRES_URL=' .env   || { echo "ERROR: POSTGRES_URL missing from .env"; exit 1; }
+
+              POSTGRES_URL=$(grep '^POSTGRES_URL=' .env | cut -d= -f2-)
+              docker run --rm \
+                --network fairworkly_default \
+                -e "ConnectionStrings__DefaultConnection=${POSTGRES_URL}" \
+                "${MIGRATE_IMAGE}"
+
+              sed -i "s|BACKEND_IMAGE=.*|BACKEND_IMAGE=${BACKEND_IMAGE}|" .env
+              sed -i "s|AGENT_IMAGE=.*|AGENT_IMAGE=${AGENT_IMAGE}|" .env
+
+              docker compose -f docker-compose.ec2.yml up -d --no-build backend agent-service nginx
+              docker exec fairworkly-nginx nginx -t
+              docker exec fairworkly-nginx nginx -s reload
+
+              until curl -sf http://localhost:5680/health >/dev/null 2>&1; do
+                echo "Waiting for backend..."; sleep 3
+              done
+              echo "backend healthy"
+            fi
+
+            docker image prune -af --filter "until=168h" --filter "label!=keep" 2>/dev/null || true
