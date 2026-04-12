@@ -1,14 +1,6 @@
 name: Build and Push Backend Image to Amazon ECR by Eric
 
 on:
-  push:
-    branches:
-      - main
-      - devops/eric-ECS-ECR-FARGATE
-      - devops/prod
-    paths:
-      - "backend/**"
-      - ".github/workflows/build-push-ecr-ey-backend.yml"
   workflow_dispatch:
 
 permissions:
