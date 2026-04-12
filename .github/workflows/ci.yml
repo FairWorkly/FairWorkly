@@ -103,6 +103,7 @@ jobs:
       - name: Run tests
         env:
           AGENT_SERVICE_KEY: test-service-key
+          PYTHONPATH: ${{ github.workspace }}/agent-service
         run: poetry run pytest tests -q
 
   fairbot-e2e:
