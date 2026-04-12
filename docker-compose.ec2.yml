@@ -1,0 +1,105 @@
+# FairWorkly EC2 Production Docker Compose
+# Run on EC2: docker compose -f docker-compose.ec2.yml up -d
+# Requires /opt/fairworkly/.env with:
+#   BACKEND_IMAGE, AGENT_IMAGE, POSTGRES_PASSWORD, JWT_SECRET,
+#   AGENT_SERVICE_KEY, OPENAI_API_KEY, POSTGRES_URL, ALLOWED_ORIGINS
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fairworkly-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: FairWorklyDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - /data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d FairWorklyDb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  agent-service:
+    image: ${AGENT_IMAGE:?AGENT_IMAGE is required}
+    container_name: fairworkly-agent
+    restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?OPENAI_API_KEY is required}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      AGENT_SERVICE_KEY: ${AGENT_SERVICE_KEY:?AGENT_SERVICE_KEY is required}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://uatec2.fairworkly.com}
+      HOST: 0.0.0.0
+      PORT: 8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  backend:
+    image: ${BACKEND_IMAGE:?BACKEND_IMAGE is required}
+    container_name: fairworkly-backend
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://0.0.0.0:5680
+      ConnectionStrings__DefaultConnection: ${POSTGRES_URL:?POSTGRES_URL is required}
+      AiSettings__BaseUrl: http://agent-service:8000
+      AiSettings__ServiceKey: ${AGENT_SERVICE_KEY:?AGENT_SERVICE_KEY is required}
+      JwtSettings__Secret: ${JWT_SECRET:?JWT_SECRET is required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      agent-service:
+        condition: service_healthy
+
+  agent-service-prod:
+    image: ${AGENT_IMAGE_PROD:?AGENT_IMAGE_PROD is required}
+    container_name: fairworkly-agent-prod
+    restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?OPENAI_API_KEY is required}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      AGENT_SERVICE_KEY: ${AGENT_SERVICE_KEY_PROD:?AGENT_SERVICE_KEY_PROD is required}
+      ALLOWED_ORIGINS: https://fairworkly.com
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  backend-prod:
+    image: ${BACKEND_IMAGE_PROD:?BACKEND_IMAGE_PROD is required}
+    container_name: fairworkly-backend-prod
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://0.0.0.0:5681
+      ConnectionStrings__DefaultConnection: ${POSTGRES_URL_PROD:?POSTGRES_URL_PROD is required}
+      AiSettings__BaseUrl: http://agent-service-prod:8000
+      AiSettings__ServiceKey: ${AGENT_SERVICE_KEY_PROD:?AGENT_SERVICE_KEY_PROD is required}
+      JwtSettings__Secret: ${JWT_SECRET_PROD:?JWT_SECRET_PROD is required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      agent-service-prod:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    container_name: fairworkly-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - backend
