@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
@@ -51,14 +51,14 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4
         with:
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-ecs-backend-deploy-oidc
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78 # v2
 
       - name: Build and push backend image
         id: push-backend
@@ -118,7 +118,7 @@ jobs:
           fi
 
       - name: Sync compose and nginx config to EC2
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
         with:
           host: ${{ steps.ec2.outputs.host }}
           username: ubuntu
@@ -128,7 +128,7 @@ jobs:
           strip_components: 0
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
         env:
           BACKEND_IMAGE: ${{ steps.push-backend.outputs.image }}
           AGENT_IMAGE: ${{ steps.push-agent.outputs.image }}
@@ -157,6 +157,10 @@ jobs:
             docker network create fairworkly_default 2>/dev/null || true
 
             if [ "$ENV_PREFIX" = "prod" ]; then
+              grep -q '^BACKEND_IMAGE_PROD=' .env || { echo "ERROR: BACKEND_IMAGE_PROD missing from .env"; exit 1; }
+              grep -q '^AGENT_IMAGE_PROD=' .env    || { echo "ERROR: AGENT_IMAGE_PROD missing from .env"; exit 1; }
+              grep -q '^POSTGRES_URL_PROD=' .env   || { echo "ERROR: POSTGRES_URL_PROD missing from .env"; exit 1; }
+
               POSTGRES_URL_PROD=$(grep '^POSTGRES_URL_PROD=' .env | cut -d= -f2-)
               docker run --rm \
                 --network fairworkly_default \
@@ -175,6 +179,10 @@ jobs:
               done
               echo "backend-prod healthy"
             else
+              grep -q '^BACKEND_IMAGE=' .env || { echo "ERROR: BACKEND_IMAGE missing from .env"; exit 1; }
+              grep -q '^AGENT_IMAGE=' .env    || { echo "ERROR: AGENT_IMAGE missing from .env"; exit 1; }
+              grep -q '^POSTGRES_URL=' .env   || { echo "ERROR: POSTGRES_URL missing from .env"; exit 1; }
+
               POSTGRES_URL=$(grep '^POSTGRES_URL=' .env | cut -d= -f2-)
               docker run --rm \
                 --network fairworkly_default \
