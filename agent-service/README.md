@@ -2,15 +2,20 @@
 
 ### Prerequisites
 
-1. Python 3.10 or newer
+1. Python 3.11
 2. [Poetry](https://python-poetry.org/) for dependency management
 
 ### Install dependencies
 
 ```bash
 cd agent-service
+poetry env use 3.11
 poetry install
 ```
+
+If you already created a virtual environment with a different Python version, remove
+`agent-service/.venv` first and then re-run the commands above so local development
+matches Docker and CI.
 
 Set secrets via shell environment variables (recommended):
 
