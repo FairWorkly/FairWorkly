@@ -1,7 +1,7 @@
 import React from 'react'
-import { Box, Typography, Checkbox, styled, alpha } from '@mui/material'
+import { Box, Typography, Checkbox, Chip, styled, alpha } from '@mui/material'
 import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined'
-import type { IssueItem } from '../types/complianceCheck.type'
+import type { IssueItem, IssueSeverity } from '../types/complianceCheck.type'
 
 const IssueRowWrapper = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -24,9 +24,11 @@ const IssueRowWrapper = styled(Box)(({ theme }) => ({
   },
 }))
 
-const IssueAlert = styled(Box)(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.error.main, 0.08),
-  borderLeft: `4px solid ${theme.palette.error.main}`,
+const IssueAlert = styled(Box, {
+  shouldForwardProp: prop => prop !== 'accentColor',
+})<{ accentColor: string }>(({ theme, accentColor }) => ({
+  backgroundColor: alpha(accentColor, 0.08),
+  borderLeft: `4px solid ${accentColor}`,
   borderRadius: theme.fairworkly.radius.sm,
   padding: theme.spacing(1.5),
   display: 'flex',
@@ -60,6 +62,17 @@ const EmployeeId = styled(Typography)(({ theme }) => ({
   flexShrink: 0,
 }))
 
+const SeverityChip = styled(Chip, {
+  shouldForwardProp: prop => prop !== 'chipColor',
+})<{ chipColor: string }>(({ chipColor }) => ({
+  height: 22,
+  fontSize: 11,
+  fontWeight: 600,
+  backgroundColor: alpha(chipColor, 0.1),
+  borderColor: alpha(chipColor, 0.3),
+  '& .MuiChip-label': { color: chipColor },
+}))
+
 const ExpectedValue = styled('span')(({ theme }) => ({
   color: theme.palette.success.main,
   fontWeight: theme.typography.h2.fontWeight,
@@ -71,8 +84,10 @@ const VarianceLabel = styled('span')(({ theme }) => ({
   marginRight: theme.spacing(1),
 }))
 
-const IssueAlertIcon = styled(ReportProblemOutlinedIcon)(({ theme }) => ({
-  color: theme.palette.error.main,
+const IssueAlertIcon = styled(ReportProblemOutlinedIcon, {
+  shouldForwardProp: prop => prop !== 'iconColor',
+})<{ iconColor: string }>(({ iconColor }) => ({
+  color: iconColor,
 }))
 
 const IssueAlertText = styled(Typography)(({ theme }) => ({
@@ -98,13 +113,33 @@ interface IssueRowProps {
   resultType?: 'payroll' | 'roster'
 }
 
+const severityConfig: Record<
+  IssueSeverity,
+  { label: string; colorToken: 'error' | 'warning' | 'info' }
+> = {
+  Critical: { label: 'Critical', colorToken: 'error' },
+  Error: { label: 'Error', colorToken: 'error' },
+  Warning: { label: 'Warning', colorToken: 'warning' },
+  Info: { label: 'Info', colorToken: 'info' },
+}
+
+const defaultSeverityStyle = severityConfig.Error
+
 export const IssueRow: React.FC<IssueRowProps> = ({
   issue,
   isSelected,
   onToggleSelection,
-  resultType = 'payroll',
+  resultType = 'roster',
 }) => {
   const varianceLabel = resultType === 'roster' ? 'Deviation' : 'Variance'
+  const severity = issue.severity ?? 'Error'
+  const severityStyle = severityConfig[severity] ?? defaultSeverityStyle
+  const accentColor =
+    severityStyle.colorToken === 'error'
+      ? '#dc2626'
+      : severityStyle.colorToken === 'warning'
+        ? '#d97706'
+        : '#2563eb'
 
   return (
     <IssueRowWrapper>
@@ -115,14 +150,20 @@ export const IssueRow: React.FC<IssueRowProps> = ({
           <EmployeeId variant="body2" color="text.disabled">
             ID: {issue.empId}
           </EmployeeId>
+          <SeverityChip
+            label={severityStyle.label}
+            size="small"
+            variant="outlined"
+            chipColor={accentColor}
+          />
         </HeaderRow>
         <IssueDetails variant="body2" color="text.primary">
           Actual: <strong>{issue.actualValue}</strong>, expected:{' '}
           <ExpectedValue>{issue.expectedValue}</ExpectedValue> — {issue.reason}
         </IssueDetails>
 
-        <IssueAlert>
-          <IssueAlertIcon />
+        <IssueAlert accentColor={accentColor}>
+          <IssueAlertIcon iconColor={accentColor} />
           <IssueAlertText variant="body2">
             <VarianceLabel>
               {varianceLabel}: {issue.variance}

@@ -6,6 +6,7 @@ import type {
   ValidationMetadata,
   ValidationSummary,
   IssueCategory,
+  IssueSeverity,
 } from '@/shared/compliance-check'
 import { checkTypeDisplayMap } from '../config/checkTypeDisplay'
 
@@ -13,6 +14,23 @@ export interface RosterComplianceResults {
   metadata: ValidationMetadata
   summary: ValidationSummary
   categories: IssueCategory[]
+}
+
+const severityRank: Record<IssueSeverity, number> = {
+  Info: 0,
+  Warning: 1,
+  Error: 2,
+  Critical: 3,
+}
+
+const issueSeverities = ['Info', 'Warning', 'Error', 'Critical'] as const
+
+function isIssueSeverity(value: string): value is IssueSeverity {
+  return issueSeverities.includes(value as IssueSeverity)
+}
+
+function normalizeIssueSeverity(value: string): IssueSeverity {
+  return isIssueSeverity(value) ? value : 'Error'
 }
 
 /**
@@ -67,18 +85,23 @@ export function mapValidationToComplianceResults(
       color: display.color,
       employeeCount: uniqueEmployees.size,
       totalUnderpayment: `${issues.length} violation${issues.length !== 1 ? 's' : ''}`,
-      issues: issues.map(issue => ({
-        id: issueIdMap.get(issue.id)!,
-        name: issue.employeeName ?? 'Unknown',
-        empId: issue.employeeNumber ?? issue.employeeId.substring(0, 8),
-        actualValue: formatIssueValue(issue.actualValue, issue.checkType),
-        expectedValue: formatIssueValue(issue.expectedValue, issue.checkType),
-        reason: issue.description,
-        variance: computeVariance(issue),
-        breakdown: issue.affectedDates
-          ? `Affected date: ${issue.affectedDates}`
-          : '',
-      })),
+      issues: issues.map(issue => {
+        const severity = normalizeIssueSeverity(issue.severity)
+
+        return {
+          id: issueIdMap.get(issue.id)!,
+          name: issue.employeeName ?? 'Unknown',
+          empId: issue.employeeNumber ?? issue.employeeId.substring(0, 8),
+          severity,
+          actualValue: formatIssueValue(issue.actualValue, issue.checkType),
+          expectedValue: formatIssueValue(issue.expectedValue, issue.checkType),
+          reason: issue.description,
+          variance: computeVariance(issue),
+          breakdown: issue.affectedDates
+            ? `Affected date: ${issue.affectedDates}`
+            : '',
+        }
+      }),
     }
   })
 
@@ -106,8 +129,9 @@ export function mapValidationToComplianceResults(
   const summary: ValidationSummary = {
     employeesCompliant: compliantEmployees,
     totalIssues: complianceIssues.length,
-    criticalIssuesCount: complianceIssues.filter(i => i.severity === 'Error')
-      .length,
+    criticalIssuesCount: complianceIssues.filter(
+      i => severityRank[normalizeIssueSeverity(i.severity)] >= severityRank.Error
+    ).length,
     totalUnderpayment: 'N/A',
     employeesAffected: affectedEmployeeIds.size,
   }

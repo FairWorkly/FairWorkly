@@ -33,6 +33,7 @@ export type {
   ValidationMetadata,
   IssueCategory,
   IssueItem,
+  IssueSeverity,
   UploadedFile,
   ValidationSummary,
   ComplianceConfig,
