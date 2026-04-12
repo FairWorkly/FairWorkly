@@ -29,6 +29,7 @@ export interface ComplianceApiResponse {
       id?: number
       name?: string
       emp_id?: string
+      severity?: 'Critical' | 'Error' | 'Warning' | 'Info'
       actual_value?: string
       expected_value?: string
       reason?: string

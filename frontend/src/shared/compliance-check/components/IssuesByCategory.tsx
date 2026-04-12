@@ -230,6 +230,7 @@ export const IssuesByCategory: React.FC<IssuesByCategoryProps> = ({
                       issue={issue}
                       isSelected={selectedIssueIds.includes(issue.id)}
                       onToggleSelection={() => toggleIssueSelection(issue.id)}
+                      resultType={resultType}
                     />
                   ))
                 ) : (

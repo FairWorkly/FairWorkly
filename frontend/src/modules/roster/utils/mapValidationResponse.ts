@@ -6,6 +6,7 @@ import type {
   ValidationMetadata,
   ValidationSummary,
   IssueCategory,
+  IssueSeverity,
 } from '@/shared/compliance-check'
 import { checkTypeDisplayMap } from '../config/checkTypeDisplay'
 
@@ -13,6 +14,13 @@ export interface RosterComplianceResults {
   metadata: ValidationMetadata
   summary: ValidationSummary
   categories: IssueCategory[]
+}
+
+const severityRank: Record<IssueSeverity, number> = {
+  Info: 0,
+  Warning: 1,
+  Error: 2,
+  Critical: 3,
 }
 
 /**
@@ -71,6 +79,7 @@ export function mapValidationToComplianceResults(
         id: issueIdMap.get(issue.id)!,
         name: issue.employeeName ?? 'Unknown',
         empId: issue.employeeNumber ?? issue.employeeId.substring(0, 8),
+        severity: issue.severity as IssueSeverity,
         actualValue: formatIssueValue(issue.actualValue, issue.checkType),
         expectedValue: formatIssueValue(issue.expectedValue, issue.checkType),
         reason: issue.description,
@@ -106,8 +115,9 @@ export function mapValidationToComplianceResults(
   const summary: ValidationSummary = {
     employeesCompliant: compliantEmployees,
     totalIssues: complianceIssues.length,
-    criticalIssuesCount: complianceIssues.filter(i => i.severity === 'Error')
-      .length,
+    criticalIssuesCount: complianceIssues.filter(
+      i => severityRank[i.severity as IssueSeverity] >= severityRank.Error
+    ).length,
     totalUnderpayment: 'N/A',
     employeesAffected: affectedEmployeeIds.size,
   }

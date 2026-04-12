@@ -17,10 +17,13 @@ export interface ValidationMetadata {
   validationId?: string
 }
 
+export type IssueSeverity = 'Critical' | 'Error' | 'Warning' | 'Info'
+
 export interface IssueItem {
   id: number
   name: string
   empId: string
+  severity?: IssueSeverity
   actualValue: string
   expectedValue: string
   reason: string

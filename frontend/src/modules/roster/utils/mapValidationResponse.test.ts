@@ -181,6 +181,7 @@ describe('mapValidationToComplianceResults', () => {
     expect(issue.id).toBe(1)
     expect(issue.name).toBe('Alice Smith')
     expect(issue.empId).toBe('E001')
+    expect(issue.severity).toBe('Error')
     expect(issue.expectedValue).toBe('3 hrs')
     expect(issue.actualValue).toBe('2 hrs')
     expect(issue.reason).toBe('Shift only 2 hours, minimum is 3 hours')
@@ -198,6 +199,56 @@ describe('mapValidationToComplianceResults', () => {
     expect(result.categories).toHaveLength(0)
     expect(result.summary.employeesCompliant).toBe(5)
     expect(result.summary.employeesAffected).toBe(0)
+  })
+
+  it('counts both Critical and Error severities as critical issues', () => {
+    const response = createBaseResponse({
+      issues: [
+        {
+          id: '1',
+          shiftId: null,
+          employeeId: 'emp-1',
+          employeeName: 'Alice',
+          employeeNumber: 'E001',
+          checkType: 'MinimumShiftHours',
+          severity: 'Critical',
+          description: 'Critical issue',
+          expectedValue: 3,
+          actualValue: 1,
+          affectedDates: null,
+        },
+        {
+          id: '2',
+          shiftId: null,
+          employeeId: 'emp-2',
+          employeeName: 'Bob',
+          employeeNumber: 'E002',
+          checkType: 'MealBreak',
+          severity: 'Error',
+          description: 'Error issue',
+          expectedValue: null,
+          actualValue: 0,
+          affectedDates: null,
+        },
+        {
+          id: '3',
+          shiftId: null,
+          employeeId: 'emp-3',
+          employeeName: 'Cara',
+          employeeNumber: 'E003',
+          checkType: 'WeeklyHoursLimit',
+          severity: 'Warning',
+          description: 'Warning issue',
+          expectedValue: 38,
+          actualValue: 40,
+          affectedDates: null,
+        },
+      ],
+    })
+
+    const result = mapValidationToComplianceResults(response)
+
+    expect(result.summary.criticalIssuesCount).toBe(2)
   })
 
   it('handles unknown checkType with fallback display', () => {

@@ -46,6 +46,7 @@ export const mapBackendToComplianceResults = (
         id: issue.id ?? 0,
         name: issue.name ?? DEFAULT_TEXT,
         empId: issue.emp_id ?? DEFAULT_TEXT,
+        severity: issue.severity,
         actualValue: issue.actual_value ?? DEFAULT_VALUE,
         expectedValue: issue.expected_value ?? DEFAULT_VALUE,
         reason: issue.reason ?? '',
