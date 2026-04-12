@@ -15,6 +15,10 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: deploy-frontend-${{ github.event.workflow_run.head_branch || github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
   deploy-frontend:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
@@ -87,10 +91,9 @@ jobs:
           set -euo pipefail
           aws s3 sync frontend/dist/assets/ \
             s3://${{ steps.targets.outputs.s3_bucket }}/assets/ \
-            --delete \
             --cache-control "public,max-age=31536000,immutable"
 
-      - name: Sync remaining files to S3 (no cache)
+      - name: Sync index.html and other root files to S3 (no cache)
         run: |
           set -euo pipefail
           aws s3 sync frontend/dist/ \
