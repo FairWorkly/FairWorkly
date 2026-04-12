@@ -2,7 +2,22 @@ name: Dependency Guard
 
 on:
   push:
+    paths:
+      - "agent-service/**"
+      - "Makefile"
+      - ".github/workflows/dependency-guard.yml"
   pull_request:
+    paths:
+      - "agent-service/**"
+      - "Makefile"
+      - ".github/workflows/dependency-guard.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deps-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint-deps:

@@ -2,14 +2,49 @@ name: CI
 
 on:
   push:
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
   pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      agent_service: ${{ steps.filter.outputs.agent_service }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - "frontend/**"
+              - ".github/workflows/ci.yml"
+            backend:
+              - "backend/**"
+              - ".github/workflows/ci.yml"
+            agent_service:
+              - "agent-service/**"
+              - ".github/workflows/ci.yml"
+
   frontend:
     name: Frontend Lint & Build
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -30,6 +65,8 @@ jobs:
 
   backend:
     name: Backend Build & Unit Tests
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -46,8 +83,33 @@ jobs:
       - name: Test (Unit)
         run: dotnet test tests/FairWorkly.UnitTests/FairWorkly.UnitTests.csproj --configuration Release --no-build --verbosity normal
 
+  agent-service:
+    name: Agent Service Tests
+    needs: changes
+    if: needs.changes.outputs.agent_service == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: agent-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pip install "poetry==2.3.2" poetry-plugin-export
+      - name: Install dependencies
+        run: poetry install --with dev --no-interaction --no-root
+      - name: Run tests
+        env:
+          AGENT_SERVICE_KEY: test-service-key
+          PYTHONPATH: ${{ github.workspace }}/agent-service
+        run: poetry run pytest tests -q
+
   fairbot-e2e:
     name: FairBot E2E (Playwright)
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
