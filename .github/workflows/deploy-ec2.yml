@@ -156,6 +156,12 @@ jobs:
 
             docker network create fairworkly_default 2>/dev/null || true
 
+            # Ensure postgres is up before running migrations (handles fresh-host deploys)
+            docker compose -f docker-compose.ec2.yml up -d postgres
+            until docker exec fairworkly-postgres pg_isready -U postgres -q; do
+              echo "Waiting for postgres..."; sleep 3
+            done
+
             if [ "$ENV_PREFIX" = "prod" ]; then
               grep -q '^BACKEND_IMAGE_PROD=' .env || { echo "ERROR: BACKEND_IMAGE_PROD missing from .env"; exit 1; }
               grep -q '^AGENT_IMAGE_PROD=' .env    || { echo "ERROR: AGENT_IMAGE_PROD missing from .env"; exit 1; }
