@@ -2,10 +2,6 @@ import { type RouteObject } from 'react-router-dom'
 import { PublicMarketingLayout } from '@/shared/components/layout/public/PublicMarketingLayout'
 import { PublicAuthLayout } from '@/shared/components/layout/public/PublicAuthLayout'
 import { AuthBranding } from '@/modules/auth'
-import { HomePage } from '@/modules/home/pages/HomePage'
-import { LoginPage } from '@/modules/auth/pages/LoginPage'
-import { AcceptInvitePage } from '@/modules/auth/pages/AcceptInvitePage'
-import { ResetPasswordPage } from '@/modules/auth/pages/ResetPasswordPage'
 
 export const publicRoutes: RouteObject[] = [
   // Marketing pages (full-width center layout)
@@ -14,7 +10,10 @@ export const publicRoutes: RouteObject[] = [
     children: [
       {
         path: '/',
-        element: <HomePage />,
+        lazy: async () => {
+          const { HomePage } = await import('@/modules/home/pages/HomePage')
+          return { Component: HomePage }
+        },
       },
     ],
   },
@@ -24,15 +23,28 @@ export const publicRoutes: RouteObject[] = [
     children: [
       {
         path: '/login',
-        element: <LoginPage />,
+        lazy: async () => {
+          const { LoginPage } = await import('@/modules/auth/pages/LoginPage')
+          return { Component: LoginPage }
+        },
       },
       {
         path: '/accept-invite',
-        element: <AcceptInvitePage />,
+        lazy: async () => {
+          const { AcceptInvitePage } = await import(
+            '@/modules/auth/pages/AcceptInvitePage'
+          )
+          return { Component: AcceptInvitePage }
+        },
       },
       {
         path: '/reset-password',
-        element: <ResetPasswordPage />,
+        lazy: async () => {
+          const { ResetPasswordPage } = await import(
+            '@/modules/auth/pages/ResetPasswordPage'
+          )
+          return { Component: ResetPasswordPage }
+        },
       },
     ],
   },
