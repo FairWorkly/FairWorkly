@@ -15,6 +15,10 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: deploy-ec2-${{ github.event.workflow_run.head_branch || github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
@@ -150,9 +154,15 @@ jobs:
             docker pull "${AGENT_IMAGE}"
             docker pull "${MIGRATE_IMAGE}"
 
+            docker network create fairworkly_default 2>/dev/null || true
+
             if [ "$ENV_PREFIX" = "prod" ]; then
               sed -i "s|BACKEND_IMAGE_PROD=.*|BACKEND_IMAGE_PROD=${BACKEND_IMAGE}|" .env
               sed -i "s|AGENT_IMAGE_PROD=.*|AGENT_IMAGE_PROD=${AGENT_IMAGE}|" .env
+
+              TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+              docker exec fairworkly-postgres pg_dump -U postgres FairWorklyProdDb \
+                | aws s3 cp - "s3://fairworkly-db-backups/pre-deploy/prod-${TIMESTAMP}.sql"
 
               POSTGRES_URL_PROD=$(grep '^POSTGRES_URL_PROD=' .env | cut -d= -f2-)
               docker run --rm \
@@ -161,10 +171,15 @@ jobs:
                 "${MIGRATE_IMAGE}"
 
               docker compose -f docker-compose.ec2.yml up -d --no-build backend-prod agent-service-prod nginx
+              docker exec fairworkly-nginx nginx -t
               docker exec fairworkly-nginx nginx -s reload
             else
               sed -i "s|BACKEND_IMAGE=.*|BACKEND_IMAGE=${BACKEND_IMAGE}|" .env
               sed -i "s|AGENT_IMAGE=.*|AGENT_IMAGE=${AGENT_IMAGE}|" .env
+
+              TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+              docker exec fairworkly-postgres pg_dump -U postgres FairWorklyDb \
+                | aws s3 cp - "s3://fairworkly-db-backups/pre-deploy/uat-${TIMESTAMP}.sql"
 
               POSTGRES_URL=$(grep '^POSTGRES_URL=' .env | cut -d= -f2-)
               docker run --rm \
@@ -173,5 +188,6 @@ jobs:
                 "${MIGRATE_IMAGE}"
 
               docker compose -f docker-compose.ec2.yml up -d --no-build backend agent-service nginx
+              docker exec fairworkly-nginx nginx -t
               docker exec fairworkly-nginx nginx -s reload
             fi
