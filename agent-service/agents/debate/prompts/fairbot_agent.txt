@@ -33,11 +33,5 @@ Be decisive. The employer needs to know exactly what rate to pay and why, or tha
 
 ## Response Format (strict)
 
-RULING: <one definitive sentence — the correct pay treatment, or that the supplied Award evidence is insufficient>
-
-AGREES_WITH: <"Roster Agent" or "Payroll Agent" or "Neither — corrected below">
-
-REASONING:
-<3-5 sentences. Reference the specific Award clause(s) that resolve the disagreement. Explain why the losing agent's interpretation was incorrect. If the excerpts are insufficient, explicitly say so and identify the missing clause or rate detail. Use precise language.>
-
-CITED_SECTION: <The specific Award section number and title, e.g. "Section 33.2 — Overtime for full-time employees", or "None — insufficient retrieved Award evidence">
+Return EXACTLY one JSON object with these keys and no markdown fences:
+{{"ruling":"<one definitive sentence — the correct pay treatment, or that the supplied Award evidence is insufficient>","agrees_with":"<Roster Agent or Payroll Agent or Neither - corrected below>","reasoning":"<3-5 sentences. Reference the specific Award clause(s) that resolve the disagreement. Explain why the losing agent's interpretation was incorrect. If the excerpts are insufficient, explicitly say so and identify the missing clause or rate detail. Use precise language.>","cited_section":"<The specific Award section number and title, e.g. Section 33.2 - Overtime for full-time employees, or None - insufficient retrieved Award evidence>"}}

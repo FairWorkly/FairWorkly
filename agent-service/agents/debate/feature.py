@@ -11,16 +11,23 @@ import logging
 import re
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from master_agent.config import load_config
 from master_agent.feature_registry import FeatureBase
 from shared.llm.factory import LLMProviderFactory
 from shared.rag.retriever_manager import ensure_retriever
 
-from .models import DebateResult, DebateRound, ShiftScenario
+from .models import (
+    DebateResult,
+    DebateRound,
+    FairBotAgentResponse,
+    PayrollAgentResponse,
+    RosterAgentResponse,
+    ShiftScenario,
+)
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
 _LLM_TIMEOUT = 30
@@ -46,11 +53,44 @@ def _scenario_text(s: ShiftScenario) -> str:
     return "\n".join(lines)
 
 
-def _parse_field(text: str, field: str) -> str:
-    """Extract a labelled field value from structured LLM output."""
-    pattern = rf"^{field}:\s*(.+?)(?=\n[A-Z_]+:|$)"
-    match = re.search(pattern, text, re.MULTILINE | re.DOTALL)
-    return match.group(1).strip() if match else ""
+def _extract_json_object(text: str) -> str:
+    """Extract a single JSON object from the LLM response."""
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        stripped = re.sub(r"^```(?:json)?\s*", "", stripped, flags=re.IGNORECASE)
+        stripped = re.sub(r"\s*```$", "", stripped)
+        stripped = stripped.strip()
+
+    start = stripped.find("{")
+    end = stripped.rfind("}")
+    if start == -1 or end == -1 or end < start:
+        raise ValueError("Response did not contain a JSON object.")
+
+    return stripped[start : end + 1]
+
+
+def _parse_agent_response(
+    text: str, model_type: Type[BaseModel], agent_name: str
+) -> BaseModel:
+    """Validate a structured JSON response from a debate agent."""
+    try:
+        return model_type.model_validate_json(_extract_json_object(text))
+    except (ValidationError, ValueError) as exc:
+        logger.warning(
+            "Invalid structured debate response from %s",
+            agent_name,
+            exc_info=True,
+        )
+        raise ValueError(
+            f"{agent_name} returned an invalid structured response."
+        ) from exc
+
+
+def _normalize_cited_section(cited_section: str) -> Optional[str]:
+    normalized = cited_section.strip()
+    if not normalized or normalized.lower().startswith("none"):
+        return None
+    return normalized
 
 
 def _has_award_evidence(award_excerpts: str) -> bool:
@@ -160,23 +200,27 @@ class DebateFeature(FeatureBase):
             {"role": "system", "content": roster_prompt},
             {"role": "user", "content": "Review the retrieved Award excerpts and provide your initial assessment."},
         ]
-        roster_raw = await self._call_llm(llm, roster_messages)
+        roster_raw = await self._call_llm(llm, roster_messages, agent_name="Roster Agent")
         model_name = roster_raw.get("model")
-        roster_text = roster_raw.get("content", "")
+        roster_response = _parse_agent_response(
+            roster_raw.get("content", ""),
+            RosterAgentResponse,
+            "Roster Agent",
+        )
 
         rounds.append(DebateRound(
             agent="Roster Agent",
             role="Shift Analyst",
             icon="📋",
-            stance=_parse_field(roster_text, "STANCE"),
-            reasoning=_parse_field(roster_text, "REASONING"),
+            stance=roster_response.stance,
+            reasoning=roster_response.reasoning,
             sources=rag_sources,
         ))
 
         # ── Round 2: Payroll Agent ───────────────────────────────────
         payroll_prompt = _load_prompt("payroll_agent").format(
             scenario=scenario_str,
-            roster_opinion=roster_text,
+            roster_opinion=roster_response.model_dump_json(indent=2),
             award_name=scenario.award_name,
             award_excerpts=award_excerpts or "(No Award excerpts available)",
         )
@@ -184,24 +228,28 @@ class DebateFeature(FeatureBase):
             {"role": "system", "content": payroll_prompt},
             {"role": "user", "content": "Please review the Roster Agent's assessment and provide your analysis."},
         ]
-        payroll_raw = await self._call_llm(llm, payroll_messages)
-        payroll_text = payroll_raw.get("content", "")
+        payroll_raw = await self._call_llm(llm, payroll_messages, agent_name="Payroll Agent")
+        payroll_response = _parse_agent_response(
+            payroll_raw.get("content", ""),
+            PayrollAgentResponse,
+            "Payroll Agent",
+        )
 
         rounds.append(DebateRound(
             agent="Payroll Agent",
             role="Payroll Compliance Specialist",
             icon="💰",
-            stance=_parse_field(payroll_text, "STANCE"),
-            reasoning=_parse_field(payroll_text, "REASONING"),
-            challenges=_parse_field(payroll_text, "CHALLENGES"),
+            stance=payroll_response.stance,
+            reasoning=payroll_response.reasoning,
+            challenges=payroll_response.challenges,
             sources=rag_sources,
         ))
 
         # ── Round 3: Fair Bot ────────────────────────────────────────
         fairbot_prompt = _load_prompt("fairbot_agent").format(
             scenario=scenario_str,
-            roster_opinion=roster_text,
-            payroll_opinion=payroll_text,
+            roster_opinion=roster_response.model_dump_json(indent=2),
+            payroll_opinion=payroll_response.model_dump_json(indent=2),
             award_name=scenario.award_name,
             award_excerpts=award_excerpts or "(No Award excerpts available)",
         )
@@ -209,20 +257,24 @@ class DebateFeature(FeatureBase):
             {"role": "system", "content": fairbot_prompt},
             {"role": "user", "content": "Please deliver your final ruling on this compliance question."},
         ]
-        fairbot_raw = await self._call_llm(llm, fairbot_messages)
-        fairbot_text = fairbot_raw.get("content", "")
+        fairbot_raw = await self._call_llm(llm, fairbot_messages, agent_name="Fair Bot")
+        fairbot_response = _parse_agent_response(
+            fairbot_raw.get("content", ""),
+            FairBotAgentResponse,
+            "Fair Bot",
+        )
 
         rounds.append(DebateRound(
             agent="Fair Bot",
             role="Compliance Arbitrator",
             icon="⚖️",
-            stance=_parse_field(fairbot_text, "RULING"),
-            reasoning=_parse_field(fairbot_text, "REASONING"),
-            challenges=_parse_field(fairbot_text, "AGREES_WITH"),
+            stance=fairbot_response.ruling,
+            reasoning=fairbot_response.reasoning,
+            agrees_with=fairbot_response.agrees_with,
             sources=rag_sources,
         ))
 
-        cited_section = _parse_field(fairbot_text, "CITED_SECTION")
+        cited_section = _normalize_cited_section(fairbot_response.cited_section)
 
         elapsed = time.perf_counter() - start
         logger.info("Debate completed in %.2fs (%d rounds)", elapsed, len(rounds))
@@ -230,14 +282,14 @@ class DebateFeature(FeatureBase):
         result = DebateResult(
             scenario_summary=scenario_str,
             rounds=rounds,
-            final_ruling=_parse_field(fairbot_text, "RULING"),
+            final_ruling=fairbot_response.ruling,
             cited_award_section=cited_section or None,
             model=model_name,
         )
         return result.model_dump()
 
     async def _call_llm(
-        self, llm, messages: List[Dict[str, str]]
+        self, llm, messages: List[Dict[str, str]], agent_name: str
     ) -> Dict[str, Any]:
         try:
             return await asyncio.wait_for(
@@ -245,8 +297,17 @@ class DebateFeature(FeatureBase):
                 timeout=_LLM_TIMEOUT,
             )
         except asyncio.TimeoutError:
-            logger.error("LLM call timed out after %ds", _LLM_TIMEOUT)
-            return {"content": "(Agent timed out)", "model": None}
-        except Exception:
-            logger.exception("LLM call failed in debate")
-            return {"content": "(Agent unavailable)", "model": None}
+            logger.error("%s timed out after %ds", agent_name, _LLM_TIMEOUT)
+            raise ValueError(
+                f"{agent_name} timed out before returning a valid debate response."
+            ) from None
+        except Exception as exc:
+            logger.exception("LLM call failed in debate for %s", agent_name)
+            detail = str(exc).strip()
+            if detail:
+                raise ValueError(
+                    f"{agent_name} failed while generating the debate response: {detail}"
+                ) from exc
+            raise ValueError(
+                f"{agent_name} was unavailable while generating the debate response."
+            ) from None

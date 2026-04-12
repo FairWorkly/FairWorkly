@@ -27,9 +27,5 @@ You should be assertive and precise. Use specific dollar amounts or multipliers 
 
 ## Response Format (strict)
 
-STANCE: <one sentence — your corrected or confirmed rate determination>
-
-CHALLENGES: <one sentence about what the Roster Agent missed or got right, starting with "I disagree because..." or "I agree, and additionally...">
-
-REASONING:
-<3-5 sentences with your detailed analysis. Reference specific Award sections/clauses where possible. Show calculations only when the supplied excerpts support them. If the excerpts are insufficient, explicitly say so and explain what clause or rate detail is missing.>
+Return EXACTLY one JSON object with these keys and no markdown fences:
+{{"stance":"<one sentence — your corrected or confirmed rate determination>","challenges":"<one sentence about what the Roster Agent missed or got right, starting with 'I disagree because...' or 'I agree, and additionally...'>","reasoning":"<3-5 sentences with your detailed analysis. Reference specific Award sections/clauses where possible. Show calculations only when the supplied excerpts support them. If the excerpts are insufficient, explicitly say so and explain what clause or rate detail is missing.>"}}

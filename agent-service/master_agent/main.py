@@ -293,6 +293,12 @@ async def debate(
     try:
         result = await debate_feature.process(request.model_dump())
         return JSONResponse(content={"code": 200, "msg": "OK", "data": result})
+    except ValueError as exc:
+        logger.warning("Structured debate validation failed: %s", exc)
+        return JSONResponse(
+            content={"code": 502, "msg": str(exc)},
+            status_code=502,
+        )
     except Exception:
         logger.exception("Unhandled error in debate endpoint")
         return JSONResponse(

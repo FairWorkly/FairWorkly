@@ -1,4 +1,4 @@
-import { type RouteObject } from 'react-router-dom'
+import { Navigate, type RouteObject } from 'react-router-dom'
 import { ProtectedRoute } from '@/shared/components/guards/ProtectedRoute'
 import { RoleBasedRoute } from '@/shared/components/guards/RoleBasedRoute'
 import { MainLayout } from '@/shared/components/layout/app/MainLayout'
@@ -25,12 +25,7 @@ export const fairbotRoutes: RouteObject[] = [
               },
               {
                 path: '/debate',
-                lazy: async () => {
-                  const { DebatePage } = await import(
-                    '@/modules/fairbot/features/debate'
-                  )
-                  return { Component: DebatePage }
-                },
+                element: <Navigate to="/fairbot" replace />,
               },
             ],
           },

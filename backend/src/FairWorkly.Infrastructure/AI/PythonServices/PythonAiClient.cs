@@ -45,8 +45,16 @@ public class PythonAiClient : IAiClient
         // Convert the request object to a JSON string and send it
         var response = await _httpClient.PostAsJsonAsync(route, request, cancellationToken);
 
-        // If the Python service reports an error, throw an exception
-        response.EnsureSuccessStatusCode();
+        // If the Python service reports an error, preserve the upstream body for callers.
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException(
+                $"Agent Service returned {(int)response.StatusCode}: {errorBody}",
+                null,
+                response.StatusCode
+            );
+        }
 
         // Read JSON from the response body and try to force it into the TResponse template
         // If the fields returned by Python don't match TResponse, there may be errors here or missing properties

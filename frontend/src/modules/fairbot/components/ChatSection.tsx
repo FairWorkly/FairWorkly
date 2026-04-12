@@ -42,11 +42,11 @@ interface ChatSectionProps {
   conversationOverride?: ReturnType<typeof useConversation>
 }
 
-export const ChatSection = ({
-  conversationOverride,
-}: ChatSectionProps = {}) => {
-  const internalConversation = useConversation()
-  const conversation = conversationOverride ?? internalConversation
+interface ChatSectionContentProps {
+  conversation: ReturnType<typeof useConversation>
+}
+
+const ChatSectionContent = ({ conversation }: ChatSectionContentProps) => {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const handleQuickFollowUp = (prompt: string) => {
@@ -103,4 +103,19 @@ export const ChatSection = ({
       </InputArea>
     </SectionContainer>
   )
+}
+
+export const ChatSection = ({
+  conversationOverride,
+}: ChatSectionProps = {}) => {
+  if (conversationOverride) {
+    return <ChatSectionContent conversation={conversationOverride} />
+  }
+
+  return <ManagedChatSection />
+}
+
+const ManagedChatSection = () => {
+  const conversation = useConversation()
+  return <ChatSectionContent conversation={conversation} />
 }
