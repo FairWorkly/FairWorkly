@@ -82,8 +82,6 @@ export function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
-import * as XLSX from 'xlsx'
-
 /**
  * Escape a CSV field value
  * Wraps in quotes if contains comma, quote, or newline
@@ -121,10 +119,19 @@ interface ExportMetadata {
 /**
  * Export compliance results to Excel (.xlsx) and trigger download
  */
-export function exportComplianceXlsx(
+let xlsxModulePromise: Promise<typeof import('xlsx')> | null = null
+
+async function loadXlsx() {
+  if (!xlsxModulePromise) {
+    xlsxModulePromise = import('xlsx')
+  }
+  return xlsxModulePromise
+}
+
+export async function exportComplianceXlsx(
   metadata: ExportMetadata,
   categories: ExportableCategory[]
-): void {
+): Promise<void> {
   const rows = categories.flatMap(category =>
     category.issues.map(issue => ({
       Category: category.title,
@@ -138,6 +145,7 @@ export function exportComplianceXlsx(
     }))
   )
 
+  const XLSX = await loadXlsx()
   const worksheet = XLSX.utils.json_to_sheet(rows)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Compliance Report')

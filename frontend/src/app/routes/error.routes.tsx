@@ -1,14 +1,18 @@
 import { type RouteObject } from 'react-router-dom'
-import NotFoundPage from '@/modules/error/pages/NotFoundPage'
-import { ForbiddenPage } from '@/modules/error/pages/ForbiddenPage'
 
 export const errorRoutes: RouteObject[] = [
   {
     path: '/403',
-    element: <ForbiddenPage />,
+    lazy: async () => {
+      const { ForbiddenPage } = await import('@/modules/error/pages/ForbiddenPage')
+      return { Component: ForbiddenPage }
+    },
   },
   {
     path: '*',
-    element: <NotFoundPage />,
+    lazy: async () => {
+      const module = await import('@/modules/error/pages/NotFoundPage')
+      return { Component: module.default }
+    },
   },
 ]

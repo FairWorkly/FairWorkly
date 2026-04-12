@@ -1,23 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router-dom'
 import { MainLayout } from '@/shared/components/layout/app/MainLayout'
 import { ProtectedRoute } from '@/shared/components/guards/ProtectedRoute'
-
-// Payroll pages
-import { PayrollUpload } from '@/modules/payroll/pages/PayrollUpload'
-import { PayrollResults } from '@/modules/payroll/pages/PayrollResults'
-
-// Compliance pages
-import { RosterUpload } from '@/modules/roster/pages/RosterUpload'
-import { RosterResults } from '@/modules/roster/pages/RosterResults'
-
-// Documents pages
-import { DocumentTemplates } from '@/modules/documents/pages/DocumentTemplates'
-import { GenerateDocument } from '@/modules/documents/pages/GenerateDocument'
-import { DocumentLibrary } from '@/modules/documents/pages/DocumentLibrary'
-
-// Settings pages
-import { Settings } from '@/modules/settings/pages/Settings'
-
 import { RoleBasedRoute } from '@/shared/components/guards/RoleBasedRoute'
 
 export const toolRoutes: RouteObject[] = [
@@ -34,8 +17,24 @@ export const toolRoutes: RouteObject[] = [
               {
                 path: '/payroll',
                 children: [
-                  { path: 'upload', element: <PayrollUpload /> },
-                  { path: 'results', element: <PayrollResults /> },
+                  {
+                    path: 'upload',
+                    lazy: async () => {
+                      const { PayrollUpload } = await import(
+                        '@/modules/payroll/pages/PayrollUpload'
+                      )
+                      return { Component: PayrollUpload }
+                    },
+                  },
+                  {
+                    path: 'results',
+                    lazy: async () => {
+                      const { PayrollResults } = await import(
+                        '@/modules/payroll/pages/PayrollResults'
+                      )
+                      return { Component: PayrollResults }
+                    },
+                  },
                   { index: true, element: <Navigate to="upload" replace /> },
                 ],
               },
@@ -49,8 +48,24 @@ export const toolRoutes: RouteObject[] = [
               {
                 path: '/roster',
                 children: [
-                  { path: 'upload', element: <RosterUpload /> },
-                  { path: 'results/:rosterId', element: <RosterResults /> },
+                  {
+                    path: 'upload',
+                    lazy: async () => {
+                      const { RosterUpload } = await import(
+                        '@/modules/roster/pages/RosterUpload'
+                      )
+                      return { Component: RosterUpload }
+                    },
+                  },
+                  {
+                    path: 'results/:rosterId',
+                    lazy: async () => {
+                      const { RosterResults } = await import(
+                        '@/modules/roster/pages/RosterResults'
+                      )
+                      return { Component: RosterResults }
+                    },
+                  },
                   { index: true, element: <Navigate to="upload" replace /> },
                 ],
               },
@@ -64,9 +79,33 @@ export const toolRoutes: RouteObject[] = [
               {
                 path: '/documents',
                 children: [
-                  { path: 'templates', element: <DocumentTemplates /> },
-                  { path: 'generate', element: <GenerateDocument /> },
-                  { path: 'library', element: <DocumentLibrary /> },
+                  {
+                    path: 'templates',
+                    lazy: async () => {
+                      const { DocumentTemplates } = await import(
+                        '@/modules/documents/pages/DocumentTemplates'
+                      )
+                      return { Component: DocumentTemplates }
+                    },
+                  },
+                  {
+                    path: 'generate',
+                    lazy: async () => {
+                      const { GenerateDocument } = await import(
+                        '@/modules/documents/pages/GenerateDocument'
+                      )
+                      return { Component: GenerateDocument }
+                    },
+                  },
+                  {
+                    path: 'library',
+                    lazy: async () => {
+                      const { DocumentLibrary } = await import(
+                        '@/modules/documents/pages/DocumentLibrary'
+                      )
+                      return { Component: DocumentLibrary }
+                    },
+                  },
                   { index: true, element: <Navigate to="templates" replace /> },
                 ],
               },
@@ -79,7 +118,12 @@ export const toolRoutes: RouteObject[] = [
             children: [
               {
                 path: '/settings',
-                element: <Settings />,
+                lazy: async () => {
+                  const { Settings } = await import(
+                    '@/modules/settings/pages/Settings'
+                  )
+                  return { Component: Settings }
+                },
               },
             ],
           },
