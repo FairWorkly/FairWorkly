@@ -1,11 +1,6 @@
 name: Build and Push Agent Service Image
 
 on:
-  push:
-    branches: [ main, devops/eric-ECS-ECR-FARGATE, devops/prod ]
-    paths:
-      - "agent-service/**"
-      - ".github/workflows/build-push-ecr-ey-agent-service.yml"
   workflow_dispatch:
 
 permissions:
