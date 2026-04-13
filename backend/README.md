@@ -102,7 +102,7 @@ Once installed, simply **Save (Ctrl+S)** any `.cs` file, and it will be formatte
 
 ### 5. Application Configuration
 
-Both `appsettings.json` and `appsettings.Development.json` are git-ignored. The repo provides `.example` templates — copy them and edit locally.
+`appsettings.Development.json` is git-ignored. The repo provides `.example` templates for local setup.
 
 **Step 1: Create `appsettings.json`** (base config, all environments)
 
@@ -113,6 +113,10 @@ cp src/FairWorkly.API/appsettings.example.json src/FairWorkly.API/appsettings.js
 What to change:
 - `ConnectionStrings:DefaultConnection` — your Postgres host, port, credentials
 - `JwtSettings:Secret` — must be non-empty; 32+ chars recommended
+
+What the tracked base config assumes:
+- `appsettings.json` now defaults to a local/container Postgres connection, not the legacy RDS instance
+- UAT/prod should override `ConnectionStrings__DefaultConnection` and secrets via environment variables during deploy
 
 What you can leave as-is for local dev:
 - `AiSettings:BaseUrl` — defaults to `localhost:8000` (Python agent-service)
