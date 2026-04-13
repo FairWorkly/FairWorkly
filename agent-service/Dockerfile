@@ -5,6 +5,8 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
+ARG POETRY_WITH=""
+
 # Install Poetry — must match the version that generated poetry.lock (2.3.2).
 # poetry-plugin-export is required separately in Poetry 2.x (no longer bundled).
 RUN pip install --no-cache-dir "poetry==2.3.2" poetry-plugin-export
@@ -12,12 +14,20 @@ RUN pip install --no-cache-dir "poetry==2.3.2" poetry-plugin-export
 # Copy lock files only — changes here invalidate only the export step
 COPY pyproject.toml poetry.lock ./
 
-# Export production deps to a plain requirements.txt (no Poetry at runtime)
-RUN poetry export \
-        --without-hashes \
-        --only main \
-        --format requirements.txt \
-        --output requirements.txt
+# Export production deps to a plain requirements.txt (no Poetry at runtime).
+# Default build stays slim; set POETRY_WITH=ingest,local-models for the full image.
+RUN if [ -n "$POETRY_WITH" ]; then \
+        poetry export \
+          --without-hashes \
+          --with "$POETRY_WITH" \
+          --format requirements.txt \
+          --output requirements.txt; \
+    else \
+        poetry export \
+          --without-hashes \
+          --format requirements.txt \
+          --output requirements.txt; \
+    fi
 
 
 # ── Stage 2: production image ──────────────────────────────────────────────────
