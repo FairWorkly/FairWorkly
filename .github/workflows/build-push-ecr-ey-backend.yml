@@ -6,11 +6,18 @@ on:
       - main
       - devops/eric-ECS-ECR-FARGATE
       - devops/prod
+    paths:
+      - "backend/**"
+      - ".github/workflows/build-push-ecr-ey-backend.yml"
   workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
+
+concurrency:
+  group: deploy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-push-backend:

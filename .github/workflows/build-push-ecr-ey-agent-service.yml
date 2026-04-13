@@ -12,6 +12,10 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: deploy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-push-agent-service:
     runs-on: ubuntu-latest
