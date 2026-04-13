@@ -99,7 +99,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install Poetry
-        run: pip install "poetry==2.3.2" poetry-plugin-export
+        run: pip install "poetry==2.3.2"
       - name: Install dependencies
         run: poetry install --with dev --no-interaction --no-root
       - name: Run tests
