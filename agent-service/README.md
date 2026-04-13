@@ -17,6 +17,11 @@ If you already created a virtual environment with a different Python version, re
 `.venv` first and then re-run the commands above so local development
 matches Docker and CI.
 
+Optional dependency groups:
+
+- `poetry install --with ingest` adds the PDF ingestion toolchain (`pypdf`, text splitters)
+- `poetry install --with ingest,local-models` adds the full local embedding fallback stack
+
 Set secrets via shell environment variables (recommended):
 
 ```bash
@@ -33,6 +38,7 @@ If you intentionally want dotenv auto-load, set `FAIRWORKLY_ENABLE_DOTENV=1`.
 Before starting the API, ingest the PDF knowledge base (AWARD.pdf lives in `agents/shared/assets/`):
 
 ```bash
+poetry install --with ingest
 poetry run python scripts/ingest_assets_to_faiss.py
 ```
 
@@ -45,7 +51,7 @@ Loading the FAISS store uses `allow_dangerous_deserialization=True`. Only load `
 ## Run
 
 Start the FastAPI server with Uvicorn via Poetry (after the FAISS index exists).  
-`config.yaml` defaults to the OpenAI “online” mode for both embeddings and LLM calls, so ensure your shell has a valid `OPENAI_API_KEY`. To fall back to a local model, change `model_params.deployment_mode_llm` / `deployment_mode_embedding` back to `local` **and re-run** `scripts/ingest_assets_to_faiss.py` so the FAISS index matches the embedding model in use.
+`config.yaml` defaults to the OpenAI “online” mode for both embeddings and LLM calls, so ensure your shell has a valid `OPENAI_API_KEY`. To fall back to a local model, install `--with ingest,local-models`, change `model_params.deployment_mode_llm` / `deployment_mode_embedding` back to `local`, and **re-run** `scripts/ingest_assets_to_faiss.py` so the FAISS index matches the embedding model in use.
 
 Security-related env vars:
 
@@ -60,6 +66,23 @@ poetry run uvicorn master_agent.main:app --port 8000
 ```
 
 The root route (`/`) redirects to Swagger, so opening `http://localhost:8000/` immediately shows the API docs.
+
+## Docker builds
+
+Default build keeps the runtime image slim and excludes ingest/local-model dependencies:
+
+```bash
+docker build -f agent-service/Dockerfile agent-service
+```
+
+Build the full fallback image only when you need local embeddings inside the container:
+
+```bash
+docker build \
+  --build-arg POETRY_WITH=ingest,local-models \
+  -f agent-service/Dockerfile \
+  agent-service
+```
 
 ## Run Tests
 
